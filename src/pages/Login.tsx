@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, CheckCircle2, ChevronLeft, ArrowRight, Sparkles, ShieldCheck, BarChart3, Check } from "@/icons/lucide";
+import { Eye, EyeOff, CheckCircle2, ChevronLeft, ArrowRight, Sparkles } from "@/icons/lucide";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,31 +106,19 @@ export default function Login() {
 
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-4 md:mt-6">
               <span className="inline-flex items-center gap-2 rounded-full border border-wine/10 bg-wine/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-wine/85">
-                <Sparkles className="h-3.5 w-3.5" /> Plataforma premium
+                <Sparkles className="h-3.5 w-3.5" /> Sommelyx
               </span>
               <h1 className={`mt-4 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                A inteligência da sua <span className="gradient-text">adega</span> começa aqui.
+                Entre no seu ambiente de <span className="gradient-text">vinho</span>.
               </h1>
               <p className={`mt-3 max-w-[400px] ${designSystem.authBody}`}>
-                Entre para acompanhar adega, consumo e decisões de compra com clareza.
+                Adega, cartas e harmonizações em uma experiência única, calma e contínua.
               </p>
             </motion.div>
           </div>
-
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }} className="mt-6 space-y-3">
-            {[
-              { icon: BarChart3, text: "Estoque, valor e giro em uma única leitura." },
-              { icon: ShieldCheck, text: "Operação estável, dados protegidos e fluxo contínuo." },
-              { icon: Check, text: "Leitura de rótulos, cartas e harmonização no mesmo ambiente." },
-            ].map((item) => (
-              <div key={item.text} className="flex items-start gap-3 text-[13px] leading-relaxed text-[rgba(72,60,46,0.76)]">
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/40 text-wine/85">
-                  <item.icon className="h-3.5 w-3.5" />
-                </div>
-                <p>{item.text}</p>
-              </div>
-            ))}
-          </motion.div>
+          <p className="mt-10 max-w-[360px] text-[12px] leading-relaxed text-[rgba(72,60,46,0.56)]">
+            Uma entrada silenciosa para uma operação menos fragmentada.
+          </p>
         </section>
 
         {/* Right panel — Form */}

@@ -1,33 +1,38 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Check, TrendingUp, AlertTriangle, Wine, Sparkles, Clock, Star, Calendar } from "@/icons/lucide";
+import { ArrowRight, BookOpen, Check, GlassWater, Sparkles, Wine } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import { designSystem } from "@/styles/designSystem";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 } as const,
+  hidden: { opacity: 0, y: 22 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.08, duration: 0.48, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
-const float = (delay: number) => ({
-  initial: { opacity: 0, y: 18, scale: 0.96 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  transition: { delay, duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
-});
-
-const floatLoop = {
-  y: [0, -4, 0],
-  transition: {
-    duration: 9.5,
-    repeat: Infinity,
-    repeatType: "loop" as const,
-    ease: "easeInOut" as const,
+const moments = [
+  {
+    icon: Wine,
+    label: "Adega",
+    title: "Brunello di Montalcino 2018",
+    detail: "2 garrafas prontas para abrir",
   },
-};
+  {
+    icon: BookOpen,
+    label: "Carta",
+    title: "Menu de inverno reconhecido",
+    detail: "12 rótulos organizados por estilo",
+  },
+  {
+    icon: GlassWater,
+    label: "Harmonização",
+    title: "Risoto de funghi",
+    detail: "Barolo ou Pinot Noir de guarda curta",
+  },
+];
 
 interface LandingHeroProps {
   onSignup: () => void;
@@ -39,23 +44,22 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
   };
 
   return (
-    <section className="relative z-10 px-5 sm:px-8 pt-8 sm:pt-6 lg:pt-8 pb-6 sm:pb-8">
-      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
-        {/* Left */}
+    <section className="relative z-10 px-5 pb-10 pt-8 sm:px-8 sm:pb-14 sm:pt-8 lg:pt-12">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 lg:grid-cols-[1.02fr_0.98fr] lg:gap-16">
         <div className="text-left">
           <motion.div
             initial="hidden"
             animate="visible"
             variants={fadeUp}
             custom={0}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 mb-4 sm:mb-5"
+            className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 sm:mb-5"
             style={{
               background: "rgba(123,30,43,0.06)",
-              border: "1px solid rgba(123,30,43,0.14)",
+              border: "1px solid rgba(123,30,43,0.12)",
             }}
           >
             <Sparkles className="h-3.5 w-3.5 text-wine" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.10em] text-wine">
+            <span className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-wine">
               Inteligência Sommelyx
             </span>
           </motion.div>
@@ -65,18 +69,15 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={1}
-            className="max-w-[34rem] text-[1.7rem] sm:text-[3.4rem] font-medium leading-[1.05] sm:leading-[1.01] tracking-[-0.025em]"
+            className="max-w-[36rem] text-[2rem] font-medium leading-[1.02] tracking-[-0.03em] sm:text-[3.65rem] sm:leading-[0.98]"
             style={{
-              color: "#1A1A1A",
+              color: "rgba(26,23,19,0.94)",
               fontFamily: "'Playfair Display', 'Fraunces', 'Libre Baskerville', Georgia, serif",
               fontOpticalSizing: "auto",
-              fontVariationSettings: '"wght" 560',
+              fontVariationSettings: '"wght" 540',
             }}
           >
-            Gestão da sua adega, com clareza de{" "}
-            <span className="gradient-text sm:whitespace-nowrap">
-              estoque, valor e giro.
-            </span>
+            Um ambiente calmo para decidir o vinho certo.
           </motion.h1>
 
           <motion.p
@@ -84,9 +85,9 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={2}
-            className="mt-3 sm:mt-4 max-w-[33rem] text-[14px] sm:text-[15px] leading-relaxed text-[#4F4A45]"
+            className="mt-4 max-w-[32rem] text-[14px] leading-relaxed text-[rgba(58,51,39,0.66)] sm:text-[15px]"
           >
-            Uma plataforma para organizar estoque, analisar cartas, ler rótulos e orientar harmonizações sem ruído operacional.
+            Sommelyx une adega, carta, rótulos e harmonizações em uma experiência de curadoria, sem aparência de planilha ou painel operacional.
           </motion.p>
 
           <motion.div
@@ -94,24 +95,24 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={3}
-            className="mt-5 sm:mt-6 flex flex-col gap-2.5 sm:gap-3 sm:flex-row sm:items-center"
+            className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:items-center"
           >
             <MagneticButton>
               <Button
                 variant="primary"
-                className="group h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 sm:px-7 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(46,74,47,0.50)]"
+                className="group h-11 w-full rounded-2xl px-6 text-[14px] font-semibold shadow-[0_18px_44px_-22px_rgba(46,74,47,0.50)] sm:h-12 sm:w-auto sm:px-7"
                 onClick={onSignup}
               >
                 Começar grátis
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Button>
             </MagneticButton>
             <Button
               variant="outline"
               onClick={scrollToFeatures}
-              className="h-11 sm:h-12 w-full sm:w-auto rounded-2xl px-6 text-[14px] font-semibold bg-white/70 backdrop-blur-sm border-black/8 hover:bg-white"
+              className="h-11 w-full rounded-2xl border-black/8 bg-white/62 px-6 text-[14px] font-semibold backdrop-blur-sm hover:bg-white/82 sm:h-12 sm:w-auto"
             >
-              Ver como funciona
+              Ver experiência
             </Button>
           </motion.div>
 
@@ -120,7 +121,7 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
             animate="visible"
             variants={fadeUp}
             custom={4}
-            className="mt-3.5 sm:mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-medium text-[#5F5F5F]"
+            className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-medium text-[rgba(58,51,39,0.58)]"
           >
             <span className="inline-flex items-center gap-1.5">
               <Check className="h-3.5 w-3.5 text-[#2E5E3E]" strokeWidth={3} />
@@ -131,196 +132,71 @@ export function LandingHero({ onSignup }: LandingHeroProps) {
               Cancele quando quiser
             </span>
           </motion.div>
-
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUp}
-            custom={5}
-            className="mt-5 sm:mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl"
-          >
-            {[
-              {
-                icon: Wine,
-                title: "Estoque",
-                desc: "Leitura clara do que está em adega.",
-                color: "hsl(var(--wine))",
-                bg: "rgba(123,30,43,0.08)",
-                border: "rgba(123,30,43,0.14)",
-              },
-              {
-                icon: TrendingUp,
-                title: "Giro",
-                desc: "Movimento e valor no mesmo ritmo.",
-                color: "#5F6F52",
-                bg: "rgba(95,111,82,0.10)",
-                border: "rgba(95,111,82,0.18)",
-              },
-              {
-                icon: AlertTriangle,
-                title: "Reposição",
-                desc: "Rótulos certos, no momento certo.",
-                color: "#B8860B",
-                bg: "rgba(198,167,104,0.12)",
-                border: "rgba(198,167,104,0.22)",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="rounded-[18px] p-3"
-                style={designSystem.glassCardSoft}
-              >
-                <div className="flex items-start gap-2">
-                  <div
-                    className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0"
-                    style={{ background: item.bg, border: `1px solid ${item.border}` }}
-                  >
-                    <item.icon className="h-3.5 w-3.5" style={{ color: item.color }} strokeWidth={1.8} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[9.5px] font-semibold uppercase tracking-[0.10em] text-[rgba(36,30,24,0.82)]">{item.title}</p>
-                    <p className="mt-0.5 text-[11px] leading-snug text-[rgba(72,60,46,0.72)]">{item.desc}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </motion.div>
         </div>
 
-        {/* Right: Organized grid of dashboard cards */}
-        <div className="relative lg:pt-24 xl:pt-32">
-          {/* Glow background */}
-          <div className="pointer-events-none absolute -left-6 -top-6 h-56 w-56 rounded-full" style={{ background: "rgba(110,30,42,0.12)", filter: "blur(84px)" }} />
-          <div className="pointer-events-none absolute -bottom-10 -right-6 h-72 w-72 rounded-full" style={{ background: "rgba(198,167,104,0.14)", filter: "blur(96px)" }} />
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+          custom={5}
+          className="relative"
+        >
+          <div
+            className="pointer-events-none absolute -left-8 top-0 h-56 w-56 rounded-full"
+            style={{ background: "rgba(110,30,42,0.10)", filter: "blur(84px)" }}
+          />
+          <div
+            className="pointer-events-none absolute -bottom-8 right-0 h-64 w-64 rounded-full"
+            style={{ background: "rgba(198,167,104,0.12)", filter: "blur(92px)" }}
+          />
 
-          <motion.div
-            className="relative grid grid-cols-2 gap-3 sm:gap-3.5"
-            animate={floatLoop}
-          >
-            {/* Adega — full width */}
-            <motion.div
-              {...float(0.18)}
-              className="col-span-2 rounded-[22px] p-4"
-              style={designSystem.glassCard}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(123,30,43,0.08)", border: "1px solid rgba(123,30,43,0.12)" }}>
-                    <Wine className="h-4 w-4 text-wine" />
+          <div className="relative overflow-hidden rounded-[30px] p-5 sm:p-6" style={designSystem.glassCard}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.46)]">
+                  Concierge de vinho
+                </p>
+                <h2
+                  className="mt-2 max-w-[22rem] font-serif text-[25px] font-medium leading-[1.08] tracking-[-0.025em] text-[rgba(26,23,19,0.92)] sm:text-[32px]"
+                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                >
+                  Da garrafa ao jantar, tudo no mesmo ritmo.
+                </h2>
+              </div>
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] text-wine">
+                <Wine className="h-5 w-5" />
+              </div>
+            </div>
+
+            <div className="mt-8 space-y-1">
+              {moments.map((item, index) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.64 + index * 0.08, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                  className="group flex items-center gap-3 rounded-2xl px-1.5 py-2.5 transition-colors duration-300 hover:bg-white/24"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/38 text-wine shadow-[inset_0_1px_0_rgba(255,255,255,0.50)]">
+                    <item.icon className="h-4 w-4" strokeWidth={1.8} />
                   </div>
-                  <div className="leading-none">
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F]">Adega</p>
-                    <p className="text-[13px] font-semibold tracking-tight text-[#1A1A1A]">128 garrafas</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.42)]">
+                      {item.label}
+                    </p>
+                    <p className="mt-0.5 truncate text-[13px] font-medium tracking-[-0.01em] text-[rgba(26,23,19,0.86)]">
+                      {item.title}
+                    </p>
                   </div>
-                </div>
-                <span className="rounded-full px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.08em] text-wine" style={{ background: "rgba(123,30,43,0.08)" }}>
-                  R$ 92k
-                </span>
-              </div>
-              <div className="mt-3 space-y-1.5">
-                {[
-                  { name: "Brunello di Montalcino", qty: 2, tone: "low" },
-                  { name: "Champagne Brut", qty: 8, tone: "ok" },
-                  { name: "Barolo Riserva", qty: 1, tone: "low" },
-                ].map((row) => (
-                  <div key={row.name} className="flex items-center gap-2">
-                    <div className={`h-1.5 w-1.5 rounded-full ${row.tone === "low" ? "bg-wine" : "bg-gold"}`} />
-                    <p className="flex-1 truncate text-[11px] font-medium text-[#1A1A1A]">{row.name}</p>
-                    <span className="text-[10px] font-medium text-[#5F5F5F]">{row.qty}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Reposição — half */}
-            <motion.div {...float(0.26)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.24)" }}>
-                  <AlertTriangle className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
-                </div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.10em]" style={{ color: "#8B6914" }}>Reposição</p>
-              </div>
-              <p className="text-[11.5px] leading-snug font-medium text-[#1A1A1A]">
-                <span className="font-semibold text-wine">3 rótulos</span> abaixo do mínimo
-              </p>
-              <p className="mt-0.5 text-[10px] text-[#5F5F5F]">Veja sugestão de compra</p>
-            </motion.div>
-
-            {/* Janela ideal — half */}
-            <motion.div {...float(0.32)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.18)" }}>
-                  <Calendar className="h-3.5 w-3.5" style={{ color: "#5F6F52" }} />
-                </div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.10em]" style={{ color: "#3F4D36" }}>Janela ideal</p>
-              </div>
-              <p className="text-[11.5px] leading-snug font-medium text-[#1A1A1A]">
-                <span className="font-semibold" style={{ color: "#3F4D36" }}>12 vinhos</span> no auge
-              </p>
-              <p className="mt-0.5 text-[10px] text-[#5F5F5F]">Beba nos próximos meses</p>
-            </motion.div>
-
-            {/* Consumo — full width */}
-            <motion.div {...float(0.40)} className="col-span-2 rounded-[22px] p-4" style={designSystem.glassCard}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: "rgba(95,111,82,0.10)", border: "1px solid rgba(95,111,82,0.16)" }}>
-                    <Clock className="h-4 w-4" style={{ color: "#5F6F52" }} />
-                  </div>
-                  <div className="leading-none">
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[#5F5F5F]">Consumo</p>
-                    <p className="text-[13px] font-semibold tracking-tight text-[#1A1A1A]">Últimos 6 meses</p>
-                  </div>
-                </div>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2E5E3E]">
-                  <TrendingUp className="h-3 w-3" /> 37%
-                </span>
-              </div>
-              <div className="grid grid-cols-6 items-end gap-1.5 h-12">
-                {[4, 7, 6, 10, 9, 12].map((h, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scaleY: 0 }}
-                    animate={{ scaleY: 1 }}
-                    transition={{ delay: 0.7 + i * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ originY: 1 }}
-                    className="rounded-md"
-                  >
-                    <div className="rounded-md bg-wine/85" style={{ height: `${h * 4}px` }} />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Mais avaliado — half */}
-            <motion.div {...float(0.48)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(198,167,104,0.14)", border: "1px solid rgba(198,167,104,0.28)" }}>
-                  <Star className="h-3.5 w-3.5" style={{ color: "#B8860B" }} />
-                </div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.10em]" style={{ color: "#8B6914" }}>Mais avaliado</p>
-              </div>
-              <p className="text-[11.5px] leading-snug font-semibold text-[#1A1A1A] truncate">Châteauneuf-du-Pape</p>
-              <p className="mt-0.5 text-[10px] text-[#5F5F5F]">★ 4.9 · 23 notas</p>
-            </motion.div>
-
-            {/* Giro — half */}
-            <motion.div {...float(0.54)} className="rounded-[22px] p-3.5" style={designSystem.glassCard}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "rgba(123,30,43,0.08)", border: "1px solid rgba(123,30,43,0.14)" }}>
-                  <TrendingUp className="h-3.5 w-3.5 text-wine" />
-                </div>
-                <p className="text-[9px] font-semibold uppercase tracking-[0.10em] text-wine">Giro</p>
-              </div>
-              <p className="text-[11.5px] leading-snug font-medium text-[#1A1A1A]">
-                <span className="font-semibold text-wine">+18%</span> vs. mês anterior
-              </p>
-              <p className="mt-0.5 text-[10px] text-[#5F5F5F]">Ritmo saudável</p>
-            </motion.div>
-          </motion.div>
-        </div>
+                  <p className="hidden max-w-[9rem] text-right text-[11px] leading-snug text-[rgba(72,60,46,0.54)] sm:block">
+                    {item.detail}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
       </div>
-
     </section>
   );
 }

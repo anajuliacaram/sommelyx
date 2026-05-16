@@ -1,90 +1,28 @@
 import { useMemo, useState, useCallback, memo } from "react";
 import {
-  AlertTriangle,
   ArrowDownRight,
-  DollarSign,
   Filter,
-  Layers,
   Package,
   Plus,
   ShoppingCart,
-  TrendingUp,
   Upload,
   Users,
   FileText,
   X,
-  Wine,
-  BarChart3,
 } from "@/icons/lucide";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
-import { EditorialKpiCard } from "@/components/editorial/EditorialPrimitives";
-import { AnimatedBarShape } from "@/components/ui/chart";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useSales } from "@/hooks/useBusinessData";
 import { useWines, type Wine as WineType } from "@/hooks/useWines";
 import { cn } from "@/lib/utils";
 
 const formatBRL = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-
-function buildMonthWindow(size: number) {
-  const months: Array<{ key: string; label: string }> = [];
-  const cursor = new Date();
-  cursor.setDate(1);
-  cursor.setHours(0, 0, 0, 0);
-  cursor.setMonth(cursor.getMonth() - (size - 1));
-  for (let i = 0; i < size; i++) {
-    const d = new Date(cursor);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "");
-    months.push({ key, label });
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-  return months;
-}
-
-const chartTooltipStyle = {
-  background: "rgba(255,255,255,0.94)",
-  border: "1px solid rgba(255,255,255,0.28)",
-  borderRadius: 14,
-  fontSize: 12,
-  boxShadow: "0 12px 28px -12px rgba(44,20,31,0.16)",
-  backdropFilter: "blur(14px)",
-};
-
-const PIE_COLORS = [
-  "hsl(348, 55%, 35%)",
-  "hsl(38, 52%, 50%)",
-  "hsl(152, 32%, 42%)",
-  "hsl(220, 40%, 50%)",
-  "hsl(270, 40%, 50%)",
-  "hsl(180, 30%, 45%)",
-  "hsl(15, 50%, 50%)",
-  "hsl(60, 35%, 48%)",
-];
 
 /* ── Filter types ── */
 interface ActiveFilters {
@@ -155,10 +93,8 @@ const FilterChipGroup = memo(function FilterChipGroup({
 });
 
 export default function CommercialDashboard() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { data: allWines = [], isLoading } = useWines();
-  const { data: sales = [], isLoading: salesLoading } = useSales();
 
   const [addOpen, setAddOpen] = useState(false);
   const [csvOpen, setCsvOpen] = useState(false);
@@ -211,19 +147,6 @@ export default function CommercialDashboard() {
     () => (isFiltered ? allWines.filter((w) => wineMatchesFilters(w, filters)) : allWines),
     [allWines, filters, isFiltered]
   );
-  const filteredWineIds = useMemo(() => new Set(wines.map((w) => w.id)), [wines]);
-  const filteredWineNames = useMemo(
-    () => new Set(wines.map((w) => w.name.toLowerCase())),
-    [wines],
-  );
-  const salesInScope = useMemo(
-    () =>
-      sales.filter((sale) => {
-        if (sale.wine_id && filteredWineIds.has(sale.wine_id)) return true;
-        return filteredWineNames.has(sale.name.toLowerCase());
-      }),
-    [sales, filteredWineIds, filteredWineNames],
-  );
 
   /* ── Filtered KPIs ── */
   const totalBottles = useMemo(() => wines.reduce((sum, w) => sum + w.quantity, 0), [wines]);
@@ -234,98 +157,12 @@ export default function CommercialDashboard() {
   const uniqueLabels = useMemo(() => wines.filter((w) => w.quantity > 0).length, [wines]);
   const lowStock = useMemo(() => wines.filter((w) => w.quantity > 0 && w.quantity <= 2).length, [wines]);
 
-  const turnover = useMemo(() => {
-    const recently = wines.filter(
-      (w) => Date.now() - new Date(w.updated_at).getTime() < 30 * 24 * 60 * 60 * 1000
-    ).length;
-    return wines.length > 0 ? Math.round((recently / wines.length) * 100) : 0;
-  }, [wines]);
-
-  const months = useMemo(() => buildMonthWindow(6), []);
-
-  const { data: wineEvents = [] } = useQuery({
-    queryKey: ["wine_events", user?.id, "commercial-dashboard"],
-    enabled: !!user,
-    queryFn: async () => {
-      const since = new Date();
-      since.setMonth(since.getMonth() - 6);
-      const { data, error } = await supabase
-        .from("wine_events")
-        .select("event_type,quantity,created_at,wine_id")
-        .eq("user_id", user!.id)
-        .gte("created_at", since.toISOString())
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-  const wineEventsInScope = useMemo(
-    () => (wineEvents as any[]).filter((event) => event.wine_id && filteredWineIds.has(event.wine_id)),
-    [wineEvents, filteredWineIds],
-  );
-
-  const salesMonthly = useMemo(() => {
-    const map: Record<string, number> = {};
-    salesInScope.forEach((s) => {
-      const d = new Date(s.created_at);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      map[key] = (map[key] || 0) + (s.price ?? 0) * (s.quantity ?? 0);
-    });
-    return months.map((m) => ({ name: m.label, value: Math.round(map[m.key] || 0) }));
-  }, [salesInScope, months]);
-
-  const stockMovesMonthly = useMemo(() => {
-    const inMap: Record<string, number> = {};
-    const outMap: Record<string, number> = {};
-    wineEventsInScope.forEach((e) => {
-      const d = new Date(e.created_at);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      const qty = Number(e.quantity ?? 0);
-      if (e.event_type === "add") inMap[key] = (inMap[key] || 0) + qty;
-      else outMap[key] = (outMap[key] || 0) + qty;
-    });
-    return months.map((m) => ({
-      name: m.label,
-      in: inMap[m.key] || 0,
-      out: outMap[m.key] || 0,
-      net: (inMap[m.key] || 0) - (outMap[m.key] || 0),
-    }));
-  }, [wineEventsInScope, months]);
-
-  /* ── Breakdown data ── */
-  const breakdownByStyle = useMemo(() => {
-    const map: Record<string, { bottles: number; value: number }> = {};
-    wines.filter(w => w.quantity > 0).forEach((w) => {
-      const key = w.style || "Outros";
-      if (!map[key]) map[key] = { bottles: 0, value: 0 };
-      map[key].bottles += w.quantity;
-      map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
-    });
-    return Object.entries(map)
-      .sort(([, a], [, b]) => b.bottles - a.bottles)
-      .map(([name, d]) => ({ name, ...d }));
-  }, [wines]);
-
-  const breakdownByRegion = useMemo(() => {
-    const map: Record<string, { bottles: number; value: number }> = {};
-    wines.filter(w => w.quantity > 0).forEach((w) => {
-      const key = w.region || w.country || "Outros";
-      if (!map[key]) map[key] = { bottles: 0, value: 0 };
-      map[key].bottles += w.quantity;
-      map[key].value += (w.current_value ?? w.purchase_price ?? 0) * w.quantity;
-    });
-    return Object.entries(map)
-      .sort(([, a], [, b]) => b.bottles - a.bottles)
-      .slice(0, 8)
-      .map(([name, d]) => ({ name, ...d }));
-  }, [wines]);
-
   const kpis = useMemo(
     () => [
-      { label: "Rótulos", value: uniqueLabels, detail: "em estoque", icon: Wine, accent: "#8F2D56", format: (v: number) => v.toLocaleString("pt-BR") },
-      { label: "Garrafas", value: totalBottles, detail: "disponíveis", icon: Layers, accent: "#5F7F52", format: (v: number) => v.toLocaleString("pt-BR") },
-      { label: "Valor em estoque", value: totalValue, detail: "investimento", icon: DollarSign, accent: "#C9A86A", format: (v: number) => formatBRL(v) },
-      { label: "Reposição", value: lowStock, detail: lowStock > 0 ? "atenção" : "estoque saudável", icon: AlertTriangle, accent: "#C44569", format: (v: number) => v.toLocaleString("pt-BR") },
+      { label: "Rótulos", value: uniqueLabels, detail: "em estoque", format: (v: number) => v.toLocaleString("pt-BR") },
+      { label: "Garrafas", value: totalBottles, detail: "disponíveis", format: (v: number) => v.toLocaleString("pt-BR") },
+      { label: "Valor em estoque", value: totalValue, detail: "investimento", format: (v: number) => formatBRL(v) },
+      { label: "Reposição", value: lowStock, detail: lowStock > 0 ? "atenção" : "estoque saudável", format: (v: number) => v.toLocaleString("pt-BR") },
     ],
     [lowStock, totalBottles, totalValue, uniqueLabels],
   );
@@ -445,9 +282,9 @@ export default function CommercialDashboard() {
         </section>
 
         {filtersOpen && (
-          <div className="surface-clarity space-y-3 rounded-[22px] p-4 sm:p-5">
+          <div className="space-y-3 border-y border-black/[0.045] px-1 py-3">
             <div className="flex items-center justify-between">
-              <p className="text-[13px] font-semibold text-foreground">Filtrar estoque</p>
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[rgba(58,51,39,0.48)]">Refinar estoque</p>
               {isFiltered && (
                 <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 gap-1 text-[11px] text-muted-foreground">
                   <X className="h-3 w-3" /> Limpar
@@ -464,12 +301,12 @@ export default function CommercialDashboard() {
         )}
 
         {isFiltered && !filtersOpen && (
-          <div className="flex flex-wrap items-center gap-2 px-1">
+          <div className="flex flex-wrap items-center gap-1.5 px-1">
             {activeFilterLabels.map(({ key, value }) => (
               <button
                 key={`${key}-${value}`}
                 onClick={() => toggleFilter(key, value)}
-                className="inline-flex items-center gap-1 rounded-full bg-primary/8 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/14"
+                className="inline-flex items-center gap-1 rounded-full bg-primary/7 px-2 py-0.5 text-[10.5px] font-medium text-primary/80 transition-colors hover:bg-primary/12"
               >
                 {value}
                 <X className="h-2.5 w-2.5" />
@@ -509,13 +346,13 @@ export default function CommercialDashboard() {
           />
         ) : (
           <>
-            <div className="grid grid-cols-12 gap-4 md:gap-5">
+            <div className="grid grid-cols-12 gap-6 md:gap-8">
               <div className="col-span-12 lg:col-span-7">
-                <div className="surface-clarity p-4 sm:p-6">
-                  <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+                <section className="px-1">
+                  <div className="mb-3 flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="chart-surface-kicker">Estoque</p>
-                      <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">
+                      <h2 className="mt-1 text-[18px] font-medium tracking-[-0.02em] text-[rgba(26,23,19,0.88)]">
                         O que sustenta a operação agora
                       </h2>
                     </div>
@@ -524,56 +361,50 @@ export default function CommercialDashboard() {
                     </Button>
                   </div>
 
-                  <div className="overflow-hidden rounded-[20px] bg-white/32">
-                    <div className="grid grid-cols-12 gap-2 px-3 py-2.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground/60 sm:px-5 sm:py-3">
-                      <div className="col-span-6">Produto</div>
-                      <div className="col-span-2 text-center">Tipo</div>
-                      <div className="col-span-2 text-right">Qtd.</div>
-                      <div className="col-span-2 text-right">Valor</div>
-                    </div>
-                    <div className="divide-y divide-border/8">
+                  <div className="border-y border-black/[0.045]">
+                    <div className="divide-y divide-black/[0.045]">
                       {stockRows.map((row) => (
                         <button
                           key={row.id}
                           type="button"
                           onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(row.name)}`)}
-                          className="grid w-full grid-cols-12 items-center gap-2 px-3 py-3 text-left transition-all duration-200 hover:bg-white/24 sm:px-5"
+                          className="grid w-full grid-cols-12 items-center gap-2 py-3 text-left transition-all duration-200 hover:bg-white/22"
                         >
-                          <div className="col-span-6 min-w-0">
+                          <div className="col-span-7 min-w-0 sm:col-span-6">
                             <div className="flex items-center gap-2.5">
                               <div className={cn("h-2 w-2 rounded-full shrink-0", row.low ? "bg-primary" : "bg-accent")} />
-                              <p className="truncate text-[13px] font-semibold text-foreground">{row.name}</p>
+                              <p className="truncate text-[13px] font-medium text-[rgba(26,23,19,0.88)]">{row.name}</p>
                             </div>
                             {row.producer && (
                               <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50 pl-[18px]">{row.producer}</p>
                             )}
                           </div>
-                          <div className="col-span-2 text-center">
+                          <div className="hidden text-center sm:col-span-2 sm:block">
                             {row.style && (
-                              <span className="inline-flex items-center rounded-lg bg-muted/20 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground/72">
+                              <span className="inline-flex items-center rounded-full bg-muted/14 px-2 py-0.5 text-[10px] font-medium text-muted-foreground/60">
                                 {row.style}
                               </span>
                             )}
                           </div>
                           <div className="col-span-2 text-right">
-                            <span className={cn("text-[13px] font-bold tabular-nums", row.low ? "text-primary" : "text-foreground")}>{row.qty}</span>
+                            <span className={cn("text-[13px] font-semibold tabular-nums", row.low ? "text-primary" : "text-[rgba(26,23,19,0.82)]")}>{row.qty}</span>
                           </div>
-                          <div className="col-span-2 text-right">
-                            <span className="text-[13px] font-semibold text-foreground tabular-nums">{formatBRL(row.value)}</span>
+                          <div className="col-span-3 text-right sm:col-span-2">
+                            <span className="text-[12px] font-medium text-[rgba(58,51,39,0.62)] tabular-nums sm:text-[13px]">{formatBRL(row.value)}</span>
                           </div>
                         </button>
                       ))}
                     </div>
                   </div>
-                </div>
+                </section>
               </div>
 
               <div className="col-span-12 lg:col-span-5">
-                <div className="surface-clarity p-4 sm:p-6">
-                  <div className="space-y-6">
+                <aside className="px-1">
+                  <div className="space-y-5 border-t border-black/[0.05] pt-4 lg:border-t-0 lg:pt-0">
                     <div>
                       <p className="chart-surface-kicker">Operação</p>
-                      <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.01em] text-foreground">Onde agir primeiro</h2>
+                      <h2 className="mt-1 text-[18px] font-medium tracking-[-0.02em] text-[rgba(26,23,19,0.88)]">Onde agir primeiro</h2>
                     </div>
 
                     <div className="space-y-3">
@@ -587,11 +418,11 @@ export default function CommercialDashboard() {
                             onClick={() => navigate(`/dashboard/inventory?q=${encodeURIComponent(w.name)}`)}
                             className="flex w-full items-center gap-3 text-left"
                           >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/8 text-primary shrink-0">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/7 text-primary shrink-0">
                               <ArrowDownRight className="h-3.5 w-3.5" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-[13px] font-semibold text-foreground">{w.name}</p>
+                              <p className="truncate text-[13px] font-medium text-[rgba(26,23,19,0.86)]">{w.name}</p>
                               {w.producer && <p className="mt-0.5 truncate text-[11px] text-muted-foreground/50">{w.producer}</p>}
                             </div>
                             <span className="text-[12px] font-semibold text-primary tabular-nums">{w.quantity}</span>
@@ -601,7 +432,7 @@ export default function CommercialDashboard() {
                     </div>
 
                     <div className="border-t border-black/[0.05] pt-4">
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {[
                           { icon: Package, label: "Estoque", route: "/dashboard/inventory" },
                           { icon: ShoppingCart, label: "Vendas", route: "/dashboard/sales" },
@@ -613,16 +444,16 @@ export default function CommercialDashboard() {
                             type="button"
                             variant="ghost"
                             onClick={() => navigate(item.route)}
-                            className="flex h-10 items-center gap-3 rounded-2xl bg-transparent px-3.5 text-left hover:bg-white/24 sm:h-11 sm:px-4"
+                            className="flex h-8 items-center justify-start gap-2 rounded-xl bg-transparent px-0 text-left hover:bg-transparent hover:text-primary"
                           >
                             <item.icon className="h-4 w-4 text-muted-foreground/40 shrink-0" />
-                            <span className="text-[12px] font-semibold text-foreground">{item.label}</span>
+                            <span className="text-[12px] font-medium text-[rgba(58,51,39,0.70)]">{item.label}</span>
                           </Button>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div>
+                </aside>
               </div>
             </div>
           </>

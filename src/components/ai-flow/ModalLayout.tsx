@@ -108,14 +108,11 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 shrink-0 px-3.5 py-2.5 sm:px-4 sm:py-3",
+        "shrink-0 px-3.5 pb-1 pt-3 sm:px-4 sm:pb-1.5 sm:pt-4",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(251,247,241,0.92) 0%, rgba(250,245,239,0.72) 100%)",
-        backdropFilter: "blur(16px) saturate(1.03)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.03)",
-        boxShadow: "0 8px 20px -24px rgba(38,24,18,0.26)",
+        background: "transparent",
       }}
     >
       {children}
@@ -133,7 +130,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-1.5 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))] sm:pt-2",
+        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-1 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))]",
         className,
       )}
     >
@@ -152,14 +149,11 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "sticky bottom-0 z-20 shrink-0 px-3.5 py-2.5 sm:px-4",
+        "shrink-0 px-3.5 pb-[calc(10px+env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:pb-[calc(12px+env(safe-area-inset-bottom))]",
         className,
       )}
       style={{
-        background: "linear-gradient(180deg, rgba(250,245,239,0.68) 0%, rgba(251,247,241,0.94) 100%)",
-        backdropFilter: "blur(16px) saturate(1.03)",
-        WebkitBackdropFilter: "blur(16px) saturate(1.03)",
-        boxShadow: "0 -8px 20px -24px rgba(38,24,18,0.26)",
+        background: "transparent",
       }}
     >
       {children}
