@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Upload, Check, AlertTriangle, X, FileSpreadsheet, Loader2, Search } from "@/icons/lucide";
@@ -128,6 +129,7 @@ const baseColumns: ColumnDef[] = [
   { key: "name", label: "Nome", kind: "text", placeholder: "Nome do vinho" },
   { key: "producer", label: "Produtor", kind: "text", placeholder: "Produtor", optional: true },
   { key: "vintage", label: "Safra", kind: "number", placeholder: "2020", optional: true },
+  { key: "style", label: "Estilo", kind: "select", placeholder: "Tinto", optional: true },
   { key: "country", label: "País", kind: "text", placeholder: "País", optional: true },
   { key: "region", label: "Região", kind: "text", placeholder: "Região", optional: true },
   { key: "grape", label: "Uva", kind: "text", placeholder: "Uva", optional: true },
@@ -156,6 +158,7 @@ const bulkFieldOptions: Array<{ key: BulkTargetField; label: string; kind: "text
 ];
 
 export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
+  const navigate = useNavigate();
   const { user, profileType } = useAuth();
   const isCommercial = profileType === "commercial";
   const [step, setStep] = useState<"upload" | "analyzing" | "preview" | "review" | "importing" | "done">("upload");
@@ -2906,7 +2909,15 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const mappingEntries = Object.entries(columnMapping);
-  const visibleColumns = baseColumns;
+  const visibleColumns: ColumnDef[] = [
+    { key: "name", label: "Nome do vinho", kind: "text", placeholder: "Nome do vinho" },
+    { key: "producer", label: "Produtor", kind: "text", placeholder: "Produtor", optional: true },
+    { key: "vintage", label: "Safra", kind: "number", placeholder: "2020", optional: true },
+    { key: "style", label: "Estilo", kind: "select", placeholder: "Tinto", optional: true },
+    { key: "country", label: "País", kind: "text", placeholder: "País", optional: true },
+    { key: "quantity", label: "Qtd.", kind: "number", align: "right", placeholder: "1" },
+    { key: "purchase_price", label: "Preço", kind: "number", align: "right", placeholder: "0,00", optional: true },
+  ];
   const duplicateIndexes = useMemo(() => getDuplicateIndexes(draftWines), [draftWines]);
   const rowStatuses = draftWines.map((row) => getImportStatus(row));
   const completeRowsCount = rowStatuses.filter((status) => status === "valid").length;
@@ -2921,33 +2932,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const filteredRowIndexes = useMemo(() => {
     return draftWines
       .map((row, index) => ({ row, index }))
-      .filter(({ row, index }) => {
+      .filter(({ row }) => {
         if (normalizedSearchQuery) {
           const searchable = normalizeSearchText([
             row.name,
             row.producer,
-            row.grape,
             row.country,
-            row.region,
             row.vintage ? String(row.vintage) : "",
           ].filter(Boolean).join(" "));
           if (!searchable.includes(normalizedSearchQuery)) return false;
         }
-
-        if (statusFilter === "ready" && getImportStatus(row) !== "valid") return false;
-        if (statusFilter === "review" && getImportStatus(row) !== "incomplete") return false;
-        if (statusFilter === "invalid" && getImportStatus(row) !== "invalid") return false;
-        if (statusFilter === "duplicates" && !duplicateIndexes.has(index) && !row.duplicateWarning) return false;
-        if (statusFilter === "low_confidence" && !isLowConfidenceRow(row)) return false;
-
-        if (emptyFieldFilters.length > 0 && !emptyFieldFilters.every((field) => isRowMissingField(row, field))) {
-          return false;
-        }
-
         return true;
       })
       .map(({ index }) => index);
-  }, [draftWines, duplicateIndexes, emptyFieldFilters, normalizedSearchQuery, statusFilter]);
+  }, [draftWines, normalizedSearchQuery]);
   const filteredRows = filteredRowIndexes.map((index) => ({ row: draftWines[index], index }));
   const allRowsSelected = filteredRowIndexes.length > 0 && filteredRowIndexes.every((index) => selectedSet.has(index));
   const bulkTarget = bulkFieldOptions.find((field) => field.key === bulkTargetField) || bulkFieldOptions[0];
@@ -3101,162 +3099,94 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     }
   };
 
-  const renderSpreadsheetInput = (row: DraftWine, rowIndex: number, column: ColumnDef, selected = false) => {
-    const error = rowErrors[rowIndex]?.[column.key as "name" | "quantity"];
-    const listId =
-      column.key === "producer" ? "producer-suggestions" :
-      column.key === "name" ? "wine-name-suggestions" :
-      column.key === "country" ? "country-suggestions" :
-      column.key === "grape" ? "grape-suggestions" :
-      undefined;
-    const stickyNameColumn = column.key === "name";
-
-    return (
-      <td
-        key={column.key}
-        className={cn(
-          "border-b border-[rgba(58,51,39,0.07)] px-1.5 py-1.5 align-top transition-colors duration-150",
-          stickyNameColumn && [
-            "sticky left-[6.5rem] z-10",
-            selected ? "bg-[rgba(123,30,43,0.05)]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
-          ],
-        )}
-      >
-        <Input
-          value={getFieldValue(row, column.key)}
-          onChange={(event) => commitField(rowIndex, column.key, event.target.value)}
-          onKeyDown={(event) => handleCellKeyDown(event, rowIndex, column.key)}
-          placeholder={column.placeholder}
-          type={column.kind === "number" ? "number" : "text"}
-          min={column.kind === "number" ? 0 : undefined}
-          step={column.key === "purchase_price" ? "0.01" : undefined}
-          disabled={!editMode || step === "importing" || step === "done"}
-          list={listId}
-          data-grid-cell={`${rowIndex}:${column.key}`}
-          className={cn(
-            "h-8 rounded-[10px] border bg-transparent px-2.5 text-[13px] shadow-none transition-all duration-150 placeholder:text-[#B7ADA1] hover:bg-[rgba(255,251,244,0.45)] focus:border-[#7B1E2B]/20 focus:bg-transparent focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10",
-            error ? "border-[#D98A80]" : "border-transparent",
-            column.align === "right" && "text-right",
-          )}
-        />
-        {error ? <p className="mt-1 text-[10px] font-medium text-[#B4534A]">{error}</p> : null}
-      </td>
-    );
-  };
-
   const renderSpreadsheetTable = () => {
+    const template = "32px minmax(220px,3fr) minmax(150px,2fr) 70px 100px 100px 60px 90px 28px";
+    const styleLabels: Record<string, string> = {
+      tinto: "Tinto",
+      branco: "Branco",
+      rose: "Rosé",
+      espumante: "Espumante",
+      sobremesa: "Sobremesa",
+      fortificado: "Fortificado",
+    };
+    const styleOptions = Object.keys(styleLabels);
+
+    const renderCell = (row: DraftWine, index: number, field: EditableField, type: "text" | "number" = "text") => {
+      if (field === "style") {
+        const current = normalizeStyle(row.type || row.style) || "";
+        const tone =
+          current === "tinto" ? "bg-[rgba(139,26,59,0.10)] text-[#8B1A3B]" :
+          current === "branco" ? "bg-[rgba(180,152,60,0.12)] text-[#7A6420]" :
+          current === "rose" ? "bg-[rgba(200,100,100,0.10)] text-[#9B3030]" :
+          current === "espumante" ? "bg-[rgba(58,74,46,0.10)] text-[#3A4A2E]" :
+          "bg-[rgba(58,42,30,0.06)] text-[#7A726A]";
+        return (
+          <select
+            value={current}
+            onChange={(event) => commitField(index, field, event.target.value)}
+            className={cn("h-7 w-full rounded-full border-0 px-2 text-[12px] font-medium outline-none", tone)}
+          >
+            <option value="">—</option>
+            {styleOptions.map((option) => (
+              <option key={option} value={option}>{styleLabels[option]}</option>
+            ))}
+          </select>
+        );
+      }
+
+      return (
+        <Input
+          value={getFieldValue(row, field)}
+          onChange={(event) => commitField(index, field, event.target.value)}
+          placeholder="—"
+          type={type}
+          min={type === "number" ? 0 : undefined}
+          step={field === "purchase_price" ? "0.01" : undefined}
+          disabled={step === "importing" || step === "done"}
+          className="h-7 rounded-md border-transparent bg-transparent px-1.5 text-[13px] text-[#3D3530] shadow-none transition-colors placeholder:text-[#AEA79F] hover:bg-[rgba(139,26,59,0.05)] focus:border-[#8B1A3B] focus:bg-[#FDFCF9] focus-visible:ring-0"
+        />
+      );
+    };
+
     return (
-      <div className="flex min-h-0 flex-1 overflow-hidden rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-transparent shadow-none">
-        <div className="h-full min-h-0 w-full overflow-auto scroll-smooth" ref={tableScrollRef}>
-          <table className="w-full min-w-[1320px] border-separate border-spacing-0 text-left">
-            <thead className="sticky top-0 z-20">
-              <tr className="bg-[#F6F0E8] backdrop-blur-xl">
-                <th className="sticky left-0 z-30 w-12 border-b border-[rgba(58,51,39,0.08)] bg-[#F6F0E8] px-3 py-2 text-center backdrop-blur-xl">
-                  <input
-                    type="checkbox"
-                    checked={allRowsSelected}
-                    onChange={toggleAllRows}
-                    className="h-4 w-4 rounded border-[#CDBFAE] accent-[#7B1E2B] transition-transform duration-150 hover:scale-105"
-                    aria-label="Selecionar todos os vinhos"
-                  />
-                </th>
-                <th className="sticky left-12 z-30 w-14 border-b border-[rgba(58,51,39,0.08)] bg-[#F6F0E8] px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65] backdrop-blur-xl">
-                  #
-                </th>
-                {visibleColumns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={cn(
-                      "border-b border-[rgba(58,51,39,0.08)] px-1.5 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]",
-                      column.key === "name" && "sticky left-[6.5rem] z-30 min-w-[260px] bg-[#F6F0E8] backdrop-blur-xl",
-                      column.key === "producer" && "min-w-[190px]",
-                      column.key === "vintage" && "min-w-[100px]",
-                      column.key === "country" && "min-w-[150px]",
-                      column.key === "region" && "min-w-[180px]",
-                      column.key === "grape" && "min-w-[170px]",
-                      column.key === "quantity" && "min-w-[110px]",
-                      column.key === "purchase_price" && "min-w-[130px]",
-                      column.align === "right" && "text-right",
-                    )}
-                  >
-                    {column.label}
-                  </th>
-                ))}
-                <th className="w-28 border-b border-[rgba(58,51,39,0.08)] px-3 py-2 text-right text-[10px] font-semibold uppercase tracking-[0.12em] text-[#7A6F65]">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.length === 0 ? (
-                <tr>
-                  <td colSpan={visibleColumns.length + 3} className="px-6 py-12 text-center">
-                    <Sparkles className="mx-auto mb-3 h-5 w-5 text-[#B98C45]" />
-                    <p className="text-sm font-semibold text-[#4A4338]">Nenhuma linha encontrada</p>
-                    <p className="mt-1 text-xs text-[#8A8075]">Ajuste a busca ou remova filtros para voltar à revisão completa.</p>
-                  </td>
-                </tr>
-              ) : null}
-              {filteredRows.map(({ row, index }) => {
-                const status = getDisplayRowStatus(row);
-                const selected = selectedSet.has(index);
-                return (
-                  <tr
-                    key={`${index}-${row.name || "row"}`}
-                    className={cn(
-                      "group bg-transparent transition-colors duration-150 hover:bg-[rgba(255,251,244,0.42)]",
-                      selected && "bg-[rgba(123,30,43,0.05)]",
-                    )}
-                  >
-                    <td className={cn(
-                      "sticky left-0 z-10 border-b border-[rgba(58,51,39,0.07)] px-3 py-1.5 text-center transition-colors duration-150",
-                      selected ? "bg-[rgba(123,30,43,0.05)]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
-                    )}>
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleRowSelection(index)}
-                        className="h-4 w-4 rounded border-[#CDBFAE] accent-[#7B1E2B] transition-transform duration-150 hover:scale-105"
-                        aria-label={`Selecionar linha ${index + 1}`}
-                      />
-                    </td>
-                    <td className={cn(
-                      "sticky left-12 z-10 border-b border-[rgba(58,51,39,0.07)] px-2 py-1.5 text-[12px] font-medium text-[#8A8075] transition-colors duration-150",
-                      selected ? "bg-[rgba(123,30,43,0.05)] text-[#7B1E2B]" : "bg-[#F6F0E8] group-hover:bg-[rgba(255,251,244,0.42)]",
-                    )}>
-                      {index + 1}
-                    </td>
-                    {visibleColumns.map((column) => renderSpreadsheetInput(row, index, column, selected))}
-                    <td className="border-b border-[rgba(58,51,39,0.07)] px-3 py-1.5 text-right">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full border px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.11em]",
-                          status === "valid" && "border-emerald-100 bg-emerald-50/75 text-emerald-700",
-                          status === "warning" && "border-amber-100 bg-amber-50/75 text-amber-700",
-                          status === "invalid" && "border-rose-100 bg-rose-50/75 text-rose-700",
-                          status === "duplicate" && "border-[#E9D3D8] bg-[#F8EDEF]/80 text-[#7B1E2B]",
-                        )}
-                      >
-                        {status === "valid" ? "Pronto" : status === "invalid" ? "Corrigir" : status === "duplicate" ? "Duplicado" : "Revisar"}
-                      </span>
-                      {row.duplicateWarning && row.duplicateIndexes?.length ? (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="mt-1 h-7 px-2 text-[10px] text-[#7B1E2B]"
-                          onClick={() => mergeDraftRows(index, row.duplicateIndexes![0])}
-                        >
-                          Mesclar
-                        </Button>
-                      ) : null}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="my-3 max-h-[min(420px,60vh)] min-h-[320px] overflow-y-auto rounded-[14px] border border-[rgba(58,42,30,0.10)] bg-[#FDFCF9]" ref={tableScrollRef}>
+        <div className="sticky top-0 z-20 grid items-center gap-2 border-b border-[rgba(58,42,30,0.10)] bg-[#EDEAE3] px-3 py-2" style={{ gridTemplateColumns: template }}>
+          {["#", "Nome do vinho", "Produtor", "Safra", "Estilo", "País", "Qtd.", "Preço", ""].map((label) => (
+            <div key={label || "delete"} className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[#AEA79F] first:text-center">
+              {label}
+            </div>
+          ))}
         </div>
+        {filteredRows.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <p className="text-sm font-semibold text-[#3D3530]">Nenhuma linha encontrada</p>
+            <p className="mt-1 text-xs text-[#7A726A]">Ajuste a busca para voltar à revisão completa.</p>
+          </div>
+        ) : null}
+        {filteredRows.map(({ row, index }) => (
+          <div
+            key={`${index}-${row.name || "row"}`}
+            className="group grid min-h-11 items-center gap-2 border-b border-[rgba(58,42,30,0.10)] bg-[#FDFCF9] px-3 py-1.5 transition-colors last:border-b-0 hover:bg-[#F5F2EC]"
+            style={{ gridTemplateColumns: template }}
+          >
+            <div className="text-center text-[11px] text-[#AEA79F]">{index + 1}</div>
+            {renderCell(row, index, "name")}
+            {renderCell(row, index, "producer")}
+            {renderCell(row, index, "vintage", "number")}
+            {renderCell(row, index, "style")}
+            {renderCell(row, index, "country")}
+            {renderCell(row, index, "quantity", "number")}
+            {renderCell(row, index, "purchase_price", "number")}
+            <button
+              type="button"
+              onClick={() => removeRow(index)}
+              className="h-6 w-6 rounded-full border-0 bg-transparent text-[14px] text-[#AEA79F] opacity-0 transition-opacity hover:bg-[rgba(139,26,59,0.08)] hover:text-[#8B1A3B] group-hover:opacity-100"
+              aria-label={`Remover linha ${index + 1}`}
+            >
+              ×
+            </button>
+          </div>
+        ))}
       </div>
     );
   };
@@ -3311,6 +3241,30 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
           <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4">
             {hasDraftRows ? (
+              step === "done" ? (
+                <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center px-4 text-center">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#3A4A2E] text-white shadow-[0_12px_26px_-18px_rgba(58,74,46,0.55)]">
+                    <Check className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-[22px] font-semibold tracking-[-0.018em] text-[#1C1410]">
+                    {Math.max(0, draftWines.length - importErrors.length)} vinho{Math.max(0, draftWines.length - importErrors.length) !== 1 ? "s" : ""} importado{Math.max(0, draftWines.length - importErrors.length) !== 1 ? "s" : ""}
+                  </h3>
+                  <p className="mt-2 max-w-[320px] text-[13px] leading-5 text-[#7A726A]">
+                    Sua adega foi atualizada com sucesso.
+                  </p>
+                  <AiModalActionButton
+                    variant="primary"
+                    onClick={() => {
+                      reset();
+                      onOpenChange(false);
+                      navigate(isCommercial ? "/dashboard/inventory" : "/dashboard/cellar");
+                    }}
+                    className="mt-6 h-11 rounded-full px-6 text-[13px] font-semibold shadow-none"
+                  >
+                    Ver minha adega
+                  </AiModalActionButton>
+                </div>
+              ) : (
               <div className="flex min-h-0 flex-1 flex-col gap-2.5">
                 {step === "importing" ? (
                   <div className="shrink-0 px-1 py-2">
@@ -3324,20 +3278,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                {step === "done" ? (
-                  <div className="shrink-0 px-1 py-2 text-[#2F4A2B]">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-white">
-                        <Check className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-[13px] font-semibold">{Math.max(0, draftWines.length - importErrors.length)} vinho(s) importado(s).</p>
-                        <p className="text-[11px] text-[#5F6F52]">A revisão permanece visível para conferência.</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
                 <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
                     <div className="relative min-w-[260px] flex-1">
@@ -3345,49 +3285,21 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       <Input
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
-                        placeholder="Buscar por vinho, produtor, uva, país, região ou safra"
+                        placeholder="Buscar por vinho, produtor, país ou safra"
                         className="h-9 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent pl-8 pr-3 text-[12px] shadow-none transition-all duration-150 placeholder:text-[#A99E91] focus:border-[#7B1E2B]/20 focus-visible:ring-[#7B1E2B]/10"
                       />
                     </div>
-                    {[
-                      { key: "all" as StatusFilter, label: "Todos", count: draftWines.length },
-                      { key: "ready" as StatusFilter, label: "Ready", count: completeRowsCount },
-                      { key: "review" as StatusFilter, label: "Review", count: reviewRowsCount },
-                      { key: "invalid" as StatusFilter, label: "Invalid", count: invalidRowsCount },
-                      { key: "duplicates" as StatusFilter, label: "Duplicados", count: duplicateRowsCount },
-                      { key: "low_confidence" as StatusFilter, label: "Baixa confiança", count: lowConfidenceRowsCount },
-                    ].map((filter) => (
-                      <button
-                        key={filter.key}
-                        type="button"
-                        onClick={() => setStatusFilter(filter.key)}
-                        className={cn(
-                          "inline-flex h-8 items-center gap-1 rounded-full border px-2.5 text-[11px] font-semibold transition-all duration-150",
-                          statusFilter === filter.key
-                            ? "border-[#7B1E2B]/16 bg-[rgba(123,30,43,0.07)] text-[#7B1E2B]"
-                            : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#4A4338]",
-                        )}
-                      >
-                        {filter.label}
-                        <span className={cn("rounded-full px-1.5 py-0.5 text-[10px]", statusFilter === filter.key ? "bg-[rgba(255,251,244,0.52)] text-[#7B1E2B]" : "bg-[rgba(58,51,39,0.05)]")}>
-                          {filter.count}
-                        </span>
-                      </button>
-                    ))}
                   </div>
                   <div className="flex items-center justify-start gap-2 xl:justify-end">
-                    <span className="rounded-full bg-transparent px-2.5 py-1 text-[11px] font-medium text-[#6B6258]">
-                      {filteredRowIndexes.length} visíveis
-                    </span>
-                    {activeFilterCount > 0 ? (
-                      <Button type="button" variant="ghost" size="sm" className="h-8 rounded-full px-3 text-[11px]" onClick={clearOperationalFilters}>
-                        Limpar filtros
-                      </Button>
-                    ) : null}
+                    <button type="button" onClick={reset} className="text-[12px] font-semibold text-[#3A4A2E] underline-offset-4 hover:underline" disabled={step === "importing"}>
+                      Trocar arquivo
+                    </button>
                   </div>
                 </AiToolbarSurface>
 
-                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center gap-1.5">
+                {renderSpreadsheetTable()}
+
+                <AiToolbarSurface className="hidden">
                   <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8075]">Vazios</span>
                   {emptyFieldOptions.map((field) => (
                     <button
@@ -3424,7 +3336,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   ))}
                 </AiToolbarSurface>
 
-                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2">
+                <AiToolbarSurface className="hidden">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Button variant="secondary" size="sm" onClick={() => setEditMode((v) => !v)} className="h-8 rounded-full px-3 text-[11px] transition-colors duration-150" disabled={step === "importing" || step === "done"}>
                       {editMode ? "Bloquear edição" : "Editar dados"}
@@ -3453,8 +3365,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 </AiToolbarSurface>
 
-                {selectedRows.length > 0 ? (
-                <AiToolbarSurface className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-[#E5D4D8] text-[12px] text-[#4A4338]">
+                {false && selectedRows.length > 0 ? (
+                <AiToolbarSurface className="hidden">
                     <span className="inline-flex items-center gap-2 font-semibold">
                       <span className="h-2 w-2 rounded-full bg-[#7B1E2B]" />
                       {selectedRows.length} linha(s) selecionada(s)
@@ -3470,7 +3382,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </AiToolbarSurface>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[160px_minmax(170px,1fr)_150px_145px_130px]">
+                <AiToolbarSurface className="hidden">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
                     <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
                       <SelectValue placeholder="Campo" />
@@ -3544,8 +3456,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                {renderSpreadsheetTable()}
-
                 {importSourceConfidence < 0.7 && importSourceHeaders.length > 0 ? (
                   <div className="max-h-40 shrink-0 overflow-auto border-t border-[rgba(198,167,104,0.18)] pt-2">
                     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -3606,6 +3516,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
               </div>
+              )
             ) : (
               <AnimatePresence mode="wait">
                 {step === "analyzing" ? (
@@ -3663,35 +3574,19 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             )}
           </AiModalBody>
 
-          {hasDraftRows ? (
+          {hasDraftRows && step !== "done" ? (
             <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5">
-              <div className="flex flex-wrap items-center gap-2 text-[12px] font-medium text-[#5F5F5F]">
-                <AiMetricPill label="total" value={draftWines.length} />
-                <AiMetricPill label="visíveis" value={filteredRowIndexes.length} />
-                <AiMetricPill label="selecionadas" value={selectedRows.length} />
-                <AiMetricPill label="prontos" value={completeRowsCount} tone="success" />
-                <AiMetricPill label="revisão" value={reviewRowsCount} tone="warning" />
-                <AiMetricPill label="corrigir" value={invalidRowsCount} tone="danger" />
-                <span className="text-[11px] font-normal text-[#7A6F65]">
-                  {invalidRowsCount > 0
-                    ? "Corrija nome/quantidade antes de importar."
-                    : "Linhas parciais podem ser importadas sem preencher campos opcionais."}
-                </span>
-              </div>
-              {step === "done" ? (
-              <AiModalActionButton variant="secondary" onClick={() => { reset(); onOpenChange(false); }} className="h-10 rounded-[12px] px-5 text-[13px] font-semibold transition-all duration-150">
-                  Fechar
-                </AiModalActionButton>
-              ) : (
-                <AiModalActionButton
-                  onClick={handleImport}
-                  variant="primary"
-                  className="h-10 rounded-[12px] px-5 text-[13px] font-semibold shadow-none transition-all duration-150 active:translate-y-0"
-                  disabled={!canImport}
-                >
-                  <Upload className="mr-1.5 h-4 w-4" /> Importar {identifiedRowsCount} linha(s)
-                </AiModalActionButton>
-              )}
+              <span className="text-[12px] font-medium text-[#7A726A]">
+                {identifiedRowsCount} vinho{identifiedRowsCount !== 1 ? "s" : ""} pronto{identifiedRowsCount !== 1 ? "s" : ""} para importar
+              </span>
+              <AiModalActionButton
+                onClick={handleImport}
+                variant="primary"
+                className="h-10 rounded-full px-5 text-[13px] font-semibold shadow-none transition-all duration-150 active:translate-y-0"
+                disabled={!canImport}
+              >
+                Importar {identifiedRowsCount} vinho{identifiedRowsCount !== 1 ? "s" : ""}
+              </AiModalActionButton>
             </AiModalFooterBar>
           ) : null}
           <AlertDialog open={importWarningOpen} onOpenChange={setImportWarningOpen}>
