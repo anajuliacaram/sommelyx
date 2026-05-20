@@ -1,3 +1,5 @@
+import { extractJSON } from "./ai.ts";
+
 export type OpenAIImageInput = {
   type: "input_image";
   image_url: string;
@@ -58,24 +60,11 @@ function extractTextFromResponsesJson(json: any): string | null {
 }
 
 function extractJsonFromText(text: string) {
-  const trimmed = text.trim();
-  if (!trimmed) return null;
-
   try {
-    return JSON.parse(trimmed);
+    return extractJSON(text);
   } catch {
-    const start = trimmed.indexOf("{");
-    const end = trimmed.lastIndexOf("}");
-    if (start !== -1 && end !== -1 && end > start) {
-      try {
-        return JSON.parse(trimmed.slice(start, end + 1));
-      } catch {
-        return null;
-      }
-    }
+    return null;
   }
-
-  return null;
 }
 
 function mapInputToMessages(input: OpenAIMessageInput[]) {

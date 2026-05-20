@@ -401,20 +401,34 @@ function normalizeWineListPayload(payload: any) {
 
   const wines = rawWines
     .map((wine: any) => {
-      const name = normalizeString(wine?.name);
-      const producer = normalizeString(wine?.producer) || null;
-      const grape = normalizeString(wine?.grape) || null;
-      const country = normalizeString(wine?.country) || null;
-      const region = normalizeString(wine?.region) || null;
-      const price = normalizePrice(wine?.price);
-      const vintageNumber = typeof wine?.vintage === "number" ? wine.vintage : Number(wine?.vintage ?? 0);
+      const name = normalizeString(wine?.name ?? wine?.nome);
+      const producer = normalizeString(wine?.producer ?? wine?.produtor) || null;
+      const grape = normalizeString(wine?.grape ?? wine?.uva) || null;
+      const country = normalizeString(wine?.country ?? wine?.pais) || null;
+      const region = normalizeString(wine?.region ?? wine?.regiao) || null;
+      const price = normalizePrice(wine?.price ?? wine?.preco);
+      const vintageNumber = typeof wine?.vintage === "number" ? wine.vintage : typeof wine?.safra === "number" ? wine.safra : Number(wine?.vintage ?? wine?.safra ?? 0);
       const vintage = Number.isInteger(vintageNumber) && vintageNumber >= 1900 && vintageNumber <= new Date().getFullYear() + 1 ? vintageNumber : null;
-      const category = allowedCategories.has(String(wine?.category || "").toLowerCase())
-        ? String(wine.category).toLowerCase()
+      const styleSource = wine?.category ?? wine?.estilo;
+      const category = allowedCategories.has(String(styleSource || "").toLowerCase())
+        ? String(styleSource).toLowerCase()
+        : /espumante|sparkling|champagne|prosecco|cava/i.test(String(styleSource || ""))
+          ? "sparkling"
+          : /branco|white/i.test(String(styleSource || ""))
+            ? "white"
+            : /ros[eé]|rose/i.test(String(styleSource || ""))
+              ? "rose"
         : "red";
       const confidence = normalizeConfidence(wine?.confidence);
+      const destaque = ["ESCOLHA_PRINCIPAL", "BEST_VALUE", "SELECAO_DA_CASA"].includes(String(wine?.destaque || ""))
+        ? String(wine.destaque)
+        : null;
+      const perfil = Array.isArray(wine?.perfil)
+        ? wine.perfil.map((item: unknown) => normalizeString(item)).filter(Boolean).slice(0, 3)
+        : [];
 
       return {
+        numero: typeof wine?.numero === "number" ? wine.numero : null,
         name,
         producer,
         grape,
@@ -424,8 +438,8 @@ function normalizeWineListPayload(payload: any) {
         vintage,
         category,
         confidence,
-        style: mapCategoryToStyle(category),
-        description: normalizeString(wine?.description) || null,
+        style: normalizeString(wine?.style ?? wine?.estilo) || mapCategoryToStyle(category),
+        description: normalizeString(wine?.description ?? wine?.descricao_carta) || null,
         verdict: normalizeString(wine?.verdict) || null,
         reasoning: normalizeString(wine?.reasoning) || null,
         compatibilityLabel: normalizeString(wine?.compatibilityLabel) || null,
@@ -436,7 +450,16 @@ function normalizeWineListPayload(payload: any) {
         acidity: normalizeString(wine?.acidity) || null,
         tannin: normalizeString(wine?.tannin) || null,
         occasion: normalizeString(wine?.occasion) || null,
-        comparativeLabels: normalizeTags(wine?.comparativeLabels ?? wine?.tags),
+        comparativeLabels: normalizeTags([
+          ...(Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels : wine?.comparativeLabels ? [wine.comparativeLabels] : []),
+          ...(Array.isArray(wine?.tags) ? wine.tags : wine?.tags ? [wine.tags] : []),
+          destaque === "ESCOLHA_PRINCIPAL" ? "Melhor escolha" : "",
+          destaque === "BEST_VALUE" ? "Melhor custo-benefício" : "",
+          destaque === "SELECAO_DA_CASA" ? "Seleção da casa" : "",
+        ]),
+        perfil,
+        harmonizacao_sugerida: normalizeString(wine?.harmonizacao_sugerida) || null,
+        destaque,
         pairings: Array.isArray(wine?.pairings)
           ? wine.pairings
               .map((pairing: any) => ({
@@ -1075,7 +1098,7 @@ Use apenas pratos LEGÍVEIS no cardápio. Não invente itens.`;
         : "";
 
       systemPrompt = `Você está fazendo EXTRAÇÃO LITERAL de uma carta de vinhos em OCR bruto.${profileContext}
-Extraia a carta como uma LISTA ESTRUTURADA de vinhos. Não escreva análise sensorial, veredictos, harmonizações ou resumo livre.
+Extraia a carta como uma LISTA ESTRUTURADA de vinhos e adicione curadoria sommelier curta, sempre ancorada no texto visível.
 
 TRATE O TEXTO como um menu/carta de vinhos.
 
@@ -1091,6 +1114,9 @@ REGRAS:
 9. Você só pode retornar vinhos que estejam explicitamente visíveis no OCR.
 10. Se um nome, produtor ou preço não estiver no texto, deixe vazio ou 0. Nunca substitua por um vinho famoso.
 11. Trate a entrada como TEXTO BRUTO. Extraia linhas que pareçam vinhos com safra, uva, região ou preço.
+12. Para cada vinho, preencha harmonizacao_sugerida com uma sugestão breve em português baseada em estilo/categoria.
+13. perfil deve ter no máximo 3 atributos curtos, como "Corpo médio", "Acidez viva", "Taninos finos".
+14. destaque deve ser "ESCOLHA_PRINCIPAL", "BEST_VALUE", "SELECAO_DA_CASA" ou null. Use no máximo um ESCOLHA_PRINCIPAL.
 
 PROIBIDO:
 - responder com um único vinho se houver várias entradas detectáveis
@@ -1114,6 +1140,7 @@ PROIBIDO:
                 items: {
                   type: "object",
                   properties: {
+                    numero: { type: ["number", "null"] },
                     name: { type: "string" },
                     producer: { type: "string" },
                     grape: { type: "string" },
@@ -1123,8 +1150,12 @@ PROIBIDO:
                     price: { type: "number" },
                     category: { type: "string", enum: ["red", "white", "sparkling", "rose"] },
                     confidence: { type: "number" },
+                    descricao_carta: { type: "string" },
+                    harmonizacao_sugerida: { type: "string" },
+                    destaque: { type: ["string", "null"], enum: ["ESCOLHA_PRINCIPAL", "BEST_VALUE", "SELECAO_DA_CASA", null] },
+                    perfil: { type: "array", items: { type: "string" }, maxItems: 3 },
                   },
-                  required: ["name", "producer", "grape", "country", "region", "vintage", "price", "category", "confidence"],
+                  required: ["numero", "name", "producer", "grape", "country", "region", "vintage", "price", "category", "confidence", "descricao_carta", "harmonizacao_sugerida", "destaque", "perfil"],
                   additionalProperties: false,
                 },
               },

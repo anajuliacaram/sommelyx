@@ -135,6 +135,7 @@ export interface WineListPairing {
 }
 
 export interface WineListItem {
+  numero?: number | null;
   name: string;
   producer?: string | null;
   grape?: string | null;
@@ -157,6 +158,9 @@ export interface WineListItem {
   tannin?: string | null;
   occasion?: string | null;
   comparativeLabels?: string[];
+  perfil?: string[];
+  harmonizacao_sugerida?: string | null;
+  destaque?: "ESCOLHA_PRINCIPAL" | "BEST_VALUE" | "SELECAO_DA_CASA" | null;
 }
 
 export interface WineListAnalysis {
@@ -176,16 +180,25 @@ export interface WineListAnalysisTextInput {
 }
 
 type RawWineListCandidate = {
+  numero?: unknown;
   name?: unknown;
+  nome?: unknown;
   producer?: unknown;
+  produtor?: unknown;
   title?: unknown;
   label?: unknown;
   grape?: unknown;
+  uva?: unknown;
   country?: unknown;
+  pais?: unknown;
   region?: unknown;
+  regiao?: unknown;
   price?: unknown;
+  preco?: unknown;
   vintage?: unknown;
+  safra?: unknown;
   category?: unknown;
+  estilo?: unknown;
   confidence?: unknown;
   style?: unknown;
   description?: unknown;
@@ -199,6 +212,10 @@ type RawWineListCandidate = {
   occasion?: unknown;
   comparativeLabels?: unknown;
   tags?: unknown;
+  perfil?: unknown;
+  harmonizacao_sugerida?: unknown;
+  descricao_carta?: unknown;
+  destaque?: unknown;
   sourceLines?: unknown;
 };
 
@@ -345,30 +362,40 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
       void index;
       const safeName = normalizeWineListName(
         wine?.name ??
+        wine?.nome ??
         wine?.producer ??
+        wine?.produtor ??
         wine?.title ??
         wine?.label,
       );
       const confidence = typeof wine?.confidence === "number" ? wine.confidence : Number(wine?.confidence ?? 0);
-      const category = ["red", "white", "sparkling", "rose"].includes(String(wine?.category || "").toLowerCase())
-        ? String(wine.category).toLowerCase() as WineListItem["category"]
-        : inferWineCategoryFromStyle(wine?.style) || "red";
-      const rawPrice = typeof wine?.price === "number" ? wine.price : Number(wine?.price ?? 0);
+      const categorySource = wine?.category ?? wine?.estilo;
+      const category = ["red", "white", "sparkling", "rose"].includes(String(categorySource || "").toLowerCase())
+        ? String(categorySource).toLowerCase() as WineListItem["category"]
+        : inferWineCategoryFromStyle(wine?.style ?? wine?.estilo) || "red";
+      const rawPrice = typeof wine?.price === "number" ? wine.price : typeof wine?.preco === "number" ? wine.preco : Number(wine?.price ?? wine?.preco ?? 0);
       const price = Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null;
-      const rawVintage = typeof wine?.vintage === "number" ? wine.vintage : Number(wine?.vintage ?? 0);
+      const rawVintage = typeof wine?.vintage === "number" ? wine.vintage : typeof wine?.safra === "number" ? wine.safra : Number(wine?.vintage ?? wine?.safra ?? 0);
       const vintage = Number.isInteger(rawVintage) && rawVintage >= 1900 && rawVintage <= new Date().getFullYear() + 1 ? rawVintage : null;
+      const destaque = ["ESCOLHA_PRINCIPAL", "BEST_VALUE", "SELECAO_DA_CASA"].includes(String(wine?.destaque || ""))
+        ? wine.destaque as WineListItem["destaque"]
+        : null;
+      const perfil = Array.isArray(wine?.perfil)
+        ? wine.perfil.map((item) => String(item).trim()).filter(Boolean).slice(0, 3)
+        : [];
       return {
+        numero: typeof wine?.numero === "number" ? wine.numero : null,
         name: safeName,
-        producer: String(wine?.producer ?? "").trim() || null,
-        grape: String(wine?.grape ?? "").trim() || null,
-        country: String(wine?.country ?? "").trim() || null,
-        region: String(wine?.region ?? "").trim() || null,
+        producer: String(wine?.producer ?? wine?.produtor ?? "").trim() || null,
+        grape: String(wine?.grape ?? wine?.uva ?? "").trim() || null,
+        country: String(wine?.country ?? wine?.pais ?? "").trim() || null,
+        region: String(wine?.region ?? wine?.regiao ?? "").trim() || null,
         price,
         vintage,
         category,
         confidence: Number.isFinite(confidence) ? Math.max(0, Math.min(1, confidence)) : 0.35,
-        style: String(wine?.style ?? "").trim() || mapWineCategoryToStyle(category),
-        description: String(wine?.description ?? "").trim() || null,
+        style: String(wine?.style ?? wine?.estilo ?? "").trim() || mapWineCategoryToStyle(category),
+        description: String(wine?.description ?? wine?.descricao_carta ?? "").trim() || null,
         pairings: Array.isArray(wine?.pairings) ? wine.pairings : [],
         verdict: String(wine?.verdict ?? "").trim() || null,
         compatibilityLabel: String(wine?.compatibilityLabel ?? "").trim() || null,
@@ -379,7 +406,16 @@ export function normalizeWineListResponse(raw: unknown): WineListAnalysis {
         acidity: String(wine?.acidity ?? "").trim() || null,
         tannin: String(wine?.tannin ?? "").trim() || null,
         occasion: String(wine?.occasion ?? "").trim() || null,
-        comparativeLabels: normalizeWineListTags(wine?.comparativeLabels ?? wine?.tags),
+        comparativeLabels: normalizeWineListTags([
+          ...(Array.isArray(wine?.comparativeLabels) ? wine.comparativeLabels : wine?.comparativeLabels ? [wine.comparativeLabels] : []),
+          ...(Array.isArray(wine?.tags) ? wine.tags : wine?.tags ? [wine.tags] : []),
+          destaque === "ESCOLHA_PRINCIPAL" ? "Melhor escolha" : "",
+          destaque === "BEST_VALUE" ? "Melhor custo-benefício" : "",
+          destaque === "SELECAO_DA_CASA" ? "Seleção da casa" : "",
+        ]),
+        perfil,
+        harmonizacao_sugerida: String(wine?.harmonizacao_sugerida ?? "").trim() || null,
+        destaque,
       };
     })
     .filter((wine): wine is WineListItem => Boolean(wine?.name?.trim()));

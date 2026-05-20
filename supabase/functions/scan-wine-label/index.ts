@@ -816,6 +816,7 @@ serve(async (req) => {
       `    "country": "string | null",\n` +
       `    "region": "string | null",\n` +
       `    "grape": "string | null",\n` +
+      `    "alcohol": "number | null",\n` +
       `    "food_pairing": "string | null",\n` +
       `    "tasting_notes": "string | null",\n` +
       `    "cellar_location": "null",\n` +
@@ -858,6 +859,7 @@ serve(async (req) => {
               country: { type: ["string", "null"] },
               region: { type: ["string", "null"] },
               grape: { type: ["string", "null"] },
+              alcohol: { type: ["number", "null"] },
               food_pairing: { type: ["string", "null"] },
               tasting_notes: { type: ["string", "null"] },
               cellar_location: { type: ["string", "null"] },
@@ -873,6 +875,7 @@ serve(async (req) => {
               "country",
               "region",
               "grape",
+              "alcohol",
               "food_pairing",
               "tasting_notes",
               "cellar_location",
@@ -976,6 +979,7 @@ serve(async (req) => {
     const rawGrape = typeof wine.grape === "string" ? wine.grape.trim() : null;
     const rawFoodPairing = typeof wine.food_pairing === "string" ? wine.food_pairing.trim() : null;
     const rawTastingNotes = typeof wine.tasting_notes === "string" ? wine.tasting_notes.trim() : null;
+    const rawAlcohol = normalizeNumber(wine.alcohol ?? wine.teor_alcoolico);
     const rawEstimatedPrice = normalizeNumber((wine as Record<string, unknown>).estimated_price);
     const rawPurchasePrice = normalizeNumber(wine.purchase_price);
     const canonicalCountry = normalizeCountry(rawCountry);
@@ -994,14 +998,25 @@ serve(async (req) => {
       country: countryConfidence >= 0.7 ? canonicalCountry ?? null : null,
       region: regionConfidence >= 0.7 ? normalizedRegion : null,
       grape: grapeFieldConfidence >= 0.7 ? normalizedGrape : null,
+      alcohol: rawAlcohol,
+      teor_alcoolico: rawAlcohol,
       estimated_price: rawEstimatedPrice ?? rawPurchasePrice ?? null,
       purchase_price: rawPurchasePrice,
       food_pairing: rawFoodPairing,
+      tasting_notes: rawTastingNotes,
       cellar_location: typeof wine.cellar_location === "string" ? wine.cellar_location.trim() : null,
       drink_from: normalizeNumber(wine.drink_from),
       drink_until: normalizeNumber(wine.drink_until),
       ocr_text: ocrText,
       ocr_confidence: ocrConfidence,
+      nome: rawName,
+      produtor: rawProducer,
+      safra: normalizeNumber(wine.vintage),
+      pais: countryConfidence >= 0.7 ? canonicalCountry ?? null : null,
+      regiao: regionConfidence >= 0.7 ? normalizedRegion : null,
+      uva: grapeFieldConfidence >= 0.7 ? normalizedGrape : null,
+      estilo: normalizeStyle(wine.style),
+      notas: rawTastingNotes,
     };
 
     const fieldConfidence = {

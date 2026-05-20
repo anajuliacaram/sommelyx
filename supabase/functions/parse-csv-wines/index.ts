@@ -554,10 +554,15 @@ Você ainda deve seguir todas as demais regras de extração, normalização e d
       notes.push("Algumas partes do arquivo não puderam ser analisadas. Tente novamente ou importe em partes menores.");
     }
 
+    const normalizedWines = Array.from(dedup.values());
+    const warnings = notes.filter(Boolean);
     const result = {
-      wines: Array.from(dedup.values()),
+      wines: normalizedWines,
+      vinhos: normalizedWines,
+      total_encontrados: normalizedWines.length,
+      avisos: warnings,
       column_mapping: column_mapping ?? {},
-      notes: notes.filter(Boolean).join(" "),
+      notes: warnings.join(" "),
       metadata: {
         fileName: typeof fileName === "string" ? fileName : null,
         fileType: typeof fileType === "string" ? fileType : null,

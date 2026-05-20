@@ -129,6 +129,9 @@ function compactText(value: string, maxLength: number) {
 }
 
 function buildDescriptorLine(wine: WineListItem) {
+  if (Array.isArray(wine.perfil) && wine.perfil.length > 0) {
+    return buildPresentationStructureLine(wine.perfil.slice(0, 3));
+  }
   const styleLabel =
     wine.style ||
     (wine.category === "red"
@@ -154,6 +157,7 @@ function buildDescriptorLine(wine: WineListItem) {
 }
 
 function buildPairingLine(wine: WineListItem) {
+  if (wine.harmonizacao_sugerida?.trim()) return wine.harmonizacao_sugerida.trim();
   const dishes = (Array.isArray(wine?.pairings) ? wine.pairings : [])
     .map((pairing) => pairing?.dish?.trim().toLowerCase())
     .filter(Boolean)

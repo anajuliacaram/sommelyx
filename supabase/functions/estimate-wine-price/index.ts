@@ -92,12 +92,13 @@ Deno.serve(async (req) => {
 REGRAS:
 - Baseie-se PRINCIPALMENTE no nome do vinho e na vinícola/produtor, que são os maiores indicadores de faixa de preço.
 - Considere também safra, uva, região e estilo como fatores secundários.
-- Retorne APENAS um JSON no formato: {"estimated_price": NUMBER, "confidence": "alta"|"media"|"baixa", "reasoning": "explicação curta"}
+- Retorne APENAS um JSON no formato: {"preco_estimado_brl": NUMBER, "faixa_min": NUMBER, "faixa_max": NUMBER, "confianca": "alta"|"media"|"baixa", "fonte_referencia": "explicação curta"}
 - O preço deve ser o valor médio praticado em lojas online e importadoras brasileiras em 2025-2026.
 - Para vinhos premium conhecidos (ex: Opus One, Sassicaia, Penfolds Grange), use valores condizentes com o mercado de luxo.
 - Para vinhos de entrada ou desconhecidos, estime com base nos comparáveis da mesma região/uva.
 - Nunca retorne valores abaixo de R$30 ou acima de R$50.000 sem justificativa.
 - Se não conhecer o vinho específico, use o produtor e a região para inferir a faixa.
+- faixa_min e faixa_max devem formar uma faixa plausível em torno de preco_estimado_brl.
 - Retorne SOMENTE o JSON, sem texto adicional.`;
 
     const openaiKey = Deno.env.get("OPENAI_API_KEY")?.trim() || "";
@@ -119,11 +120,13 @@ REGRAS:
       schema: {
         type: "object",
         properties: {
-          estimated_price: { type: "number" },
-          confidence: { type: "string", enum: ["alta", "media", "baixa"] },
-          reasoning: { type: "string" },
+          preco_estimado_brl: { type: "number" },
+          faixa_min: { type: "number" },
+          faixa_max: { type: "number" },
+          confianca: { type: "string", enum: ["alta", "media", "baixa"] },
+          fonte_referencia: { type: "string" },
         },
-        required: ["estimated_price", "confidence", "reasoning"],
+        required: ["preco_estimado_brl", "faixa_min", "faixa_max", "confianca", "fonte_referencia"],
         additionalProperties: false,
       },
       maxOutputTokens: 200,
@@ -139,16 +142,28 @@ REGRAS:
       return errorResponse(result.status === 504 ? 408 : 502, result.status === 504 ? "AI_TIMEOUT" : "AI_UNAVAILABLE", result.status === 504 ? "A estimativa demorou muito. Tente novamente." : "Erro ao estimar preço.", true);
     }
     const parsed = result.parsed;
-    const price = Number(parsed.estimated_price);
+    const price = Number(parsed.preco_estimado_brl ?? parsed.estimated_price);
 
     if (!Number.isFinite(price) || price < 0) {
       return errorResponse(422, "PARSE_ERROR", "A resposta da IA veio em um formato inválido. Tente novamente.", true);
     }
 
+    const roundedPrice = Math.round(price * 100) / 100;
+    const rangeMinRaw = Number(parsed.faixa_min);
+    const rangeMaxRaw = Number(parsed.faixa_max);
+    const faixaMin = Number.isFinite(rangeMinRaw) && rangeMinRaw > 0 ? Math.round(rangeMinRaw * 100) / 100 : Math.round(roundedPrice * 0.82 * 100) / 100;
+    const faixaMax = Number.isFinite(rangeMaxRaw) && rangeMaxRaw >= faixaMin ? Math.round(rangeMaxRaw * 100) / 100 : Math.round(roundedPrice * 1.22 * 100) / 100;
+    const confidence = parsed.confianca || parsed.confidence || "media";
+    const reasoning = parsed.fonte_referencia || parsed.reasoning || "";
     const response = {
-      estimated_price: Math.round(price * 100) / 100,
-      confidence: parsed.confidence || "media",
-      reasoning: parsed.reasoning || "",
+      preco_estimado_brl: roundedPrice,
+      faixa_min: faixaMin,
+      faixa_max: faixaMax,
+      confianca: confidence,
+      fonte_referencia: reasoning,
+      estimated_price: roundedPrice,
+      confidence,
+      reasoning,
     };
     await setCachedAiResponse("estimate-wine-price", cacheInput, response, { userId: claimsData.claims.sub });
     console.log("[estimate-wine-price] success", { request_id: requestId, latency_ms: Date.now() - startedAt, retryable: false });

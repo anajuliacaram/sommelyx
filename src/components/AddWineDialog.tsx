@@ -441,6 +441,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [importCsvOpen, setImportCsvOpen] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
+  const [estimateRange, setEstimateRange] = useState<{ min: number; max: number } | null>(null);
   const [scanHydrated, setScanHydrated] = useState(false);
   const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingHydrationTraceRef = useRef<{ source: "scan" | "initialValues"; payload: AddWinePrefillValues } | null>(null);
@@ -476,7 +477,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setEstimating(true);
     setEstimateConfidence(null);
     try {
-      const data = await invokeEdgeFunction<{ estimated_price?: number; confidence?: string | null }>(
+      const data = await invokeEdgeFunction<{ estimated_price?: number; confidence?: string | null; faixa_min?: number; faixa_max?: number; confianca?: string | null }>(
         "estimate-wine-price",
         {
           name: n.trim(),
@@ -492,10 +493,16 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         if (isCommercial || !currentValueTouched) {
           setCurrentValue(String(data.estimated_price));
         }
-        setEstimateConfidence(data.confidence || "media");
+        setEstimateConfidence(data.confianca || data.confidence || "media");
+        setEstimateRange(
+          typeof data.faixa_min === "number" && typeof data.faixa_max === "number"
+            ? { min: data.faixa_min, max: data.faixa_max }
+            : null,
+        );
       }
     } catch {
       setEstimateConfidence(null);
+      setEstimateRange(null);
     } finally {
       setEstimating(false);
     }
@@ -517,7 +524,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setNoLocationInfo(false);
     setDrinkFrom(""); setDrinkUntil(""); setFoodPairing(""); setNotes("");
     setLabelImagePreview(null); setLabelImageFile(null); setLabelImageBase64(null); setNoPriceInfo(false);
-    setEstimating(false); setEstimateConfidence(null); setCurrentValueTouched(false);
+    setEstimating(false); setEstimateConfidence(null); setEstimateRange(null); setCurrentValueTouched(false);
     setScanHydrated(false);
     setAiPrefilledFields({});
     setMissingFields([]);
@@ -1393,6 +1400,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                                 </div>
                               )}
                             </div>
+                            {estimateConfidence && (
+                              <p className="mt-1 text-[11px] text-[var(--sx-text-muted)]">
+                                {estimateConfidence === "baixa" && estimateRange
+                                  ? `estimado pela IA: R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                  : "estimado pela IA"}
+                              </p>
+                            )}
                           </div>
                           <div>
                             <p className={AI_MODAL_LABEL_CLASSNAME}>Janela de consumo</p>
