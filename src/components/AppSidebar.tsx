@@ -32,23 +32,24 @@ interface MenuItem {
   title: string;
   url: string;
   icon: any;
+  navKey: string;
 }
 
 const personalMenu: MenuItem[] = [
-  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater },
-  { title: "Meu Consumo", url: "/dashboard/consumption", icon: Wine },
-  { title: "Alertas", url: "/dashboard/alerts", icon: Bell },
-  { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart },
+  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard, navKey: "visao-geral" },
+  { title: "Minha Adega", url: "/dashboard/cellar", icon: GlassWater, navKey: "minha-adega" },
+  { title: "Meu Consumo", url: "/dashboard/consumption", icon: Wine, navKey: "meu-consumo" },
+  { title: "Alertas", url: "/dashboard/alerts", icon: Bell, navKey: "alertas" },
+  { title: "Wishlist", url: "/dashboard/wishlist", icon: Heart, navKey: "wishlist" },
 ];
 
 const commercialMenu: MenuItem[] = [
-  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Estoque", url: "/dashboard/inventory", icon: Package },
-  { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart },
-  { title: "Cadastros", url: "/dashboard/registers", icon: Users },
-  { title: "Relatórios", url: "/dashboard/reports", icon: FileText },
-  { title: "Histórico", url: "/dashboard/log", icon: ClipboardList },
+  { title: "Visão geral", url: "/dashboard", icon: LayoutDashboard, navKey: "visao-geral" },
+  { title: "Estoque", url: "/dashboard/inventory", icon: Package, navKey: "minha-adega" },
+  { title: "Vendas", url: "/dashboard/sales", icon: ShoppingCart, navKey: "meu-consumo" },
+  { title: "Cadastros", url: "/dashboard/registers", icon: Users, navKey: "wishlist" },
+  { title: "Relatórios", url: "/dashboard/reports", icon: FileText, navKey: "alertas" },
+  { title: "Histórico", url: "/dashboard/log", icon: ClipboardList, navKey: "neutral" },
 ];
 
 export function AppSidebar() {
@@ -159,6 +160,7 @@ export function AppSidebar() {
                         end={item.url === "/dashboard"}
                         className="sidebar-item"
                         activeClassName="sidebar-item--active"
+                        data-nav={item.navKey}
                         onClick={closeMobileSidebar}
                       >
                         <item.icon className="h-4 w-4 shrink-0" />
@@ -179,7 +181,7 @@ export function AppSidebar() {
               <SidebarMenu className="gap-1.5">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/settings" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
                       <Settings className="h-4 w-4 shrink-0" />
                       <span>Preferências</span>
                     </NavLink>
@@ -187,7 +189,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item" activeClassName="sidebar-item--active" onClick={closeMobileSidebar}>
+                    <NavLink to="/dashboard/plans" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
                       <CreditCard className="h-4 w-4 shrink-0" />
                       <span>Meu Plano</span>
                     </NavLink>
@@ -204,6 +206,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
+                  data-nav="sair"
                   className="sidebar-item md:!h-[38px] md:!text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
                 >
                   <LogOut className="h-4 w-4 shrink-0" />

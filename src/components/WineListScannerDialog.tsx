@@ -605,7 +605,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 />
               </AiModalHeaderBar>
 
-              <AiModalBody>
+              <AiModalBody style={{ overflowY: "auto", flex: 1, paddingBottom: 24 }}>
                 <AiModalSplitLayout contentClassName="pb-1">
                   <AnimatePresence mode="wait">
                     {step === "capture" && (

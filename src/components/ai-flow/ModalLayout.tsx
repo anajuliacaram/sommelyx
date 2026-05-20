@@ -94,7 +94,7 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "shrink-0",
+        "modal-header-bar shrink-0",
         className,
       )}
     >
@@ -106,9 +106,11 @@ export function AiModalHeaderBar({
 export function AiModalBody({
   children,
   className,
+  style,
 }: {
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 }) {
   return (
     <div
@@ -116,6 +118,7 @@ export function AiModalBody({
         "modal-body min-h-0 flex-1 overflow-y-auto pb-[calc(32px+env(safe-area-inset-bottom))]",
         className,
       )}
+      style={style}
     >
       {children}
     </div>

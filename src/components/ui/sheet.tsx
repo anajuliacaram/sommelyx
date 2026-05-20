@@ -70,6 +70,8 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
             {...props}
           >
             <div
+              data-radix-sheet-content=""
+              data-side="bottom"
               className={cn("premium-modal-shell pointer-events-auto flex max-h-[92dvh] flex-col", className)}
               style={style}
             >
@@ -88,6 +90,8 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         <SheetOverlay />
         <SheetPrimitive.Content
           ref={ref}
+          data-radix-sheet-content=""
+          data-side={side}
           className={cn("premium-modal-shell", !isCentered && sheetVariants({ side }), className)}
           style={style}
           {...props}
