@@ -550,7 +550,7 @@ export function PremiumChoiceCard({
       transition={{ duration: 0.3, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -0.5 }}
       whileTap={{ scale: 0.985 }}
-      className="premium-card-surface group w-full rounded-[16px] border border-[rgba(95,111,82,0.05)] p-2.25 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.52),0_8px_18px_-24px_rgba(58,51,39,0.10)] transition-all duration-200"
+      className="harmonizar-option premium-card-surface group w-full rounded-[16px] border border-[rgba(95,111,82,0.05)] p-2.25 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.52),0_8px_18px_-24px_rgba(58,51,39,0.10)] transition-all duration-200"
       style={{
         background: selected
           ? "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(249,241,242,0.72) 100%)"
@@ -560,7 +560,7 @@ export function PremiumChoiceCard({
     >
       <div className="flex items-center gap-2.5">
         <div
-          className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-[10px] transition-all duration-200 group-hover:scale-[1.03]"
+          className="harmonizar-option-icon flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-[10px] transition-all duration-200 group-hover:scale-[1.03]"
           style={{
             background: selected ? `${accentColor}14` : "rgba(123,30,43,0.05)",
             border: `1px solid ${selected ? `${accentColor}24` : "rgba(123,30,43,0.06)"}`,
@@ -569,8 +569,8 @@ export function PremiumChoiceCard({
           <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-medium tracking-[-0.01em] text-[#1A1713]">{title}</p>
-          <p className="mt-0.5 text-[11px] leading-[1.4] text-[rgba(58,51,39,0.62)]">{description}</p>
+          <p className="harmonizar-option-title text-[13px] font-medium tracking-[-0.01em] text-[#1A1713]">{title}</p>
+          <p className="harmonizar-option-subtitle mt-0.5 text-[11px] leading-[1.4] text-[rgba(58,51,39,0.62)]">{description}</p>
         </div>
       </div>
     </motion.button>

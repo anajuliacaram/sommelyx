@@ -1925,13 +1925,13 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           >
               <div className="space-y-3">
                 {recipeModal.recipe.description && (
-                  <p className="text-sm text-black/70 leading-relaxed italic">{recipeModal.recipe.description}</p>
+                  <p className="text-sm text-[var(--sx-text-body)] leading-relaxed italic">{recipeModal.recipe.description}</p>
                 )}
                 <div>
-                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-black/50">Ingredientes</h4>
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Ingredientes</h4>
                   <ul className="space-y-2">
                     {recipeModal.recipe.ingredients.map((ing, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-black/70 leading-relaxed">
+                      <li key={i} className="flex items-start gap-2 text-sm text-[var(--sx-text-body)] leading-relaxed">
                         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7B1E2B]/35" />
                         {ing}
                       </li>
@@ -1939,11 +1939,11 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </ul>
                 </div>
                 <div>
-                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-black/50">Modo de preparo</h4>
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Modo de preparo</h4>
                   <ol className="space-y-2">
                     {recipeModal.recipe.steps.map((step, i) => (
-                      <li key={i} className="flex items-start gap-2.5 text-sm text-black/70 leading-relaxed">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/5 text-[10px] font-bold text-[#5F5F5F]">
+                      <li key={i} className="flex items-start gap-2.5 text-sm text-[var(--sx-text-body)] leading-relaxed">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(58,42,30,0.05)] text-[10px] font-bold text-[#5F5F5F]">
                           {i + 1}
                         </span>
                         {step}
@@ -1954,9 +1954,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 <div className="rounded-[14px] border border-[rgba(58,51,39,0.06)] bg-transparent p-3">
                   <div className="mb-1 flex items-center gap-1.5">
                     <Sparkles className="h-3 w-3 text-[#7B1E2B]" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-black/50">Por que harmoniza</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Por que harmoniza</span>
                   </div>
-                  <p className="text-sm text-black/70 leading-relaxed">{recipeModal.recipe.wine_reason}</p>
+                  <p className="text-sm text-[var(--sx-text-body)] leading-relaxed">{recipeModal.recipe.wine_reason}</p>
                 </div>
               </div>
           </ModalBase>

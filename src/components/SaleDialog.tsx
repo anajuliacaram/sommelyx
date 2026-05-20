@@ -185,8 +185,8 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
             </motion.div>
           ) : (
             <motion.div key="form" className="mt-1 flex flex-col gap-5">
-              <div className="rounded-2xl border border-black/5 bg-white p-4 space-y-3">
-                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+              <div className="rounded-2xl border border-[var(--sx-border-default)] bg-white p-4 space-y-3">
+                <p className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                   Auditoria da operação
                 </p>
                 <div className="grid grid-cols-1 gap-3">
@@ -251,7 +251,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
               {/* Items list */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Itens da venda</Label>
+                  <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Itens da venda</Label>
                   <Button
                     type="button"
                     variant="secondary"
@@ -335,7 +335,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                 )}
 
                 {items.map(item => (
-                  <div key={item.id} className="rounded-2xl border border-black/5 bg-white p-3 space-y-2">
+                  <div key={item.id} className="rounded-2xl border border-[var(--sx-border-default)] bg-white p-3 space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-[11px] font-semibold text-foreground truncate">{item.wineName}</p>
@@ -346,7 +346,7 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeItem(item.id)}
-                        className="shrink-0 h-9 w-9 rounded-full bg-black/5 text-[#6B6B6B] hover:bg-black/10 hover:text-[#1A1A1A]"
+                        className="shrink-0 h-9 w-9 rounded-full bg-[rgba(58,42,30,0.05)] text-[#6B6B6B] hover:bg-black/10 hover:text-[#1A1A1A]"
                         aria-label="Remover item"
                       >
                         <Trash2 className="h-3 w-3" />

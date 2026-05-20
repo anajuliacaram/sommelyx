@@ -485,16 +485,16 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="space-y-2"
+        className="space-y-3"
       >
-        <section className="space-y-1">
-          <div className="pb-1">
+        <section className="carta-results-header">
+          <div>
             <div>
-              <p className="text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:text-[17px]">
+              <p className="carta-results-count">
                 {displayWines.length} rótulos para decidir
               </p>
               {safeResults.topPick ? (
-                <p className={cn("mt-0.5 sm:text-[12px]", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                <p className="carta-results-sub">
                   Primeiro destaque: {safeResults.topPick}
                 </p>
               ) : null}
@@ -521,7 +521,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
                   selected={active}
-                  className="px-1.25 uppercase tracking-[0.04em] sm:px-1.75"
+                  className={cn("chip uppercase tracking-[0.04em]", active && "active")}
                 >
                   {pill.label}
                 </AiFilterChip>
@@ -573,7 +573,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         ) : null}
 
         {isTruncated ? (
-          <p className="text-[11px] font-medium text-[#6B6258]">
+          <p className="text-[11px] font-medium text-[var(--sx-text-secondary)]">
             Mostrando 100 de {refinedWines.length} vinhos
           </p>
         ) : null}
@@ -739,22 +739,20 @@ function WineListCard({
   const descriptorLine = buildDescriptorLine(wine);
   const pairingLine = buildPairingLine(wine);
   const priceLabel = formatPrice(wine.price);
+  const badgeLabels = Array.from(new Set([curationNote, ...tags].filter(Boolean) as string[]));
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "overflow-hidden rounded-[15px] border border-[rgba(95,111,82,0.04)] bg-[linear-gradient(180deg,rgba(255,255,255,0.42)_0%,rgba(249,244,237,0.34)_100%)] transition-colors duration-200",
+        "carta-wine-card",
         isFeatured && "xl:col-span-1",
         rhythmClassName,
-        isSelected ? "border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.56)_0%,rgba(249,241,242,0.46)_100%)]" : "",
+        isSelected && "is-selected",
       )}
-      style={{
-        backdropFilter: "blur(8px) saturate(1.02)",
-        WebkitBackdropFilter: "blur(8px) saturate(1.02)",
-      }}
     >
+      <span className="carta-wine-number">{index + 1}</span>
       <div
         role="button"
         tabIndex={0}
@@ -765,62 +763,54 @@ function WineListCard({
             onSelect();
           }
         }}
-        className="w-full px-3 py-2.25 text-left"
+        className="w-full text-left"
       >
-        <div className="grid gap-2.5 sm:grid-cols-[28px_minmax(0,1fr)_auto] sm:items-start">
-          <div className="flex items-center gap-2 sm:block">
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(32,26,21,0.88)] text-[10px] font-medium text-white">
-              {index + 1}
-            </span>
-            {curationNote ? (
-              <p className="text-[9px] font-medium uppercase tracking-[0.10em] text-[rgba(91,79,68,0.58)] sm:mt-1.5">
-                {curationNote}
-              </p>
-            ) : null}
-          </div>
-          <div className="min-w-0 space-y-1">
-            <div className="flex items-start justify-between gap-2 sm:hidden">
-              <h4 className="text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)]">{wine.name}</h4>
-              {priceLabel ? <span className="shrink-0 text-[13px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)]">{priceLabel}</span> : null}
-            </div>
-            <h4 className="hidden text-[15px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:block">
-              {wine.name}
-            </h4>
-            {originLine ? (
-              <p className={AI_MODAL_HELP_TEXT_CLASSNAME}>{originLine}</p>
-            ) : null}
-            {descriptorLine ? (
-              <p className={AI_MODAL_META_TEXT_CLASSNAME}>{descriptorLine}</p>
-            ) : null}
-            {pairingLine ? (
-              <p className={AI_MODAL_META_TEXT_CLASSNAME}>{pairingLine}</p>
-            ) : null}
-            {tags.length > 0 ? (
-              <div className="flex flex-wrap gap-1 pt-0.25">
-                {tags.slice(0, 1).map((tag) => (
-                  <span key={tag} className="rounded-full border border-[rgba(123,30,43,0.06)] bg-[rgba(123,30,43,0.04)] px-1.25 py-0.5 text-[8px] font-medium uppercase tracking-[0.05em] text-[#7B1E2B]">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <div className="flex flex-wrap items-center gap-1 sm:max-w-[210px] sm:justify-end">
-            {priceLabel ? (
-              <span className="hidden shrink-0 pr-1 text-[13px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:inline">
-                {priceLabel}
+        <div className="carta-wine-top">
+          <h4 className="carta-wine-name">{wine.name}</h4>
+          {priceLabel ? (
+            <span className="carta-wine-price">{priceLabel}</span>
+          ) : null}
+        </div>
+
+        {originLine ? (
+          <p className="carta-wine-origin">{originLine}</p>
+        ) : null}
+
+        {descriptorLine ? (
+          <p className="carta-wine-attrs">{descriptorLine}</p>
+        ) : null}
+
+        {pairingLine ? (
+          <p className="carta-wine-attrs">{pairingLine}</p>
+        ) : null}
+
+        {badgeLabels.length > 0 ? (
+          <div className="carta-wine-badges">
+            {badgeLabels.slice(0, 3).map((tag) => (
+              <span key={tag} className={cn("carta-badge", getCartaBadgeVariant(tag))}>
+                {tag}
               </span>
-            ) : null}
-            <ActionPill label={cellarMatch ? "Na adega" : "Salvar"} icon={Check} onClick={onSave} disabled={Boolean(cellarMatch)} disabledReason="Esse vinho já existe na sua adega." />
-            <ActionPill label="Wishlist" icon={Heart} onClick={onWishlist} />
-            <ActionPill label="Harmonizar" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
-            <ActionPill label="Ver" icon={Eye} onClick={onView} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
-            <ActionPill label="Consumo" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
+            ))}
           </div>
+        ) : null}
+
+        <div className="carta-wine-actions">
+          <ActionPill label={cellarMatch ? "Na adega" : "Salvar"} icon={Check} onClick={onSave} disabled={Boolean(cellarMatch)} disabledReason="Esse vinho já existe na sua adega." />
+          <ActionPill label="Wishlist" icon={Heart} onClick={onWishlist} />
+          <ActionPill label="Harmonizar" icon={UtensilsCrossed} onClick={onPair} disabled={!cellarMatch} disabledReason="Salve na adega para harmonizar por garrafa." />
+          <ActionPill label="Ver" icon={Eye} onClick={onView} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
+          <ActionPill label="Consumo" icon={GlassWater} onClick={onConsume} disabled={!cellarMatch} disabledReason="Disponível quando o vinho já está na sua adega." />
         </div>
       </div>
     </motion.article>
   );
+}
+
+function getCartaBadgeVariant(label: string) {
+  const normalized = label.toLocaleLowerCase("pt-BR");
+  if (normalized.includes("principal") || normalized.includes("ícone") || normalized.includes("icone")) return "principal";
+  if (normalized.includes("valor") || normalized.includes("value") || normalized.includes("preço") || normalized.includes("preco")) return "value";
+  return "casa";
 }
 
 function ActionPill({
@@ -844,10 +834,9 @@ function ActionPill({
         if (!disabled) onClick();
       }}
       className={cn(
-        "inline-flex h-6 items-center gap-1 rounded-full px-2 text-[8.5px] font-medium uppercase tracking-[0.08em] transition-all duration-200",
-        disabled
-          ? "cursor-not-allowed border border-[rgba(58,51,39,0.05)] bg-[rgba(255,251,244,0.30)] text-[#9A9086]"
-          : "border border-[rgba(58,51,39,0.05)] bg-[rgba(255,251,244,0.46)] text-[#433A32] shadow-none hover:bg-[rgba(255,251,244,0.62)]",
+        "carta-action-btn",
+        (label === "Salvar" || label === "Na adega") && "save",
+        disabled && "is-disabled",
       )}
       disabled={disabled}
     >

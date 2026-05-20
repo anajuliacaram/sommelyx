@@ -16,6 +16,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', "system-ui", "sans-serif"],
+        display: ['"Cormorant Garamond"', '"Libre Baskerville"', "Georgia", "serif"],
         serif: ['"Libre Baskerville"', "Georgia", "serif"],
       },
       fontSize: {
@@ -109,6 +110,14 @@ export default {
         copper: {
           DEFAULT: "hsl(var(--copper))",
           light: "hsl(var(--copper-light))",
+        },
+        cellar: {
+          bg: "var(--cellar-bg)",
+          surface: "var(--cellar-surface)",
+          elevated: "var(--cellar-elevated)",
+          ink: "var(--cellar-ink)",
+          muted: "var(--cellar-muted)",
+          parchment: "var(--cellar-parchment)",
         },
       },
       borderRadius: {

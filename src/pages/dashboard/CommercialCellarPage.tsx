@@ -352,7 +352,7 @@ function EditorialLabelPreview({
   }, [src]);
 
   return (
-    <div className="relative h-[180px] overflow-hidden rounded-[22px] border border-black/5 bg-[#F7F3EC]">
+    <div className="relative h-[180px] overflow-hidden rounded-[22px] border border-[var(--sx-border-default)] bg-[#F7F3EC]">
       {src && !failed ? (
         <img
           src={src}
@@ -377,7 +377,7 @@ function EditorialLabelPreview({
       )}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#F4F1EC] via-[#F4F1EC]/75 to-transparent" />
       {generated && (
-        <div className="absolute right-3 top-3 rounded-full border border-black/5 bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
+        <div className="absolute right-3 top-3 rounded-full border border-[var(--sx-border-default)] bg-white/72 px-2 py-1 text-[9px] font-medium text-[#6F6A60] shadow-[0_8px_18px_-16px_rgba(0,0,0,0.18)] backdrop-blur-sm">
           Imagem ilustrativa
         </div>
       )}
@@ -401,7 +401,7 @@ function EditorialWineCard({
 
   return (
     <article
-      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/5 bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]"
+      className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-[var(--sx-border-default)] bg-[rgba(255,255,255,0.88)] shadow-[0_12px_28px_-24px_rgba(44,20,31,0.16)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-28px_rgba(44,20,31,0.18)]"
     >
       {showLabels ? (
         <WineLabelPreview
@@ -479,7 +479,7 @@ function EditorialWineCard({
             variant="secondary"
             size="sm"
             onClick={() => onOpen(wine)}
-            className="h-9 rounded-full border-black/10 bg-white/80 px-4 text-[12px] font-medium text-[#55505A] shadow-none hover:border-black/15 hover:bg-white"
+            className="btn-abrir h-9 rounded-full border-[var(--sx-border-default)] bg-white/80 px-4 text-[12px] font-medium text-[var(--sx-text-secondary)] shadow-none hover:border-[var(--sx-border-strong)] hover:bg-white"
           >
             Abrir
           </Button>
@@ -880,17 +880,17 @@ export default function CellarPage() {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Pesquise vinho, produtor, uva, safra…"
-                className="h-11 rounded-full border-black/5 bg-white/85 pl-9 text-[13px] font-medium text-[#1A1A1A] placeholder:text-[#9C9488] shadow-none focus:border-[#C8A95B] focus:ring-[#C8A95B]/15"
+                className="h-11 rounded-full border-[var(--sx-border-default)] bg-white/85 pl-9 text-[13px] font-medium text-[#1A1A1A] placeholder:text-[#9C9488] shadow-none focus:border-[#C8A95B] focus:ring-[#C8A95B]/15"
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-white/75 px-3 py-1.5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--sx-border-default)] bg-white/75 px-3 py-1.5">
                 <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8C8578]">Rótulos</span>
                 <Switch checked={showLabels} onCheckedChange={setShowLabels} />
                 <span className="text-[11px] font-medium text-[#6F6A60]">Exibir rótulos</span>
               </div>
-              <div className="hidden sm:flex rounded-full border border-black/5 bg-white/75 p-[2px]">
+              <div className="hidden sm:flex rounded-full border border-[var(--sx-border-default)] bg-white/75 p-[2px]">
                 <Button
                   type="button"
                   variant="ghost"
@@ -921,7 +921,7 @@ export default function CellarPage() {
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value)}
-                className="h-9 rounded-full border border-black/5 bg-white/78 px-3 pr-7 text-[11px] font-medium text-[#5F5A53] shadow-none transition-[transform,background-color,color,filter] duration-200 ease-out hover:bg-white active:scale-[0.98]"
+                className="h-9 rounded-full border border-[var(--sx-border-default)] bg-white/78 px-3 pr-7 text-[11px] font-medium text-[#5F5A53] shadow-none transition-[transform,background-color,color,filter] duration-200 ease-out hover:bg-white active:scale-[0.98]"
               >
                 <option value="drink">Prioridade</option>
                 <option value="drinkNow">Beber agora</option>
@@ -941,7 +941,7 @@ export default function CellarPage() {
                   "h-9 rounded-full border px-3 text-[11px] font-medium transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98]",
                   lowStock
                     ? "border-[#7B1E2B]/20 bg-[#7B1E2B]/8 text-[#7B1E2B] hover:bg-[#7B1E2B]/10"
-                    : "border-black/5 bg-white/78 text-[#6F6A60] hover:bg-white hover:text-[#1A1A1A]",
+                    : "border-[var(--sx-border-default)] bg-white/78 text-[#6F6A60] hover:bg-white hover:text-[#1A1A1A]",
                 )}
               >
                 Baixo estoque
@@ -1022,7 +1022,7 @@ export default function CellarPage() {
         <div className="chart-surface overflow-hidden p-0">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-black/5 bg-black/[0.02]">
+              <tr className="border-b border-[var(--sx-border-default)] bg-black/[0.02]">
                 <th className="px-3 py-2.5 text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578]">Vinho</th>
                 <th className="hidden px-3 py-2.5 text-left text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578] sm:table-cell">Estilo</th>
                 <th className="hidden px-3 py-2.5 text-right text-[8.5px] font-semibold uppercase tracking-[0.14em] text-[#8C8578] md:table-cell">Preço</th>
@@ -1037,7 +1037,7 @@ export default function CellarPage() {
                 return (
                   <tr
                     key={wine.id}
-                    className="group border-b border-black/5 transition-[transform,background-color,box-shadow,filter] duration-200 ease-out last:border-0 hover:bg-black/[0.015] hover:-translate-y-[1px]"
+                    className="group border-b border-[var(--sx-border-default)] transition-[transform,background-color,box-shadow,filter] duration-200 ease-out last:border-0 hover:bg-black/[0.015] hover:-translate-y-[1px]"
                     style={{ borderLeftColor: getWineTypeAccent(wine.style).borderLeftColor || 'transparent' }}
                   >
                     <td className="px-3 py-2.25 align-middle">

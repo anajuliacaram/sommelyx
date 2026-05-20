@@ -167,6 +167,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   accent = "#5F7F52",
   layout = "stacked",
   motionIndex,
+  className,
 }: {
   icon: ReactNode;
   label: string;
@@ -177,6 +178,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
   accent?: string;
   layout?: "stacked" | "row";
   motionIndex?: number;
+  className?: string;
 }) {
   const isRow = layout === "row";
   const reduceMotion = usePrefersReducedMotion();
@@ -204,6 +206,7 @@ export const EditorialKpiCard = memo(function EditorialKpiCard({
         isRow
           ? "flex h-full flex-col justify-center gap-2 px-3.5 py-3 sm:px-4 sm:py-4"
           : "flex min-h-[92px] flex-col gap-1.5 px-3.5 py-3.5 sm:min-h-[96px] sm:gap-1.5 sm:px-0 sm:py-0",
+        className,
       )}
       style={{
         ...surfaceStyle,

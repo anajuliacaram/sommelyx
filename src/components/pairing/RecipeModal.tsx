@@ -41,7 +41,7 @@ export function RecipeModal({
         {hasRecipe ? (
           <>
             {recipe?.description ? (
-              <p className="text-sm text-black/70 leading-relaxed">
+              <p className="text-sm text-[var(--sx-text-body)] leading-relaxed">
                 {recipe.description}
               </p>
             ) : null}
@@ -49,13 +49,13 @@ export function RecipeModal({
             {(time || difficulty) ? (
               <div className="flex flex-wrap gap-2">
                 {time ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-sm font-medium tracking-tight text-[#5F5F5F]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(58,42,30,0.05)] px-3 py-1 text-sm font-medium tracking-tight text-[#5F5F5F]">
                     <Clock className="h-3.5 w-3.5" />
                     {time}
                   </span>
                 ) : null}
                 {difficulty ? (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-black/5 px-3 py-1 text-sm font-medium tracking-tight text-[#5F5F5F]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[rgba(58,42,30,0.05)] px-3 py-1 text-sm font-medium tracking-tight text-[#5F5F5F]">
                     <ChefHat className="h-3.5 w-3.5" />
                     {difficulty}
                   </span>
@@ -65,10 +65,10 @@ export function RecipeModal({
 
             {recipe?.ingredients?.length ? (
               <section className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.12em] text-black/50">Ingredientes</p>
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Ingredientes</p>
                 <ul className="space-y-2">
                   {recipe.ingredients.map((ingredient, index) => (
-                    <li key={`${ingredient}-${index}`} className="flex items-start gap-2 text-sm text-black/70 leading-relaxed">
+                    <li key={`${ingredient}-${index}`} className="flex items-start gap-2 text-sm text-[var(--sx-text-body)] leading-relaxed">
                       <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7B1E2B]/35" />
                       <span>{ingredient}</span>
                     </li>
@@ -79,11 +79,11 @@ export function RecipeModal({
 
             {recipe?.steps?.length ? (
               <section className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.12em] text-black/50">Modo de preparo</p>
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Modo de preparo</p>
                 <ol className="space-y-2">
                   {recipe.steps.map((step, index) => (
-                    <li key={`${index}-${step}`} className="flex items-start gap-2 text-sm text-black/70 leading-relaxed">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/5 text-[10px] font-semibold text-[#5F5F5F]">
+                    <li key={`${index}-${step}`} className="flex items-start gap-2 text-sm text-[var(--sx-text-body)] leading-relaxed">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(58,42,30,0.05)] text-[10px] font-semibold text-[#5F5F5F]">
                         {index + 1}
                       </span>
                       <span>{step}</span>
@@ -94,14 +94,14 @@ export function RecipeModal({
             ) : null}
 
             {recipe?.wine_reason ? (
-              <section className="space-y-2 rounded-2xl border border-black/5 bg-white p-4">
-                <p className="text-xs uppercase tracking-[0.12em] text-black/50">Por que harmoniza</p>
-                <p className="text-sm text-black/70 leading-relaxed">{recipe.wine_reason}</p>
+              <section className="space-y-2 rounded-2xl border border-[var(--sx-border-default)] bg-white p-4">
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Por que harmoniza</p>
+                <p className="text-sm text-[var(--sx-text-body)] leading-relaxed">{recipe.wine_reason}</p>
               </section>
             ) : null}
           </>
         ) : (
-          <p className="text-sm text-black/70 leading-relaxed">
+          <p className="text-sm text-[var(--sx-text-body)] leading-relaxed">
             Receita detalhada em breve.
           </p>
         )}

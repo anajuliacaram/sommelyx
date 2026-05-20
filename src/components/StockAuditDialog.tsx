@@ -138,7 +138,7 @@ export function StockAuditDialog({
               <div className="grid gap-3">
                 {locations?.length ? (
                   <div>
-                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                       Localização {requireLocation ? <span className="text-destructive">*</span> : null}
                     </Label>
                     <Select value={locationId} onValueChange={(v) => { setLocationId(v); setTouched(true); }}>
@@ -162,7 +162,7 @@ export function StockAuditDialog({
                 ) : null}
 
                 <div>
-                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                       Nome do responsável <span className="text-destructive">*</span>
                     </Label>
                   <Input
@@ -181,7 +181,7 @@ export function StockAuditDialog({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                       Motivo da alteração <span className="text-destructive">*</span>
                     </Label>
                     <Select value={reason} onValueChange={(v) => { setReason(v as any); setTouched(true); }}>
@@ -204,7 +204,7 @@ export function StockAuditDialog({
                   </div>
 
                   <div>
-                    <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                    <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                       Observação complementar
                     </Label>
                     <Textarea

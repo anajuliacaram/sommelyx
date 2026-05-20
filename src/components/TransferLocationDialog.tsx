@@ -67,13 +67,13 @@ export function TransferLocationDialog({
 
         <div className="grid gap-3">
           <div className="surface-clarity p-4">
-            <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Vinho</p>
+            <p className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Vinho</p>
             <p className="mt-1 text-[13px] font-semibold text-foreground truncate">{wineName}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">De</Label>
+              <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">De</Label>
               <Select value={fromId} onValueChange={setFromId}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecionar..." />
@@ -88,7 +88,7 @@ export function TransferLocationDialog({
               </Select>
             </div>
             <div>
-              <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Para</Label>
+              <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Para</Label>
               <Select value={toId} onValueChange={setToId}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Selecionar..." />
@@ -105,7 +105,7 @@ export function TransferLocationDialog({
           </div>
 
           <div>
-            <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Quantidade</Label>
+            <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Quantidade</Label>
             <Input
               type="number"
               min={1}
@@ -122,7 +122,7 @@ export function TransferLocationDialog({
           {isCommercial ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                   Responsável <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -138,7 +138,7 @@ export function TransferLocationDialog({
                 />
               </div>
               <div>
-                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                   Motivo <span className="text-destructive">*</span>
                 </Label>
                 <Select value={reason} onValueChange={setReason}>
@@ -155,7 +155,7 @@ export function TransferLocationDialog({
                 </Select>
               </div>
               <div className="sm:col-span-2">
-                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                   Observação {normalizeAuditText(reason) === "Outro" ? <span className="text-destructive">*</span> : null}
                 </Label>
                 <Input

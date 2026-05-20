@@ -532,17 +532,18 @@ export default function ConsumptionPage() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
-          accent="#7B1E2B"
+          accent="#8B1A3B"
           label="Consumo (6 meses)"
           value={total}
           sub="garrafas"
           layout="row"
           animatedValue={total}
           motionIndex={0}
+          className="consumo-stat-card"
         />
         <EditorialKpiCard
           icon={<TrendingUp className="h-4 w-4" />}
-          accent="#5F7F52"
+          accent="#3A4A2E"
           label="Ritmo mensal"
           value={avgPerMonth}
           sub="por mês"
@@ -550,29 +551,32 @@ export default function ConsumptionPage() {
           animatedValue={avgPerMonthValue}
           valueFormatter={(value) => value.toFixed(1).replace(".", ",")}
           motionIndex={1}
+          className="consumo-stat-card"
         />
         <EditorialKpiCard
           icon={<Star className="h-4 w-4" />}
-          accent="#B48C3A"
+          accent="#8B1A3B"
           label="Estilo favorito"
           value={styleStats.name}
           sub={styleStats.pct > 0 ? `${styleStats.pct}% do consumo` : ""}
           layout="row"
           motionIndex={2}
+          className="consumo-stat-card"
         />
         <EditorialKpiCard
           icon={<Calendar className="h-4 w-4" />}
-          accent="#6B8298"
+          accent="#3A4A2E"
           label="Última abertura"
           value={lastLabel}
           sub={lastEntry?.wine_name || ""}
           layout="row"
           motionIndex={3}
+          className="consumo-stat-card"
         />
       </div>
 
       {/* Monthly chart */}
-      <EditorialCard style={{ padding: "12px 12px 10px" }}>
+      <EditorialCard className="consumo-chart-wrap" style={{ padding: "18px 20px" }}>
         <div className="mb-2 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
@@ -584,7 +588,7 @@ export default function ConsumptionPage() {
         </div>
         <Sparkbar
           data={chart.data}
-          accent="#8A6A54"
+          accent="#8B1A3B"
           height={isMobile ? 84 : 100}
           showValues={!isMobile}
           activeIndex={activeChartIndex}
@@ -763,17 +767,17 @@ export default function ConsumptionPage() {
                 type="button"
                 onClick={() => setOpenFilter(open ? null : box.kind)}
                 className={cn(
-                  "flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
+                  "filter-dropdown flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
                   open
                     ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.08)]"
                     : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)]",
                 )}
               >
                 <span className="min-w-0">
-                  <span className="block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
+                  <span className="filter-label block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
                     {box.title}
                   </span>
-                  <span className="mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
+                  <span className="filter-value mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
                     {box.value}
                   </span>
                 </span>

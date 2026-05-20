@@ -74,14 +74,14 @@ export function LocationAuditDialog({
 
         <div className="mt-2 grid gap-4">
           <div className="glass-card p-4">
-            <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Localização</p>
+            <p className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Localização</p>
             <div className="mt-2 grid grid-cols-12 gap-3 items-start">
               <div className="col-span-12 sm:col-span-6">
-                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Anterior</p>
+                <p className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Anterior</p>
                 <p className="text-[13px] font-semibold text-foreground truncate">{previousLabel || "—"}</p>
               </div>
               <div className="col-span-12 sm:col-span-6">
-                <p className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">Nova</p>
+                <p className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">Nova</p>
                 <p className="text-[13px] font-semibold text-foreground truncate">{newLabel || "—"}</p>
               </div>
             </div>
@@ -90,7 +90,7 @@ export function LocationAuditDialog({
           {requireAudit ? (
             <div className="grid gap-3">
               <div>
-                <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                   Nome do responsável <span className="text-destructive">*</span>
                 </Label>
                 <Input
@@ -109,7 +109,7 @@ export function LocationAuditDialog({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                  <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                     Motivo <span className="text-destructive">*</span>
                   </Label>
                   <Select value={reason} onValueChange={(v) => { setReason(v as any); setTouched(true); }}>
@@ -131,7 +131,7 @@ export function LocationAuditDialog({
                   ) : null}
                 </div>
                 <div>
-                  <Label className="text-xs tracking-[0.12em] uppercase text-black/50 mb-2">
+                  <Label className="text-xs tracking-[0.12em] uppercase text-[var(--sx-text-muted)] mb-2">
                     Observação {normalizeAuditText(String(reason || "")) === "Outro" ? <span className="text-destructive">*</span> : null}
                   </Label>
                   <Textarea

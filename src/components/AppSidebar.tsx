@@ -96,11 +96,11 @@ export function AppSidebar() {
             className="flex w-full items-center gap-4 px-4 py-4 mb-2 rounded-[20px] transition-[background-color,border-color,box-shadow,transform] hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
             aria-label="Ir para o início do dashboard"
             style={{
-              background: "linear-gradient(135deg, rgba(28, 28, 24, 0.95) 0%, rgba(42, 36, 31, 0.94) 52%, rgba(31, 26, 23, 0.96) 100%)",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
+              background: "linear-gradient(135deg, #3A4A2E 0%, #4A5E38 52%, #2F3F26 100%)",
+              border: "1px solid rgba(255, 255, 255, 0.10)",
               backdropFilter: "blur(8px) saturate(1.02)",
               WebkitBackdropFilter: "blur(8px) saturate(1.02)",
-              boxShadow: "0 18px 34px -28px rgba(30, 24, 20, 0.42)",
+              boxShadow: "0 18px 34px -28px rgba(58, 74, 46, 0.48)",
             }}
           >
             <div className="flex items-center gap-0">

@@ -199,7 +199,7 @@ export function WineCard({ wine, showLabel = false, onOpen }: WineCardProps) {
             variant="secondary"
             size="sm"
             onClick={() => onOpen(wine)}
-            className="h-7 rounded-full px-2.5 text-[10px] font-medium text-[#55505A] shadow-none sm:h-9 sm:px-4 sm:text-[12px]"
+            className="btn-abrir h-7 rounded-full px-2.5 text-[10px] font-medium text-[var(--sx-text-secondary)] shadow-none sm:h-9 sm:px-4 sm:text-[12px]"
           >
             Abrir
           </Button>
