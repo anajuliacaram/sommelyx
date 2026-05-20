@@ -1,19 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, CheckCircle2, ChevronLeft, ArrowRight, Sparkles } from "@/icons/lucide";
+import { Eye, EyeOff, CheckCircle2, ChevronLeft, ArrowRight } from "@/icons/lucide";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import { analytics } from "@/lib/analytics";
 import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
-import { designSystem } from "@/styles/designSystem";
-import { LandingBackground } from "@/components/landing/LandingBackground";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Erro desconhecido.");
 
@@ -30,7 +27,6 @@ export default function Login() {
   const { signIn, user, profileType, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const inputClass = designSystem.inputField;
 
   useEffect(() => {
     if (emailConfirmed) {
@@ -92,54 +88,24 @@ export default function Login() {
   };
 
   return (
-    <div className={`${designSystem.authShell} ${designSystem.pageBackground}`}>
-      <LandingBackground />
-
-      <div className={designSystem.authGrid}>
-        {/* Left panel */}
-        <section className={`hidden lg:flex order-2 flex-col justify-between lg:order-1 ${designSystem.authPanel}`} style={designSystem.authCard}>
-          <div>
-            <Link to="/" className={designSystem.authLogoLink}>
-              <Logo variant="navbar" className={designSystem.authLogo} />
-              <BrandName className={designSystem.authBrand} />
-            </Link>
-
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }} className="mt-4 md:mt-6">
-              <span className="inline-flex items-center gap-2 rounded-full border border-wine/10 bg-wine/[0.04] px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-wine/85">
-                <Sparkles className="h-3.5 w-3.5" /> Sommelyx
-              </span>
-              <h1 className={`mt-4 max-w-[560px] ${designSystem.authHeadline}`} style={{ fontFamily: designSystem.typography.heading }}>
-                Entre no seu ambiente de <span className="gradient-text">vinho</span>.
-              </h1>
-              <p className={`mt-3 max-w-[400px] ${designSystem.authBody}`}>
-                Adega, cartas e harmonizações em uma experiência única, calma e contínua.
-              </p>
-            </motion.div>
-          </div>
-          <p className="mt-10 max-w-[360px] text-[12px] leading-relaxed text-[rgba(72,60,46,0.56)]">
-            Uma entrada silenciosa para uma operação menos fragmentada.
-          </p>
-        </section>
-
-        {/* Right panel — Form */}
-        <section className="order-1 flex items-center justify-center py-0 lg:order-2">
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--sx-bg-page)] px-5 py-6 text-[var(--sx-t-body)]">
+      <section className="flex w-full items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className={designSystem.authFormCard}
-            style={designSystem.authCard}
+            className="w-full max-w-[400px] rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] px-8 pb-8 pt-9 shadow-[var(--sx-shadow-lg)]"
           >
-            <div className="mb-5 flex items-center gap-2.5 lg:hidden">
-              <Link to="/" className={designSystem.authLogoLink}>
+            <div className="mb-7 flex items-center gap-3">
+              <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-85">
                 <Logo variant="navbar" className="h-8 w-auto" />
-                <BrandName className="text-[22px]" />
+                <BrandName className="text-[20px] font-medium text-[var(--sx-bordeaux)]" />
               </Link>
             </div>
 
-            <div className="mb-5">
-              <h2 className={designSystem.authHeadline} style={{ fontFamily: designSystem.typography.heading }}>Acesse sua conta</h2>
-              <p className={`mt-2 ${designSystem.authBody}`}>Entre para continuar.</p>
+            <div className="mb-7">
+              <h2 className="text-[26px] font-medium leading-tight tracking-[-0.018em] text-[var(--sx-t-head)]">Acesse sua conta</h2>
+              <p className="mt-1.5 text-[14px] leading-5 text-[var(--sx-t-sub)]">Entre para continuar.</p>
             </div>
 
             {emailConfirmed && (
@@ -155,7 +121,7 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.58)]">
+                <Label htmlFor="email" className="block text-[10px] font-semibold uppercase tracking-[0.09em] text-[var(--sx-t-muted)]">
                   E-mail
                 </Label>
                 <Input
@@ -166,16 +132,16 @@ export default function Login() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className={inputClass}
+                  className="h-auto w-full rounded-[var(--sx-r-sm)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] px-3.5 py-[13px] text-[15px] text-[var(--sx-t-body)] shadow-none outline-none transition-colors placeholder:text-[var(--sx-t-muted)] focus:border-[var(--sx-b-focus)] focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <Label htmlFor="password" className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[rgba(72,60,46,0.58)]">
+                  <Label htmlFor="password" className="block text-[10px] font-semibold uppercase tracking-[0.09em] text-[var(--sx-t-muted)]">
                     Senha
                   </Label>
-                  <Link to="/forgot-password" className="text-[12px] font-semibold text-wine transition-colors hover:text-foreground hover:underline">
+                  <Link to="/forgot-password" className="text-[13px] font-medium text-[var(--sx-bordeaux)] transition-colors hover:text-[var(--sx-t-head)] hover:underline">
                     Recuperar acesso
                   </Link>
                 </div>
@@ -188,7 +154,7 @@ export default function Login() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className={`${inputClass} pr-12`}
+                    className="h-auto w-full rounded-[var(--sx-r-sm)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] px-3.5 py-[13px] pr-12 text-[15px] text-[var(--sx-t-body)] shadow-none outline-none transition-colors placeholder:text-[var(--sx-t-muted)] focus:border-[var(--sx-b-focus)] focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]"
                   />
                   <Button
                     type="button"
@@ -196,7 +162,7 @@ export default function Login() {
                     size="icon"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted/30 hover:text-foreground"
+                    className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 rounded-lg text-[var(--sx-t-sub)] hover:bg-[rgba(58,42,30,0.06)] hover:text-[var(--sx-t-head)]"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
@@ -204,12 +170,11 @@ export default function Login() {
               </div>
 
               <div className="pt-1">
-                <MagneticButton disabled={loading}>
                   <Button
                     type="submit"
                     variant="primary"
                     disabled={loading}
-                    className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
+                    className="inline-flex w-auto items-center gap-2 rounded-[var(--sx-r-pill)] border-0 bg-[var(--sx-bordeaux)] px-7 py-[13px] text-[15px] font-medium uppercase tracking-[0.04em] text-[var(--sx-t-white)] shadow-none transition-opacity hover:opacity-90"
                   >
                     {loading ? (
                       <span className="flex items-center gap-3">
@@ -227,14 +192,13 @@ export default function Login() {
                       </span>
                     )}
                   </Button>
-                </MagneticButton>
               </div>
             </form>
 
-            <div className="relative mt-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-border/50" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">ou</span>
-              <div className="h-px flex-1 bg-border/50" />
+            <div className="my-5 flex items-center gap-3 text-[12px] uppercase tracking-[0.08em] text-[var(--sx-t-muted)]">
+              <div className="h-px flex-1 bg-[var(--sx-b-default)]" />
+              <span>ou</span>
+              <div className="h-px flex-1 bg-[var(--sx-b-default)]" />
             </div>
 
             <Button
@@ -248,7 +212,7 @@ export default function Login() {
                   toast({ title: "Erro ao entrar com Google", description: String(error), variant: "destructive" });
                 }
               }}
-            className={`mt-3.5 flex h-10.5 w-full items-center justify-center gap-3 ${designSystem.secondaryButton}`}
+            className="flex w-full items-center justify-center gap-2.5 rounded-[var(--sx-r-pill)] border border-[var(--sx-b-medium)] bg-[var(--sx-bg-card)] px-5 py-[13px] text-[14px] font-medium text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
             >
               <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -259,10 +223,10 @@ export default function Login() {
               Entrar com Google
             </Button>
 
-            <div className="mt-4 border-t border-border/30 pt-4 text-center">
-              <p className="text-[13px] font-medium text-muted-foreground">
+            <div className="mt-4 border-t border-[var(--sx-b-default)] pt-4 text-center">
+              <p className="text-[13px] font-medium text-[var(--sx-t-sub)]">
                 Ainda não tem acesso?{" "}
-                <Link to="/signup" className="font-bold text-foreground transition-colors hover:text-wine hover:underline">
+                <Link to="/signup" className="font-medium text-[var(--sx-bordeaux)] transition-colors hover:text-[var(--sx-t-head)] hover:underline">
                   Crie sua conta
                 </Link>
               </p>
@@ -271,14 +235,13 @@ export default function Login() {
             <div className="mt-6 flex justify-center sm:justify-start">
               <Link
                 to="/"
-                className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--sx-t-muted)] transition-colors hover:text-[var(--sx-t-body)]"
               >
                 <ChevronLeft className="h-3.5 w-3.5" /> Retornar
               </Link>
             </div>
           </motion.div>
         </section>
-      </div>
     </div>
   );
 }

@@ -69,60 +69,42 @@ export function AppSidebar() {
   const closeMobileSidebar = () => {
     if (isMobile) setOpenMobile(false);
   };
-  const initials = user?.user_metadata?.full_name
-    ?.split(" ")
-    .map((n: string) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "U";
-
   return (
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="w-[256px]"
+        className="w-[256px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
         style={{
-          background: "linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 243, 236, 0.94) 100%)",
-          backdropFilter: "blur(16px) saturate(1.02)",
-          WebkitBackdropFilter: "blur(16px) saturate(1.02)",
-          borderColor: "rgba(58, 51, 39, 0.06)",
-          boxShadow: "0 26px 58px -46px rgba(58, 51, 39, 0.24)",
+          background: "var(--sx-bg-card)",
+          borderColor: "var(--sx-b-default)",
+          boxShadow: "none",
         }}
       >
-        <SidebarHeader className="pt-4 md:pt-4 px-3">
+        <SidebarHeader className="px-0 pt-3">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="flex w-full items-center gap-4 px-4 py-4 mb-2 rounded-[20px] transition-[background-color,border-color,box-shadow,transform] hover:-translate-y-[1px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/15 overflow-hidden"
+            className="mx-3 mt-0 flex items-center gap-3 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-[18px] py-4 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
             aria-label="Ir para o início do dashboard"
-            style={{
-              background: "linear-gradient(135deg, #3A4A2E 0%, #4A5E38 52%, #2F3F26 100%)",
-              border: "1px solid rgba(255, 255, 255, 0.10)",
-              backdropFilter: "blur(8px) saturate(1.02)",
-              WebkitBackdropFilter: "blur(8px) saturate(1.02)",
-              boxShadow: "0 18px 34px -28px rgba(58, 74, 46, 0.48)",
-            }}
           >
-            <div className="flex items-center gap-0">
-              <img src="/logo-sommelyx-mark.png" className="w-20 h-20 drop-shadow-[0_2px_8px_rgba(0,0,0,0.25)] px-0 ml-0 text-left" alt="Sommelyx" />
+            <img src="/logo-sommelyx-mark.png" className="h-11 w-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]" alt="Sommelyx" />
 
-              <div className="flex flex-col text-left -ml-3">
-                <BrandName tone="light" className="text-[22px] leading-none" />
+            <div className="flex min-w-0 flex-col text-left">
+              <BrandName tone="light" className="text-[18px] font-medium leading-none tracking-[-0.01em]" />
 
-                <span className="mt-1.5 text-[10px] font-semibold tracking-[0.12em] py-[3px] rounded-full text-white/72 backdrop-blur-sm w-fit px-0">
-                  {isCommercial ? "COMERCIAL" : "PESSOAL"}
-                </span>
-              </div>
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
+                {isCommercial ? "COMERCIAL" : "PESSOAL"}
+              </span>
             </div>
           </Link>
 
           {/* CTAs */}
-          <div className="px-0 pb-0">
+          <div className="mx-3 my-2">
             {isCommercial ? (
-              <div className="space-y-2.5">
+              <div className="sidebar-actions flex flex-col gap-0.5 rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
                 <Button
                   variant="primary"
-                  className="w-full h-11 text-[13px] font-semibold rounded-[16px] gap-1.5 px-4 shadow-[0_12px_22px_-18px_hsl(var(--primary)/0.26)] hover:shadow-[0_14px_24px_-20px_hsl(var(--primary)/0.3)]"
+                  className="h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <Plus className="h-[15px] w-[15px] shrink-0" />
@@ -130,18 +112,22 @@ export function AppSidebar() {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-10.5 bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] hover:from-[#8E2433] hover:to-[#6A1826] text-white rounded-[16px] shadow-[0_8px_18px_-12px_rgba(123,30,43,0.32)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-center gap-2 font-semibold text-[13px]"
+                  className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <ShoppingCart className="h-[15px] w-[15px] shrink-0 text-white/90 transition-colors group-hover:text-white" />
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+                    <ShoppingCart className="h-[15px] w-[15px]" />
+                  </span>
                   Registrar venda
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group w-full h-9.5 rounded-[16px] gap-1.5 px-4 text-[12.5px] font-semibold tracking-[-0.01em] text-[rgba(36,30,24,0.82)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-[0.5px]"
+                  className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <AlertTriangle className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+                    <AlertTriangle className="h-[15px] w-[15px]" />
+                  </span>
                   Ruptura
                 </Button>
               </div>
@@ -158,9 +144,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-3 pt-1 gap-0">
+        <SidebarContent className="gap-0 px-0 pt-1">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-semibold mb-2 mt-2 px-3 text-[rgba(72,60,46,0.54)]">
+            <SidebarGroupLabel className="mb-1.5 mt-4 px-5 text-[10px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -186,7 +172,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-0 py-0">
-            <SidebarGroupLabel className="text-[9px] md:text-[9px] max-md:text-[11px] uppercase tracking-[0.12em] font-semibold mb-2 mt-2 px-3 text-[rgba(72,60,46,0.54)]">
+            <SidebarGroupLabel className="mb-1.5 mt-4 px-5 text-[10px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -213,7 +199,7 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-          <div className="px-3 pt-2 pb-[calc(10px+env(safe-area-inset-bottom))]">
+          <div className="px-2 pb-[calc(10px+env(safe-area-inset-bottom))] pt-2">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton

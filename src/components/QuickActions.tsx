@@ -41,15 +41,13 @@ export const QuickActions = memo(function QuickActions({
 
   /* ── Stacked layout (sidebar — dark context) ── */
   return (
-    <div
-      className="premium-card-surface rounded-[20px] p-3"
-    >
-      <div className="space-y-2">
+    <div className="sidebar-actions rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
+      <div className="flex flex-col gap-0.5">
         {/* ── Primary ── */}
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-11 w-full rounded-[16px] text-[13px] font-semibold tracking-[-0.01em] gap-1.5 px-4 shadow-[0_12px_22px_-18px_hsl(var(--primary)/0.26)] hover:shadow-[0_14px_24px_-20px_hsl(var(--primary)/0.28)]"
+            className="h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
           >
             <Plus className="h-[15px] w-[15px] shrink-0" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
@@ -60,9 +58,11 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="secondary"
             onClick={onRegisterConsumption}
-            className="group h-10.5 w-full rounded-[16px] gap-1.5 px-4 text-[13px] font-semibold text-[rgba(36,30,24,0.88)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-[0.5px]"
+            className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
           >
-            <Wine className="h-[15px] w-[15px] shrink-0 text-[#7B1E2B] transition-colors group-hover:text-[#8E2433]" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+              <Wine className="h-[15px] w-[15px]" />
+            </span>
             {isCommercial ? "Registrar venda" : "Adicionar consumo"}
           </Button>
         )}
@@ -72,9 +72,11 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="ghost"
             onClick={onHarmonize}
-            className="group h-9.5 w-full rounded-[16px] gap-1.5 px-4 text-[12.5px] font-semibold tracking-[-0.01em] text-[rgba(36,30,24,0.82)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-[0.5px]"
+            className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
           >
-            <UtensilsCrossed className="h-[15px] w-[15px] shrink-0 text-[#B7791F] transition-colors group-hover:text-[#C98922]" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+              <UtensilsCrossed className="h-[15px] w-[15px]" />
+            </span>
             Harmonizar
           </Button>
         )}
@@ -82,9 +84,11 @@ export const QuickActions = memo(function QuickActions({
           <Button
             variant="ghost"
             onClick={onAnalyzeList}
-            className="group h-9.5 w-full rounded-[16px] gap-1.5 px-4 text-[12.5px] font-semibold tracking-[-0.01em] text-[rgba(36,30,24,0.82)] transition-all duration-180 ease-[cubic-bezier(0.22,1,0.36,1)] active:translate-y-[0.5px]"
+            className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
           >
-            <BookOpen className="h-[15px] w-[15px] shrink-0 text-[#9B5DE5] transition-colors group-hover:text-[#A776EA]" />
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+              <BookOpen className="h-[15px] w-[15px]" />
+            </span>
             Analisar carta
           </Button>
         )}

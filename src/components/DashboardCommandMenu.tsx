@@ -141,13 +141,13 @@ export const DashboardCommandMenu = memo(function DashboardCommandMenu({
       <Button
         type="button"
         variant="ghost"
-        className="hidden h-10 w-full max-w-[760px] items-center justify-start gap-3 rounded-2xl border border-border/70 bg-background/60 px-4 text-[12px] font-semibold text-muted-foreground shadow-[0_12px_28px_-22px_rgba(23,20,29,0.55)] backdrop-blur-xl transition-colors hover:bg-background md:inline-flex"
+        className="header-search-pill hidden h-10 w-full max-w-[760px] items-center justify-start gap-2 rounded-[var(--sx-r-pill)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] px-4 text-[14px] font-medium text-[var(--sx-t-muted)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)] md:inline-flex"
         onClick={() => setOpen(true)}
         aria-label="Abrir pesquisa"
       >
-        <Search className="h-4.5 w-4.5 text-primary" />
-        <span className="text-[12px] font-semibold text-foreground">Pesquisa</span>
-        <span className="ml-auto hidden text-[11px] font-semibold text-muted-foreground sm:inline">
+        <Search className="h-4 w-4 text-[var(--sx-t-muted)]" />
+        <span className="text-[14px] font-medium text-[var(--sx-t-body)]">Pesquisa</span>
+        <span className="ml-auto hidden text-[12px] font-medium text-[var(--sx-t-muted)] sm:inline">
           {isCommercial ? "Pesquisar telas, ações e produtos…" : "Pesquisar telas, ações e rótulos…"}
         </span>
       </Button>
@@ -156,11 +156,11 @@ export const DashboardCommandMenu = memo(function DashboardCommandMenu({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 rounded-2xl border border-border/70 bg-background/60 md:hidden"
+        className="h-9 w-9 rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] text-[var(--sx-t-muted)] md:hidden"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu rápido"
       >
-        <Search className="h-4 w-4 text-primary" />
+        <Search className="h-4 w-4 text-[var(--sx-t-muted)]" />
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>

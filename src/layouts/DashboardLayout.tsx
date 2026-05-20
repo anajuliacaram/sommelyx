@@ -75,21 +75,15 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="relative isolate h-[60px] flex items-center px-3.5 md:px-6 gap-3 sticky top-0 z-30 overflow-hidden border-b border-[rgba(58,51,39,0.05)] bg-[rgba(248,245,239,0.72)] backdrop-blur-xl shadow-[0_10px_24px_-24px_rgba(58,51,39,0.14)]"
+            className="mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-xl md:px-6"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "group relative rounded-xl h-9.5 w-9.5 p-0",
-                    "border border-[rgba(123,30,43,0.14)]",
-                    "bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] text-white",
-                    "shadow-[0_10px_20px_-16px_rgba(123,30,43,0.34),inset_0_1px_0_rgba(255,255,255,0.12)]",
-                    "hover:from-[#8B2333] hover:to-[#6A1820] hover:shadow-[0_12px_24px_-18px_rgba(123,30,43,0.38),inset_0_1px_0_rgba(255,255,255,0.15)]",
-                    "active:scale-[0.96] transition-all duration-200",
-                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white/95 [&>svg]:transition-transform [&>svg]:duration-200 hover:[&>svg]:scale-105",
-                    "after:absolute after:top-1.5 after:right-1.5 after:h-1.5 after:w-1.5 after:rounded-full after:bg-[#C9B469] after:shadow-[0_0_4px_rgba(201,180,105,0.6)]",
+                    "group relative h-9.5 w-9.5 rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] p-0 text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-[0.96]",
+                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
                   )}
                 />
               )}
@@ -98,16 +92,11 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "group relative rounded-xl h-9.5 min-w-[84px] px-3 gap-2",
-                    "border border-[rgba(123,30,43,0.14)]",
-                    "bg-gradient-to-br from-[#7B1E2B] to-[#5A1420] text-white",
-                    "shadow-[0_10px_20px_-16px_rgba(123,30,43,0.34),inset_0_1px_0_rgba(255,255,255,0.12)]",
-                    "hover:from-[#8B2333] hover:to-[#6A1820]",
-                    "active:scale-95 transition-all duration-200",
-                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white/95",
+                    "header-btn-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
+                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
                   )}
                 >
-                  <span className="text-[13px] font-semibold tracking-[-0.005em] leading-none text-white">Menu</span>
+                  <span className="text-[13px] font-medium leading-none text-white">Menu</span>
                 </SidebarTrigger>
               )}
 
@@ -143,9 +132,8 @@ export default function DashboardLayout() {
                   variant="primary"
                   size="icon"
                   className={cn(
-                    "h-9 w-9 rounded-xl p-0 text-[11px] font-semibold shadow-[0_10px_24px_-18px_hsl(var(--primary)/0.26)]",
-                    "bg-[rgba(255,252,247,0.78)] text-[rgba(36,30,24,0.86)] border border-[rgba(58,51,39,0.06)]",
-                    accountOpen && "ring-2 ring-primary/20",
+                    "header-avatar h-9 w-9 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] p-0 text-[13px] font-semibold text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90",
+                    accountOpen && "ring-2 ring-[rgba(139,26,59,0.18)]",
                   )}
                   onClick={handleOpenAccount}
                   aria-haspopup="dialog"
