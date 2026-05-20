@@ -223,14 +223,14 @@ export default function PersonalDashboard() {
                   : "Sua adega está vazia. Adicione o primeiro vinho para começar a acompanhar consumo, janelas e valor."}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <button type="button" className="editorial-btn-primary" onClick={() => setAddOpen(true)}>
+            <div className="dashboard-quick-actions flex w-full flex-wrap items-center gap-2 sm:w-auto">
+              <button type="button" className="editorial-btn-primary btn-adicionar-wine-primary" onClick={() => setAddOpen(true)}>
                 <Plus className="h-4 w-4" />
                 <span>Adicionar vinho</span>
               </button>
               <button
                 type="button"
-                className="editorial-btn-ghost"
+                className="editorial-btn-ghost btn-adicionar-consumo-secondary"
                 onClick={() => {
                   setPreSelectedWine(null);
                   setConsumptionOpen(true);

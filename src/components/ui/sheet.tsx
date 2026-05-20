@@ -70,7 +70,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
             {...props}
           >
             <div
-              className={cn("premium-modal-shell pointer-events-auto", className)}
+              className={cn("premium-modal-shell pointer-events-auto flex max-h-[92dvh] flex-col", className)}
               style={style}
             >
               {children}

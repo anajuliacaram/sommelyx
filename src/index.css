@@ -5854,3 +5854,537 @@
     .modal-container::-webkit-scrollbar { display: none; }
   }
 }
+
+/* === FINAL POLISH v6 === */
+
+/* v6 Typography Reset */
+.overview-greeting,
+h1.overview-greeting {
+  font-size: 28px !important;
+  font-weight: 400 !important;
+  color: var(--sx-t-head) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.ready-section-title,
+.ready-section h2 {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: var(--sx-t-head) !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.3 !important;
+}
+
+.adega-title,
+h1.adega-title,
+.consumo-title,
+.wishlist-title,
+.alerts-header-title {
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  color: var(--sx-t-head) !important;
+  letter-spacing: -0.02em !important;
+}
+
+.stat-value {
+  font-size: 22px !important;
+  font-weight: 500 !important;
+  color: var(--sx-t-head) !important;
+}
+
+.stat-label {
+  font-size: 9px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.10em !important;
+  color: var(--sx-t-muted) !important;
+}
+
+.modal-title,
+[data-radix-dialog-title],
+[data-radix-sheet-title],
+.sheet-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--sx-t-head) !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.2 !important;
+}
+
+.modal-subtitle,
+[data-radix-dialog-description],
+[data-radix-sheet-description] {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--sx-t-sub) !important;
+  line-height: 1.45 !important;
+}
+
+.wine-row-name,
+.wine-card-name {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: var(--sx-t-head) !important;
+  letter-spacing: -0.01em !important;
+}
+
+.wine-row-meta,
+.wine-card-vintage,
+.wine-row-year {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--sx-t-muted) !important;
+}
+
+.stat-label,
+.adega-eyebrow,
+.overview-date,
+.form-field-label,
+.modal-field-label,
+.harmonizar-eyebrow,
+.modal-section-label,
+.sidebar-section-label,
+[class*="eyebrow"],
+[class*="kicker"],
+[class*="Kicker"] {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.10em !important;
+  text-transform: uppercase !important;
+  color: var(--sx-t-muted) !important;
+}
+
+/* v6 Modal scroll fix */
+.modal-container {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.modal-container > .flex {
+  min-height: 0 !important;
+  max-height: inherit !important;
+}
+
+.modal-body,
+.modal-container .modal-body,
+.modal-container > [class*="ModalBody"] {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+.modal-header {
+  flex-shrink: 0 !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 639px) {
+  .modal-container {
+    max-height: 90dvh !important;
+    height: auto !important;
+  }
+}
+
+/* v6 Button overrides */
+.btn-ver-adega {
+  background: var(--sx-olive) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  padding: 8px 18px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: var(--sx-r-pill) !important;
+}
+
+.btn-ver-adega:hover {
+  opacity: 0.88 !important;
+  background: var(--sx-olive) !important;
+}
+
+.btn-abrir {
+  background: transparent !important;
+  color: var(--sx-bordeaux) !important;
+  border: 1px solid rgba(123, 30, 43, 0.25) !important;
+  border-radius: var(--sx-r-pill) !important;
+  padding: 5px 14px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.btn-abrir:hover {
+  background: var(--sx-bordeaux-10) !important;
+}
+
+.btn-abrir-card {
+  background: var(--sx-olive) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: var(--sx-r-pill) !important;
+  padding: 5px 14px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+}
+
+.btn-adicionar-adega {
+  width: auto !important;
+  flex-shrink: 0 !important;
+  background: var(--sx-olive) !important;
+  color: #FFFFFF !important;
+  border-radius: var(--sx-r-md) !important;
+  padding: 9px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.modal-btn-primary {
+  background: var(--sx-bordeaux) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: var(--sx-r-pill) !important;
+  font-weight: 500 !important;
+}
+
+.modal-btn-secondary {
+  background: transparent !important;
+  color: var(--sx-olive) !important;
+  border: 1.5px solid var(--sx-olive) !important;
+  border-radius: var(--sx-r-pill) !important;
+}
+
+.sidebar-action-item {
+  background: transparent !important;
+}
+
+.sidebar-action-item:hover {
+  background: var(--sx-bg-input) !important;
+}
+
+.dashboard-quick-actions {
+  align-items: center !important;
+}
+
+.btn-adicionar-wine-primary {
+  flex: 1 1 auto !important;
+  background: var(--sx-bordeaux) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: var(--sx-r-pill) !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+.btn-adicionar-consumo-secondary {
+  flex-shrink: 0 !important;
+  background: transparent !important;
+  color: var(--sx-t-body) !important;
+  border: 1px solid var(--sx-b-medium) !important;
+  border-radius: var(--sx-r-pill) !important;
+  padding: 12px 16px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 639px) {
+  .dashboard-quick-actions {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+  }
+
+  .btn-adicionar-wine-primary {
+    min-width: 0 !important;
+  }
+
+  .btn-adicionar-consumo-secondary {
+    min-width: max-content !important;
+  }
+
+  .adega-controls {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+  }
+
+  .adega-controls .adega-filter-btn {
+    flex: 1 1 calc(50% - 4px) !important;
+    min-width: 0 !important;
+  }
+
+  .adega-controls .btn-adicionar-adega {
+    grid-column: auto !important;
+    justify-content: center !important;
+    margin-left: auto !important;
+  }
+}
+
+/* v6 Wine type chips */
+.chip.active.todos,
+.chip[data-style="todos"].active,
+.chip.active.all,
+.chip[data-style="all"].active,
+button.chip.todos.active {
+  background: var(--sx-bordeaux) !important;
+  color: #FFFFFF !important;
+  border-color: var(--sx-bordeaux) !important;
+}
+
+.chip.active.tinto,
+button.chip.tinto.active,
+.consumption-filter-chip.active.tinto {
+  background: var(--sx-wine-tinto) !important;
+  color: #FFFFFF !important;
+  border-color: var(--sx-wine-tinto) !important;
+}
+
+.chip.active.branco,
+button.chip.branco.active,
+.consumption-filter-chip.active.branco {
+  background: var(--sx-wine-branco) !important;
+  color: var(--sx-t-head) !important;
+  border-color: var(--sx-wine-branco) !important;
+}
+
+.chip.active.rose,
+.chip.active.rosé,
+button.chip.rose.active,
+.consumption-filter-chip.active.rose {
+  background: var(--sx-wine-rose) !important;
+  color: #FFFFFF !important;
+  border-color: var(--sx-wine-rose) !important;
+}
+
+.chip.active.espumante,
+button.chip.espumante.active,
+.consumption-filter-chip.active.espumante {
+  background: var(--sx-wine-espumante) !important;
+  color: var(--sx-t-head) !important;
+  border-color: var(--sx-wine-espumante) !important;
+}
+
+.chip.active.sobremesa,
+button.chip.sobremesa.active,
+.consumption-filter-chip.active.sobremesa {
+  background: var(--sx-wine-sobremesa) !important;
+  color: #FFFFFF !important;
+  border-color: var(--sx-wine-sobremesa) !important;
+}
+
+.chips-row > button.chip.tinto:not(.active)::before,
+.chips-row > button.chip.branco:not(.active)::before,
+.chips-row > button.chip.rose:not(.active)::before,
+.chips-row > button.chip.rosé:not(.active)::before,
+.chips-row > button.chip.espumante:not(.active)::before,
+.chips-row > button.chip.sobremesa:not(.active)::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.chips-row > button.chip.tinto:not(.active)::before { background: var(--sx-wine-tinto); }
+.chips-row > button.chip.branco:not(.active)::before { background: var(--sx-wine-branco); }
+.chips-row > button.chip.rose:not(.active)::before,
+.chips-row > button.chip.rosé:not(.active)::before { background: var(--sx-wine-rose); }
+.chips-row > button.chip.espumante:not(.active)::before { background: var(--sx-wine-espumante); }
+.chips-row > button.chip.sobremesa:not(.active)::before { background: var(--sx-wine-sobremesa); }
+
+.consumption-filter-chip .wine-dot {
+  display: inline-flex !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  flex-shrink: 0 !important;
+}
+
+/* v6 Sidebar active item */
+.dashboard-shell .sidebar-item--active,
+[data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active,
+.sidebar-nav-item.active {
+  background: var(--sx-bordeaux-10) !important;
+  color: var(--sx-bordeaux) !important;
+  font-weight: 500 !important;
+  border-left: none !important;
+  border-color: transparent !important;
+  padding-left: 20px !important;
+}
+
+.dashboard-shell .sidebar-item--active::before,
+[data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active::before {
+  display: none !important;
+}
+
+.sidebar-nav-item,
+.dashboard-shell .sidebar-item,
+[data-mobile="true"][data-sidebar="sidebar"] .sidebar-item {
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  color: var(--sx-t-sub) !important;
+}
+
+.dashboard-shell .sidebar-item--active,
+[data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active,
+.sidebar-nav-item.active {
+  color: var(--sx-bordeaux) !important;
+}
+
+.sidebar-nav-item svg,
+.sidebar-action-item svg,
+.dashboard-shell .sidebar-item svg,
+.sidebar-actions svg {
+  stroke-width: 1.5 !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+.sidebar-action-item {
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+.sidebar-action-item .action-icon {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 6px !important;
+}
+
+/* v6 Stat cards */
+.stat-card::before {
+  display: none !important;
+}
+
+.stat-label {
+  font-size: 9px !important;
+  letter-spacing: 0.10em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+.stat-card {
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  background: var(--sx-bg-card) !important;
+  border: 0.5px solid var(--sx-b-default) !important;
+  box-shadow: 0 1px 4px rgba(28, 20, 16, 0.05) !important;
+}
+
+/* v6 Wine card proportions */
+.wine-card {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 0.5px solid var(--sx-b-default) !important;
+  background: var(--sx-bg-card) !important;
+}
+
+.wine-card-image,
+.wine-card [class*="WineLabelPreview"],
+.wine-card [class*="label-preview"] {
+  width: 100% !important;
+  height: 160px !important;
+  max-height: 160px !important;
+  object-fit: cover !important;
+  border-radius: 16px 16px 0 0 !important;
+  display: block !important;
+}
+
+.wine-card-image-placeholder {
+  height: 160px !important;
+  max-height: 160px !important;
+}
+
+.wine-card-body {
+  padding: 10px 12px 12px !important;
+}
+
+.wine-card-name {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  -webkit-line-clamp: 2 !important;
+  color: var(--sx-t-head) !important;
+}
+
+.wine-card-footer {
+  margin-top: 8px !important;
+  padding-top: 8px !important;
+  border-top: 0.5px solid var(--sx-b-default) !important;
+}
+
+/* v6 Harmonizar options */
+.harmonizar-option {
+  border-radius: 14px !important;
+  padding: 16px !important;
+  background: var(--sx-bg-card) !important;
+  border: 0.5px solid var(--sx-b-default) !important;
+  box-shadow: 0 1px 4px rgba(28, 20, 16, 0.04) !important;
+}
+
+.harmonizar-option:first-of-type .harmonizar-option-icon {
+  background: var(--sx-bordeaux-10) !important;
+  color: var(--sx-bordeaux) !important;
+}
+
+.harmonizar-option:last-of-type .harmonizar-option-icon {
+  background: var(--sx-olive-10) !important;
+  color: var(--sx-olive) !important;
+}
+
+.harmonizar-option-title {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: var(--sx-t-head) !important;
+}
+
+/* v6 Segment toggle */
+.segment-row,
+.consumption-source-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.segment-card,
+.consumption-source-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  text-align: left !important;
+}
+
+.segment-card > div[class*="icon"],
+.segment-card > button[class*="icon"],
+.consumption-source-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+.segment-card .seg-title,
+.segment-card-title,
+.segment-card > p:first-of-type,
+.consumption-source-title {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.segment-card .seg-subtitle,
+.segment-card-sub,
+.segment-card > p:last-of-type,
+.consumption-source-sub {
+  font-size: 11px !important;
+  color: var(--sx-t-muted) !important;
+}

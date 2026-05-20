@@ -18,7 +18,7 @@ export const AI_MODAL_ACTION_TILE_CLASSNAME =
   "modal-action-card";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "modal-container premium-modal-shell sx-ai-modal h-auto max-h-[92dvh] w-full max-w-[560px] gap-0 overflow-hidden p-0";
+  "modal-container premium-modal-shell sx-ai-modal h-auto max-h-[92dvh] w-full max-w-[560px] gap-0 p-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   width: "100%",
@@ -81,7 +81,7 @@ export function AiModalShell({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("flex h-full min-h-0 flex-col", className)}>{children}</div>;
+  return <div className={cn("flex min-h-0 max-h-full flex-col", className)}>{children}</div>;
 }
 
 export function AiModalHeaderBar({
