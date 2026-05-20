@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Wine as WineIcon, MapPin, Star, Search, Check } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
+import { getWineTypeColor } from "@/lib/wine-utils";
 import {
   AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_HELP_TEXT_CLASSNAME,
@@ -42,13 +43,13 @@ import {
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
-const TYPE_FILTERS: { id: WineTypeFilter; label: string; dot: string }[] = [
-  { id: "all", label: "Todos", dot: "bg-[#1C1C1C]/30" },
-  { id: "tinto", label: "Tinto", dot: "bg-[#7B1E2B]" },
-  { id: "branco", label: "Branco", dot: "bg-[#C8A96A]" },
-  { id: "rose", label: "Rosé", dot: "bg-[#E8A0A6]" },
-  { id: "espumante", label: "Espumante", dot: "bg-[#6A8F6B]" },
-  { id: "sobremesa", label: "Sobremesa", dot: "bg-[#A67C52]" },
+const TYPE_FILTERS: { id: WineTypeFilter; label: string }[] = [
+  { id: "all", label: "Todos" },
+  { id: "tinto", label: "Tinto" },
+  { id: "branco", label: "Branco" },
+  { id: "rose", label: "Rosé" },
+  { id: "espumante", label: "Espumante" },
+  { id: "sobremesa", label: "Sobremesa" },
 ];
 
 function classifyWineType(style?: string | null): WineTypeFilter {
@@ -60,12 +61,6 @@ function classifyWineType(style?: string | null): WineTypeFilter {
   if (/(branco|white|chardonnay|sauvignon blanc|riesling|verdejo|albariño|albarino)/.test(s)) return "branco";
   if (/(tinto|red|cabernet|merlot|malbec|pinot noir|syrah|shiraz|tempranillo|sangiovese|nebbiolo)/.test(s)) return "tinto";
   return "all";
-}
-
-function dotForWine(style?: string | null): string {
-  const t = classifyWineType(style);
-  const found = TYPE_FILTERS.find((f) => f.id === t);
-  return found && t !== "all" ? found.dot : "bg-[#1C1C1C]/25";
 }
 
 interface AddConsumptionDialogProps {
@@ -325,15 +320,17 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
                   <div className="consumption-chip-row">
                     {TYPE_FILTERS.map((f) => {
+                      const styleKey = f.id === "all" ? "todos" : f.id;
                       return (
                         <AiFilterChip
                           key={f.id}
                           type="button"
                           onClick={() => setTypeFilter(f.id)}
                           selected={typeFilter === f.id}
-                          className="consumption-filter-chip shrink-0 uppercase tracking-[0.04em]"
+                          data-style={styleKey}
+                          className={cn("consumption-filter-chip shrink-0 uppercase tracking-[0.04em]", styleKey)}
                         >
-                          <span className={cn("mr-1 inline-flex h-1.5 w-1.5 rounded-full", f.dot)} />
+                          <span className="wine-dot mr-1 inline-flex" style={{ background: f.id === "all" ? "var(--sx-bordeaux)" : getWineTypeColor(f.id) }} />
                           {f.label}
                         </AiFilterChip>
                       );
@@ -367,7 +364,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                               "consumption-wine-icon",
                               selected && "is-selected",
                             )}>
-                              {selected ? <Check className="h-3.5 w-3.5" /> : <WineIcon className="h-3.5 w-3.5" />}
+                              {selected ? <Check className="h-3.5 w-3.5" /> : <span className="wine-selector-dot" style={{ background: getWineTypeColor(w.style) }} />}
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="consumption-wine-name truncate">

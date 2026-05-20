@@ -30,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { notifySuccess } from "@/lib/feedback";
 import { buildPresentationStructureLine } from "@/lib/ai-presentation";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
+import { getWineTypeColor } from "@/lib/wine-utils";
 import { cn } from "@/lib/utils";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import {
@@ -519,14 +520,17 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
           <div className="flex flex-wrap gap-1">
             {TYPE_PILLS.filter((pill) => pill.key === "all" || availableTypes.includes(pill.key as WineType)).map((pill) => {
               const active = filterMode === pill.key;
+              const styleKey = pill.key === "all" ? "todos" : pill.key === "rosé" ? "rose" : pill.key;
               return (
                 <AiFilterChip
                   key={pill.key}
                   type="button"
                   onClick={() => setFilterMode(pill.key)}
                   selected={active}
-                  className={cn("chip uppercase tracking-[0.04em]", active && "active")}
+                  data-style={styleKey}
+                  className={cn("chip uppercase tracking-[0.04em]", styleKey, active && "active")}
                 >
+                  <span className="wine-dot mr-1 inline-flex" style={{ background: pill.key === "all" ? "var(--sx-bordeaux)" : getWineTypeColor(pill.key) }} />
                   {pill.label}
                 </AiFilterChip>
               );
@@ -782,6 +786,7 @@ function WineListCard({
         className="w-full text-left"
       >
         <div className="carta-wine-top">
+          <span className="wine-selector-dot" style={{ background: getWineTypeColor(wine.style) }} />
           <h4 className="carta-wine-name">{wine.name}</h4>
           {priceLabel ? (
             <span className="carta-wine-price">{priceLabel}</span>

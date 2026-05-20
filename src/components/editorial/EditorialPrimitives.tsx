@@ -3,16 +3,11 @@
 
 import { cn } from "@/lib/utils";
 import { formatMotionNumber, motionDelay, useCountUp, usePrefersReducedMotion } from "@/lib/motion";
+import { getWineTypeBg, getWineTypeColor, WINE_TYPE_COLORS } from "@/lib/wine-utils";
 import { memo, ReactNode, useEffect, useMemo, useState } from "react";
 
 export const STYLE_COLORS: Record<string, string> = {
-  tinto: "#7B1E2B",
-  branco: "#C9B469",
-  rosé: "#D89BA0",
-  rose: "#D89BA0",
-  espumante: "#B8C49A",
-  sobremesa: "#B4793F",
-  fortificado: "#B4793F",
+  ...WINE_TYPE_COLORS,
 };
 
 export function getStyleFamily(style?: string | null): string {
@@ -26,7 +21,7 @@ export function getStyleFamily(style?: string | null): string {
 }
 
 export function getStyleColor(style?: string | null) {
-  return STYLE_COLORS[getStyleFamily(style)] || "#7B1E2B";
+  return getWineTypeColor(getStyleFamily(style));
 }
 
 /* ── Kicker (rótulo pequeno) ─────────────────────────── */
@@ -46,17 +41,22 @@ export function Kicker({ children, className }: { children: ReactNode; className
 /* ── Style badge ─────────────────────────────────────── */
 export function StyleBadge({ style, className }: { style?: string | null; className?: string }) {
   const family = getStyleFamily(style);
-  const color = STYLE_COLORS[family];
+  const label = style || "—";
+  const color = getWineTypeColor(family);
+  const bg = getWineTypeBg(family);
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.08em]",
+        "wine-type-chip type-chip inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em]",
+        family === "rosé" ? "rose" : family,
         className,
       )}
-      style={{ color }}
+      data-style-badge
+      data-style={family === "rosé" ? "rose" : family}
+      style={{ background: bg, color }}
     >
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-      {family}
+      {label}
     </span>
   );
 }

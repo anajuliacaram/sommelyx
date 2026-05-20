@@ -258,8 +258,8 @@ export function PremiumResultCard({
       transition={{ delay: index * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       className={cn("list-none overflow-hidden transition-all duration-200 hover:-translate-y-px", AI_MODAL_CARD_CLASSNAME, extraClass)}
       style={{
-        backdropFilter: "blur(12px) saturate(1.05)",
-        WebkitBackdropFilter: "blur(12px) saturate(1.05)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
       }}
     >
       {accentColor && <div className="h-[2px] w-full" style={{ background: accentColor }} />}
@@ -301,7 +301,7 @@ export function PairingLoadingState({ steps, subtitle }: { steps: string[]; subt
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={cn("px-3 py-2.5", AI_MODAL_CARD_CLASSNAME)}
+      className={cn("harmonizar-loading-card recommendation-card loading-card px-3 py-2.5", AI_MODAL_CARD_CLASSNAME)}
     >
       <div className="space-y-2">
           {subtitle ? <p className="text-[9.5px] font-medium uppercase tracking-[0.14em] text-primary/52">{subtitle}</p> : null}
@@ -428,8 +428,8 @@ export function WineSuggestionCard({
         className,
       )}
       style={{
-        backdropFilter: "blur(14px) saturate(1.08)",
-        WebkitBackdropFilter: "blur(14px) saturate(1.08)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
       }}
     >
       <div className="space-y-2.5 p-3 sm:p-3.5">
@@ -487,8 +487,8 @@ export function PairingSheetHero({
         )}
         style={{
           background: "rgba(255,251,244,0.70)",
-          backdropFilter: "blur(14px) saturate(1.1)",
-          WebkitBackdropFilter: "blur(14px) saturate(1.1)",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
           border: "1px solid rgba(58,51,39,0.08)",
           boxShadow: "none",
         }}

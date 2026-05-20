@@ -75,7 +75,7 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-xl md:px-6"
+            className="mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
@@ -116,16 +116,7 @@ export default function DashboardLayout() {
               <div className="flex items-center gap-2.5">
                 {profileType === "commercial" ? (
                   <span className="business-mode-badge hidden sm:inline-flex">Business</span>
-                ) : (
-                  <span
-                    className={cn(
-                      "hidden sm:inline-flex items-center h-6.5 px-3 shrink-0 whitespace-nowrap rounded-full text-[10px] font-semibold uppercase tracking-[0.08em]",
-                      "bg-[rgba(123,30,43,0.05)] text-[hsl(var(--primary))] border border-[rgba(123,30,43,0.08)]",
-                    )}
-                  >
-                    PESSOAL
-                  </span>
-                )}
+                ) : null}
 
                 <Button
                   type="button"

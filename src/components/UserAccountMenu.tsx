@@ -47,7 +47,7 @@ export const UserAccountMenu = React.memo(function UserAccountMenu({
               "relative w-full max-w-[440px] overflow-hidden rounded-t-[24px] border border-white/50",
               "bg-[linear-gradient(180deg,rgba(255,255,255,0.95)_0%,rgba(255,255,255,0.90)_48%,rgba(248,244,237,0.92)_100%)]",
               "p-4 shadow-[0_30px_80px_-36px_rgba(58,51,39,0.38),0_10px_30px_-22px_rgba(0,0,0,0.18)]",
-              "backdrop-blur-2xl saturate-150 sm:rounded-[22px] sm:p-5",
+              "sm:rounded-[22px] sm:p-5",
               "data-[state=open]:animate-in data-[state=closed]:animate-out",
               "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
               "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",

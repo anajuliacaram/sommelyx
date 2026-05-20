@@ -67,10 +67,10 @@ const statusColor = {
 
 function getWineTone(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]";
-  if (s.includes("branco")) return "bg-[#DDBD74]";
-  if (s.includes("rose")) return "bg-[#C97A93]";
-  if (s.includes("espum")) return "bg-[#B8A06A]";
+  if (s.includes("tinto")) return "bg-[#7B1E2B]";
+  if (s.includes("branco")) return "bg-[#C9B469]";
+  if (s.includes("rose") || s.includes("rosé")) return "bg-[#D89BA0]";
+  if (s.includes("espum")) return "bg-[#B8C49A]";
   return "bg-[#C5BAAA]";
 }
 
@@ -80,20 +80,20 @@ function getStyleBadgeClass(style?: string | null, compact = false) {
     ? "min-h-[24px] rounded-full px-2.5 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]"
     : "min-h-[24px] rounded-full px-3 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]";
 
-  if (s.includes("tinto")) return `${sizing} bg-gradient-to-br from-[#5B1831] via-[#651D36] to-[#451326] text-[#FCF7F8] border-[rgba(113,52,72,0.22)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
-  if (s.includes("branco")) return `${sizing} bg-gradient-to-br from-[#F7F2E6] via-[#E9DEBF] to-[#D7C99E] text-[#5A4A22] border-[rgba(216,198,154,0.58)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
-  if (s.includes("rose")) return `${sizing} bg-gradient-to-br from-[#F4DCE3] via-[#E2B2C2] to-[#C87B95] text-[#4C2232] border-[rgba(220,167,184,0.46)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
-  if (s.includes("espum")) return `${sizing} bg-gradient-to-br from-[#F6F0DD] via-[#E8DAB7] to-[#D6C48F] text-[#5B4C2A] border-[rgba(222,207,170,0.58)] group-hover:brightness-[1.03] group-hover:saturate-[0.96]`;
+  if (s.includes("tinto")) return `${sizing} wine-type-chip type-chip tinto border-[rgba(123,30,43,0.12)] group-hover:brightness-[1.03]`;
+  if (s.includes("branco")) return `${sizing} wine-type-chip type-chip branco border-[rgba(201,180,105,0.18)] group-hover:brightness-[1.03]`;
+  if (s.includes("rose") || s.includes("rosé")) return `${sizing} wine-type-chip type-chip rose border-[rgba(216,155,160,0.18)] group-hover:brightness-[1.03]`;
+  if (s.includes("espum")) return `${sizing} wine-type-chip type-chip espumante border-[rgba(184,196,154,0.20)] group-hover:brightness-[1.03]`;
   return `${sizing} bg-[rgba(255,255,255,0.82)] text-[#564d5c] border-white/40 group-hover:brightness-[1.02]`;
 }
 
 function getCardTypeTagClass(style?: string | null) {
   const s = (style || "").toLowerCase();
-  const base = "inline-flex min-h-[24px] items-center justify-center rounded-full px-3 py-1.5 text-[11px] font-medium leading-none tracking-[-0.01em] border shadow-[0_1px_2px_rgba(0,0,0,0.03)] backdrop-blur-sm transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
-  if (s.includes("tinto")) return `${base} bg-red-50 text-red-700 border-red-100`;
-  if (s.includes("branco")) return `${base} bg-amber-50 text-amber-700 border-amber-100`;
-  if (s.includes("espum")) return `${base} bg-yellow-50 text-yellow-700 border-yellow-100`;
-  if (s.includes("rose") || s.includes("rosé")) return `${base} bg-pink-50 text-pink-700 border-pink-100`;
+  const base = "wine-type-chip type-chip inline-flex min-h-[24px] items-center justify-center rounded-full border px-3 py-1.5 text-[11px] font-medium leading-none tracking-[0.06em] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
+  if (s.includes("tinto")) return `${base} tinto border-[rgba(123,30,43,0.12)]`;
+  if (s.includes("branco")) return `${base} branco border-[rgba(201,180,105,0.18)]`;
+  if (s.includes("espum")) return `${base} espumante border-[rgba(184,196,154,0.20)]`;
+  if (s.includes("rose") || s.includes("rosé")) return `${base} rose border-[rgba(216,155,160,0.18)]`;
   return `${base} bg-neutral-100 text-neutral-600 border-neutral-200`;
 }
 

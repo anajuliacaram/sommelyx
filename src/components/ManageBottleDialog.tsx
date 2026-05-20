@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
+import { getWineTypeColor } from "@/lib/wine-utils";
 import {
   AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_HELP_TEXT_CLASSNAME,
@@ -71,12 +72,12 @@ const RATING_LABELS: Record<number, string> = {
 };
 
 const STYLE_FILTERS = [
-  { value: "all" as const, label: "Todos", color: "rgba(28,28,28,0.28)" },
-  { value: "tinto" as const, label: "Tinto", color: "#7B1E2B" },
-  { value: "branco" as const, label: "Branco", color: "#C8A96A" },
-  { value: "rose" as const, label: "Rosé", color: "#E8A0A6" },
-  { value: "espumante" as const, label: "Espumante", color: "#6B7D55" },
-  { value: "sobremesa" as const, label: "Sobremesa", color: "#B4793F" },
+  { value: "all" as const, label: "Todos" },
+  { value: "tinto" as const, label: "Tinto" },
+  { value: "branco" as const, label: "Branco" },
+  { value: "rose" as const, label: "Rosé" },
+  { value: "espumante" as const, label: "Espumante" },
+  { value: "sobremesa" as const, label: "Sobremesa" },
 ];
 
 export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogProps) {
@@ -536,18 +537,22 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             </AnimatePresence>
 
                             <div className="consumption-chip-row">
-                              {STYLE_FILTERS.map((pill) => (
-                                <AiFilterChip
-                                  key={pill.value}
-                                  type="button"
-                                  selected={styleFilter === pill.value}
-                                  onClick={() => setStyleFilter(pill.value)}
-                                  className="consumption-filter-chip shrink-0 uppercase tracking-[0.04em]"
-                                >
-                                  <span className="mr-1 inline-flex h-1.5 w-1.5 rounded-full" style={{ backgroundColor: pill.color }} />
-                                  {pill.label}
-                                </AiFilterChip>
-                              ))}
+                              {STYLE_FILTERS.map((pill) => {
+                                const styleKey = pill.value === "all" ? "todos" : pill.value;
+                                return (
+                                  <AiFilterChip
+                                    key={pill.value}
+                                    type="button"
+                                    selected={styleFilter === pill.value}
+                                    onClick={() => setStyleFilter(pill.value)}
+                                    data-style={styleKey}
+                                    className={cn("consumption-filter-chip shrink-0 uppercase tracking-[0.04em]", styleKey)}
+                                  >
+                                    <span className="wine-dot mr-1 inline-flex" style={{ background: pill.value === "all" ? "var(--sx-bordeaux)" : getWineTypeColor(pill.value) }} />
+                                    {pill.label}
+                                  </AiFilterChip>
+                                );
+                              })}
                             </div>
 
                             <div className={cn("consumption-wine-list max-h-[320px]", AI_MODAL_LIST_SURFACE_CLASSNAME)}>
@@ -578,7 +583,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                       )}
                                     >
                                       <div className={cn("consumption-wine-icon", selected && "is-selected")}>
-                                        {selected ? <Check className="h-3.5 w-3.5" /> : <WineIcon className="h-3.5 w-3.5" />}
+                                        {selected ? <Check className="h-3.5 w-3.5" /> : <span className="wine-selector-dot" style={{ background: getWineTypeColor(wine.style) }} />}
                                       </div>
                                       <div className="min-w-0 flex-1">
                                         <p className="consumption-wine-name truncate">

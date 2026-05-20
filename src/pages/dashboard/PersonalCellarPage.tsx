@@ -258,16 +258,20 @@ export default function PersonalCellarPage() {
       </div>
 
       <div className="chips-row">
-        {styleOptions.map((s) => (
-          <button
-            key={s.key}
-            type="button"
-            className={`chip ${styleFilter === s.key ? "active" : ""}`}
-            onClick={() => setStyleFilter(s.key)}
-          >
-            {s.label}
-          </button>
-        ))}
+        {styleOptions.map((s) => {
+          const styleKey = s.key === "todos" ? "todos" : s.key === "rosé" ? "rose" : s.key;
+          return (
+            <button
+              key={s.key}
+              type="button"
+              data-style={styleKey}
+              className={`chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
+              onClick={() => setStyleFilter(s.key)}
+            >
+              {s.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="chips-row">
@@ -460,7 +464,7 @@ export default function PersonalCellarPage() {
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-baseline gap-2">
-                      <h4 className="text-[14px] font-bold" style={{ color: "#1a1713" }}>
+                      <h4 className="wine-card-name m-0" style={{ color: "#1a1713" }}>
                         {w.name}
                       </h4>
                       {w.vintage && (

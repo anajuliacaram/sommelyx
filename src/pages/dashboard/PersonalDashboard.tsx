@@ -304,16 +304,20 @@ export default function PersonalDashboard() {
 
                 <div className="chips-row">
                     {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map(
-                      (s) => (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`chip ${styleFilter === s ? "active" : ""}`}
-                          onClick={() => setStyleFilter(s)}
-                        >
-                          {s}
-                        </button>
-                      ),
+                      (s) => {
+                        const styleKey = s === "todos" ? "todos" : s === "rosé" ? "rose" : s;
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            data-style={styleKey}
+                            className={`chip ${styleKey} ${styleFilter === s ? "active" : ""}`}
+                            onClick={() => setStyleFilter(s)}
+                          >
+                            {s}
+                          </button>
+                        );
+                      },
                     )}
                 </div>
 
@@ -351,8 +355,10 @@ export default function PersonalDashboard() {
                           <WineIcon className="h-4 w-4" />
                         </div>
                         <div className="wine-row-body">
-                          <div className="wine-row-name">
+                          <div className="flex min-w-0 items-baseline gap-1.5">
+                            <p className="wine-row-name truncate">
                               {w.name}
+                            </p>
                             {w.vintage && (
                               <span className="wine-row-year tabular-nums">
                                 {w.vintage}

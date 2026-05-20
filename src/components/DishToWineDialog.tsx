@@ -14,6 +14,7 @@ import { prepareWineListAnalysisTextAttachment } from "@/lib/ai-attachments";
 import { cn } from "@/lib/utils";
 import { useWines, type Wine } from "@/hooks/useWines";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
+import { getWineTypeColor } from "@/lib/wine-utils";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
 import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
@@ -1418,32 +1419,26 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               const styleFilterOptions: Array<{
                 key: typeof wineStyleFilter;
                 label: string;
-                dot: string;
               }> = [
                 {
                   key: "all",
                   label: "Todos",
-                  dot: "bg-[#6B6258]/40",
                 },
                 {
                   key: "tinto",
                   label: "Tinto",
-                  dot: "bg-[hsl(348,55%,40%)]",
                 },
                 {
                   key: "branco",
                   label: "Branco",
-                  dot: "bg-[hsl(45,60%,55%)]",
                 },
                 {
                   key: "rosé",
                   label: "Rosé",
-                  dot: "bg-[hsl(340,55%,65%)]",
                 },
                 {
                   key: "espumante",
                   label: "Espumante",
-                  dot: "bg-[hsl(48,55%,62%)]",
                 },
               ];
 
@@ -1495,14 +1490,16 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     })}
                     {styleFilterOptions.map((opt) => {
                       const active = wineStyleFilter === opt.key;
+                      const styleKey = opt.key === "all" ? "todos" : opt.key === "rosé" ? "rose" : opt.key;
                       return (
                         <AiFilterChip
                           key={opt.key}
                           onClick={() => setWineStyleFilter(opt.key)}
                           selected={active}
-                          className="consumption-filter-chip shrink-0 gap-1 tracking-[0.04em]"
+                          data-style={styleKey}
+                          className={cn("consumption-filter-chip shrink-0 gap-1 tracking-[0.04em]", styleKey)}
                         >
-                          <span className={cn("h-1.5 w-1.5 rounded-full", opt.dot)} />
+                          <span className="wine-dot" style={{ background: opt.key === "all" ? "var(--sx-bordeaux)" : getWineTypeColor(opt.key) }} />
                           {opt.label}
                         </AiFilterChip>
                       );
@@ -1533,7 +1530,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                               {isSelected ? (
                                 <Check className="h-3.5 w-3.5 text-primary" />
                               ) : (
-                                <WineIcon className="h-3.5 w-3.5 text-[#6B6258]/46" />
+                                <span className="wine-selector-dot" style={{ background: getWineTypeColor(w.style) }} />
                               )}
                           </div>
                           <div className="flex-1 min-w-0">

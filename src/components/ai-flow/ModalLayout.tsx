@@ -44,11 +44,11 @@ export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
 export const AI_MODAL_LABEL_CLASSNAME =
   "form-field-label modal-field-label";
 export const AI_MODAL_HELP_TEXT_CLASSNAME =
-  "text-[11px] leading-[1.42] text-[rgba(72,60,46,0.60)]";
+  "text-[13px] font-normal leading-[1.42] text-[rgba(72,60,46,0.60)]";
 export const AI_MODAL_META_TEXT_CLASSNAME =
   "text-[10.5px] leading-[1.38] text-[rgba(72,60,46,0.56)]";
 export const AI_MODAL_TEXT_PRIMARY_CLASSNAME =
-  "text-[13px] font-medium tracking-[-0.018em] text-[rgba(32,26,21,0.88)]";
+  "text-[14px] font-medium text-[rgba(32,26,21,0.88)]";
 export const AI_MODAL_TEXT_SECONDARY_CLASSNAME =
   "text-[14px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)]";
 export const AI_MODAL_PILL_TEXT_CLASSNAME =
@@ -415,8 +415,8 @@ export function AiStatusCard({
     <div
       className={cn("rounded-[16px] border border-[rgba(95,111,82,0.05)] bg-[linear-gradient(180deg,rgba(255,255,255,0.58)_0%,rgba(249,244,237,0.50)_100%)] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.48),0_8px_18px_-24px_rgba(58,51,39,0.10)] sm:px-3.5 sm:py-3", toneClassName)}
       style={{
-        backdropFilter: "blur(10px) saturate(1.04)",
-        WebkitBackdropFilter: "blur(10px) saturate(1.04)",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
       }}
     >
       <div className="flex items-start gap-3">
