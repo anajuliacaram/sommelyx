@@ -611,7 +611,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                        className="space-y-2.5"
+                        className="analyze-carta-capture space-y-3"
                       >
                         <div className="space-y-2">
                           <AiUploadPanel
@@ -634,7 +634,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             description="Foto, imagem ou PDF."
                           />
 
-                          <div className="grid gap-1.5 sm:grid-cols-2">
+                          <div className="analyze-carta-actions grid gap-2 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
                               <Camera className="mr-2 h-4 w-4" />
                               Tirar foto
@@ -644,6 +644,18 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                               Arquivo
                             </AiModalActionButton>
                           </div>
+
+                          <AiModalCard className="analyze-carta-help">
+                            <div className="flex items-start gap-3">
+                              <div className="modal-action-icon-wrap modal-action-icon">
+                                <BookOpen className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <p className="modal-action-title">Curadoria da carta</p>
+                                <p className="modal-action-subtitle">A leitura destaca preço, estilo e boas escolhas para decidir com calma.</p>
+                              </div>
+                            </div>
+                          </AiModalCard>
 
                           <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />
                           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />

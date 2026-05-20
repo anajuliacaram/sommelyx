@@ -18,7 +18,7 @@ export const AI_MODAL_ACTION_TILE_CLASSNAME =
   "modal-action-card premium-card-surface";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "modal-container fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[560px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[86vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
+  "modal-container premium-modal-shell sx-ai-modal fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[560px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[86vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   width: "100%",
@@ -76,9 +76,9 @@ export const AI_MODAL_LIST_ROW_CLASSNAME =
 export const AI_MODAL_LIST_ROW_SELECTED_CLASSNAME =
   "bg-[rgba(139,26,59,0.06)]";
 export const AI_MODAL_INLINE_ACTION_CLASSNAME =
-  "h-6 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[9px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/82 shadow-none hover:bg-[rgba(255,251,244,0.54)]";
+  "h-8 rounded-full border border-[rgba(58,74,46,0.16)] bg-[rgba(253,252,249,0.72)] px-3 text-[11px] font-medium text-[var(--sx-olive)] shadow-none hover:bg-[var(--sx-olive-06)]";
 export const AI_MODAL_SEGMENTED_BUTTON_CLASSNAME =
-  "h-7 rounded-[11px] border px-1 text-[9px] font-medium transition-colors duration-150";
+  "h-8 rounded-full border px-2 text-[11px] font-medium transition-colors duration-150";
 export const AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME =
   "border-[#7B1E2B]/88 bg-[linear-gradient(135deg,#7B1E2B,#8A2536)] text-white shadow-[0_10px_18px_-18px_rgba(122,20,30,0.24)]";
 export const AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME =
@@ -456,7 +456,7 @@ export function AiFilterChip({
       {...props}
       variant="ghost"
       className={cn(
-        "h-5 rounded-full px-1.75 text-[8.5px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_10px_20px_-22px_rgba(58,51,39,0.10)] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97]",
+        "h-7 rounded-full px-3 text-[11.5px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_10px_20px_-22px_rgba(58,51,39,0.14)] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97]",
         selected
           ? "border border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,241,242,0.38)_100%)] text-[#5A1528] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(249,241,242,0.46)_100%)]"
           : "border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.34)_0%,rgba(249,246,241,0.24)_100%)] text-[#6B6258]/82 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.48)_0%,rgba(255,252,248,0.34)_100%)] hover:text-[#1A1713]",
