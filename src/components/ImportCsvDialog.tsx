@@ -34,7 +34,6 @@ import {
   AiModalBody,
   AiModalFooterBar,
   AiToolbarSurface,
-  AiMetricPill,
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
 } from "@/components/ai-flow/ModalLayout";
@@ -212,6 +211,11 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     if (typeof value !== "string") return undefined;
     const cleaned = value.trim().replace(/\s+/g, " ");
     return cleaned.length ? cleaned : undefined;
+  };
+
+  const cleanReviewWineName = (value?: string | null) => {
+    const text = normalizeText(value) || "";
+    return text.includes("·") ? text.split("·")[0].trim() : text;
   };
 
   const pickFirstValue = (source: Record<string, unknown>, aliases: string[]) => {
@@ -451,6 +455,31 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     return sameVintage && nameSimilarity >= 0.9;
   };
 
+  const isExactDuplicateRow = (
+    left: {
+      name?: string | null;
+      producer?: string | null;
+      vintage?: number | null;
+    },
+    right: {
+      name?: string | null;
+      producer?: string | null;
+      vintage?: number | null;
+    },
+  ) => {
+    const leftName = normalizeSearchText(cleanReviewWineName(left.name));
+    const rightName = normalizeSearchText(cleanReviewWineName(right.name));
+    if (!leftName || !rightName || leftName !== rightName) return false;
+
+    const leftProducer = normalizeSearchText(left.producer);
+    const rightProducer = normalizeSearchText(right.producer);
+    if (leftProducer && rightProducer && leftProducer !== rightProducer) return false;
+
+    if (left.vintage != null && right.vintage != null && left.vintage !== right.vintage) return false;
+    return true;
+  };
+
+
   const getDuplicateDebug = (
     left: {
       name?: string | null;
@@ -499,7 +528,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const draftToParsed = (row: DraftWine): ParsedWine => ({
-    name: row.name,
+    name: cleanReviewWineName(row.name),
     producer: row.producer,
     vintage: row.vintage,
     style: row.type || row.style,
@@ -522,25 +551,21 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const duplicates = shouldCheckDuplicates
       ? sourceRows.filter((candidate, candidateIndex) => {
           if (candidateIndex === index) return false;
-          const debug = getDuplicateDebug(candidate, row);
-          if (debug.duplicate) {
-            console.info("[ImportCsvDialog] duplicate_candidate_detected", debug);
-          }
-          return debug.duplicate;
+          return isExactDuplicateRow(candidate, row);
         })
       : [];
     const duplicateIndexes = shouldCheckDuplicates
       ? sourceRows
           .map((candidate, candidateIndex) => {
             if (candidateIndex === index) return null;
-            const duplicate = isLikelyDuplicateRow(candidate, row);
+            const duplicate = isExactDuplicateRow(candidate, row);
             return duplicate ? candidateIndex : null;
           })
           .filter((value): value is number => value !== null)
       : [];
     const cellarDuplicate = shouldCheckDuplicates
       ? cellarWines?.find((wine) => {
-          return isLikelyDuplicateRow(wine, row);
+          return isExactDuplicateRow(wine, row);
         })
       : null;
 
@@ -559,6 +584,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     return {
       ...row,
+      name: cleanReviewWineName(row.name),
       type,
       price: row.purchase_price,
       confidence,
@@ -2231,6 +2257,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
   const getFieldValue = (row: DraftWine, field: EditableField) => {
     switch (field) {
+      case "name":
+        return cleanReviewWineName(row.name);
       case "quantity":
         return row.quantity ?? "";
       case "purchase_price":
@@ -2338,7 +2366,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     const seen = new Map<string, number>();
     const duplicates = new Set<number>();
     rows.forEach((row, index) => {
-      const key = normalizeSearchText(`${row.name}|${row.producer || ""}`);
+      const key = normalizeSearchText(`${cleanReviewWineName(row.name)}|${row.producer || ""}|${row.vintage || ""}`);
       if (!key) return;
       if (seen.has(key)) {
         duplicates.add(index);
@@ -2811,7 +2839,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
     for (let i = 0; i < draftWines.length; i++) {
       const w = draftWines[i];
-      const wineName = w.name?.trim();
+      const wineName = cleanReviewWineName(w.name);
       if (!wineName) {
         errors.push(`Linha ${i + 1}: nome obrigatório`);
         continue;
@@ -2908,7 +2936,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
     await performImport();
   };
 
-  const mappingEntries = Object.entries(columnMapping);
   const visibleColumns: ColumnDef[] = [
     { key: "name", label: "Nome do vinho", kind: "text", placeholder: "Nome do vinho" },
     { key: "producer", label: "Produtor", kind: "text", placeholder: "Produtor", optional: true },
@@ -2923,7 +2950,10 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   const completeRowsCount = rowStatuses.filter((status) => status === "valid").length;
   const reviewRowsCount = rowStatuses.filter((status) => status === "incomplete").length;
   const invalidRowsCount = rowStatuses.filter((status) => status === "invalid").length;
-  const duplicateRowsCount = draftWines.filter((row, index) => duplicateIndexes.has(index) || !!row.duplicateWarning).length;
+  const duplicateRowsCount = useMemo(
+    () => draftWines.filter((row) => (cellarWines ?? []).some((wine) => isExactDuplicateRow(wine, row))).length,
+    [cellarWines, draftWines],
+  );
   const lowConfidenceRowsCount = draftWines.filter((row) => isLowConfidenceRow(row)).length;
   const identifiedRowsCount = completeRowsCount + reviewRowsCount;
   const canImport = identifiedRowsCount > 0 && invalidRowsCount === 0 && step !== "importing" && step !== "done";
@@ -3100,7 +3130,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const renderSpreadsheetTable = () => {
-    const template = "32px minmax(220px,3fr) minmax(150px,2fr) 70px 100px 100px 60px 90px 28px";
+    const template = "40px minmax(0,24fr) minmax(0,16fr) minmax(0,8fr) minmax(0,10fr) minmax(0,12fr) minmax(0,7fr) minmax(0,10fr) 36px";
     const styleLabels: Record<string, string> = {
       tinto: "Tinto",
       branco: "Branco",
@@ -3115,16 +3145,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
       if (field === "style") {
         const current = normalizeStyle(row.type || row.style) || "";
         const tone =
-          current === "tinto" ? "bg-[rgba(139,26,59,0.10)] text-[#8B1A3B]" :
-          current === "branco" ? "bg-[rgba(180,152,60,0.12)] text-[#7A6420]" :
-          current === "rose" ? "bg-[rgba(200,100,100,0.10)] text-[#9B3030]" :
-          current === "espumante" ? "bg-[rgba(58,74,46,0.10)] text-[#3A4A2E]" :
-          "bg-[rgba(58,42,30,0.06)] text-[#7A726A]";
+          current === "tinto" ? "border-[rgba(139,26,59,0.20)] bg-[rgba(139,26,59,0.10)] text-[#8B1A3B]" :
+          current === "branco" ? "border-[rgba(180,152,60,0.25)] bg-[rgba(180,152,60,0.12)] text-[#7A6420]" :
+          current === "rose" ? "border-[rgba(200,100,100,0.20)] bg-[rgba(200,100,100,0.10)] text-[#9B3030]" :
+          current === "espumante" ? "border-[rgba(58,74,46,0.20)] bg-[rgba(58,74,46,0.10)] text-[#3A4A2E]" :
+          "border-[rgba(58,42,30,0.15)] bg-transparent text-[#AEA79F]";
         return (
           <select
             value={current}
             onChange={(event) => commitField(index, field, event.target.value)}
-            className={cn("h-7 w-full rounded-full border-0 px-2 text-[12px] font-medium outline-none", tone)}
+            className={cn("h-[30px] w-full cursor-pointer appearance-none rounded-full border bg-[length:10px_6px] bg-[right_8px_center] bg-no-repeat py-1 pl-2 pr-6 text-[12px] font-medium outline-none", tone)}
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23AEA79F'/%3E%3C/svg%3E\")",
+            }}
           >
             <option value="">—</option>
             {styleOptions.map((option) => (
@@ -3143,16 +3177,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           min={type === "number" ? 0 : undefined}
           step={field === "purchase_price" ? "0.01" : undefined}
           disabled={step === "importing" || step === "done"}
-          className="h-7 rounded-md border-transparent bg-transparent px-1.5 text-[13px] text-[#3D3530] shadow-none transition-colors placeholder:text-[#AEA79F] hover:bg-[rgba(139,26,59,0.05)] focus:border-[#8B1A3B] focus:bg-[#FDFCF9] focus-visible:ring-0"
+          className={cn(
+            "h-[30px] min-w-0 rounded-[7px] border border-transparent bg-transparent px-2 text-[13px] text-[#3D3530] shadow-none transition-colors placeholder:text-[#AEA79F] hover:border-[rgba(139,26,59,0.25)] hover:bg-[rgba(139,26,59,0.03)] focus:border-[#8B1A3B] focus:bg-[#FDFCF9] focus-visible:ring-2 focus-visible:ring-[rgba(139,26,59,0.08)]",
+            field === "name" && "truncate",
+          )}
         />
       );
     };
 
     return (
-      <div className="my-3 max-h-[min(420px,60vh)] min-h-[320px] overflow-y-auto rounded-[14px] border border-[rgba(58,42,30,0.10)] bg-[#FDFCF9]" ref={tableScrollRef}>
-        <div className="sticky top-0 z-20 grid items-center gap-2 border-b border-[rgba(58,42,30,0.10)] bg-[#EDEAE3] px-3 py-2" style={{ gridTemplateColumns: template }}>
+      <div className="my-3 min-h-0 flex-1 overflow-hidden rounded-[14px] border border-[rgba(58,42,30,0.10)] bg-[#FDFCF9] shadow-[0_2px_12px_rgba(28,20,16,0.07),0_1px_3px_rgba(28,20,16,0.04)]">
+        <div className="h-full overflow-x-hidden overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(139,26,59,0.22)] scrollbar-track-transparent" ref={tableScrollRef}>
+        <div className="sticky top-0 z-20 grid items-center gap-1 border-b border-[rgba(58,42,30,0.10)] bg-[#F0EDE6] px-3 py-2.5" style={{ gridTemplateColumns: template }}>
           {["#", "Nome do vinho", "Produtor", "Safra", "Estilo", "País", "Qtd.", "Preço", ""].map((label) => (
-            <div key={label || "delete"} className="truncate text-[10px] font-semibold uppercase tracking-[0.08em] text-[#AEA79F] first:text-center">
+            <div key={label || "delete"} className="truncate px-1 text-[10px] font-semibold uppercase tracking-[0.09em] text-[#AEA79F] first:text-center">
               {label}
             </div>
           ))}
@@ -3166,7 +3204,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
         {filteredRows.map(({ row, index }) => (
           <div
             key={`${index}-${row.name || "row"}`}
-            className="group grid min-h-11 items-center gap-2 border-b border-[rgba(58,42,30,0.10)] bg-[#FDFCF9] px-3 py-1.5 transition-colors last:border-b-0 hover:bg-[#F5F2EC]"
+            className="group grid min-h-11 min-w-0 items-center gap-1 border-b border-[rgba(58,42,30,0.07)] bg-[#FDFCF9] px-3 py-2 transition-colors last:border-b-0 hover:bg-[rgba(139,26,59,0.02)]"
             style={{ gridTemplateColumns: template }}
           >
             <div className="text-center text-[11px] text-[#AEA79F]">{index + 1}</div>
@@ -3180,13 +3218,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             <button
               type="button"
               onClick={() => removeRow(index)}
-              className="h-6 w-6 rounded-full border-0 bg-transparent text-[14px] text-[#AEA79F] opacity-0 transition-opacity hover:bg-[rgba(139,26,59,0.08)] hover:text-[#8B1A3B] group-hover:opacity-100"
+              className="flex h-6 w-6 items-center justify-center rounded-full border-0 bg-[rgba(139,26,59,0.08)] text-[12px] text-[#8B1A3B] opacity-0 transition-all hover:bg-[rgba(139,26,59,0.16)] group-hover:opacity-100"
               aria-label={`Remover linha ${index + 1}`}
             >
               ×
             </button>
           </div>
         ))}
+        </div>
       </div>
     );
   };
@@ -3194,26 +3233,45 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
-        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
-        style={{
-          ...AI_MODAL_SHEET_CONTENT_STYLE,
-          width: hasDraftRows ? "min(94vw, 840px)" : "min(94vw, 620px)",
-          height: hasDraftRows ? "88dvh" : "auto",
-          maxHeight: "88dvh",
-        }}
+        className={cn(
+          AI_MODAL_SHEET_CONTENT_CLASSNAME,
+          hasDraftRows &&
+            "!h-[92dvh] !max-h-[92dvh] !w-full !max-w-full !rounded-b-none !rounded-t-[24px] md:!h-[85vh] md:!max-h-[85vh] md:!w-[90vw] md:!max-w-[1100px] md:!rounded-[20px] xl:!w-[80vw] xl:!max-w-[1200px]",
+        )}
+        style={
+          hasDraftRows
+            ? {
+                left: "50%",
+                top: "50%",
+                right: "auto",
+                bottom: "auto",
+                transform: "translate(-50%, -50%)",
+                background: "var(--sx-bg-card)",
+                border: "0.5px solid var(--sx-border-default)",
+                backdropFilter: "none",
+                WebkitBackdropFilter: "none",
+                boxShadow: "var(--sx-shadow-modal)",
+              }
+            : {
+                ...AI_MODAL_SHEET_CONTENT_STYLE,
+                width: "min(94vw, 620px)",
+                height: "auto",
+                maxHeight: "88dvh",
+              }
+        }
         aria-label="Importar planilha de vinhos"
       >
         <AiModalShell>
-          <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 px-4 py-3 pr-12">
+          <AiModalHeaderBar className="z-30 flex flex-wrap items-center justify-between gap-3 border-b border-[rgba(58,42,30,0.10)] px-5 py-4 pr-12 md:px-6">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_-22px_rgba(122,20,30,0.18)]">
-                <FileSpreadsheet className="h-4.5 w-4.5 text-[#7B1E2B]" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(139,26,59,0.10)] bg-[rgba(139,26,59,0.08)] text-[#8B1A3B]">
+                <FileSpreadsheet className="h-[18px] w-[18px]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle className="text-[20px] font-semibold leading-tight tracking-[-0.018em] text-[#1A1713]">
+                <SheetTitle className="text-[18px] font-medium leading-tight tracking-[-0.018em] text-[#1C1410]">
                   {hasDraftRows ? "Revisar importação" : "Importar vinhos"}
                 </SheetTitle>
-                <SheetDescription className="mt-0.5 text-[12px] font-medium leading-5 tracking-tight text-[#6B6258]">
+                <SheetDescription className="mt-0.5 text-[13px] font-normal leading-5 tracking-tight text-[#7A726A]">
                   {hasDraftRows
                     ? `${draftWines.length} linha(s) carregadas.`
                     : "CSV, Excel, PDF, texto ou imagem."}
@@ -3221,25 +3279,26 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
               </div>
             </div>
             {hasDraftRows ? (
-              <div className="flex flex-wrap items-center gap-1.5">
+              <div className="ml-auto flex shrink-0 flex-wrap items-center gap-1.5">
                 {[
-                  { label: "Prontos", value: completeRowsCount, tone: "success" as const },
-                  { label: "Revisão", value: reviewRowsCount, tone: "warning" as const },
-                  { label: "Corrigir", value: invalidRowsCount, tone: "danger" as const },
-                  { label: "Duplicados", value: duplicateRowsCount + autoMergedDuplicates, tone: "accent" as const },
+                  { label: "Prontos", value: completeRowsCount, className: "border-[rgba(58,74,46,0.15)] bg-[rgba(58,74,46,0.08)] text-[#3A4A2E]" },
+                  { label: "Revisão", value: reviewRowsCount, className: "border-[rgba(58,42,30,0.12)] bg-transparent text-[#7A726A]" },
+                  { label: "Corrigir", value: invalidRowsCount, className: "border-[rgba(139,26,59,0.15)] bg-[rgba(139,26,59,0.05)] text-[#8B1A3B]" },
+                  { label: "Duplicados", value: duplicateRowsCount, className: "border-[rgba(58,42,30,0.10)] bg-[rgba(58,42,30,0.06)] text-[#9E9890]" },
                 ].map((pill) => (
-                  <AiMetricPill
+                  <span
                     key={pill.label}
-                    label={pill.label}
-                    value={pill.value}
-                    tone={pill.tone}
-                  />
+                    className={cn("inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-medium whitespace-nowrap", pill.className)}
+                  >
+                    <span>{pill.value}</span>
+                    <span>{pill.label}</span>
+                  </span>
                 ))}
               </div>
             ) : null}
           </AiModalHeaderBar>
 
-          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-3 py-2 sm:px-4">
+          <AiModalBody className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-0 md:px-6">
             {hasDraftRows ? (
               step === "done" ? (
                 <div className="flex min-h-[360px] flex-1 flex-col items-center justify-center px-4 text-center">
@@ -3265,7 +3324,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </AiModalActionButton>
                 </div>
               ) : (
-              <div className="flex min-h-0 flex-1 flex-col gap-2.5">
+              <div className="flex min-h-0 flex-1 flex-col">
                 {step === "importing" ? (
                   <div className="shrink-0 px-1 py-2">
                     <div className="mb-2 flex items-center justify-between gap-3 text-[12px] font-semibold text-[#2A211A]">
@@ -3278,20 +3337,20 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                <AiToolbarSurface className="grid shrink-0 gap-2 xl:grid-cols-[minmax(280px,1fr)_auto]">
+                <AiToolbarSurface className="grid shrink-0 gap-3 rounded-none border-0 bg-transparent px-0 py-3 shadow-none xl:grid-cols-[minmax(280px,1fr)_auto]">
                   <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-                    <div className="relative min-w-[260px] flex-1">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#8A8075]/70" />
+                    <div className="relative min-w-[220px] flex-1">
+                      <Search className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[#AEA79F]" />
                       <Input
                         value={searchQuery}
                         onChange={(event) => setSearchQuery(event.target.value)}
                         placeholder="Buscar por vinho, produtor, país ou safra"
-                        className="h-9 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent pl-8 pr-3 text-[12px] shadow-none transition-all duration-150 placeholder:text-[#A99E91] focus:border-[#7B1E2B]/20 focus-visible:ring-[#7B1E2B]/10"
+                        className="h-10 rounded-full border-[rgba(58,42,30,0.10)] bg-[#F0EDE6] pl-10 pr-4 text-[14px] text-[#3D3530] shadow-none transition-all duration-150 placeholder:text-[#AEA79F] focus:border-[#8B1A3B] focus-visible:ring-2 focus-visible:ring-[rgba(139,26,59,0.08)]"
                       />
                     </div>
                   </div>
                   <div className="flex items-center justify-start gap-2 xl:justify-end">
-                    <button type="button" onClick={reset} className="text-[12px] font-semibold text-[#3A4A2E] underline-offset-4 hover:underline" disabled={step === "importing"}>
+                    <button type="button" onClick={reset} className="whitespace-nowrap border-0 bg-transparent px-0 py-2 text-[13px] font-medium text-[#7A726A] underline-offset-4 transition-colors hover:text-[#3D3530] hover:underline" disabled={step === "importing"}>
                       Trocar arquivo
                     </button>
                   </div>
@@ -3502,19 +3561,6 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   </div>
                 ) : null}
 
-                {mappingEntries.length > 0 ? (
-                  <div className="shrink-0 px-1 py-1 text-[11px] text-[#6B6258]">
-                    {mappingEntries.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
-                        {mappingEntries.map(([from, to]) => (
-                          <span key={from} className="rounded-full bg-[rgba(58,51,39,0.05)] px-2 py-0.5 text-[10px] font-medium">
-                            {from} {"->"} {to}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
               </div>
               )
             ) : (
@@ -3575,14 +3621,14 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
           </AiModalBody>
 
           {hasDraftRows && step !== "done" ? (
-            <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-2.5 px-4 py-2.5">
-              <span className="text-[12px] font-medium text-[#7A726A]">
-                {identifiedRowsCount} vinho{identifiedRowsCount !== 1 ? "s" : ""} pronto{identifiedRowsCount !== 1 ? "s" : ""} para importar
+            <AiModalFooterBar className="z-30 flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(58,42,30,0.10)] bg-[#FDFCF9] px-5 py-3.5 md:px-6">
+              <span className="text-[13px] font-normal text-[#7A726A]">
+                <strong className="font-medium text-[#3A4A2E]">{identifiedRowsCount}</strong> vinho{identifiedRowsCount !== 1 ? "s" : ""} pronto{identifiedRowsCount !== 1 ? "s" : ""} para importar
               </span>
               <AiModalActionButton
                 onClick={handleImport}
                 variant="primary"
-                className="h-10 rounded-full px-5 text-[13px] font-semibold shadow-none transition-all duration-150 active:translate-y-0"
+                className="h-11 rounded-full bg-[#8B1A3B] px-7 text-[14px] font-medium text-white shadow-none transition-opacity duration-150 hover:opacity-90 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45"
                 disabled={!canImport}
               >
                 Importar {identifiedRowsCount} vinho{identifiedRowsCount !== 1 ? "s" : ""}
