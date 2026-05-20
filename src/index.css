@@ -7313,3 +7313,118 @@ aside[class*="sidebar"],
 .sidebar-item[data-nav="wishlist"] svg { color: var(--sx-wine-rose) !important; }
 .sidebar-nav-item.active svg,
 .sidebar-item--active svg { color: var(--sx-bordeaux) !important; }
+
+/* === Analisar Carta upload polish === */
+.modal-icon-wrapper {
+  background: rgba(139, 26, 59, 0.08) !important;
+  color: #8B1A3B !important;
+  border-radius: 12px !important;
+}
+
+.analyze-carta-modal .modal-header .modal-icon-wrap,
+.analyze-carta-modal .modal-header .modal-icon-circle {
+  background: rgba(139,26,59,0.08) !important;
+  color: #8B1A3B !important;
+  border-radius: 12px !important;
+  padding: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-radix-dialog-content] h2,
+[data-radix-dialog-content] [class*="title"],
+[data-radix-sheet-content] h2,
+[data-radix-sheet-content] [class*="title"] {
+  color: #1A1714 !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em !important;
+}
+
+[data-radix-dialog-content] [class*="subtitle"],
+[data-radix-dialog-content] [class*="description"],
+[data-radix-dialog-content] [class*="sub"],
+[data-radix-sheet-content] [class*="subtitle"],
+[data-radix-sheet-content] [class*="description"],
+[data-radix-sheet-content] [class*="sub"] {
+  color: #6B5E52 !important;
+  font-size: 13px !important;
+}
+
+.analyze-carta-modal .modal-action-card,
+.analyze-carta-modal [class*="upload-card"],
+.analyze-carta-modal [class*="enviar-carta"] {
+  background: #F2EDE6 !important;
+  border: 0.5px solid #D9D0C4 !important;
+  border-radius: 14px !important;
+}
+
+.analyze-carta-modal .modal-action-card [class*="icon"],
+.analyze-carta-modal [class*="upload-card"] svg {
+  color: #6B5E52 !important;
+  background: #FDFCFA !important;
+  border-radius: 10px !important;
+  padding: 8px !important;
+}
+
+.analyze-carta-modal .modal-action-card [class*="title"],
+.analyze-carta-modal [class*="upload-card"] [class*="label"] {
+  color: #1A1714 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+.analyze-carta-modal .modal-action-card [class*="sub"],
+.analyze-carta-modal [class*="upload-card"] [class*="desc"] {
+  color: #6B5E52 !important;
+  font-size: 12px !important;
+}
+
+[data-radix-dialog-content] button[aria-label="Close"],
+[data-radix-dialog-content] button[aria-label="Fechar"],
+[data-radix-dialog-content] button[aria-label="Fechar modal"],
+[data-radix-dialog-content] [class*="close-btn"],
+[data-radix-sheet-content] button[aria-label="Close"],
+[data-radix-sheet-content] button[aria-label="Fechar"],
+[data-radix-sheet-content] button[aria-label="Fechar modal"],
+[data-radix-sheet-content] [class*="close-btn"],
+.analyze-carta-modal .modal-close {
+  background: rgba(107, 94, 82, 0.08) !important;
+  color: #6B5E52 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  transition: background 0.15s !important;
+}
+
+[data-radix-dialog-content] button[aria-label="Close"]:hover,
+[data-radix-dialog-content] button[aria-label="Fechar"]:hover,
+[data-radix-dialog-content] button[aria-label="Fechar modal"]:hover,
+[data-radix-sheet-content] button[aria-label="Close"]:hover,
+[data-radix-sheet-content] button[aria-label="Fechar"]:hover,
+[data-radix-sheet-content] button[aria-label="Fechar modal"]:hover,
+.analyze-carta-modal .modal-close:hover {
+  background: rgba(107, 94, 82, 0.15) !important;
+}
+
+.analyze-carta-modal [class*="curadoria"] svg,
+.analyze-carta-modal [class*="carta-info"] svg,
+.analyze-carta-modal [class*="scanner-footer"] svg {
+  color: #3A4A2E !important;
+}
+
+.analyze-carta-modal [class*="curadoria"] [class*="title"],
+.analyze-carta-modal [class*="carta-info"] [class*="title"] {
+  color: #1A1714 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.analyze-carta-modal [class*="curadoria"] p,
+.analyze-carta-modal [class*="curadoria"] [class*="desc"],
+.analyze-carta-modal [class*="carta-info"] p {
+  color: #6B5E52 !important;
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}

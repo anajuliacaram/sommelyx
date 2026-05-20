@@ -45,11 +45,11 @@ export function ModalBase({
               {icon}
             </div>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="text-2xl font-semibold tracking-tight text-[#1E1E1E]">
+              <DialogTitle className="text-2xl font-semibold tracking-tight text-[#1A1714]">
                 {title}
               </DialogTitle>
               {description ? (
-                <DialogDescription className="mt-1 text-sm font-medium tracking-tight text-[#6B6B6B] leading-relaxed">
+                <DialogDescription className="mt-1 text-sm font-medium tracking-tight text-[#6B5E52] leading-relaxed">
                   {description}
                 </DialogDescription>
               ) : null}

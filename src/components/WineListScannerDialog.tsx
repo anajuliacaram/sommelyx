@@ -593,7 +593,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <TooltipProvider>
         <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent centered className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
+          <SheetContent centered className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "analyze-carta-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
             <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
             <AiModalShell>
               <AiModalHeaderBar>
@@ -601,7 +601,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   icon={<BookOpen className="h-5 w-5" />}
                   title="Analisar Carta"
                   description="Encontre os destaques da carta."
-                  tone="gold"
+                  tone="wine"
                 />
               </AiModalHeaderBar>
 
@@ -636,6 +636,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             icon={<Camera className="h-5 w-5" strokeWidth={1.75} />}
                             title="Enviar carta"
                             description="Foto, imagem ou PDF."
+                            className="upload-card enviar-carta"
                           />
 
                           <div className="analyze-carta-actions grid gap-2 sm:grid-cols-2">
@@ -649,7 +650,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             </AiModalActionButton>
                           </div>
 
-                          <AiModalCard className="analyze-carta-help">
+                          <AiModalCard className="analyze-carta-help scanner-footer carta-info curadoria-card">
                             <div className="flex items-start gap-3">
                               <div className="modal-action-icon-wrap modal-action-icon">
                                 <BookOpen className="h-4 w-4" />
