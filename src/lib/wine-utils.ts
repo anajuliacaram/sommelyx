@@ -1,10 +1,10 @@
 export const WINE_TYPE_COLORS: Record<string, string> = {
   tinto: "#7B1E2B",
-  branco: "#C9B469",
-  rose: "#D89BA0",
-  "rosé": "#D89BA0",
-  espumante: "#B8C49A",
-  sobremesa: "#C47B3A",
+  branco: "#C9A84C",
+  rose: "#C97B8A",
+  "rosé": "#C97B8A",
+  espumante: "#7A9A5E",
+  sobremesa: "#B8652A",
   fortificado: "#8B6914",
 };
 
@@ -24,7 +24,7 @@ export function getWineTypeColor(style: string | null | undefined): string {
   if (normalized.includes("espumante") || normalized.includes("sparkling") || normalized.includes("champagne")) return WINE_TYPE_COLORS.espumante;
   if (normalized.includes("sobremesa") || normalized.includes("dessert")) return WINE_TYPE_COLORS.sobremesa;
   if (normalized.includes("fortificado") || normalized.includes("fortified") || normalized.includes("porto")) return WINE_TYPE_COLORS.fortificado;
-  return WINE_TYPE_COLORS[normalized] ?? "#AEA79F";
+  return WINE_TYPE_COLORS[normalized] ?? "#B5A89F";
 }
 
 export function getWineTypeBg(style: string | null | undefined): string {

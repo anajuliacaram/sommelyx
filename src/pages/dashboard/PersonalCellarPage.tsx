@@ -110,7 +110,7 @@ export default function PersonalCellarPage() {
   });
   const [view, setView] = useState<"grid" | "list">(() => {
     if (typeof window === "undefined") return "grid";
-    return (window.localStorage.getItem("cellar:view") as "grid" | "list" | null) ?? "grid";
+    return (window.localStorage.getItem("cellar:view") as "grid" | "list" | null) ?? (window.innerWidth < MOBILE_BREAKPOINT ? "list" : "grid");
   });
   const [showLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;

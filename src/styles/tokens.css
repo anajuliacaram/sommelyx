@@ -9,40 +9,40 @@
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
     --sx-bordeaux: #8B1A3B;
-    --sx-bordeaux-10: rgba(139, 26, 59, 0.10);
-    --sx-bordeaux-06: rgba(139, 26, 59, 0.06);
+    --sx-bordeaux-10: rgba(139,26,59,0.10);
+    --sx-bordeaux-06: rgba(139,26,59,0.06);
     --sx-bordeaux-light: #F5ECF0;
     --sx-bordeaux-mid: #C4708A;
     --sx-olive: #3A4A2E;
-    --sx-olive-10: rgba(58, 74, 46, 0.10);
-    --sx-olive-06: rgba(58, 74, 46, 0.06);
+    --sx-olive-10: rgba(58,74,46,0.10);
+    --sx-olive-06: rgba(58,74,46,0.06);
     --sx-olive-light: #EEF1EA;
 
-    --sx-bg-page: #F2EFE9;
-    --sx-bg-card: #FDFCF9;
-    --sx-bg-input: #EDEAE3;
+    --sx-bg-page: #F5EDE6;
+    --sx-bg-card: #FFFFFF;
+    --sx-bg-input: #F0EAE4;
     --sx-bg-row: #F7F5F0;
     --sx-bg-chip-off: transparent;
     --sx-bg-chip-on: #8B1A3B;
 
     /* Wine type colors — used for chips, badges, dots, filter buttons, type labels */
     --sx-wine-tinto: #7B1E2B;
-    --sx-wine-tinto-bg: rgba(123, 30, 43, 0.10);
-    --sx-wine-branco: #C9B469;
-    --sx-wine-branco-bg: rgba(201, 180, 105, 0.12);
-    --sx-wine-rose: #D89BA0;
-    --sx-wine-rose-bg: rgba(216, 155, 160, 0.12);
-    --sx-wine-espumante: #B8C49A;
-    --sx-wine-espumante-bg: rgba(184, 196, 154, 0.12);
-    --sx-wine-sobremesa: #C47B3A;
-    --sx-wine-sobremesa-bg: rgba(196, 123, 58, 0.12);
+    --sx-wine-tinto-bg: rgba(123,30,43,0.10);
+    --sx-wine-branco: #C9A84C;
+    --sx-wine-branco-bg: rgba(201,168,76,0.12);
+    --sx-wine-rose: #C97B8A;
+    --sx-wine-rose-bg: rgba(201,123,138,0.12);
+    --sx-wine-espumante: #7A9A5E;
+    --sx-wine-espumante-bg: rgba(122,154,94,0.12);
+    --sx-wine-sobremesa: #B8652A;
+    --sx-wine-sobremesa-bg: rgba(184,101,42,0.12);
     --sx-wine-fortificado: #8B6914;
     --sx-wine-fortificado-bg: rgba(139, 105, 20, 0.12);
 
-    --sx-t-head: #1C1410;
-    --sx-t-body: #3D3530;
-    --sx-t-sub: #7A726A;
-    --sx-t-muted: #AEA79F;
+    --sx-t-head: #2C1810;
+    --sx-t-body: #3D2B20;
+    --sx-t-sub: #8B7B72;
+    --sx-t-muted: #B5A89F;
     --sx-t-white: #FFFFFF;
     --sx-text-headline: var(--sx-t-head);
     --sx-text-body: var(--sx-t-body);
@@ -50,16 +50,16 @@
     --sx-text-muted: var(--sx-t-muted);
     --sx-text-on-dark: var(--sx-t-white);
 
-    --sx-b-default: rgba(58, 42, 30, 0.10);
-    --sx-b-medium: rgba(58, 42, 30, 0.18);
+    --sx-b-default: rgba(139,80,60,0.12);
+    --sx-b-medium: rgba(139,80,60,0.22);
     --sx-b-focus: #8B1A3B;
     --sx-border-default: var(--sx-b-default);
     --sx-border-strong: var(--sx-b-medium);
     --sx-border-focus: var(--sx-b-focus);
 
-    --sx-shadow-sm: 0 10px 24px -22px rgba(28, 20, 16, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.64);
-    --sx-shadow-md: 0 18px 40px -30px rgba(28, 20, 16, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.72);
-    --sx-shadow-lg: 0 28px 74px -46px rgba(28, 20, 16, 0.34), 0 10px 30px -28px rgba(123, 30, 43, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.74);
+    --sx-shadow-sm: 0 1px 4px rgba(44,24,16,0.06);
+    --sx-shadow-md: 0 2px 12px rgba(44,24,16,0.09);
+    --sx-shadow-lg: 0 8px 32px rgba(44,24,16,0.12);
     --sx-shadow-card: var(--sx-shadow-md);
     --sx-shadow-modal: var(--sx-shadow-lg);
 
@@ -75,10 +75,10 @@
     --sx-weight-medium: 500;
     --sx-weight-semibold: 600;
 
-    --sx-r-sm: 16px;
-    --sx-r-md: 22px;
-    --sx-r-lg: 28px;
-    --sx-r-xl: 34px;
+    --sx-r-sm: 10px;
+    --sx-r-md: 14px;
+    --sx-r-lg: 20px;
+    --sx-r-xl: 24px;
     --sx-r-pill: 50px;
 
     --cellar-bg: #0d0a08;
