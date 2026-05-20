@@ -312,15 +312,15 @@ export default function WishlistPage() {
     return () => window.clearTimeout(timeout);
   }, [showForm, wineName, lastAiQuery]);
 
-  if (isLoading) return <div className="text-sm text-muted-foreground p-4">Carregando wishlist…</div>;
+  if (isLoading) return <div className="wishlist-page text-sm text-muted-foreground p-4">Carregando wishlist…</div>;
 
   return (
-    <div className="space-y-7 max-w-[980px]">
+    <div className="wishlist-page space-y-7 max-w-[980px]">
       <div>
         <div className="surface-clarity p-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="t-title">Wishlist inteligente</h1>
-            <p className="t-subtitle mt-1.5">
+            <h1 className="wishlist-title t-title">Wishlist inteligente</h1>
+            <p className="wishlist-sub t-subtitle mt-1.5">
               Digite um rótulo ou anexe uma foto — o Sommelyx completa os detalhes para você.
             </p>
           </div>
@@ -545,7 +545,7 @@ export default function WishlistPage() {
       {filtered.length > 0 ? (
         <div className="grid gap-3">
           {filtered.map((item, index) => (
-            <div key={item.id} className="surface-clarity p-3 sm:p-4 flex gap-3 group">
+            <div key={item.id} className="wishlist-card surface-clarity p-3 sm:p-4 flex gap-3 group">
               <div className="h-20 w-20 shrink-0 overflow-hidden rounded-[20px] border border-border/50 bg-primary/5">
                 <WineLabelPreview
                   wine={{
@@ -563,8 +563,8 @@ export default function WishlistPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="truncate text-[14px] font-semibold text-foreground">{item.wine_name}</p>
-                    <p className="truncate text-[11px] text-muted-foreground">
+                    <p className="wine-row-name truncate text-[14px] font-semibold text-foreground">{item.wine_name}</p>
+                    <p className="wine-row-meta truncate text-[11px] text-muted-foreground">
                       {[item.producer, item.vintage, item.region || item.country].filter(Boolean).join(" · ") || "Item salvo manualmente"}
                     </p>
                   </div>
@@ -596,14 +596,17 @@ export default function WishlistPage() {
                 </div>
               </div>
 
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-9 w-9 md:h-8 md:w-8 shrink-0 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                onClick={() => void handleRemove(item.id)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="wishlist-card-actions">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="btn-wishlist-remove h-9 w-9 md:h-8 md:w-8 shrink-0 p-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
+                  onClick={() => void handleRemove(item.id)}
+                  aria-label="Remover da wishlist"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>

@@ -516,10 +516,10 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <div className="editorial-page">
+    <div className="editorial-page consumo-page">
       <header>
-        <Kicker>Histórico pessoal</Kicker>
-        <h1 className="editorial-page-h1 mt-1">Meu Consumo</h1>
+        <Kicker className="consumo-eyebrow">Histórico pessoal</Kicker>
+        <h1 className="editorial-page-h1 consumo-title mt-1">Meu Consumo</h1>
         <p
           className="mt-1 max-w-[560px] text-[12.5px] leading-[1.35]"
           style={{ color: "rgba(58,51,39,0.6)" }}
@@ -529,7 +529,7 @@ export default function ConsumptionPage() {
       </header>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+      <div className="stats-grid grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
           accent="#8B1A3B"
@@ -575,15 +575,26 @@ export default function ConsumptionPage() {
         />
       </div>
 
+      {lastEntry ? (
+        <section className="last-opened-card">
+          <p className="last-opened-eyebrow">Último aberto</p>
+          <p className="last-opened-time">{lastLabel}</p>
+          <h2 className="last-opened-name">{lastEntry.wine_name}</h2>
+          <p className="last-opened-rating">
+            {[lastEntry.producer, lastEntry.vintage, lastEntry.country].filter(Boolean).join(" · ") || "Registro de consumo"}
+          </p>
+        </section>
+      ) : null}
+
       {/* Monthly chart */}
-      <EditorialCard className="consumo-chart-wrap" style={{ padding: "18px 20px" }}>
-        <div className="mb-2 flex items-baseline justify-between">
+      <EditorialCard className="consumo-chart-card consumo-chart-wrap" style={{ padding: "18px 20px" }}>
+        <div className="chart-header mb-2 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
-            <h2 className="editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
+            <h2 className="chart-title editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
           </div>
-          <span className="text-[9px] font-semibold uppercase tracking-[0.10em] text-[rgba(58,51,39,0.5)]">
-            garrafas / {filters.period === "week" ? "dia" : "mês"}
+          <span className="chart-total">
+            {total}
           </span>
         </div>
         <Sparkbar

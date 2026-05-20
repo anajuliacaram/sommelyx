@@ -168,7 +168,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="space-y-7 max-w-3xl">
+    <div className="alerts-page space-y-7 max-w-3xl">
       {/* ── Header ── */}
       <div>
         <div className="glass-card px-5 py-4">
@@ -178,7 +178,7 @@ export default function AlertsPage() {
                 <Bell className="h-5 w-5 text-primary" />
               </div>
               <div className="min-w-0">
-                <h1 className="t-title">Alertas</h1>
+                <h1 className="alerts-header-title t-title">Alertas</h1>
                 <p className="t-subtitle mt-1">
                   {visibleAlerts.length} alerta{visibleAlerts.length !== 1 ? "s" : ""} ativo{visibleAlerts.length !== 1 ? "s" : ""} no momento
                 </p>
@@ -336,7 +336,7 @@ export default function AlertsPage() {
                     })();
                     return (
                     <div key={a.id}>
-                      <div className="glass-card overflow-hidden relative">
+                      <div className="alert-card glass-card overflow-hidden relative">
                         {/* Barra lateral colorida por tipo de vinho */}
                         <span
                           aria-hidden
@@ -353,7 +353,10 @@ export default function AlertsPage() {
                           {/* Bolinha colorida tipo de vinho */}
                           <span
                             aria-hidden
-                            className="h-2.5 w-2.5 rounded-full shrink-0 ring-1 ring-black/5"
+                            className={cn(
+                              "alerta-dot h-2.5 w-2.5 rounded-full shrink-0 ring-1 ring-black/5",
+                              a.type === "drink_now" ? "now" : a.type === "past_peak" ? "soon" : "aging",
+                            )}
                             style={{ background: wineColor }}
                           />
 
@@ -370,8 +373,8 @@ export default function AlertsPage() {
                                 <span className="text-[10px] font-medium text-muted-foreground/60">· {a.vintage}</span>
                               )}
                             </div>
-                            <p className="font-semibold truncate text-foreground leading-tight text-[14px] font-sans mt-0.5">{a.wineName}</p>
-                            <p className="text-muted-foreground leading-tight mt-px font-medium text-[11px]">{a.desc}</p>
+                            <p className="alert-card-title font-semibold truncate text-foreground leading-tight text-[14px] font-sans mt-0.5">{a.wineName}</p>
+                            <p className="alert-card-meta text-muted-foreground leading-tight mt-px font-medium text-[11px]">{a.desc}</p>
                           </div>
 
                           {/* Actions cluster */}

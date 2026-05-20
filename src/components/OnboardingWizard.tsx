@@ -51,23 +51,19 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
 
   const current = benefits[step];
   const isLast = step === totalSteps - 1;
+  const iconTone = step === 0 ? "wine" : step === 1 ? "clock" : "shield";
 
   return (
     <motion.div
-      className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[10vh] sm:pt-[12vh] lg:pt-[14vh]"
+      className="modal-overlay onboarding-overlay fixed inset-0 z-[60] flex items-center justify-center p-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleSkip} />
+      <div className="absolute inset-0" onClick={handleSkip} />
 
       <motion.div
-        className="relative w-full max-w-md overflow-hidden rounded-2xl shadow-2xl border border-white/10"
-        style={{
-          background: "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.88))",
-          backdropFilter: "blur(40px)",
-          boxShadow: "0 32px 64px -16px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.15) inset",
-        }}
+        className="modal-container onboarding-container relative w-full overflow-hidden"
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
@@ -78,14 +74,11 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
           onClick={handleSkip}
         />
 
-        <div className="px-6 pt-6 pb-2">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{step + 1} de {totalSteps}</span>
-          </div>
-          <div className="h-1.5 rounded-full bg-black/[0.05] overflow-hidden">
+        <div className="pb-2">
+          <span className="onboarding-step">{step + 1} de {totalSteps}</span>
+          <div className="onboarding-progress">
             <motion.div
-              className="h-full rounded-full"
-              style={{ background: "linear-gradient(90deg, #8F2D56, #C44569)" }}
+              className="onboarding-progress-fill"
               initial={{ width: 0 }}
               animate={{ width: `${((step + 1) / totalSteps) * 100}%` }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
@@ -93,7 +86,7 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
           </div>
         </div>
 
-        <div className="px-6 pb-6 pt-4">
+        <div>
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -104,46 +97,38 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
               className="flex flex-col items-center text-center"
             >
               <motion.div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
-                style={{ background: `linear-gradient(135deg, ${current.color}, ${current.color}cc)`, boxShadow: `0 8px 24px ${current.color}33` }}
+                className={`onboarding-icon ${iconTone}`}
                 initial={{ scale: 0.5, rotate: -10 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ type: "spring", stiffness: 200, damping: 15 }}
               >
-                <current.icon className="h-7 w-7 text-white" />
+                <current.icon className="h-7 w-7" />
               </motion.div>
 
-              <h2 className="text-xl font-serif font-bold text-foreground mb-3" style={{ letterSpacing: "-0.02em" }}>
+              <h2 className="onboarding-title">
                 {current.title}
               </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+              <p className="onboarding-text">
                 {current.desc}
               </p>
 
-              <div className="flex gap-2 mt-6 mb-6">
+              <div className="onboarding-dots">
                 {benefits.map((_, i) => (
                   <div
                     key={i}
-                    className="h-1.5 rounded-full transition-all duration-300"
-                    style={{ width: i === step ? 24 : 8, background: i === step ? current.color : "hsl(var(--muted))" }}
+                    className={`onboarding-dot ${i === step ? "active" : ""}`}
                   />
                 ))}
               </div>
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" className="flex-1 h-12 text-sm font-semibold text-muted-foreground" onClick={handleSkip}>
+          <div className="onboarding-footer">
+            <Button variant="ghost" className="btn-pular" onClick={handleSkip}>
               Pular
             </Button>
             <Button
-              className="flex-1 h-12 text-sm font-bold text-white border-0 rounded-xl"
-              style={{
-                background: isLast
-                  ? "linear-gradient(135deg, #8F2D56, #C44569, #E07A5F)"
-                  : "linear-gradient(135deg, #8F2D56, #C44569)",
-                boxShadow: "0 8px 20px rgba(143,45,86,0.25)",
-              }}
+              className="btn-proximo"
               onClick={handleNext}
             >
               {isLast ? (

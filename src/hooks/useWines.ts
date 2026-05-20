@@ -257,11 +257,19 @@ export function useWineMetrics() {
   // Full wine list (deferred) — used by secondary sections
   const { data: wines } = useWines();
 
-  const totalBottles = kpiRows?.reduce((sum, w) => sum + w.quantity, 0) ?? 0;
-  const totalValue = kpiRows?.reduce((sum, w) => sum + (w.current_value ?? w.purchase_price ?? 0) * w.quantity, 0) ?? 0;
-  const drinkNow = kpiRows?.filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until).length ?? 0;
+  const rowsForMetrics = kpiRows ?? wines?.map((w) => ({
+    quantity: w.quantity,
+    current_value: w.current_value,
+    purchase_price: w.purchase_price,
+    drink_from: w.drink_from,
+    drink_until: w.drink_until,
+  })) ?? [];
+
+  const totalBottles = rowsForMetrics.reduce((sum, w) => sum + w.quantity, 0);
+  const totalValue = rowsForMetrics.reduce((sum, w) => sum + (w.current_value ?? w.purchase_price ?? 0) * w.quantity, 0);
+  const drinkNow = rowsForMetrics.filter(w => w.drink_from && w.drink_until && currentYear >= w.drink_from && currentYear <= w.drink_until).length;
   const recentCount = 0; // not used in KPIs, avoid extra query
-  const lowStock = kpiRows?.filter(w => w.quantity > 0 && w.quantity <= 2).length ?? 0;
+  const lowStock = rowsForMetrics.filter(w => w.quantity > 0 && w.quantity <= 2).length;
 
   return { totalBottles, totalValue, drinkNow, recentCount, lowStock, wines: wines ?? [], isLoading: kpiLoading };
 }
