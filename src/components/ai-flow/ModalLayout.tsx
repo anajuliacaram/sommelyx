@@ -12,52 +12,47 @@ export const AI_MODAL_CARD_BORDER = "var(--sx-border-default)";
 export const AI_MODAL_SOFT_SURFACE = "var(--sx-bg-row)";
 
 export const AI_MODAL_CARD_CLASSNAME =
-  "premium-card-surface rounded-[18px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.50)_0%,rgba(249,244,237,0.36)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.38),0_18px_38px_-34px_rgba(58,51,39,0.16)]";
+  "premium-card-surface rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] shadow-none";
 
 export const AI_MODAL_ACTION_TILE_CLASSNAME =
-  "modal-action-card premium-card-surface premium-card-surface-hover rounded-[16px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(249,244,237,0.32)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.36),0_18px_38px_-34px_rgba(58,51,39,0.14)]";
+  "modal-action-card premium-card-surface";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "left-1/2 top-1/2 right-auto bottom-auto h-[90dvh] max-h-[90dvh] w-[94vw] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[24px] border-0 p-0 gap-0";
+  "modal-container fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[520px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[85vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
-  left: "50%",
-  top: "50%",
-  right: "auto",
-  bottom: "auto",
-  transform: "translate(-50%, -50%)",
-  width: "min(94vw, 840px)",
-  maxWidth: "880px",
-  maxHeight: "90dvh",
-  height: "90dvh",
+  width: "100%",
+  maxWidth: "520px",
+  maxHeight: "92dvh",
+  height: "auto",
   background: "var(--sx-bg-card)",
-  border: "0.5px solid var(--sx-border-default)",
+  border: "0.5px solid var(--sx-b-default)",
   backdropFilter: "none",
   WebkitBackdropFilter: "none",
-  boxShadow: "var(--sx-shadow-modal)",
+  boxShadow: "var(--sx-shadow-lg)",
 };
 
 export const AI_MODAL_DIALOG_CONTENT_CLASSNAME =
-  "items-center overflow-hidden rounded-[20px] border border-[rgba(95,111,82,0.07)] p-0 shadow-[0_24px_56px_rgba(38,24,18,0.14)] sm:max-w-[880px]";
+  "modal-container items-center overflow-hidden rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] p-0 shadow-[var(--sx-shadow-lg)] sm:max-w-[520px]";
 
 export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
   background: "var(--sx-bg-card)",
-  border: "0.5px solid var(--sx-border-default)",
+  border: "0.5px solid var(--sx-b-default)",
   backdropFilter: "none",
   WebkitBackdropFilter: "none",
-  boxShadow: "var(--sx-shadow-modal)",
+  boxShadow: "var(--sx-shadow-lg)",
 };
 
 export const AI_MODAL_FIELD_CLASSNAME =
-  "modal-input h-8 rounded-[14px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(249,244,237,0.34)_100%)] px-3 text-[12px] font-medium text-[rgba(36,30,24,0.84)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_14px_28px_-30px_rgba(58,51,39,0.12)] backdrop-blur-xl transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] placeholder:text-[rgba(108,96,84,0.48)] focus-visible:border-[rgba(123,30,43,0.14)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(252,248,242,0.48)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/5 focus-visible:ring-offset-0 disabled:opacity-60 sm:h-9 sm:text-[12.5px]";
+  "form-input modal-input";
 
 export const AI_MODAL_TEXTAREA_CLASSNAME =
-  "modal-input min-h-[72px] rounded-[13px] border border-[rgba(95,111,82,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(249,244,237,0.56)_100%)] px-3 py-2 text-[12px] font-medium text-[rgba(36,30,24,0.86)] shadow-[inset_0_1px_0_rgba(255,255,255,0.56),0_6px_14px_-18px_rgba(58,51,39,0.10)] transition-all duration-180 placeholder:text-[rgba(108,96,84,0.52)] focus-visible:border-[rgba(123,30,43,0.12)] focus-visible:bg-[linear-gradient(180deg,rgba(255,255,255,0.74)_0%,rgba(252,248,242,0.68)_100%)] focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/6 focus-visible:ring-offset-0 sm:text-[12.5px]";
+  "form-input modal-input min-h-[84px] resize-none py-2.5";
 
 export const AI_MODAL_COMPACT_STACK_CLASSNAME = "space-y-1";
 export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
 export const AI_MODAL_LABEL_CLASSNAME =
-  "modal-field-label text-[11px] font-medium tracking-[-0.01em] text-[rgba(72,60,46,0.64)]";
+  "form-field-label modal-field-label";
 export const AI_MODAL_HELP_TEXT_CLASSNAME =
   "text-[11px] leading-[1.42] text-[rgba(72,60,46,0.60)]";
 export const AI_MODAL_META_TEXT_CLASSNAME =
@@ -69,17 +64,17 @@ export const AI_MODAL_TEXT_SECONDARY_CLASSNAME =
 export const AI_MODAL_PILL_TEXT_CLASSNAME =
   "text-[8.5px] font-medium uppercase tracking-[0.08em]";
 export const AI_MODAL_SELECTION_CARD_CLASSNAME =
-  "segment-card premium-card-surface flex min-h-[48px] flex-col justify-between rounded-[15px] border px-2.5 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.46),0_8px_18px_-24px_rgba(58,51,39,0.08)] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/10";
+  "segment-card flex min-h-[48px] flex-col justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME =
-  "active border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.70)_0%,rgba(249,241,242,0.62)_100%)]";
+  "active";
 export const AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME =
-  "border-[rgba(95,111,82,0.04)] bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,244,237,0.46)_100%)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(252,248,242,0.56)_100%)]";
+  "";
 export const AI_MODAL_LIST_SURFACE_CLASSNAME =
-  "modal-wine-list-wrap cellar-scroll overflow-y-auto rounded-[16px] bg-transparent pr-0.5";
+  "modal-wine-list overflow-y-auto";
 export const AI_MODAL_LIST_ROW_CLASSNAME =
-  "modal-wine-row flex w-full items-center gap-2 rounded-[13px] px-2.5 py-1.5 text-left transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-[rgba(255,255,255,0.24)] hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/8";
+  "modal-wine-row flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_LIST_ROW_SELECTED_CLASSNAME =
-  "bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,241,242,0.36)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.34)]";
+  "bg-[rgba(139,26,59,0.06)]";
 export const AI_MODAL_INLINE_ACTION_CLASSNAME =
   "h-6 rounded-full border border-[rgba(58,51,39,0.06)] bg-transparent px-2.5 text-[9px] font-medium uppercase tracking-[0.08em] text-[#7B1E2B]/82 shadow-none hover:bg-[rgba(255,251,244,0.54)]";
 export const AI_MODAL_SEGMENTED_BUTTON_CLASSNAME =
@@ -109,12 +104,9 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "shrink-0 px-3.5 pb-1 pt-3 sm:px-4 sm:pb-1.5 sm:pt-4",
+        "shrink-0",
         className,
       )}
-      style={{
-        background: "transparent",
-      }}
     >
       {children}
     </div>
@@ -131,7 +123,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "min-h-0 flex-1 overflow-hidden px-3.5 pb-[calc(12px+env(safe-area-inset-bottom))] pt-1 sm:px-4 sm:pb-[calc(14px+env(safe-area-inset-bottom))]",
+        "modal-body min-h-0 flex-1 overflow-y-auto pb-[calc(32px+env(safe-area-inset-bottom))]",
         className,
       )}
     >
@@ -150,12 +142,9 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "shrink-0 px-3.5 pb-[calc(10px+env(safe-area-inset-bottom))] pt-2 sm:px-4 sm:pb-[calc(12px+env(safe-area-inset-bottom))]",
+        "shrink-0 px-6 pb-[calc(20px+env(safe-area-inset-bottom))] pt-3",
         className,
       )}
-      style={{
-        background: "transparent",
-      }}
     >
       {children}
     </div>
@@ -175,31 +164,20 @@ export function AiModalHeader({
   tone?: "wine" | "gold" | "purple" | "neutral";
   className?: string;
 }) {
-  const toneClasses = {
-    wine:
-      "border-[rgba(123,30,43,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] text-[#7B1E2B] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(122,20,30,0.20)]",
-    gold:
-      "border-[rgba(183,121,31,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,244,232,0.82)_100%)] text-[#B7791F] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(183,121,31,0.22)]",
-    purple:
-      "border-[rgba(155,93,229,0.14)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(244,239,251,0.82)_100%)] text-[#9B5DE5] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(155,93,229,0.22)]",
-    neutral:
-      "border-[rgba(95,111,82,0.12)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(248,244,238,0.82)_100%)] text-[#5F6F52] shadow-[inset_0_1px_0_rgba(255,255,255,0.74),0_12px_24px_-22px_rgba(58,51,39,0.18)]",
-  } as const;
-
   return (
-    <SheetHeader className={cn("modal-header mb-0 flex flex-col gap-1.5 pr-11 sm:pr-12", className)}>
+    <SheetHeader className={cn("modal-header mb-0 pr-11 sm:pr-12", className)}>
       <div className="flex items-start gap-2.5">
         {icon ? (
-          <div className={cn("modal-icon-circle flex h-9 w-9 shrink-0 items-center justify-center rounded-[13px] border", toneClasses[tone])}>
+          <div className={cn("modal-icon-wrap modal-icon-circle", tone && `tone-${tone}`)}>
             {icon}
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
-          <SheetTitle className="modal-title text-[18px] font-medium leading-tight tracking-[-0.02em] text-[rgba(32,26,21,0.88)] sm:text-[20px]">
+          <SheetTitle className="modal-title">
             {title}
           </SheetTitle>
           {description ? (
-            <SheetDescription className="modal-subtitle mt-0.5 max-w-[38rem] text-[11.5px] font-normal leading-[1.45] text-[rgba(72,60,46,0.60)] sm:text-[12px]">
+            <SheetDescription className="modal-subtitle max-w-[38rem]">
               {description}
             </SheetDescription>
           ) : null}
@@ -291,7 +269,7 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "rounded-[16px] border border-[rgba(95,111,82,0.04)] bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,244,237,0.44)_100%)] px-3 py-2.25 shadow-[inset_0_1px_0_rgba(255,255,255,0.46),0_8px_18px_-24px_rgba(58,51,39,0.08)] sm:px-3.5 sm:py-2.5",
+        "premium-card-surface rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] px-3 py-2.5 shadow-none sm:px-3.5",
         className,
       )}
     >
@@ -359,16 +337,16 @@ export function AiModalActionButton({
       : "modal-btn-primary";
   const variantClassName =
     variant === "ghost"
-      ? "h-8 rounded-[15px] px-3 text-[12px] font-medium text-[#4A4338] hover:bg-[rgba(255,255,255,0.40)] hover:text-[#1A1713]"
+      ? "h-8 rounded-[var(--sx-r-pill)] px-3 text-[13px] font-medium text-[var(--sx-t-sub)] hover:bg-[var(--sx-bg-input)] hover:text-[var(--sx-t-body)]"
       : variant === "secondary" || variant === "outline" || variant === "success"
-        ? "h-8 rounded-[15px] px-3.5 text-[12px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.54),0_14px_28px_-28px_rgba(58,51,39,0.14)]"
-        : "h-8 rounded-[15px] px-3.5 text-[12px] font-medium shadow-[0_16px_30px_-22px_rgba(122,20,30,0.30),inset_0_1px_0_rgba(255,255,255,0.12)] hover:shadow-[0_20px_38px_-24px_rgba(122,20,30,0.34),inset_0_1px_0_rgba(255,255,255,0.14)]";
+        ? "shadow-none"
+        : "shadow-none";
 
   return (
     <Button
       {...props}
       className={cn(
-        "tracking-[-0.005em] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px active:translate-y-[0.5px] active:scale-[0.985] sm:h-9 sm:text-[12.5px]",
+        "tracking-[-0.005em] transition-opacity duration-150 ease-out active:scale-[0.99]",
         modalButtonClassName,
         variantClassName,
         className,
@@ -414,16 +392,16 @@ export function AiUploadPanel({
         }
       }}
       className={cn(
-        "modal-action-card group flex cursor-pointer items-center justify-start gap-3 rounded-[16px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.46)_0%,rgba(249,244,237,0.34)_100%)] px-3 py-2.25 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.36),0_18px_38px_-34px_rgba(58,51,39,0.14)] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px data-[dragging=true]:bg-[rgba(255,255,255,0.62)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B1E2B]/8",
+        "modal-action-card group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]",
         className,
       )}
     >
-      <div className="modal-action-icon flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-[10px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.54)_0%,rgba(249,244,237,0.42)_100%)] text-[#7B1E2B] transition-transform duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-px group-hover:scale-[1.025]">
+      <div className="modal-action-icon-wrap modal-action-icon">
         {icon}
       </div>
       <div className="max-w-[320px]">
-        <p className="modal-action-title text-[13px] font-medium tracking-[-0.012em] text-[rgba(32,26,21,0.88)]">{title}</p>
-        {description ? <p className="modal-action-subtitle mt-0.5 text-[11px] leading-[1.42] text-[rgba(72,60,46,0.60)]">{description}</p> : null}
+        <p className="modal-action-title">{title}</p>
+        {description ? <p className="modal-action-subtitle">{description}</p> : null}
       </div>
       {children}
     </div>

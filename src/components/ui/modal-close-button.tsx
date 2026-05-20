@@ -14,11 +14,11 @@ export const ModalCloseButton = React.forwardRef<HTMLButtonElement, ModalCloseBu
       type={type}
       aria-label={label}
       className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-full",
-        "border border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] shadow-none",
+        "modal-close flex h-8 w-8 items-center justify-center rounded-full",
+        "border-0 bg-[rgba(58,42,30,0.07)] text-[var(--sx-t-sub)] shadow-none",
         "transition-all duration-180 ease-out",
-        "hover:bg-[rgba(255,251,244,0.45)] hover:text-[#1A1713]",
-        "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#7B1E2B]/16 disabled:pointer-events-none",
+        "hover:bg-[rgba(58,42,30,0.11)] hover:text-[var(--sx-t-body)]",
+        "active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[var(--sx-bordeaux-10)] disabled:pointer-events-none",
         className,
       )}
       {...props}

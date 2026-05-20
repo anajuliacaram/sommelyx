@@ -4028,4 +4028,636 @@
   .drink-badge.soon { background: rgba(180,152,60,0.15); color: #7A6420; }
   .drink-badge.now { background: var(--sx-olive-10); color: var(--sx-olive); }
   .drink-badge.aging { background: rgba(58,74,200,0.08); color: #2A3A8A; }
+
+  /* ── Redesign Pass 3: Universal modals + forms ───────── */
+  .premium-modal-overlay,
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(28, 20, 16, 0.50);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  @media (min-width: 640px) {
+    .premium-modal-overlay,
+    .modal-overlay {
+      align-items: center;
+    }
+  }
+
+  .modal-container,
+  .premium-modal-shell.modal-container,
+  [role="dialog"].modal-container {
+    width: 100%;
+    max-width: 520px;
+    max-height: 92dvh;
+    overflow-y: auto;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-xl) var(--sx-r-xl) 0 0;
+    background: var(--sx-bg-card);
+    color: var(--sx-t-body);
+    box-shadow: var(--sx-shadow-lg);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  @media (min-width: 640px) {
+    .modal-container,
+    .premium-modal-shell.modal-container,
+    [role="dialog"].modal-container {
+      max-height: 85vh;
+      border-radius: var(--sx-r-xl);
+    }
+  }
+
+  .modal-container::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 2px;
+    background: var(--sx-b-medium);
+  }
+
+  @media (min-width: 640px) {
+    .modal-container::before {
+      display: none;
+    }
+  }
+
+  .modal-container::-webkit-scrollbar,
+  .modal-container *::-webkit-scrollbar {
+    width: 3px;
+  }
+
+  .modal-container::-webkit-scrollbar-track,
+  .modal-container *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modal-container::-webkit-scrollbar-thumb,
+  .modal-container *::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: rgba(139, 26, 59, 0.20);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0 0 4px;
+    border-bottom: 0.5px solid var(--sx-b-default);
+    padding: 20px 24px 16px;
+  }
+
+  .modal-body {
+    padding: 12px 24px 0;
+  }
+
+  .modal-icon-wrap,
+  .modal-icon-circle {
+    display: flex;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 10px;
+    background: var(--sx-bordeaux-06);
+    color: var(--sx-bordeaux);
+    box-shadow: none;
+  }
+
+  .modal-icon-wrap svg,
+  .modal-icon-circle svg {
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+  }
+
+  .modal-title,
+  .premium-modal-shell [data-radix-dialog-title].modal-title {
+    margin: 0;
+    color: var(--sx-t-head);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: 0;
+  }
+
+  .modal-subtitle,
+  .premium-modal-shell [data-radix-dialog-description].modal-subtitle {
+    margin-top: 2px;
+    color: var(--sx-t-sub);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0;
+  }
+
+  .modal-close,
+  .premium-modal-shell [aria-label="Fechar modal"] {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--sx-bg-input);
+    color: var(--sx-t-sub);
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .modal-close:hover,
+  .premium-modal-shell [aria-label="Fechar modal"]:hover {
+    background: rgba(58, 42, 30, 0.11);
+    color: var(--sx-t-body);
+  }
+
+  .modal-btn-primary,
+  .premium-modal-shell .modal-btn-primary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    border: none;
+    border-radius: var(--sx-r-pill);
+    background: var(--sx-bordeaux);
+    padding: 15px 20px;
+    color: var(--sx-t-white);
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .modal-btn-primary:hover,
+  .premium-modal-shell .modal-btn-primary:hover {
+    opacity: 0.88;
+  }
+
+  .modal-btn-secondary,
+  .premium-modal-shell .modal-btn-secondary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    border: 1.5px solid var(--sx-olive);
+    border-radius: var(--sx-r-pill);
+    background: transparent;
+    padding: 14px 20px;
+    color: var(--sx-olive);
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: none;
+    cursor: pointer;
+  }
+
+  .modal-btn-secondary:hover,
+  .premium-modal-shell .modal-btn-secondary:hover {
+    background: var(--sx-olive-06);
+  }
+
+  .modal-action-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-md);
+    background: var(--sx-bg-input);
+    padding: 13px 14px;
+    color: var(--sx-t-body);
+    box-shadow: none;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  .modal-action-card:hover {
+    background: #E5E1D8;
+  }
+
+  .modal-action-icon,
+  .modal-action-icon-wrap {
+    display: flex;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: 8px;
+    background: var(--sx-bg-card);
+    color: var(--sx-t-sub);
+    font-size: 16px;
+  }
+
+  .modal-action-title {
+    color: var(--sx-t-body);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  .modal-action-sub,
+  .modal-action-subtitle {
+    margin-top: 1px;
+    color: var(--sx-t-muted);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .form-section-label,
+  .modal-section-label {
+    margin: 18px 0 10px;
+    color: var(--sx-t-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  .form-field-label,
+  .modal-field-label {
+    display: block;
+    margin: 14px 0 6px;
+    color: var(--sx-t-muted);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .form-input,
+  .modal-input,
+  .premium-modal-shell .input-premium,
+  .premium-modal-shell :is(input, textarea, select) {
+    width: 100%;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-sm);
+    background: var(--sx-bg-input);
+    padding: 12px 13px;
+    color: var(--sx-t-body);
+    font-size: 15px;
+    outline: none;
+    box-shadow: 0 0 0 1000px var(--sx-bg-input) inset;
+  }
+
+  .form-input::placeholder,
+  .modal-input::placeholder,
+  .premium-modal-shell .input-premium::placeholder,
+  .premium-modal-shell :is(input, textarea)::placeholder {
+    color: var(--sx-t-muted);
+  }
+
+  .form-input:focus,
+  .form-input:focus-visible,
+  .modal-input:focus,
+  .modal-input:focus-visible,
+  .premium-modal-shell .input-premium:focus,
+  .premium-modal-shell .input-premium:focus-visible,
+  .premium-modal-shell :is(input, textarea, select):focus,
+  .premium-modal-shell :is(input, textarea, select):focus-visible {
+    border-color: var(--sx-b-focus);
+    background: var(--sx-bg-card);
+    box-shadow:
+      0 0 0 3px var(--sx-bordeaux-10),
+      0 0 0 1000px var(--sx-bg-card) inset;
+  }
+
+  .form-row-2col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .form-accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    border-top: 0.5px solid var(--sx-b-default);
+    padding: 13px 0;
+    cursor: pointer;
+  }
+
+  .form-accordion-title {
+    color: var(--sx-t-body);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .form-accordion-sub {
+    color: var(--sx-t-muted);
+    font-size: 12px;
+  }
+
+  .form-accordion-chevron {
+    color: var(--sx-t-muted);
+    font-size: 16px;
+    transition: transform 200ms ease;
+  }
+
+  .form-accordion-trigger[aria-expanded="true"] .form-accordion-chevron {
+    transform: rotate(180deg);
+  }
+
+  .harmonizar-eyebrow {
+    margin: 16px 0 10px;
+    color: var(--sx-t-muted);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+  }
+
+  .harmonizar-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-md);
+    background: var(--sx-bg-input);
+    padding: 14px 16px;
+    color: var(--sx-t-body);
+    box-shadow: none;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  .harmonizar-option:hover {
+    background: #E5E1D8;
+  }
+
+  .harmonizar-option-icon {
+    display: flex;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: 10px;
+    background: var(--sx-bg-card);
+    color: var(--sx-t-sub);
+    font-size: 18px;
+  }
+
+  .harmonizar-option-title {
+    color: var(--sx-t-body);
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .harmonizar-option-sub,
+  .harmonizar-option-subtitle {
+    margin-top: 2px;
+    color: var(--sx-t-muted);
+    font-size: 12px;
+  }
+
+  .harmonizar-option-arrow {
+    margin-left: auto;
+    color: var(--sx-t-muted);
+    font-size: 16px;
+  }
+
+  .segment-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .segment-card {
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-md);
+    background: var(--sx-bg-input);
+    padding: 13px 14px;
+    cursor: pointer;
+    transition: all 150ms ease;
+  }
+
+  .segment-card.active {
+    border: 1.5px solid var(--sx-bordeaux);
+    background: var(--sx-bordeaux-06);
+  }
+
+  .segment-card-title,
+  .segment-card .seg-title,
+  .segment-card :is(p:first-child) {
+    color: var(--sx-t-body);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .segment-card.active .segment-card-title,
+  .segment-card.active .seg-title,
+  .segment-card.active :is(p:first-child) {
+    color: var(--sx-bordeaux);
+  }
+
+  .segment-card-sub,
+  .segment-card .seg-subtitle,
+  .segment-card :is(p + p) {
+    margin-top: 2px;
+    color: var(--sx-t-muted);
+    font-size: 12px;
+  }
+
+  .modal-wine-list,
+  .modal-wine-list-wrap {
+    overflow: hidden;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-md);
+    background: var(--sx-bg-input);
+  }
+
+  .modal-wine-row {
+    display: block;
+    border-bottom: 0.5px solid var(--sx-b-default);
+    background: transparent;
+    padding: 11px 14px;
+    color: var(--sx-t-body);
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+
+  .modal-wine-row:last-child {
+    border-bottom: none;
+  }
+
+  .modal-wine-row:hover {
+    background: rgba(139, 26, 59, 0.04);
+  }
+
+  .modal-wine-row-name,
+  .modal-wine-row :is(p:first-child) {
+    color: var(--sx-t-body);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .modal-wine-row-meta,
+  .modal-wine-row :is(p + p) {
+    margin-top: 2px;
+    color: var(--sx-t-muted);
+    font-size: 12px;
+  }
+
+  .carta-results-header {
+    margin: 0;
+    padding: 16px 24px 12px;
+  }
+
+  .carta-results-title,
+  .carta-results-count {
+    margin-bottom: 4px;
+    color: var(--sx-t-head);
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .carta-results-sub {
+    color: var(--sx-t-sub);
+    font-size: 13px;
+  }
+
+  .carta-wine-card {
+    position: relative;
+    margin-bottom: 10px;
+    border: 0.5px solid var(--sx-b-default);
+    border-radius: var(--sx-r-md);
+    background: var(--sx-bg-card);
+    padding: 14px 16px;
+    box-shadow: none;
+  }
+
+  .carta-wine-number {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--sx-t-head);
+    color: var(--sx-t-white);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .carta-wine-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+    padding-left: 34px;
+  }
+
+  .carta-wine-name {
+    flex: 1;
+    color: var(--sx-t-head);
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .carta-wine-price {
+    color: var(--sx-bordeaux);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .carta-wine-origin {
+    margin-bottom: 5px;
+    padding-left: 34px;
+    color: var(--sx-t-sub);
+    font-size: 12px;
+  }
+
+  .carta-wine-attrs {
+    margin-bottom: 8px;
+    padding-left: 34px;
+    color: var(--sx-t-muted);
+    font-size: 12px;
+  }
+
+  .carta-wine-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+    padding-left: 34px;
+  }
+
+  .carta-badge {
+    border-radius: var(--sx-r-pill);
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .carta-badge.principal {
+    background: var(--sx-bordeaux-10);
+    color: var(--sx-bordeaux);
+  }
+
+  .carta-badge.value {
+    background: var(--sx-olive-10);
+    color: var(--sx-olive);
+  }
+
+  .carta-badge.casa {
+    background: var(--sx-bg-input);
+    color: var(--sx-t-sub);
+  }
+
+  .carta-wine-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    border-top: 0.5px solid var(--sx-b-default);
+    padding-top: 10px;
+    padding-left: 34px;
+  }
+
+  .carta-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 0.5px solid var(--sx-b-medium);
+    border-radius: var(--sx-r-pill);
+    background: transparent;
+    padding: 5px 10px;
+    color: var(--sx-t-sub);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .carta-action-btn.save {
+    border-color: rgba(139, 26, 59, 0.25);
+    color: var(--sx-bordeaux);
+  }
 }

@@ -52,22 +52,26 @@ interface SheetContentProps
     VariantProps<typeof sheetVariants> {}
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  ({ side = "right", className, children, ...props }, ref) => (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content
+  ({ side = "right", className, children, ...props }, ref) => {
+    const isModalContainer = typeof className === "string" && className.includes("modal-container");
+
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <SheetPrimitive.Content
           ref={ref}
-        className={cn("premium-modal-shell", sheetVariants({ side }), className)}
-        style={undefined}
-        {...props}
-      >
-        {children}
-        <SheetPrimitive.Close asChild>
-          <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
-        </SheetPrimitive.Close>
-      </SheetPrimitive.Content>
-    </SheetPortal>
-  ),
+          className={cn("premium-modal-shell", !isModalContainer && sheetVariants({ side }), className)}
+          style={undefined}
+          {...props}
+        >
+          {children}
+          <SheetPrimitive.Close asChild>
+            <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
+          </SheetPrimitive.Close>
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    );
+  },
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 
