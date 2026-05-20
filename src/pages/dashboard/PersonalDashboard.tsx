@@ -23,11 +23,9 @@ import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import {
-  Chip,
   Kicker,
   Sparkbar,
   STYLE_COLORS,
-  StyleBadge,
   getStyleFamily,
   classifyDrinkWindow,
   resolveSuggestedDrinkWindow,
@@ -57,6 +55,11 @@ function buildMonthWindow(size: number) {
 function formatCurrencyShort(value: number) {
   if (value >= 1000) return `R$ ${(value / 1000).toFixed(1).replace(".", ",")}k`;
   return `R$ ${Math.round(value).toLocaleString("pt-BR")}`;
+}
+
+function getWineTypeClass(style?: string | null) {
+  const family = getStyleFamily(style);
+  return family === "rosé" ? "rose" : family;
 }
 
 export default function PersonalDashboard() {
@@ -193,36 +196,30 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="editorial-page">
-        <section className="px-1 pt-1">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="editorial-page !px-0">
+        <section>
+          <div className="overview-greeting-wrap flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
-              <Kicker>
+              <p className="overview-date">
                 {new Date().toLocaleDateString("pt-BR", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
                 })}
-              </Kicker>
-              <h1 className={`editorial-page-h1 mt-1 ${isMobile ? "!text-[27px] leading-[1.02]" : ""}`}>
+              </p>
+              <h1 className={`overview-greeting ${isMobile ? "!text-[29px]" : ""}`}>
                 Olá,{" "}
-                <span
-                  style={{
-                    backgroundImage: "linear-gradient(145deg, #7B1E2B, #5A141F)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {firstName}
-                </span>
+                <span className="name-accent">{firstName}</span>
               </h1>
-              <p
-                className={`mt-2 max-w-[560px] text-[13px] leading-[1.5] ${isMobile ? "!text-[12px] !leading-[1.38]" : ""}`}
-                style={{ color: "rgba(58,51,39,0.64)" }}
-              >
+              <p className="overview-summary max-w-[620px]">
                 {totalBottles > 0
-                  ? `Sua adega guarda ${totalBottles} ${totalBottles === 1 ? "garrafa" : "garrafas"}. ${drinkNow} ${drinkNow === 1 ? "está pronta" : "estão prontas"} para abrir hoje, enquanto ${inGuard} seguem em guarda.`
+                  ? (
+                    <>
+                      Sua adega guarda <strong>{totalBottles} {totalBottles === 1 ? "garrafa" : "garrafas"}</strong>.{" "}
+                      <span className="ready-accent">{drinkNow} {drinkNow === 1 ? "está pronta" : "estão prontas"}</span>{" "}
+                      para abrir hoje, enquanto <strong>{inGuard}</strong> seguem em guarda.
+                    </>
+                  )
                   : "Sua adega está vazia. Adicione o primeiro vinho para começar a acompanhar consumo, janelas e valor."}
               </p>
             </div>
@@ -245,21 +242,20 @@ export default function PersonalDashboard() {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 border-t border-black/[0.05] pt-4 md:grid-cols-4">
+          <div className="stats-grid md:grid-cols-4">
             {[
-              { label: "Garrafas", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque" },
-              { label: "Valor estimado", value: formatCurrencyShort(totalValue), detail: "atualizado hoje" },
-              { label: "Beber agora", value: String(drinkNow), detail: "em janela ideal" },
-              { label: "Em guarda", value: String(inGuard), detail: "aguardando" },
+              { label: "Garrafas", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque", icon: WineIcon },
+              { label: "Valor estimado", value: formatCurrencyShort(totalValue), detail: "atualizado hoje", icon: Star },
+              { label: "Beber agora", value: String(drinkNow), detail: "em janela ideal", icon: GlassWater, olive: true },
+              { label: "Em guarda", value: String(inGuard), detail: "aguardando", icon: Sparkles, olive: true },
             ].map((metric) => (
-              <div key={metric.label} className="min-w-0">
-                <p className="text-[9.5px] font-semibold uppercase tracking-[0.12em] text-[rgba(58,51,39,0.46)]">
+              <div key={metric.label} className={`stat-card min-w-0 ${metric.olive ? "olive" : ""}`}>
+                <p className="stat-label">
+                  <metric.icon className="stat-label-icon h-3 w-3" />
                   {metric.label}
                 </p>
-                <div className="mt-1 text-[20px] font-semibold leading-none tracking-[-0.03em] text-[rgba(26,23,19,0.92)]">
-                  {metric.value}
-                </div>
-                <p className="mt-1 text-[11px] text-[rgba(58,51,39,0.54)]">{metric.detail}</p>
+                <div className="stat-value">{metric.value}</div>
+                <p className="stat-sublabel">{metric.detail}</p>
               </div>
             ))}
           </div>
@@ -267,15 +263,12 @@ export default function PersonalDashboard() {
 
         <div className="grid grid-cols-12 gap-5 lg:gap-8">
           <section className="col-span-12 lg:col-span-8">
-            <div className="px-1">
-              <div className="mb-3 flex flex-col gap-2 md:mb-4 md:flex-row md:items-end md:justify-between md:gap-3">
+            <div>
+              <div className="ready-section">
                 <div className="min-w-0">
-                  <h2 className="editorial-h2 text-[19px] md:text-[22px]">Escolha a próxima garrafa</h2>
-                  <p
-                    className="mt-0.5 text-[11px] leading-[1.25] md:text-[12px]"
-                    style={{ color: "rgba(58,51,39,0.56)" }}
-                  >
-                    {ready.length}{" "}
+                  <h2 className="ready-section-title">Escolha a próxima garrafa</h2>
+                  <p className="ready-section-sub">
+                    <span className="count-badge">{ready.length}</span>{" "}
                     {ready.length === 1
                       ? "vinho pronto para abrir agora"
                       : "vinhos prontos para abrir agora"}
@@ -283,16 +276,15 @@ export default function PersonalDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="editorial-btn-ghost h-8 w-fit px-3 text-[11px] md:h-8 md:px-3.5 md:text-[12px]"
+                  className="btn-ver-adega"
                   onClick={() => navigate("/dashboard/cellar")}
                 >
                   Ver adega <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
 
-              <div className="mb-3 flex flex-col gap-2 border-y border-black/[0.045] py-2.5 sm:flex-row sm:items-center">
-                <div className="editorial-search h-8 flex-1 md:h-9">
-                  <Search className="h-3.5 w-3.5" style={{ color: "rgba(58,51,39,0.36)" }} />
+              <div className="overview-search">
+                  <Search className="h-4 w-4" />
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -302,25 +294,28 @@ export default function PersonalDashboard() {
                     <button
                       type="button"
                       onClick={() => setQuery("")}
-                      style={{ color: "rgba(58,51,39,0.4)" }}
+                      className="text-[var(--sx-t-muted)]"
                       aria-label="Limpar busca"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
-                </div>
-                <div className="overflow-x-auto pb-0.5 sm:max-w-[360px] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                  <div className="flex min-w-max items-center gap-1">
+              </div>
+
+                <div className="chips-row">
                     {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map(
                       (s) => (
-                        <Chip key={s} active={styleFilter === s} onClick={() => setStyleFilter(s)} className="h-[22px] px-2 text-[9.5px] tracking-[0.04em]">
+                        <button
+                          key={s}
+                          type="button"
+                          className={`chip ${styleFilter === s ? "active" : ""}`}
+                          onClick={() => setStyleFilter(s)}
+                        >
                           {s}
-                        </Chip>
+                        </button>
                       ),
                     )}
-                  </div>
                 </div>
-              </div>
 
               {ready.length === 0 ? (
                 <PremiumEmptyState
@@ -343,49 +338,37 @@ export default function PersonalDashboard() {
                   className="px-6 py-10 lg:py-12"
                 />
               ) : (
-                <div className="flex flex-col divide-y divide-black/[0.045]">
+                <div className="wine-list">
                   {ready.map((w) => {
                     const family = getStyleFamily(w.style);
                     const color = STYLE_COLORS[family];
                     return (
-                      <div key={w.id} className="editorial-row border-0 px-0">
+                      <div key={w.id} className="wine-row-card">
                         <div
-                          className="editorial-bottle-icon"
+                          className="wine-row-icon"
                           style={{ background: `${color}14`, color }}
                         >
                           <WineIcon className="h-4 w-4" />
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-baseline gap-2">
-                            <h4
-                              className="text-[14px] font-semibold"
-                              style={{ color: "rgba(26,23,19,0.88)", letterSpacing: "-0.01em" }}
-                            >
+                        <div className="wine-row-body">
+                          <div className="wine-row-name">
                               {w.name}
-                            </h4>
                             {w.vintage && (
-                              <span
-                                className="text-[12.5px] tabular-nums"
-                                style={{ color: "rgba(58,51,39,0.6)" }}
-                              >
+                              <span className="wine-row-year tabular-nums">
                                 {w.vintage}
                               </span>
                             )}
                           </div>
-                          <p
-                            className="mt-0.5 truncate text-[12px]"
-                            style={{ color: "rgba(58,51,39,0.6)" }}
-                          >
+                          <p className="wine-row-meta truncate">
                             {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
                               .filter(Boolean)
                               .join(" · ")}
                           </p>
-                          <div className="mt-1.5 flex items-center gap-3">
-                            <StyleBadge style={w.style} />
-                            <span
-                              className="text-[11.5px] font-semibold"
-                              style={{ color: "rgba(58,51,39,0.55)" }}
-                            >
+                          <div className="mt-1.5 flex items-center gap-2">
+                            <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
+                              {family}
+                            </span>
+                            <span className="wine-qty-badge">
                               {w.quantity} un.
                               {w.drink_until ? (
                                 <>
@@ -414,7 +397,7 @@ export default function PersonalDashboard() {
                         </div>
                         <button
                           type="button"
-                          className="editorial-btn-open shrink-0"
+                          className="btn-abrir"
                           disabled={wineEvent.isPending}
                           onClick={() => handleOpenBottle(w.id, w.name)}
                         >

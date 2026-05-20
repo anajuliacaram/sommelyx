@@ -3,17 +3,14 @@
 // Dados reais via Supabase.
 
 import { useMemo, useState, useEffect } from "react";
-import { ArrowUpDown, Globe, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
+import { ArrowUpDown, Globe, Plus, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import {
-  Chip,
-  DrinkWindow,
   EditorialCard,
-  Kicker,
   STYLE_COLORS,
   StyleBadge,
   getStyleFamily,
@@ -66,6 +63,22 @@ function resolveWineCountry(wine: Pick<Wine, "country" | "region">) {
   return "";
 }
 
+function getWineTypeClass(style?: string | null) {
+  const family = getStyleFamily(style);
+  return family === "rosé" ? "rose" : family;
+}
+
+function getDrinkBadgeClass(status: string) {
+  if (status === "now") return "now";
+  if (status === "soon") return "soon";
+  return "aging";
+}
+
+function formatWinePrice(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(Number(value))) return "Preço n/i";
+  return `R$ ${Number(value).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`;
+}
+
 export default function PersonalCellarPage() {
   const { data: wines = [], isLoading } = useWines();
   const wineEvent = useWineEvent();
@@ -109,12 +122,6 @@ export default function PersonalCellarPage() {
   const [editWine, setEditWine] = useState<Wine | null>(null);
   const [consumptionOpen, setConsumptionOpen] = useState(false);
   const [preSelectedWine, setPreSelectedWine] = useState<Wine | null>(null);
-  const controlBase =
-    "premium-control-surface inline-flex h-9 items-center rounded-[14px] border px-2.5 text-[11.5px] font-medium tracking-[-0.01em] transition-all outline-none sm:h-10 sm:px-3 sm:text-[12.5px]";
-  const controlSurface = "text-[#1a1713]";
-  const controlMuted = "bg-[rgba(255,255,255,0.68)] border-[rgba(95,111,82,0.10)] text-[rgba(58,51,39,0.72)]";
-  const sectionLabel = "text-[9.5px] font-semibold uppercase tracking-[0.16em] text-[rgba(58,51,39,0.48)]";
-
   useEffect(() => {
     window.localStorage.setItem("cellar:query", query);
   }, [query]);
@@ -186,117 +193,106 @@ export default function PersonalCellarPage() {
     return countryFilter === "all" ? "País" : `País: ${selected}`;
   }, [countryFilter, countryOptions]);
 
-  const mobileHeader = (filteredCount: number) => (
-    <EditorialCard style={{ padding: "10px" }}>
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <Kicker>Adega</Kicker>
-            <h1 className="editorial-page-h1 mt-0.5 !text-[24px] leading-tight tracking-[-0.04em]">
-              Minha Adega
-            </h1>
-            <div className="mt-1 text-[11px] font-medium leading-[1.3] tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
-              <b style={{ color: "#1a1713", fontWeight: 700 }}>{filteredCount}</b> / {wines.length} vinhos
-            </div>
-          </div>
-        </div>
+  const pageHeader = (filteredCount: number) => (
+    <>
+      <section className="adega-header">
+        <p className="adega-eyebrow">Adega</p>
+        <h1 className="adega-title">Minha Adega</h1>
+        <p className="adega-count">
+          <strong>{filteredCount}</strong> / {wines.length} vinhos
+        </p>
+      </section>
 
-        <div className="editorial-search min-w-0 h-11 px-3">
-          <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nome, produtor, região…"
-          />
-          {query && (
-            <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
-              <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2">
-          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger
-              aria-label="Ordenar vinhos"
-              className={`${controlBase} ${controlSurface} h-11 min-w-0 px-3 text-[11.5px]`}
-            >
-              <div className="flex min-w-0 items-center gap-1.5">
-                <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                <span className="min-w-0 truncate">{sortLabel}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-              <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-              <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-              <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-              <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-            <SelectTrigger
-              aria-label="Filtrar por país"
-              className={`${controlBase} ${controlSurface} h-11 min-w-0 px-3 text-[11.5px]`}
-            >
-              <div className="flex min-w-0 items-center gap-1.5">
-                <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                <span className="min-w-0 truncate">{countryLabel}</span>
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">País</SelectItem>
-              {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <button
-            type="button"
-            className="editorial-btn-primary h-11 w-fit max-w-[118px] justify-self-end rounded-[14px] px-3.5 text-[12px] font-semibold tracking-[-0.01em] whitespace-nowrap shadow-[0_8px_20px_-14px_rgba(95,127,82,0.32)]"
-            onClick={() => setAddOpen(true)}
-          >
-            + Adicionar
+      <div className="overview-search">
+        <Search className="h-4 w-4" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por nome, produtor, região…"
+        />
+        {query && (
+          <button type="button" onClick={() => setQuery("")} aria-label="Limpar" className="text-[var(--sx-t-muted)]">
+            <X className="h-4 w-4" />
           </button>
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.5">
-              <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Tipo</span>
-              {styleOptions.map((s) => (
-                <Chip
-                  key={s.key}
-                  active={styleFilter === s.key}
-                  onClick={() => setStyleFilter(s.key)}
-                  className="h-[32px] shrink-0 whitespace-nowrap px-2.5 text-[10px] normal-case tracking-[-0.01em]"
-                >
-                  {s.label}
-                </Chip>
-              ))}
-            </div>
-          </div>
-
-          <div className="overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <div className="flex min-w-max items-center gap-1.5">
-              <span className={`${sectionLabel} shrink-0 whitespace-nowrap`}>Janela</span>
-              {drinkWindowOptions.map((option) => (
-                <Chip
-                  key={option.key}
-                  active={drinkWindowFilter === option.key}
-                  onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                  className="h-[32px] shrink-0 whitespace-nowrap px-2.5 text-[10px] normal-case tracking-[-0.01em]"
-                >
-                  {option.label}
-                </Chip>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
-    </EditorialCard>
+
+      <div className="adega-controls">
+        <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+          <SelectTrigger aria-label="Ordenar vinhos" className="adega-filter-btn h-auto min-w-0 shadow-none">
+            <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[var(--sx-bordeaux)]" />
+            <span className="min-w-0 text-left">
+              <span className="filter-label">Ordenar</span>
+              <span className="block truncate">{sortLabel.replace("Ordenar: ", "")}</span>
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
+            <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
+            <SelectItem value="value">Ordenar: Mais caros</SelectItem>
+            <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
+            <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+          <SelectTrigger aria-label="Filtrar por país" className="adega-filter-btn h-auto min-w-0 shadow-none">
+            <Globe className="h-3.5 w-3.5 shrink-0 text-[var(--sx-olive)]" />
+            <span className="min-w-0 text-left">
+              <span className="filter-label">País</span>
+              <span className="block truncate">{countryLabel.replace("País: ", "")}</span>
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">País</SelectItem>
+            {countryOptions.filter((o) => o.key !== "all").map((option) => (
+              <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <button type="button" className="btn-adicionar-adega" onClick={() => setAddOpen(true)}>
+          <Plus className="h-3.5 w-3.5" />
+          + Adicionar
+        </button>
+      </div>
+
+      <div className="chips-row">
+        {styleOptions.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            className={`chip ${styleFilter === s.key ? "active" : ""}`}
+            onClick={() => setStyleFilter(s.key)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="chips-row">
+        {drinkWindowOptions.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            className={`chip ${drinkWindowFilter === option.key ? "active" : ""}`}
+            onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+          >
+            {option.label}
+          </button>
+        ))}
+        {!isMobile && (
+          <span className="ml-auto inline-flex rounded-[var(--sx-r-pill)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-1">
+            <button className={`chip !border-0 !px-3 ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
+              Grade
+            </button>
+            <button className={`chip !border-0 !px-3 ${view === "list" ? "active" : ""}`} onClick={() => setView("list")}>
+              Lista
+            </button>
+          </span>
+        )}
+      </div>
+    </>
   );
 
   const filtered = useMemo(() => {
@@ -338,128 +334,8 @@ export default function PersonalCellarPage() {
 
   return (
     <>
-      <div className="editorial-page">
-        {isMobile ? (
-          mobileHeader(filtered.length)
-        ) : (
-          <EditorialCard style={{ padding: "10px 12px 10px" }}>
-            <div className="flex flex-col gap-1.5">
-              <div className="grid gap-2 lg:grid-cols-[minmax(210px,300px)_minmax(0,1fr)_auto] lg:items-center lg:gap-2.5">
-                <div className="flex min-w-0 flex-col">
-                  <Kicker>Adega</Kicker>
-                  <h1 className="editorial-page-h1 mt-0.5 !text-[26px] sm:!text-[28px] leading-tight tracking-[-0.04em]">
-                    Minha Adega
-                  </h1>
-                  <div className="mt-1 text-[12px] font-medium tracking-[-0.01em]" style={{ color: "rgba(58,51,39,0.58)" }}>
-                    <b style={{ color: "#1a1713", fontWeight: 700 }}>{filtered.length}</b> / {wines.length} vinhos
-                  </div>
-                </div>
-
-                <div className="editorial-search min-w-0">
-                  <Search className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-                  <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Buscar por nome, produtor, região…"
-                  />
-                  {query && (
-                    <button type="button" onClick={() => setQuery("")} aria-label="Limpar">
-                      <X className="h-4 w-4" style={{ color: "rgba(58,51,39,0.4)" }} />
-                    </button>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="editorial-btn-primary h-10 rounded-[14px] px-4 text-[12.5px] font-semibold tracking-[-0.01em] whitespace-nowrap"
-                  onClick={() => setAddOpen(true)}
-                >
-                  + Adicionar
-                </button>
-              </div>
-
-              <div className="overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-max items-center gap-2.5">
-                  <div className="flex items-center gap-2">
-                    <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-                      <SelectTrigger
-                        aria-label="Ordenar vinhos"
-                        className={`${controlBase} ${controlSurface} h-10 min-w-[180px] px-3.5 text-[12px]`}
-                      >
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[#7B1E2B]/75" />
-                          <span className="min-w-0 truncate">{sortLabel}</span>
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-                        <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-                        <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-                        <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-                        <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-                      <SelectTrigger
-                        aria-label="Filtrar por país"
-                        className={`${controlBase} ${controlSurface} h-10 min-w-[144px] px-3.5 text-[12px]`}
-                      >
-                        <div className="flex min-w-0 items-center gap-1.5">
-                          <Globe className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]/80" />
-                          <span className="min-w-0 truncate">{countryLabel}</span>
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">País</SelectItem>
-                        {countryOptions.filter((o) => o.key !== "all").map((option) => (
-                          <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className={sectionLabel}>Tipo</span>
-                    {styleOptions.map((s) => (
-                      <Chip
-                        key={s.key}
-                        active={styleFilter === s.key}
-                        onClick={() => setStyleFilter(s.key)}
-                        className="h-10 px-3 text-[11px] normal-case tracking-[-0.01em]"
-                      >
-                        {s.label}
-                      </Chip>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className={sectionLabel}>Janela</span>
-                    {drinkWindowOptions.map((option) => (
-                      <Chip
-                        key={option.key}
-                        active={drinkWindowFilter === option.key}
-                        onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-                        className="h-10 px-3 text-[11px] normal-case tracking-[-0.01em]"
-                      >
-                        {option.label}
-                      </Chip>
-                    ))}
-                  </div>
-
-                  <div className="editorial-segmented h-10">
-                    <button className={view === "grid" ? "active" : ""} onClick={() => setView("grid")}>
-                      Grade
-                    </button>
-                    <button className={view === "list" ? "active" : ""} onClick={() => setView("list")}>
-                      Lista
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </EditorialCard>
-        )}
+      <div className="editorial-page !px-0">
+        {pageHeader(filtered.length)}
 
         {/* Results */}
         {isLoading ? (
@@ -499,227 +375,60 @@ export default function PersonalCellarPage() {
             className="px-6 py-10 lg:py-12"
           />
         ) : view === "grid" ? (
-          <div
-            className={isMobile
-              ? "grid grid-cols-2 gap-2"
-              : "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]"}
-          >
+          <div className="adega-grid">
             {filtered.map((w) => {
-              const family = getStyleFamily(w.style);
-              const color = STYLE_COLORS[family];
               const dw = resolveSuggestedDrinkWindow(w);
               const classification = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until });
-              const past = classification.status === "past";
-              const statusTone = past
-                ? { background: "rgba(201,107,85,0.12)", color: "#B55A43" }
-                : classification.status === "now"
-                  ? { background: "rgba(95,127,82,0.14)", color: "#4C6B43" }
-                  : classification.status === "soon"
-                    ? { background: "rgba(198,167,104,0.16)", color: "#8B6914" }
-                    : { background: "rgba(107,130,152,0.12)", color: "#566C82" };
-              return isMobile ? (
-                <EditorialCard
+              return (
+                <article
                   key={w.id}
-                  className="flex h-full flex-col overflow-hidden"
-                  style={{ padding: 8, cursor: "pointer" }}
+                  className="wine-card"
+                  onClick={() => setEditWine(w)}
                 >
-                  <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
-                    {showLabels && (
-                      <WineLabelPreview
-                        wine={w}
-                        alt={w.name}
-                        className="mb-2 h-[88px] overflow-hidden rounded-[14px]"
-                        imageClassName="h-[88px] w-full object-cover"
-                        generated={false}
-                        compact
-                      />
-                    )}
-
-                    <div className="mb-1.25 flex min-h-0 items-start justify-between gap-2">
-                      <div className="flex min-w-0 items-start gap-1.5">
-                        <div
-                          className="mt-[0.34rem] h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{
-                            background: `linear-gradient(145deg, ${color}, ${color}cc)`,
-                            boxShadow:
-                              "0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.28)",
-                          }}
-                        />
-                        <h3
-                          className="font-serif text-[13px] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1a1713]"
-                          style={{
-                            fontFamily: "'Libre Baskerville', Georgia, serif",
-                            display: "-webkit-box",
-                            WebkitBoxOrient: "vertical",
-                            WebkitLineClamp: 2,
-                            overflow: "hidden",
-                            minHeight: 0,
-                          }}
-                        >
-                          {w.name}
-                        </h3>
-                      </div>
-                      {w.rating != null && (
-                        <div
-                          className="flex items-center gap-1 text-[9.5px] font-bold tabular-nums"
-                          style={{ color: "#B48C3A" }}
-                        >
-                          <Star className="h-2.5 w-2.5 fill-current" /> {Number(w.rating).toFixed(1)}
-                        </div>
-                      )}
+                  {showLabels ? (
+                    <WineLabelPreview
+                      wine={w}
+                      alt={w.name}
+                      className="wine-card-image"
+                      imageClassName="h-full w-full object-cover"
+                      generated={false}
+                      compact
+                    />
+                  ) : (
+                    <div className="wine-card-image-placeholder">
+                      <WineIcon className="h-8 w-8" />
                     </div>
+                  )}
 
-                    <p className="mt-0.5 truncate text-[10px] font-medium text-[#6F665C]">
+                  <div className="wine-card-body">
+                    <span className={`drink-badge ${getDrinkBadgeClass(classification.status)}`}>
+                      {classification.label}
+                    </span>
+                    <h3 className="wine-card-name">{w.name}</h3>
+                    <p className="wine-card-vintage">
                       {[w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Safra NV · Região n/i"}
                     </p>
+                    <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
+                      {getStyleFamily(w.style)}
+                    </span>
+                    <span className="wine-qty-badge">{w.quantity} un.</span>
 
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
-                      <StyleBadge
-                        style={w.style}
-                        className="min-h-[18px] text-[8.5px] leading-none"
-                      />
-                      <span
-                        className="text-[9.5px] font-semibold text-[#6F665C]"
+                    <div className="wine-card-footer">
+                      <span className="wine-card-price">{formatWinePrice(w.current_value)}</span>
+                      <button
+                        type="button"
+                        className="btn-abrir-card"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenBottle(w);
+                        }}
+                        disabled={wineEvent.isPending}
                       >
-                        {w.quantity} un.
-                      </span>
-                    </div>
-
-                    <div className="mt-1.5 flex items-center justify-between gap-2">
-                      <span
-                        className="inline-flex h-5.5 items-center rounded-full px-2.5 text-[8.5px] font-bold tracking-[0.02em] whitespace-nowrap"
-                        style={statusTone}
-                      >
-                        {classification.label}
-                      </span>
-                      <p className="text-right text-[9.5px] font-semibold text-[#1a1713]">
-                        {w.current_value != null
-                          ? `R$ ${Number(w.current_value).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                          : "Preço n/i"}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="editorial-btn-open mt-1.5 h-7.5 w-full rounded-full px-3 text-[10.5px]"
-                      style={{ minHeight: 30 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenBottle(w);
-                      }}
-                      disabled={wineEvent.isPending}
-                    >
-                      Abrir
-                    </button>
-                  </div>
-                </EditorialCard>
-              ) : (
-                <EditorialCard
-                  key={w.id}
-                  className="flex h-full flex-col"
-                  style={{ padding: 14, cursor: "pointer" }}
-                >
-                  <div className="flex min-h-0 flex-1 flex-col" onClick={() => setEditWine(w)}>
-                    {showLabels && (
-                      <WineLabelPreview
-                        wine={w}
-                        alt={w.name}
-                        className="mb-2 h-[168px] sm:h-[160px]"
-                        imageClassName="h-[168px] w-full object-contain sm:h-[160px]"
-                        generated={false}
-                        compact
-                      />
-                    )}
-                    <div className="mb-1.5 flex min-h-0 items-start justify-between gap-2">
-                      <div className="flex min-w-0 items-start gap-1.5">
-                        <div
-                          className="mt-[0.38rem] h-2.5 w-2.5 shrink-0 rounded-full"
-                          style={{
-                            background: `linear-gradient(145deg, ${color}, ${color}cc)`,
-                            boxShadow:
-                              "0 1px 3px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.28)",
-                          }}
-                        />
-                        <h3
-                          className="min-w-0 font-serif text-[18px] font-semibold leading-[1.18] tracking-[-0.01em]"
-                          style={{
-                            fontFamily: "'Libre Baskerville', Georgia, serif",
-                            color: "#1a1713",
-                            display: "-webkit-box",
-                            WebkitBoxOrient: "vertical",
-                            WebkitLineClamp: 2,
-                            overflow: "hidden",
-                          }}
-                        >
-                          {w.name}
-                        </h3>
-                      </div>
-                      {w.rating != null && (
-                        <div
-                          className="flex items-center gap-1 text-[12px] font-bold tabular-nums"
-                          style={{ color: "#B48C3A" }}
-                        >
-                          <Star className="h-3.5 w-3.5 fill-current" /> {Number(w.rating).toFixed(1)}
-                        </div>
-                      )}
-                    </div>
-                    <p
-                      className="mt-0.5 min-h-[18px] truncate text-[12.25px]"
-                      style={{ color: "rgba(58,51,39,0.6)" }}
-                    >
-                      {[w.vintage, w.region, w.country].filter(Boolean).join(" · ")}
-                    </p>
-                    <div className="mt-2 min-h-[34px]">
-                      <DrinkWindow from={dw.from} until={dw.until} current={currentYear} estimated={dw.estimated} />
+                        Abrir
+                      </button>
                     </div>
                   </div>
-                  <div className="mt-2.5 pt-0">
-                    <div className="flex min-h-[80px] flex-col gap-2">
-                      <div className="flex min-h-[28px] flex-wrap items-center justify-between gap-x-3 gap-y-2">
-                        <StyleBadge
-                          style={w.style}
-                          className="min-h-[22px] text-[10px] leading-none"
-                        />
-                        <div className="text-right">
-                          {w.current_value != null && (
-                            <div
-                              className="text-[14px] font-bold tracking-[-0.02em]"
-                              style={{ color: "#1a1713" }}
-                            >
-                              R$ {Number(w.current_value).toLocaleString("pt-BR")}
-                            </div>
-                          )}
-                          <div
-                            className="text-[11px] font-semibold"
-                            style={{ color: "rgba(58,51,39,0.55)" }}
-                          >
-                            {w.quantity} un.
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex min-h-[34px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                        <span
-                          className="inline-flex h-7 w-fit items-center rounded-full px-3 text-[10px] font-bold tracking-[0.02em] whitespace-nowrap"
-                          style={statusTone}
-                        >
-                          {classification.label}
-                        </span>
-                        <button
-                          type="button"
-                          className="editorial-btn-open w-full sm:w-auto"
-                          style={{ minHeight: 36, padding: "0 14px", fontSize: 12 }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenBottle(w);
-                          }}
-                          disabled={wineEvent.isPending}
-                        >
-                          Abrir
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </EditorialCard>
+                </article>
               );
             })}
           </div>
