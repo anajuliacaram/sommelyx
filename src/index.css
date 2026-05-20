@@ -86,6 +86,64 @@
 
     /* Cream warm for content areas */
     --cream-warm: 33 18% 96%;
+
+    /* === SOMMELYX DESIGN TOKENS === */
+    --sx-bordeaux: #8B1A3B;
+    --sx-bordeaux-10: rgba(139,26,59,0.10);
+    --sx-bordeaux-06: rgba(139,26,59,0.06);
+    --sx-olive: #3A4A2E;
+    --sx-olive-10: rgba(58,74,46,0.10);
+    --sx-olive-06: rgba(58,74,46,0.06);
+
+    --sx-bg-base: #F5F0E8;
+    --sx-bg-card: #FDFCFA;
+    --sx-bg-input: #F2EDE6;
+    --sx-bg-overlay: rgba(26,23,20,0.45);
+
+    --sx-t-head: #1A1714;
+    --sx-t-body: #2D2420;
+    --sx-t-sub: #6B5E52;
+    --sx-t-muted: #9C8E82;
+    --sx-t-white: #FDFCFA;
+
+    --sx-b-default: #D9D0C4;
+    --sx-b-medium: #C4B8AA;
+    --sx-b-strong: #A89880;
+    --sx-b-focus: var(--sx-bordeaux);
+
+    --sx-r-sm: 8px;
+    --sx-r-md: 14px;
+    --sx-r-lg: 20px;
+    --sx-r-xl: 28px;
+    --sx-r-pill: 999px;
+
+    --sx-shadow-sm: 0 1px 3px rgba(26,23,20,0.06), 0 1px 2px rgba(26,23,20,0.04);
+    --sx-shadow-md: 0 4px 12px rgba(26,23,20,0.08), 0 2px 4px rgba(26,23,20,0.04);
+    --sx-shadow-lg: 0 8px 24px rgba(26,23,20,0.12), 0 4px 8px rgba(26,23,20,0.06);
+    --sx-shadow-modal: 0 20px 60px rgba(26,23,20,0.20), 0 8px 24px rgba(26,23,20,0.10);
+
+    --sx-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --sx-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1.00);
+    --sx-dur-fast: 120ms;
+    --sx-dur-base: 200ms;
+    --sx-dur-slow: 320ms;
+
+    --sx-bg-page: var(--sx-bg-base);
+    --sx-bg-row: var(--sx-bg-input);
+    --sx-text-headline: var(--sx-t-head);
+    --sx-text-body: var(--sx-t-body);
+    --sx-text-secondary: var(--sx-t-sub);
+    --sx-text-muted: var(--sx-t-muted);
+    --sx-text-on-dark: var(--sx-t-white);
+    --sx-border-default: var(--sx-b-default);
+    --sx-border-strong: var(--sx-b-medium);
+    --sx-border-focus: var(--sx-b-focus);
+    --sx-shadow-card: var(--sx-shadow-md);
+    --color-page-bg: var(--sx-bg-base);
+    --color-card-bg: var(--sx-bg-card);
+    --color-text-primary: var(--sx-t-head);
+    --color-text-secondary: var(--sx-t-sub);
+    --color-text-muted: var(--sx-t-muted);
   }
 
   .dark {
@@ -7427,4 +7485,134 @@ aside[class*="sidebar"],
   color: #6B5E52 !important;
   font-size: 12px !important;
   line-height: 1.5 !important;
+}
+
+/* === Design Token System + Premium Typography === */
+body,
+#root,
+.app-shell {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "SF Pro Display",
+    "Segoe UI Variable",
+    system-ui,
+    sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+  background: var(--sx-bg-base) !important;
+  color: var(--sx-t-body) !important;
+}
+
+.tx-display {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--sx-t-head);
+}
+
+.tx-title {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.20;
+  letter-spacing: -0.025em;
+  color: var(--sx-t-head);
+}
+
+.tx-headline {
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.30;
+  letter-spacing: -0.015em;
+  color: var(--sx-t-head);
+}
+
+.tx-body {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.50;
+  letter-spacing: -0.01em;
+  color: var(--sx-t-body);
+}
+
+.tx-sub {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
+  color: var(--sx-t-sub);
+}
+
+.tx-caption {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.40;
+  letter-spacing: 0.04em;
+  color: var(--sx-t-muted);
+}
+
+.tx-label {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.30;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sx-t-muted);
+}
+
+.text-black,
+.text-gray-900 {
+  color: var(--sx-t-head) !important;
+}
+
+.text-gray-800,
+.text-gray-700 {
+  color: var(--sx-t-body) !important;
+}
+
+.text-gray-600,
+.text-gray-500 {
+  color: var(--sx-t-sub) !important;
+}
+
+.text-gray-400,
+.text-gray-300 {
+  color: var(--sx-t-muted) !important;
+}
+
+.bg-white {
+  background: var(--sx-bg-card) !important;
+}
+
+.bg-gray-50,
+.bg-gray-100 {
+  background: var(--sx-bg-input) !important;
+}
+
+.border-gray-200,
+.border-gray-100 {
+  border-color: var(--sx-b-default) !important;
+}
+
+.rounded-lg {
+  border-radius: var(--sx-r-md) !important;
+}
+
+.rounded-xl {
+  border-radius: var(--sx-r-lg) !important;
+}
+
+.rounded-2xl {
+  border-radius: var(--sx-r-xl) !important;
+}
+
+.shadow-sm {
+  box-shadow: var(--sx-shadow-sm) !important;
+}
+
+.shadow-md {
+  box-shadow: var(--sx-shadow-md) !important;
 }
