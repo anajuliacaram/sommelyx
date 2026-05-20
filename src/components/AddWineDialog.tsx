@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1046,6 +1045,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     <>
       <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <SheetContent
+        centered
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
       >
@@ -1088,23 +1088,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </AiModalCard>
                   )}
                   <div className="flex gap-2 w-full pt-1">
-                    <Button
+                    <AiModalActionButton
                       type="button"
                       variant="secondary"
-                      className="h-10 flex-1 rounded-[16px]"
+                      className="mt-0 h-10 flex-1"
                       onClick={() => { reset(); onOpenChange(false); }}
                     >
                       Concluir
-                    </Button>
-                    <Button
+                    </AiModalActionButton>
+                    <AiModalActionButton
                       type="button"
                       variant="primary"
-                      className="h-10 flex-1 rounded-[16px]"
+                      className="mt-0 h-10 flex-1"
                       onClick={() => reset()}
                     >
                       <Plus className="h-4 w-4" />
                       Adicionar outro
-                    </Button>
+                    </AiModalActionButton>
                   </div>
                 </motion.div>
               ) : (
@@ -1114,7 +1114,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                       onClick={() => setScanOpen(true)}
                     >
-                      <div className="w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+                      <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                         <Camera className="h-4.5 w-4.5" style={{ color: '#6F7F5B' }} />
                       </div>
                       <div className="flex flex-col">
@@ -1127,7 +1127,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
                       onClick={() => setImportCsvOpen(true)}
                     >
-                      <div className="w-8 h-8 rounded-[12px] flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+                      <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                         <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                       </div>
                       <div className="flex flex-col">

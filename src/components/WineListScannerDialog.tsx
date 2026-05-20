@@ -589,7 +589,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <TooltipProvider>
         <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
+          <SheetContent centered className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
             <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
             <AiModalShell>
               <AiModalHeaderBar>
@@ -597,7 +597,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                   icon={<BookOpen className="h-5 w-5" />}
                   title="Analisar Carta"
                   description="Encontre os destaques da carta."
-                  tone="purple"
+                  tone="gold"
                 />
               </AiModalHeaderBar>
 

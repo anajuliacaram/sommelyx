@@ -17,7 +17,7 @@ import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { notifySuccess } from "@/lib/feedback";
 import { logFileRequestStart } from "@/lib/observability";
 import { buildPresentationStructureLine, cleanAiPresentationText } from "@/lib/ai-presentation";
-import { AiModalHeader, AiModalCard, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AiFilterChip, AI_MODAL_FIELD_CLASSNAME, AI_MODAL_HELP_TEXT_CLASSNAME, AI_MODAL_LIST_ROW_CLASSNAME, AI_MODAL_LIST_ROW_SELECTED_CLASSNAME, AI_MODAL_LIST_SURFACE_CLASSNAME, AI_MODAL_META_TEXT_CLASSNAME, AI_MODAL_TEXT_PRIMARY_CLASSNAME, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
+import { AiModalHeader, AiModalCard, AiModalActionButton, AiModalShell, AiModalHeaderBar, AiModalBody, AiModalSplitLayout, AiFilterChip, AiSectionLabel, AI_MODAL_FIELD_CLASSNAME, AI_MODAL_HELP_TEXT_CLASSNAME, AI_MODAL_LIST_ROW_CLASSNAME, AI_MODAL_LIST_ROW_SELECTED_CLASSNAME, AI_MODAL_LIST_SURFACE_CLASSNAME, AI_MODAL_META_TEXT_CLASSNAME, AI_MODAL_TEXT_PRIMARY_CLASSNAME, AI_MODAL_SHEET_CONTENT_CLASSNAME, AI_MODAL_SHEET_CONTENT_STYLE } from "@/components/ai-flow/ModalLayout";
 import {
   PairingLoadingState,
   PairingErrorState,
@@ -1120,7 +1120,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
+      <SheetContent centered className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
         <SheetTitle className="sr-only">Harmonizar</SheetTitle>
         <AiModalShell>
         <AiModalHeaderBar>
@@ -1584,11 +1584,17 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   {selectedWine ? (
                     <div className="space-y-2">
                       <div className="consumption-selected-summary">
-                        <div className="min-w-0">
-                        <p className={cn("consumption-wine-name", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{selectedWine.name}</p>
-                        <p className={cn("consumption-wine-meta", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
-                        </p>
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="consumption-wine-icon is-selected">
+                            <WineIcon className="h-3.5 w-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
+                            <p className={cn("consumption-wine-name mt-1", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{selectedWine.name}</p>
+                            <p className={cn("consumption-wine-meta mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                              {[selectedWine.style, selectedWine.grape, selectedWine.region, selectedWine.country].filter(Boolean).join(" · ")}
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <AiModalActionButton

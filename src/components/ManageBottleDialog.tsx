@@ -1,19 +1,45 @@
 import { useState, useMemo } from "react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Wine as WineIcon, Check, Search, X, Filter, Camera, Plus, Trash2, Star } from "@/icons/lucide";
+import { Wine as WineIcon, Check, Search, Filter, Camera, Plus, Trash2, MapPin } from "@/icons/lucide";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
+import {
+  AI_MODAL_FIELD_CLASSNAME,
+  AI_MODAL_HELP_TEXT_CLASSNAME,
+  AI_MODAL_INLINE_ACTION_CLASSNAME,
+  AI_MODAL_LABEL_CLASSNAME,
+  AI_MODAL_LIST_ROW_CLASSNAME,
+  AI_MODAL_LIST_SURFACE_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
+  AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_CLASSNAME,
+  AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_CLASSNAME,
+  AI_MODAL_SHEET_CONTENT_STYLE,
+  AI_MODAL_TEXTAREA_CLASSNAME,
+  AI_MODAL_TEXT_PRIMARY_CLASSNAME,
+  AiFilterChip,
+  AiModalActionButton,
+  AiModalBody,
+  AiModalCard,
+  AiModalFooterBar,
+  AiModalHeader,
+  AiModalHeaderBar,
+  AiModalShell,
+  AiModalSplitLayout,
+  AiSectionLabel,
+} from "@/components/ai-flow/ModalLayout";
 
 interface ManageBottleDialogProps {
   open: boolean;
@@ -40,21 +66,18 @@ interface ConsumptionItem {
 
 let itemCounter = 0;
 
-// Wine type color dot — consistent with the rest of the app
-const wineTypeColor = (style?: string | null): string => {
-  if (!style) return "#9CA3AF";
-  const s = style.toLowerCase();
-  if (s.includes("tinto") || s.includes("red")) return "#7B1E2B";
-  if (s.includes("branco") || s.includes("white")) return "#D4B86A";
-  if (s.includes("rosé") || s.includes("rose")) return "#E8A4A4";
-  if (s.includes("espumante") || s.includes("sparkling") || s.includes("champagne")) return "#A8C49A";
-  if (s.includes("sobremesa") || s.includes("fortificado")) return "#8B5A2B";
-  return "#9CA3AF";
-};
-
 const RATING_LABELS: Record<number, string> = {
   1: "Ruim", 2: "Regular", 3: "Bom", 4: "Muito bom", 5: "Excelente",
 };
+
+const STYLE_FILTERS = [
+  { value: "all" as const, label: "Todos", color: "rgba(28,28,28,0.28)" },
+  { value: "tinto" as const, label: "Tinto", color: "#7B1E2B" },
+  { value: "branco" as const, label: "Branco", color: "#C8A96A" },
+  { value: "rose" as const, label: "Rosé", color: "#E8A0A6" },
+  { value: "espumante" as const, label: "Espumante", color: "#6B7D55" },
+  { value: "sobremesa" as const, label: "Sobremesa", color: "#B4793F" },
+];
 
 export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogProps) {
   const { profileType } = useAuth();
@@ -272,479 +295,426 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   };
 
   const canAddItem = source === "cellar" ? !!wineId : !!extWineName.trim();
-
-  // Section label — matches Harmonização modal
-  const SectionLabel = ({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) => (
-    <div className="flex items-center gap-1.5 mb-2">
-      {icon}
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3A3327]/55">
-        {children}
-      </span>
-    </div>
-  );
+  const fieldClassName = AI_MODAL_FIELD_CLASSNAME;
+  const submitLabel = submitting
+    ? "Salvando..."
+    : items.length === 0
+      ? "Adicione um vinho à lista"
+      : items.length === 1
+        ? "Salvar consumo"
+        : `Salvar ${items.length} consumos`;
 
   return (
     <>
-      <Sheet open={open} onOpenChange={v => { if (!v) resetAll(); onOpenChange(v); }}>
+      <Sheet open={open} onOpenChange={(v) => { if (!v) resetAll(); onOpenChange(v); }}>
         <SheetContent
-          className="w-full sm:max-w-[460px] overflow-y-auto p-0 border-l border-[rgba(255,255,255,0.45)] shadow-[0_18px_38px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.55)]"
-          style={{ background: "rgba(255,255,255,0.58)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+          centered
+          className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+          style={AI_MODAL_SHEET_CONTENT_STYLE}
+          aria-label="Adicionar consumo"
         >
-          {/* Header — premium block icon + serif title */}
-          <div className="px-6 pt-6 pb-5 sm:px-7 sm:pt-7">
-            <div className="flex items-start gap-3.5">
-              <div
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
-                style={{ background: "rgba(123,30,43,0.08)" }}
-              >
-                <WineIcon className="h-5 w-5 text-[#7B1E2B]" />
-              </div>
-              <div className="min-w-0 flex-1 pt-0.5">
-                <SheetTitle
-                  className="text-[26px] sm:text-[28px] font-semibold text-[#1A1713] leading-[1.15]"
-                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif", letterSpacing: "-0.02em" }}
-                >
-                  Adicionar Consumo
-                </SheetTitle>
-                <p className="text-[13px] leading-relaxed text-[#3A3327]/60 mt-1">
-                  Registre uma degustação da sua adega ou de um consumo externo
-                </p>
-              </div>
-            </div>
-          </div>
+          <SheetTitle className="sr-only">Adicionar consumo</SheetTitle>
+          <AiModalShell>
+            <AiModalHeaderBar>
+              <AiModalHeader
+                icon={<WineIcon className="h-5 w-5" />}
+                title="Adicionar consumo"
+                description="Registre uma degustação da sua adega ou um consumo externo."
+                tone="wine"
+              />
+            </AiModalHeaderBar>
 
-          <div className="px-6 sm:px-7 pb-8">
-            <AnimatePresence mode="wait">
-              {success ? (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center py-20 gap-4"
-                >
-                  <div
-                    className="w-14 h-14 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(123,30,43,0.25)]"
-                    style={{ background: "linear-gradient(135deg, #7B1E2B, #A12C3A)" }}
-                  >
-                    <Check className="h-7 w-7 text-white" />
-                  </div>
-                  <p className="text-[14px] font-medium text-[#1A1713] text-center">{success}</p>
-                </motion.div>
-              ) : (
-                <motion.div key="form" className="space-y-5">
-                  {/* Added items list */}
-                  {items.length > 0 && (
-                    <div className="space-y-2">
-                      <SectionLabel>Vinhos adicionados ({items.length})</SectionLabel>
-                      <div className="space-y-1.5">
-                        {items.map(item => (
-                          <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, x: -8 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="glass-card flex items-center gap-2.5 px-3 py-2.5 rounded-[12px]"
-                          >
-                            <span
-                              className="h-2.5 w-2.5 shrink-0 rounded-full"
-                              style={{ background: wineTypeColor(item.style) }}
-                              aria-hidden
-                            />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">
-                                {item.wineName}
-                              </p>
-                              <p className="text-[11px] text-[#3A3327]/60 mt-0.5">
-                                {item.quantity} un.{item.rating ? ` · ${RATING_LABELS[item.rating]}` : ""}
-                                {item.source === "external" ? " · Externo" : ""}
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeItem(item.id)}
-                              className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center text-[#3A3327]/50 hover:text-[#7B1E2B] hover:bg-[#7B1E2B]/8 transition-all duration-200"
-                              aria-label="Remover item"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ORIGEM — selectable cards */}
-                  <div>
-                    <SectionLabel>Origem</SectionLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      {([
-                        { value: "cellar" as const, label: "Minha adega", desc: "Registrar abertura" },
-                        { value: "external" as const, label: "Externo", desc: "Restaurante / outro" },
-                      ]).map(opt => {
-                        const active = source === opt.value;
-                        return (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => { setSource(opt.value); setWineId(""); }}
-                            className={cn(
-                              "group relative text-left px-3.5 py-3 rounded-[14px] border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                              active
-                                ? "border-[#7B1E2B] bg-[rgba(123,30,43,0.05)] shadow-[0_4px_14px_-6px_rgba(123,30,43,0.25)]"
-                                : "border-black/[0.08] bg-white/70 hover:bg-white hover:-translate-y-px",
-                            )}
-                          >
-                            <div className="flex items-center gap-2">
-                              <div className={cn(
-                                "h-4 w-4 rounded-full border flex items-center justify-center transition-colors",
-                                active ? "border-[#7B1E2B] bg-[#7B1E2B]" : "border-black/20 bg-white",
-                              )}>
-                                {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
-                              </div>
-                              <span className={cn(
-                                "text-[13px] font-semibold",
-                                active ? "text-[#7B1E2B]" : "text-[#1A1713]",
-                              )}>
-                                {opt.label}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-[#3A3327]/55 mt-1 ml-6">{opt.desc}</p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* CELLAR: Wine selector */}
-                  {source === "cellar" && (
-                    <div>
-                      <SectionLabel>Vinho</SectionLabel>
-                      {selectedWine ? (
-                        <div className="glass-card flex items-center gap-3 p-3 rounded-[14px]">
-                          <span
-                            className="h-2.5 w-2.5 shrink-0 rounded-full"
-                            style={{ background: wineTypeColor(selectedWine.style) }}
-                            aria-hidden
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">{selectedWine.name}</p>
-                            <p className="text-[11px] text-[#3A3327]/60 mt-0.5">
-                              {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} — {selectedWine.quantity} un.
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setWineId("")}
-                            className="shrink-0 h-7 w-7 rounded-full flex items-center justify-center text-[#3A3327]/55 hover:text-[#1A1713] hover:bg-black/[0.05] transition-all"
-                            aria-label="Trocar vinho"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
+            <AiModalBody className="consumption-modal-body">
+              <AiModalSplitLayout contentClassName="overflow-y-auto">
+                <AnimatePresence mode="wait">
+                  {success ? (
+                    <motion.div
+                      key="success"
+                      initial={{ opacity: 0, scale: 0.96 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="py-12"
+                    >
+                      <AiModalCard className="consumption-details-card flex flex-col items-center gap-3 py-10 text-center">
+                        <div className="consumption-wine-icon is-selected h-12 w-12 min-w-[48px]">
+                          <Check className="h-5 w-5" />
                         </div>
-                      ) : (
-                        <div className="space-y-2.5">
-                          <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#3A3327]/45" />
-                            <Input
-                              placeholder="Buscar por nome, uva, país, safra…"
-                              value={searchText}
-                              onChange={e => setSearchText(e.target.value)}
-                              className="pl-11 pr-12 h-12 text-[13px] rounded-[14px] bg-white"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowFilters(!showFilters)}
-                              className={cn(
-                                "absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full flex items-center justify-center transition-all duration-200",
-                                showFilters || activeFilterCount > 0
-                                  ? "bg-[#7B1E2B]/10 text-[#7B1E2B]"
-                                  : "text-[#3A3327]/55 hover:bg-black/[0.05]",
-                              )}
-                              aria-label="Filtros"
-                            >
-                              <Filter className="h-3.5 w-3.5" />
-                              {activeFilterCount > 0 && (
-                                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#7B1E2B] text-[9px] font-bold text-white flex items-center justify-center">
-                                  {activeFilterCount}
-                                </span>
-                              )}
-                            </button>
+                        <div>
+                          <p className={cn("text-center", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{success}</p>
+                          <p className={cn("mt-1 text-center", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                            Fechando automaticamente.
+                          </p>
+                        </div>
+                      </AiModalCard>
+                    </motion.div>
+                  ) : (
+                    <motion.div key="form" className="space-y-3">
+                      {items.length > 0 ? (
+                        <AiModalCard className="consumption-details-card">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <AiSectionLabel>Itens adicionados</AiSectionLabel>
+                            <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{items.length} selecionado(s)</span>
                           </div>
-
-                          <AnimatePresence>
-                            {showFilters && (
+                          <div className="space-y-2">
+                            {items.map((item) => (
                               <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden"
+                                key={item.id}
+                                initial={{ opacity: 0, x: -8 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="consumption-selected-summary rounded-[22px] px-3 py-3"
                               >
-                                <div className="glass-card space-y-2.5 p-3 rounded-[14px]">
-                                  {countries.length > 0 && (
-                                    <div>
-                                      <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">País</p>
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {countries.map(c => {
-                                          const on = selectedCountries.includes(c);
-                                          return (
-                                            <button
-                                              key={c}
-                                              type="button"
-                                              onClick={() => toggleFilter(c, selectedCountries, setSelectedCountries)}
-                                              className={cn(
-                                                "h-7 px-2.5 rounded-full text-[11px] font-medium border transition-all",
-                                                on
-                                                  ? "bg-[rgba(123,30,43,0.08)] border-[#7B1E2B] text-[#7B1E2B]"
-                                                  : "bg-white/70 border-black/[0.08] text-[#3A3327] hover:bg-black/[0.04]",
-                                              )}
-                                            >{c}</button>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                                  {grapesList.length > 0 && (
-                                    <div>
-                                      <p className="text-[10px] font-semibold text-[#3A3327]/55 uppercase tracking-[0.12em] mb-1.5">Uva</p>
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {grapesList.map(g => {
-                                          const on = selectedGrapes.includes(g);
-                                          return (
-                                            <button
-                                              key={g}
-                                              type="button"
-                                              onClick={() => toggleFilter(g, selectedGrapes, setSelectedGrapes)}
-                                              className={cn(
-                                                "h-7 px-2.5 rounded-full text-[11px] font-medium border transition-all",
-                                                on
-                                                  ? "bg-[rgba(123,30,43,0.08)] border-[#7B1E2B] text-[#7B1E2B]"
-                                                  : "bg-white/70 border-black/[0.08] text-[#3A3327] hover:bg-black/[0.04]",
-                                              )}
-                                            >{g}</button>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
-                                  )}
-                                  {activeFilterCount > 0 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }}
-                                      className="h-7 px-2.5 text-[11px] font-semibold text-[#7B1E2B] hover:bg-[#7B1E2B]/8 rounded-full transition-all"
-                                    >
-                                      Limpar filtros
-                                    </button>
-                                  )}
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <div className="consumption-wine-icon is-selected">
+                                    <WineIcon className="h-3.5 w-3.5" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="consumption-wine-name truncate">{item.wineName}</p>
+                                    <p className={cn("mt-0.5 truncate", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                                      {item.quantity} un.{item.rating ? ` · ${RATING_LABELS[item.rating]}` : ""}
+                                      {item.source === "external" ? " · Externo" : ""}
+                                    </p>
+                                  </div>
                                 </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeItem(item.id)}
+                                  className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "h-8 px-2.5")}
+                                  aria-label="Remover item"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
                               </motion.div>
-                            )}
-                          </AnimatePresence>
+                            ))}
+                          </div>
+                        </AiModalCard>
+                      ) : null}
 
-                          {/* Wine type filter pills */}
-                          {(() => {
-                            const pills = [
-                              { value: "all" as const, label: "Todos", bg: "#EFEDE8", fg: "#1A1713" },
-                              { value: "tinto" as const, label: "Tinto", bg: "#7B1E2B", fg: "#FFFFFF" },
-                              { value: "branco" as const, label: "Branco", bg: "#C8A96A", fg: "#FFFFFF" },
-                              { value: "rose" as const, label: "Rosé", bg: "#E8A0A6", fg: "#FFFFFF" },
-                              { value: "espumante" as const, label: "Espumante", bg: "#6A8F6B", fg: "#FFFFFF" },
-                              { value: "sobremesa" as const, label: "Sobremesa", bg: "#A67C52", fg: "#FFFFFF" },
-                            ];
-                            return (
-                              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-                                {pills.map(p => {
-                                  const active = styleFilter === p.value;
-                                  return (
-                                    <button
-                                      key={p.value}
-                                      type="button"
-                                      onClick={() => setStyleFilter(p.value)}
-                                      className={cn(
-                                        "shrink-0 rounded-full px-3 py-1.5 text-[12px] font-medium border transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                                        active
-                                          ? "scale-[1.05] shadow-sm border-transparent"
-                                          : "bg-white/70 text-[#3A3327] border-black/[0.08] hover:bg-white",
-                                      )}
-                                      style={active ? { background: p.bg, color: p.fg, borderColor: "transparent" } : undefined}
-                                    >
-                                      {p.label}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            );
-                          })()}
+                      <section className="consumption-section">
+                        <AiSectionLabel>Origem</AiSectionLabel>
+                        <div className="consumption-source-grid">
+                          {([
+                            { value: "cellar" as const, label: "Minha adega", desc: "Registrar abertura", icon: WineIcon },
+                            { value: "external" as const, label: "Externo", desc: "Restaurante / outro", icon: MapPin },
+                          ]).map((opt) => {
+                            const active = source === opt.value;
+                            const Icon = opt.icon;
 
-                          <ScrollArea className="max-h-[260px] rounded-[14px] border border-black/[0.06] bg-white/60">
-                            {filteredWines.length === 0 ? (
-                              <div className="px-4 py-8 text-center">
-                                <p className="text-[12px] text-[#3A3327]/55">
-                                  {baseWines.length === 0 ? "Você ainda não cadastrou vinhos" : "Nenhum vinho encontrado"}
-                                </p>
-                                {baseWines.length > 0 && (
-                                  <p className="text-[11px] text-[#3A3327]/45 mt-1">Use a busca ou ajuste os filtros para localizar a garrafa certa</p>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="divide-y divide-black/[0.05]">
-                                {filteredWines.map(w => (
-                                  <button
-                                    key={w.id}
-                                    type="button"
-                                    onClick={() => setWineId(w.id)}
-                                    className="w-full flex items-center gap-3 px-3.5 py-3 text-left hover:bg-black/[0.03] transition-colors"
-                                  >
-                                    <span
-                                      className="h-2.5 w-2.5 shrink-0 rounded-full"
-                                      style={{ background: wineTypeColor(w.style) }}
-                                      aria-hidden
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-[13px] font-semibold text-[#1A1713] truncate leading-tight">{w.name}</p>
-                                      <p className="text-[11px] text-[#3A3327]/60 truncate mt-0.5">
-                                        {[w.producer, w.vintage, w.grape, w.country].filter(Boolean).join(" · ")}
-                                      </p>
-                                    </div>
-                                    <span className="text-[11px] font-semibold text-[#3A3327]/65 shrink-0">{w.quantity} un.</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </ScrollArea>
-                          <p className="text-[11px] text-[#3A3327]/50 px-1">{filteredWines.length} vinho(s) encontrado(s)</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* EXTERNAL: Manual entry or scan */}
-                  {source === "external" && (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#3A3327]/55">
-                          Dados do vinho
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setScanOpen(true)}
-                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-[11px] font-semibold text-[#7B1E2B] bg-[rgba(123,30,43,0.06)] hover:bg-[rgba(123,30,43,0.10)] transition-all"
-                        >
-                          <Camera className="h-3.5 w-3.5" />
-                          Escanear rótulo
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input value={extWineName} onChange={e => setExtWineName(e.target.value)} placeholder="Nome do vinho *" className="col-span-2 h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extProducer} onChange={e => setExtProducer(e.target.value)} placeholder="Produtor" className="h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extVintage} onChange={e => setExtVintage(e.target.value)} placeholder="Safra" type="number" className="h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extCountry} onChange={e => setExtCountry(e.target.value)} placeholder="País" className="h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extRegion} onChange={e => setExtRegion(e.target.value)} placeholder="Região" className="h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extGrape} onChange={e => setExtGrape(e.target.value)} placeholder="Uva" className="h-11 text-[13px] rounded-[12px]" />
-                        <Input value={extLocation} onChange={e => setExtLocation(e.target.value)} placeholder="Local (restaurante…)" className="h-11 text-[13px] rounded-[12px]" />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Quantidade + Observações — grouped block */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <SectionLabel>Quantidade</SectionLabel>
-                      <Input
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={e => setQuantity(e.target.value)}
-                        className="h-11 text-[13px] rounded-[12px]"
-                      />
-                    </div>
-                    <div>
-                      <SectionLabel>Observações</SectionLabel>
-                      <Input
-                        value={notes}
-                        onChange={e => setNotes(e.target.value)}
-                        placeholder="Opcional…"
-                        className="h-11 text-[13px] rounded-[12px]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Avaliação — premium star system (only personal) */}
-                  {profileType !== "commercial" && (
-                    <div>
-                      <SectionLabel icon={<Star className="h-3 w-3 text-[#3A3327]/55" />}>Avaliação</SectionLabel>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map(v => {
-                            const filled = rating >= v;
                             return (
                               <button
-                                key={v}
+                                key={opt.value}
                                 type="button"
-                                onClick={() => setRating(rating === v ? 0 : v)}
-                                className="h-9 w-9 rounded-full flex items-center justify-center hover:bg-black/[0.04] transition-all duration-200"
-                                aria-label={`${v} estrela${v > 1 ? "s" : ""}`}
+                                onClick={() => { setSource(opt.value); setWineId(""); }}
+                                className={cn(
+                                  AI_MODAL_SELECTION_CARD_CLASSNAME,
+                                  "consumption-source-card",
+                                  active && "is-selected",
+                                  active ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
+                                )}
                               >
-                                <Star
-                                  className={cn(
-                                    "h-5 w-5 transition-all duration-200",
-                                    filled ? "text-[#7B1E2B]" : "text-[#3A3327]/25",
-                                  )}
-                                  fill={filled ? "#7B1E2B" : "none"}
-                                  strokeWidth={1.75}
-                                />
+                                <div className={cn("consumption-source-icon", opt.value === "external" && "olive", active && "is-selected")}>
+                                  <Icon className="h-4 w-4" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{opt.label}</p>
+                                  <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>{opt.desc}</p>
+                                </div>
                               </button>
                             );
                           })}
                         </div>
-                        {rating > 0 && (
-                          <span className="text-[12px] font-medium text-[#7B1E2B] ml-1">
-                            {RATING_LABELS[rating]}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                      </section>
+
+                      {source === "cellar" ? (
+                        selectedWine ? (
+                          <section className="consumption-selected-summary">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="consumption-wine-icon is-selected">
+                                <WineIcon className="h-3.5 w-3.5" />
+                              </div>
+                              <div className="min-w-0">
+                                <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
+                                <p className="consumption-wine-name mt-1 truncate">{selectedWine.name}</p>
+                                <p className={cn("mt-0.5 truncate", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                                  {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ")} · {selectedWine.quantity} un.
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setWineId("")}
+                              className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "consumption-change-button")}
+                            >
+                              Trocar
+                            </button>
+                          </section>
+                        ) : (
+                          <section className="consumption-section consumption-picker-section">
+                            <div className="consumption-section-head">
+                              <AiSectionLabel>Vinho</AiSectionLabel>
+                              <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
+                            </div>
+
+                            <div className="consumption-search relative">
+                              <Search className="pointer-events-none absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[rgba(72,60,46,0.46)]" />
+                              <Input
+                                placeholder="Buscar por nome, uva, país, safra"
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                className={cn(fieldClassName, "pl-10 pr-12")}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={cn(
+                                  "absolute right-2 top-1/2 inline-flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full transition-colors",
+                                  showFilters || activeFilterCount > 0
+                                    ? "bg-[rgba(58,74,46,0.12)] text-[var(--sx-olive)]"
+                                    : "text-[rgba(72,60,46,0.46)] hover:bg-[rgba(58,74,46,0.08)] hover:text-[var(--sx-olive)]",
+                                )}
+                                aria-label="Filtros"
+                              >
+                                <Filter className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+
+                            <AnimatePresence>
+                              {showFilters ? (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <AiModalCard className="consumption-details-card px-3 py-3">
+                                    {countries.length > 0 ? (
+                                      <div className="space-y-2">
+                                        <AiSectionLabel>País</AiSectionLabel>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {countries.map((country) => (
+                                            <AiFilterChip
+                                              key={country}
+                                              type="button"
+                                              selected={selectedCountries.includes(country)}
+                                              onClick={() => toggleFilter(country, selectedCountries, setSelectedCountries)}
+                                            >
+                                              {country}
+                                            </AiFilterChip>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : null}
+
+                                    {grapesList.length > 0 ? (
+                                      <div className={cn("space-y-2", countries.length > 0 && "mt-3")}>
+                                        <AiSectionLabel>Uva</AiSectionLabel>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {grapesList.map((grape) => (
+                                            <AiFilterChip
+                                              key={grape}
+                                              type="button"
+                                              selected={selectedGrapes.includes(grape)}
+                                              onClick={() => toggleFilter(grape, selectedGrapes, setSelectedGrapes)}
+                                            >
+                                              {grape}
+                                            </AiFilterChip>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    ) : null}
+
+                                    {activeFilterCount > 0 ? (
+                                      <button
+                                        type="button"
+                                        onClick={() => { setSelectedCountries([]); setSelectedGrapes([]); }}
+                                        className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "mt-3")}
+                                      >
+                                        Limpar filtros
+                                      </button>
+                                    ) : null}
+                                  </AiModalCard>
+                                </motion.div>
+                              ) : null}
+                            </AnimatePresence>
+
+                            <div className="consumption-chip-row">
+                              {STYLE_FILTERS.map((pill) => (
+                                <AiFilterChip
+                                  key={pill.value}
+                                  type="button"
+                                  selected={styleFilter === pill.value}
+                                  onClick={() => setStyleFilter(pill.value)}
+                                  className="consumption-filter-chip shrink-0 uppercase tracking-[0.04em]"
+                                >
+                                  <span className="mr-1 inline-flex h-1.5 w-1.5 rounded-full" style={{ backgroundColor: pill.color }} />
+                                  {pill.label}
+                                </AiFilterChip>
+                              ))}
+                            </div>
+
+                            <div className={cn("consumption-wine-list max-h-[320px]", AI_MODAL_LIST_SURFACE_CLASSNAME)}>
+                              {filteredWines.length === 0 ? (
+                                <div className="px-4 py-6 text-center">
+                                  <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>
+                                    {baseWines.length === 0 ? "Você ainda não cadastrou vinhos" : "Nenhum vinho encontrado"}
+                                  </p>
+                                  {baseWines.length > 0 ? (
+                                    <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                                      Use a busca ou ajuste os filtros.
+                                    </p>
+                                  ) : null}
+                                </div>
+                              ) : (
+                                filteredWines.map((wine) => {
+                                  const selected = wineId === wine.id;
+
+                                  return (
+                                    <button
+                                      key={wine.id}
+                                      type="button"
+                                      onClick={() => setWineId(wine.id)}
+                                      className={cn(
+                                        AI_MODAL_LIST_ROW_CLASSNAME,
+                                        "consumption-wine-row",
+                                        selected && "is-selected",
+                                      )}
+                                    >
+                                      <div className={cn("consumption-wine-icon", selected && "is-selected")}>
+                                        {selected ? <Check className="h-3.5 w-3.5" /> : <WineIcon className="h-3.5 w-3.5" />}
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="consumption-wine-name truncate">
+                                          {wine.name}
+                                          {wine.vintage ? <span className="consumption-wine-vintage"> {wine.vintage}</span> : null}
+                                        </p>
+                                        <p className="consumption-wine-meta truncate">
+                                          {[wine.producer, wine.grape, wine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+                                        </p>
+                                      </div>
+                                      <span className={cn("consumption-qty-badge", selected && "is-selected")}>
+                                        {wine.quantity}x
+                                      </span>
+                                    </button>
+                                  );
+                                })
+                              )}
+                            </div>
+                          </section>
+                        )
+                      ) : (
+                        <AiModalCard className="consumption-details-card">
+                          <div className="flex items-center justify-between gap-3">
+                            <AiSectionLabel>Dados do vinho</AiSectionLabel>
+                            <button
+                              type="button"
+                              onClick={() => setScanOpen(true)}
+                              className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "shrink-0")}
+                            >
+                              <Camera className="h-3.5 w-3.5" />
+                              Escanear rótulo
+                            </button>
+                          </div>
+
+                          <div className="consumption-field-grid mt-3">
+                            <Input value={extWineName} onChange={(e) => setExtWineName(e.target.value)} placeholder="Nome do vinho *" className={cn(fieldClassName, "col-span-2")} />
+                            <div className="consumption-two-col">
+                              <Input value={extProducer} onChange={(e) => setExtProducer(e.target.value)} placeholder="Produtor" className={fieldClassName} />
+                              <Input value={extVintage} onChange={(e) => setExtVintage(e.target.value)} placeholder="Safra" type="number" className={fieldClassName} />
+                              <Input value={extCountry} onChange={(e) => setExtCountry(e.target.value)} placeholder="País" className={fieldClassName} />
+                              <Input value={extRegion} onChange={(e) => setExtRegion(e.target.value)} placeholder="Região" className={fieldClassName} />
+                              <Input value={extGrape} onChange={(e) => setExtGrape(e.target.value)} placeholder="Uva" className={fieldClassName} />
+                              <Input value={extLocation} onChange={(e) => setExtLocation(e.target.value)} placeholder="Local (restaurante, viagem...)" className={fieldClassName} />
+                            </div>
+                          </div>
+                        </AiModalCard>
+                      )}
+
+                      <AiModalCard className="consumption-details-card">
+                        <AiSectionLabel>Detalhes</AiSectionLabel>
+                        <div className="consumption-field-grid mt-3">
+                          <div className="consumption-two-col">
+                            <div className="space-y-1">
+                              <label className={AI_MODAL_LABEL_CLASSNAME}>Quantidade</label>
+                              <Input
+                                type="number"
+                                min="1"
+                                value={quantity}
+                                onChange={(e) => setQuantity(e.target.value)}
+                                className={fieldClassName}
+                              />
+                            </div>
+
+                            {profileType !== "commercial" ? (
+                              <div className="space-y-1">
+                                <label className={AI_MODAL_LABEL_CLASSNAME}>Avaliação</label>
+                                <div className="consumption-rating-grid">
+                                  {Object.entries(RATING_LABELS).map(([value, label]) => {
+                                    const numericValue = Number(value);
+                                    const selected = rating === numericValue;
+
+                                    return (
+                                      <button
+                                        key={value}
+                                        type="button"
+                                        onClick={() => setRating(selected ? 0 : numericValue)}
+                                        className={cn(
+                                          AI_MODAL_SEGMENTED_BUTTON_CLASSNAME,
+                                          "consumption-rating-button",
+                                          selected ? AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME : AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME,
+                                        )}
+                                      >
+                                        {label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className={AI_MODAL_LABEL_CLASSNAME}>Observações</label>
+                            <Textarea
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
+                              placeholder="Impressões, ocasião, serviço."
+                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "min-h-[86px]")}
+                              rows={2}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <AiModalActionButton
+                            type="button"
+                            variant="secondary"
+                            disabled={!canAddItem}
+                            onClick={addItemToList}
+                            className="w-full"
+                          >
+                            <Plus className="h-4 w-4" />
+                            Adicionar à lista
+                          </AiModalActionButton>
+                        </div>
+                      </AiModalCard>
+                    </motion.div>
                   )}
+                </AnimatePresence>
+              </AiModalSplitLayout>
+            </AiModalBody>
 
-                  {/* Add to list — secondary action */}
-                  <button
-                    type="button"
-                    disabled={!canAddItem}
-                    onClick={addItemToList}
-                    className={cn(
-                      "w-full h-11 rounded-[14px] text-[13px] font-semibold inline-flex items-center justify-center gap-1.5 transition-all duration-200",
-                      canAddItem
-                        ? "surface-clarity border border-black/[0.08] text-[#1A1713] hover:bg-white hover:-translate-y-px"
-                        : "bg-white/40 border border-dashed border-black/[0.10] text-[#3A3327]/40 cursor-not-allowed",
-                    )}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Adicionar à lista
-                  </button>
-
-                  {/* PRIMARY — gradient wine button */}
-                  <button
-                    type="button"
-                    disabled={submitting || items.length === 0}
-                    onClick={handleSubmitAll}
-                    className={cn(
-                      "w-full h-[52px] rounded-[16px] text-white text-[15px] font-semibold transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_10px_28px_-10px_rgba(123,30,43,0.5)]",
-                      submitting || items.length === 0
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:-translate-y-px hover:shadow-[0_14px_32px_-10px_rgba(123,30,43,0.6)] active:translate-y-0",
-                    )}
-                    style={{
-                      background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)",
-                    }}
-                  >
-                    {submitting
-                      ? "Salvando…"
-                      : items.length === 0
-                        ? "Adicione um vinho à lista"
-                        : `Confirmar ${items.length} consumo${items.length > 1 ? "s" : ""}`}
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+            {!success ? (
+              <AiModalFooterBar>
+                <AiModalActionButton
+                  type="button"
+                  variant="primary"
+                  disabled={submitting || items.length === 0}
+                  onClick={handleSubmitAll}
+                  className="w-full"
+                >
+                  {submitLabel}
+                </AiModalActionButton>
+              </AiModalFooterBar>
+            ) : null}
+          </AiModalShell>
         </SheetContent>
       </Sheet>
 

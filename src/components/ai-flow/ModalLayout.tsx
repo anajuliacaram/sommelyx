@@ -12,35 +12,25 @@ export const AI_MODAL_CARD_BORDER = "var(--sx-border-default)";
 export const AI_MODAL_SOFT_SURFACE = "var(--sx-bg-row)";
 
 export const AI_MODAL_CARD_CLASSNAME =
-  "premium-card-surface rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] shadow-none";
+  "premium-card-surface";
 
 export const AI_MODAL_ACTION_TILE_CLASSNAME =
-  "modal-action-card premium-card-surface";
+  "modal-action-card";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "modal-container premium-modal-shell sx-ai-modal fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[560px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[86vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
+  "modal-container premium-modal-shell sx-ai-modal h-auto max-h-[92dvh] w-full max-w-[560px] gap-0 overflow-hidden p-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   width: "100%",
   maxWidth: "560px",
   maxHeight: "92dvh",
   height: "auto",
-  background: "var(--sx-bg-card)",
-  border: "0.5px solid var(--sx-b-default)",
-  backdropFilter: "none",
-  WebkitBackdropFilter: "none",
-  boxShadow: "var(--sx-shadow-lg)",
 };
 
 export const AI_MODAL_DIALOG_CONTENT_CLASSNAME =
-  "modal-container items-center overflow-hidden rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] p-0 shadow-[var(--sx-shadow-lg)] sm:max-w-[520px]";
+  "modal-container premium-modal-shell items-center overflow-hidden p-0 sm:max-w-[520px]";
 
 export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
-  background: "var(--sx-bg-card)",
-  border: "0.5px solid var(--sx-b-default)",
-  backdropFilter: "none",
-  WebkitBackdropFilter: "none",
-  boxShadow: "var(--sx-shadow-lg)",
 };
 
 export const AI_MODAL_FIELD_CLASSNAME =
@@ -74,15 +64,15 @@ export const AI_MODAL_LIST_SURFACE_CLASSNAME =
 export const AI_MODAL_LIST_ROW_CLASSNAME =
   "modal-wine-row flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_LIST_ROW_SELECTED_CLASSNAME =
-  "bg-[rgba(139,26,59,0.06)]";
+  "";
 export const AI_MODAL_INLINE_ACTION_CLASSNAME =
-  "h-8 rounded-full border border-[rgba(58,74,46,0.16)] bg-[rgba(253,252,249,0.72)] px-3 text-[11px] font-medium text-[var(--sx-olive)] shadow-none hover:bg-[var(--sx-olive-06)]";
+  "premium-inline-action h-8 rounded-full px-3 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(58,74,46,0.10)]";
 export const AI_MODAL_SEGMENTED_BUTTON_CLASSNAME =
-  "h-8 rounded-full border px-2 text-[11px] font-medium transition-colors duration-150";
+  "h-8 rounded-full border px-2 text-[11px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(139,26,59,0.10)]";
 export const AI_MODAL_SEGMENTED_BUTTON_ACTIVE_CLASSNAME =
-  "border-[#7B1E2B]/88 bg-[linear-gradient(135deg,#7B1E2B,#8A2536)] text-white shadow-[0_10px_18px_-18px_rgba(122,20,30,0.24)]";
+  "active";
 export const AI_MODAL_SEGMENTED_BUTTON_IDLE_CLASSNAME =
-  "border-[rgba(95,111,82,0.06)] bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(249,244,237,0.56)_100%)] text-[rgba(72,60,46,0.64)] shadow-[inset_0_1px_0_rgba(255,255,255,0.48),0_6px_14px_-20px_rgba(58,51,39,0.10)] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.74)_0%,rgba(252,248,242,0.66)_100%)]";
+  "";
 
 export function AiModalShell({
   children,
@@ -142,7 +132,7 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "shrink-0 px-6 pb-[calc(20px+env(safe-area-inset-bottom))] pt-3",
+        "modal-footer shrink-0 px-6 pb-[calc(20px+env(safe-area-inset-bottom))] pt-3",
         className,
       )}
     >
@@ -456,10 +446,8 @@ export function AiFilterChip({
       {...props}
       variant="ghost"
       className={cn(
-        "h-7 rounded-full px-3 text-[11.5px] font-medium shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_10px_20px_-22px_rgba(58,51,39,0.14)] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.97]",
-        selected
-          ? "border border-[rgba(123,30,43,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,241,242,0.38)_100%)] text-[#5A1528] hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.62)_0%,rgba(249,241,242,0.46)_100%)]"
-          : "border border-white/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.34)_0%,rgba(249,246,241,0.24)_100%)] text-[#6B6258]/82 hover:bg-[linear-gradient(180deg,rgba(255,255,255,0.48)_0%,rgba(255,252,248,0.34)_100%)] hover:text-[#1A1713]",
+        "chip h-auto min-h-[32px] rounded-full px-3 text-[11.5px] font-medium transition-all duration-200 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(58,74,46,0.10)]",
+        selected && "active",
         className,
       )}
     >

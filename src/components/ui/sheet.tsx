@@ -49,19 +49,47 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  centered?: boolean;
+}
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
-  ({ side = "right", className, children, ...props }, ref) => {
+  ({ side = "right", centered = false, className, children, style, ...props }, ref) => {
     const isModalContainer = typeof className === "string" && className.includes("modal-container");
+    const isCentered = centered || isModalContainer;
+
+    if (isCentered) {
+      return (
+        <SheetPortal>
+          <SheetOverlay />
+          <SheetPrimitive.Content
+            ref={ref}
+            className={cn(
+              "premium-modal-sheet fixed inset-0 z-50 flex items-end justify-center overflow-hidden p-0 pointer-events-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:items-center sm:p-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
+            )}
+            {...props}
+          >
+            <div
+              className={cn("premium-modal-shell pointer-events-auto", className)}
+              style={style}
+            >
+              {children}
+              <SheetPrimitive.Close asChild>
+                <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
+              </SheetPrimitive.Close>
+            </div>
+          </SheetPrimitive.Content>
+        </SheetPortal>
+      );
+    }
 
     return (
       <SheetPortal>
         <SheetOverlay />
         <SheetPrimitive.Content
           ref={ref}
-          className={cn("premium-modal-shell", !isModalContainer && sheetVariants({ side }), className)}
-          style={undefined}
+          className={cn("premium-modal-shell", !isCentered && sheetVariants({ side }), className)}
+          style={style}
           {...props}
         >
           {children}

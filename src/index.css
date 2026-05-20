@@ -142,656 +142,481 @@
   }
 }
 
-/* Modal consistency final lock: keeps action/AI dialogs in one premium Sommelyx system. */
-@layer components {
-  .sx-ai-modal,
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    background:
-      radial-gradient(420px 180px at 12% -10%, rgba(200,169,106,0.13), transparent 62%),
-      linear-gradient(180deg, #fffdf8 0%, var(--sx-bg-card) 54%, #f6f1ea 100%) !important;
-    border: 0.5px solid rgba(255,255,255,0.74) !important;
-    border-radius: 34px 34px 0 0 !important;
-    box-shadow: 0 24px 70px -42px rgba(28,20,16,0.44), inset 0 1px 0 rgba(255,255,255,0.82) !important;
-    overflow: hidden !important;
-  }
+/* Premium modal system: authoritative layer for Add Wine, Add Consumption, Harmonizar and Analisar Carta. */
+@layer utilities {
+  @keyframes sx-modal-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px) scale(0.985);
+      filter: blur(6px);
+    }
 
-  @media (min-width: 640px) {
-    .sx-ai-modal,
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      border-radius: 34px !important;
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
     }
   }
 
-  .modal-header {
-    gap: 14px !important;
-    padding: 24px 24px 14px !important;
-    border-bottom: 0 !important;
+  .premium-modal-overlay,
+  .modal-overlay {
+    background:
+      radial-gradient(ellipse 78% 62% at 50% 12%, rgba(255,247,234,0.14), transparent 62%),
+      rgba(28,20,16,0.44);
+    backdrop-filter: blur(12px) saturate(1.02);
+    -webkit-backdrop-filter: blur(12px) saturate(1.02);
+  }
+
+  .premium-modal-shell.modal-container,
+  .sx-ai-modal,
+  [role="dialog"].premium-modal-shell.modal-container {
+    width: min(560px, calc(100vw - 20px));
+    max-width: min(560px, calc(100vw - 20px));
+    max-height: min(92dvh, calc(100dvh - 12px));
+    margin-inline: auto;
+    overflow: hidden;
+    color: var(--sx-t-body);
+    background:
+      radial-gradient(460px 210px at 14% -12%, rgba(200,169,106,0.18), transparent 64%),
+      radial-gradient(360px 180px at 94% 4%, rgba(58,74,46,0.10), transparent 62%),
+      linear-gradient(180deg, #fffdf8 0%, #fdfcf9 52%, #f4efe7 100%);
+    border: 0.5px solid rgba(255,255,255,0.78);
+    border-radius: 34px 34px 0 0;
+    box-shadow:
+      0 34px 84px -52px rgba(28,20,16,0.44),
+      0 18px 42px -34px rgba(58,74,46,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.82);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    isolation: isolate;
+  }
+
+  .premium-modal-shell.modal-container::before {
+    content: "";
+    display: block;
+    width: 42px;
+    height: 4px;
+    margin: 12px auto 0;
+    border-radius: 999px;
+    background: rgba(122,114,106,0.34);
+  }
+
+  @media (min-width: 640px) {
+    .premium-modal-shell.modal-container,
+    .sx-ai-modal,
+    [role="dialog"].premium-modal-shell.modal-container {
+      border-radius: 34px;
+      max-height: min(86dvh, 860px);
+    }
+
+    .premium-modal-shell.modal-container::before {
+      display: none;
+    }
+  }
+
+  .premium-modal-shell .modal-header {
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    border-bottom: 0;
+    padding: 24px 24px 14px;
+    padding-right: 64px;
+  }
+
+  .premium-modal-shell .modal-body {
+    padding: 10px 24px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(74,94,56,0.22) transparent;
+  }
+
+  .premium-modal-shell .modal-body::-webkit-scrollbar,
+  .premium-modal-shell .consumption-wine-list::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .premium-modal-shell .modal-body::-webkit-scrollbar-track,
+  .premium-modal-shell .consumption-wine-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .premium-modal-shell .modal-body::-webkit-scrollbar-thumb,
+  .premium-modal-shell .consumption-wine-list::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(74,94,56,0.24);
+  }
+
+  .premium-modal-shell .modal-footer {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0) 0%, rgba(253,252,249,0.94) 34%, rgba(244,239,231,0.98) 100%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .modal-icon-wrap,
+  .modal-icon-circle,
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .harmonizar-option-icon,
+  .consumption-source-icon,
+  .consumption-wine-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 16px;
+    border: 0.5px solid rgba(58,74,46,0.12);
+    background:
+      radial-gradient(circle at 28% 20%, rgba(255,255,255,0.78), transparent 40%),
+      linear-gradient(180deg, rgba(253,252,249,0.92), rgba(238,241,234,0.74));
+    color: var(--sx-olive);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78);
   }
 
   .modal-icon-wrap,
   .modal-icon-circle {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    border-radius: 16px !important;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-color: rgba(139,26,59,0.11);
+    color: var(--sx-bordeaux);
     background:
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.82), transparent 34%),
-      linear-gradient(145deg, rgba(245,236,240,0.96), rgba(238,241,234,0.74)) !important;
-    border: 0.5px solid rgba(139,26,59,0.10) !important;
-    color: var(--sx-bordeaux) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 14px 28px -24px rgba(139,26,59,0.30) !important;
+      radial-gradient(circle at 28% 20%, rgba(255,255,255,0.82), transparent 40%),
+      linear-gradient(160deg, rgba(245,236,240,0.94), rgba(238,241,234,0.74));
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.82),
+      0 16px 28px -24px rgba(139,26,59,0.28);
+  }
+
+  .modal-icon-wrap.tone-gold,
+  .modal-icon-circle.tone-gold {
+    border-color: rgba(200,169,106,0.18);
+    color: #B4793F;
+    background:
+      radial-gradient(circle at 28% 20%, rgba(255,255,255,0.82), transparent 40%),
+      linear-gradient(160deg, rgba(250,243,226,0.96), rgba(253,252,249,0.74));
+  }
+
+  .modal-icon-wrap.tone-neutral,
+  .modal-icon-circle.tone-neutral {
+    border-color: rgba(58,74,46,0.10);
+    color: var(--sx-olive);
+  }
+
+  .modal-icon-wrap svg,
+  .modal-icon-circle svg,
+  .modal-action-icon-wrap svg,
+  .modal-action-icon svg,
+  .harmonizar-option-icon svg,
+  .consumption-source-icon svg,
+  .consumption-wine-icon svg {
+    width: 16px;
+    height: 16px;
+    color: currentColor;
+  }
+
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .harmonizar-option-icon,
+  .consumption-source-icon,
+  .consumption-wine-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .consumption-source-icon.is-selected {
+    border-color: rgba(139,26,59,0.18);
+    color: #fff;
+    background: linear-gradient(145deg, #8B1A3B 0%, #7B1E2B 55%, #5A1E24 100%);
+    box-shadow: 0 16px 26px -24px rgba(139,26,59,0.46), inset 0 1px 0 rgba(255,255,255,0.16);
+  }
+
+  .consumption-source-icon.olive.is-selected,
+  .consumption-wine-icon.is-selected {
+    border-color: rgba(58,74,46,0.18);
+    color: #fff;
+    background: linear-gradient(145deg, #4A5E38 0%, #3A4A2E 55%, #25311D 100%);
+    box-shadow: 0 16px 26px -24px rgba(58,74,46,0.40), inset 0 1px 0 rgba(255,255,255,0.14);
   }
 
   .modal-title,
   .premium-modal-shell [data-radix-dialog-title].modal-title {
-    color: var(--sx-t-head) !important;
-    font-size: clamp(24px, 6vw, 30px) !important;
-    font-weight: 580 !important;
-    letter-spacing: -0.035em !important;
-    line-height: 0.98 !important;
+    margin: 0;
+    color: var(--sx-t-head);
+    font-size: clamp(22px, 5vw, 28px);
+    font-weight: 570;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
   }
 
   .modal-subtitle,
   .premium-modal-shell [data-radix-dialog-description].modal-subtitle {
-    color: var(--sx-t-sub) !important;
-    font-size: 13.5px !important;
-    line-height: 1.35 !important;
-    margin-top: 6px !important;
+    margin-top: 6px;
+    max-width: 34rem;
+    color: var(--sx-t-sub);
+    font-size: 13.5px;
+    font-weight: 420;
+    line-height: 1.42;
   }
 
-  .modal-close {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    border-radius: 999px !important;
-    background: rgba(237,234,227,0.78) !important;
-    color: var(--sx-t-sub) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
+  .modal-close,
+  .premium-modal-shell [aria-label="Fechar modal"],
+  .premium-modal-shell [data-radix-dialog-close] {
+    top: 18px;
+    right: 18px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 999px;
+    border: 0.5px solid rgba(58,74,46,0.08);
+    background: rgba(242,239,233,0.86);
+    color: var(--sx-t-sub);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.76);
   }
 
-  .modal-body,
-  .premium-modal-shell .modal-body {
-    padding: 12px 24px max(24px, env(safe-area-inset-bottom)) !important;
+  .modal-close:hover,
+  .premium-modal-shell [aria-label="Fechar modal"]:hover,
+  .premium-modal-shell [data-radix-dialog-close]:hover {
+    background: rgba(237,234,227,0.98);
+    color: var(--sx-t-body);
   }
 
-  .premium-modal-shell :is(input, textarea, select),
-  .modal-input,
-  .form-input {
-    background: linear-gradient(180deg, rgba(253,252,249,0.78), rgba(237,234,227,0.72)) !important;
-    border: 0.5px solid rgba(28,20,16,0.075) !important;
-    border-radius: 18px !important;
-    color: var(--sx-t-body) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
-  }
-
-  .premium-modal-shell :is(input, textarea, select):focus,
-  .modal-input:focus,
-  .form-input:focus {
-    border-color: rgba(139,26,59,0.30) !important;
-    background: rgba(253,252,249,0.96) !important;
-    box-shadow: 0 0 0 4px rgba(139,26,59,0.08), inset 0 1px 0 rgba(255,255,255,0.78) !important;
-  }
-
-  .modal-btn-primary,
-  .premium-modal-shell .modal-btn-primary,
-  .premium-modal-shell button[type="submit"] {
-    border-radius: 999px !important;
+  .premium-modal-shell .modal-btn-primary {
+    display: inline-flex;
+    min-height: 50px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    border: 0;
+    border-radius: 999px;
     background:
-      linear-gradient(180deg, rgba(255,255,255,0.14), transparent 38%),
-      linear-gradient(135deg, #912634 0%, var(--sx-bordeaux) 58%, #5A1E24 100%) !important;
-    color: #fff !important;
-    box-shadow: 0 18px 34px -24px rgba(139,26,59,0.66), inset 0 1px 0 rgba(255,255,255,0.22) !important;
-    transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease !important;
+      linear-gradient(180deg, rgba(255,255,255,0.16), transparent 36%),
+      linear-gradient(135deg, #912634 0%, #8B1A3B 56%, #5A1E24 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 560;
+    box-shadow: 0 20px 40px -26px rgba(139,26,59,0.54), inset 0 1px 0 rgba(255,255,255,0.22);
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), box-shadow 180ms ease, opacity 160ms ease;
   }
 
-  .modal-btn-secondary,
+  .premium-modal-shell .modal-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 24px 44px -26px rgba(139,26,59,0.60), inset 0 1px 0 rgba(255,255,255,0.24);
+  }
+
+  .premium-modal-shell .modal-btn-secondary,
+  .premium-inline-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+    border: 1px solid rgba(58,74,46,0.20);
+    border-radius: 999px;
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0.94), rgba(238,241,234,0.74));
+    color: var(--sx-olive);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.76), 0 12px 24px -24px rgba(58,74,46,0.28);
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), background 180ms ease, border-color 180ms ease;
+  }
+
   .premium-modal-shell .modal-btn-secondary {
-    border-radius: 999px !important;
-    border: 1px solid rgba(58,74,46,0.28) !important;
-    background: rgba(253,252,249,0.74) !important;
-    color: var(--sx-olive) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70) !important;
+    min-height: 48px;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 540;
   }
 
-  .modal-btn-primary:active,
-  .modal-btn-secondary:active,
-  .premium-modal-shell button:active {
+  .premium-inline-action {
+    min-height: 32px;
+  }
+
+  .premium-modal-shell .modal-btn-secondary:hover,
+  .premium-inline-action:hover {
+    transform: translateY(-1px);
+    border-color: rgba(58,74,46,0.28);
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0.98), rgba(238,241,234,0.90));
+  }
+
+  .premium-modal-shell .modal-btn-primary:active,
+  .premium-modal-shell .modal-btn-secondary:active,
+  .premium-inline-action:active {
     transform: scale(0.985);
   }
 
   .modal-action-card,
-  .harmonizar-option,
-  .segment-card,
-  .carta-wine-card,
-  .consumption-section,
-  .consumption-details-card {
-    border: 0.5px solid rgba(28,20,16,0.065) !important;
-    background:
-      radial-gradient(circle at 18% 0%, rgba(255,255,255,0.78), transparent 36%),
-      linear-gradient(180deg, rgba(253,252,249,0.82), rgba(247,245,240,0.72)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.68), 0 16px 32px -30px rgba(28,20,16,0.28) !important;
-  }
-
-  .modal-action-card,
   .harmonizar-option {
-    border-radius: 24px !important;
-    padding: 14px !important;
-  }
-
-  .consumption-modal-flow {
     display: flex;
-    min-height: 0;
-    flex-direction: column;
+    align-items: center;
     gap: 14px;
+    width: 100%;
+    border: 0.5px solid rgba(28,20,16,0.06);
+    border-radius: 24px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.76), transparent 34%),
+      linear-gradient(180deg, rgba(253,252,249,0.88), rgba(244,239,231,0.76));
+    padding: 14px;
+    color: var(--sx-t-body);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.76), 0 16px 32px -32px rgba(28,20,16,0.28);
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
   }
 
+  .modal-action-card:hover,
+  .harmonizar-option:hover {
+    transform: translateY(-1px);
+    border-color: rgba(58,74,46,0.16);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.80), transparent 34%),
+      linear-gradient(180deg, rgba(253,252,249,0.96), rgba(238,241,234,0.82));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 20px 34px -32px rgba(58,74,46,0.22);
+  }
+
+  .premium-card-surface,
+  .segment-card,
   .consumption-section,
-  .consumption-details-card {
-    border-radius: 28px !important;
-    padding: 16px !important;
+  .consumption-details-card,
+  .consumption-selected-summary,
+  .analyze-carta-help,
+  .carta-wine-card {
+    border: 0.5px solid rgba(28,20,16,0.06);
+    border-radius: 26px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.70), transparent 36%),
+      linear-gradient(180deg, rgba(253,252,249,0.86), rgba(247,245,240,0.76));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.76), 0 18px 36px -34px rgba(28,20,16,0.22);
   }
 
-  .consumption-source-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .segment-card {
+    padding: 14px;
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms ease, background 180ms ease;
   }
 
-  .consumption-source-card {
-    display: flex !important;
-    min-height: 112px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    border-radius: 26px !important;
-    border: 0.5px solid rgba(28,20,16,0.07) !important;
-    background: rgba(253,252,249,0.62) !important;
-    padding: 14px !important;
-    text-align: left !important;
-    color: var(--sx-t-body) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70) !important;
-  }
-
+  .segment-card.active,
+  .consumption-source-card.active,
   .consumption-source-card.is-selected {
-    border-color: rgba(139,26,59,0.22) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.88), rgba(253,252,249,0.70)) !important;
+    border-color: rgba(139,26,59,0.18);
+    background:
+      radial-gradient(circle at 88% 0%, rgba(200,169,106,0.14), transparent 40%),
+      linear-gradient(180deg, rgba(245,236,240,0.78), rgba(253,252,249,0.84));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), 0 18px 34px -34px rgba(139,26,59,0.24);
   }
 
-  .consumption-source-icon,
-  .consumption-wine-icon,
-  .modal-action-icon-wrap,
-  .modal-action-icon,
-  .harmonizar-option-icon {
-    border-radius: 16px !important;
-    border: 0.5px solid rgba(28,20,16,0.06) !important;
-    background: rgba(253,252,249,0.82) !important;
-    color: var(--sx-olive) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.74) !important;
-  }
-
-  .consumption-source-icon.is-selected,
-  .consumption-wine-icon.is-selected {
-    background: linear-gradient(145deg, var(--sx-bordeaux), #6d1730) !important;
-    color: #fff !important;
-  }
-
-  .consumption-source-title,
-  .consumption-wine-name,
+  .segment-card :is(p:first-child),
   .modal-action-title,
-  .harmonizar-option-title {
-    color: var(--sx-t-body) !important;
-    font-weight: 580 !important;
-    letter-spacing: -0.01em !important;
+  .harmonizar-option-title,
+  .consumption-source-title,
+  .consumption-wine-name {
+    color: var(--sx-t-head);
+    font-size: 14px;
+    font-weight: 560;
+    letter-spacing: -0.016em;
+    line-height: 1.24;
   }
 
+  .segment-card :is(p + p),
+  .modal-action-sub,
+  .modal-action-subtitle,
+  .harmonizar-option-sub,
+  .harmonizar-option-subtitle,
   .consumption-source-sub,
   .consumption-source-meta,
-  .consumption-wine-meta,
-  .modal-action-sub,
-  .harmonizar-option-sub {
-    color: var(--sx-t-sub) !important;
+  .consumption-wine-meta {
+    color: var(--sx-t-sub);
+    font-size: 12px;
+    line-height: 1.4;
   }
 
-  .consumption-search {
-    position: relative;
-    margin-top: 10px;
+  .form-field-label,
+  .modal-field-label,
+  .form-section-label,
+  .modal-section-label {
+    display: block;
+    color: rgba(61,53,48,0.62);
+    font-size: 10px;
+    font-weight: 560;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .consumption-search input {
-    height: 44px !important;
-    border-radius: 999px !important;
-    padding-left: 40px !important;
+  .form-section-label,
+  .modal-section-label {
+    margin: 0 0 10px;
   }
 
-  .consumption-chip-row {
-    display: flex;
-    gap: 7px;
-    margin: 10px -2px 12px;
-    overflow-x: auto;
-    padding: 0 2px 2px;
-    scrollbar-width: none;
+  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"]) {
+    width: 100%;
+    min-height: 46px;
+    border: 0.5px solid rgba(28,20,16,0.075);
+    border-radius: 18px;
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0.94), rgba(237,234,227,0.80));
+    color: var(--sx-t-body);
+    font-size: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
   }
 
-  .consumption-chip-row::-webkit-scrollbar {
-    display: none;
+  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"])::placeholder {
+    color: rgba(122,114,106,0.72);
   }
 
-  .consumption-filter-chip,
-  .premium-modal-shell .chip,
-  .premium-modal-shell [data-state] {
-    min-height: 30px !important;
-    border-radius: 999px !important;
-    font-size: 11.5px !important;
+  .premium-modal-shell :is(textarea, textarea.form-input, textarea.modal-input, textarea.input-premium) {
+    min-height: 86px;
+    border-radius: 22px;
   }
 
-  .consumption-wine-list {
-    display: flex !important;
-    max-height: min(330px, 38dvh);
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: 0 2px 2px !important;
-    box-shadow: none !important;
+  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"]):focus,
+  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input:not([type="checkbox"]):not([type="radio"]), textarea, select, button[role="combobox"]):focus-visible {
+    border-color: rgba(139,26,59,0.18);
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0.98), rgba(242,239,233,0.88));
+    box-shadow:
+      0 0 0 3px rgba(58,74,46,0.08),
+      0 0 0 1px rgba(139,26,59,0.14),
+      inset 0 1px 0 rgba(255,255,255,0.80);
   }
 
-  .harmonize-picker-flow .consumption-wine-list {
-    max-height: none;
-  }
-
-  .consumption-wine-list::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .consumption-wine-list::-webkit-scrollbar-thumb {
+  .chip {
+    min-height: 32px;
+    border: 0.5px solid rgba(58,74,46,0.14);
     border-radius: 999px;
-    background: rgba(58,74,46,0.18);
+    background: rgba(253,252,249,0.80);
+    padding: 6px 12px;
+    color: var(--sx-t-sub);
+    font-size: 11px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.66);
   }
 
-  .consumption-wine-row {
-    display: flex !important;
-    align-items: center !important;
-    gap: 11px !important;
-    width: 100% !important;
-    border: 0.5px solid rgba(28,20,16,0.055) !important;
-    border-radius: 22px !important;
-    background: rgba(253,252,249,0.66) !important;
-    padding: 11px 12px !important;
-    text-align: left !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.64) !important;
-    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease !important;
+  .chip:hover {
+    border-color: rgba(139,26,59,0.16);
+    color: var(--sx-t-body);
   }
 
-  .consumption-wine-row:hover,
-  .consumption-wine-row.is-selected {
-    border-color: rgba(139,26,59,0.16) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.74), rgba(253,252,249,0.76)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70), 0 14px 28px -26px rgba(139,26,59,0.25) !important;
+  .chip.active {
+    border-color: rgba(58,74,46,0.18);
+    background:
+      linear-gradient(180deg, rgba(58,74,46,0.16), rgba(58,74,46,0.08));
+    color: var(--sx-olive);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.54), 0 12px 22px -24px rgba(58,74,46,0.34);
   }
 
-  @media (hover: hover) {
-    .consumption-source-card:hover,
-    .consumption-wine-row:hover,
-    .modal-action-card:hover,
-    .harmonizar-option:hover {
-      transform: translateY(-1px);
-    }
-  }
-
-  .consumption-qty-badge,
-  .wine-qty-badge {
-    border-radius: 999px !important;
-    background: rgba(237,234,227,0.76) !important;
-    color: var(--sx-t-sub) !important;
-    font-size: 11px !important;
-  }
-
-  .consumption-qty-badge.is-selected {
-    background: rgba(58,74,46,0.11) !important;
-    color: var(--sx-olive) !important;
-  }
-
-  .consumption-selected-summary,
-  .harmonize-selected-footer {
-    border-radius: 24px !important;
-    border: 0.5px solid rgba(58,74,46,0.10) !important;
-    background: linear-gradient(180deg, rgba(238,241,234,0.86), rgba(253,252,249,0.74)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
-  }
-
-  .consumption-change-button {
-    border-radius: 999px !important;
-    border: 0.5px solid rgba(58,74,46,0.18) !important;
-    color: var(--sx-olive) !important;
-  }
-
-  .consumption-field-grid,
-  .consumption-two-col {
-    display: grid;
-    gap: 12px;
-  }
-
-  .consumption-two-col {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .consumption-rating-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 7px;
-  }
-
-  .consumption-rating-button {
-    min-height: 42px;
-    border-radius: 16px !important;
-    border: 0.5px solid rgba(28,20,16,0.075) !important;
-    background: rgba(253,252,249,0.66) !important;
-    color: var(--sx-t-muted) !important;
-    transition: transform 150ms ease, background 150ms ease, color 150ms ease !important;
-  }
-
-  .consumption-rating-button.is-selected {
-    border-color: rgba(139,26,59,0.22) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.92), rgba(253,252,249,0.76)) !important;
-    color: var(--sx-bordeaux) !important;
-  }
-
+  .consumption-modal-flow,
   .analyze-carta-capture {
     display: flex;
     flex-direction: column;
     gap: 14px;
   }
 
-  .analyze-carta-actions {
-    display: grid;
-    gap: 10px;
-  }
-
-  @media (min-width: 640px) {
-    .analyze-carta-actions {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .analyze-carta-help {
-    border-radius: 26px !important;
-    border: 0.5px solid rgba(58,74,46,0.10) !important;
-    background:
-      radial-gradient(circle at 8% 0%, rgba(200,169,106,0.16), transparent 38%),
-      linear-gradient(180deg, rgba(238,241,234,0.76), rgba(253,252,249,0.74)) !important;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .sx-ai-modal[data-state="open"] {
-      animation: sx-modal-rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-
-    .premium-modal-shell :is(.modal-action-card, .harmonizar-option, .segment-card, .carta-wine-card, .consumption-section, .consumption-wine-row) {
-      animation: sx-card-in 220ms ease both;
-    }
-  }
-
-  @media (max-width: 420px) {
-    .consumption-source-grid,
-    .consumption-two-col,
-    .consumption-rating-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .modal-title,
-    .premium-modal-shell [data-radix-dialog-title].modal-title {
-      font-size: 24px !important;
-    }
-  }
-}
-
-/* Modal consistency correction: Add Wine, Add Consumption, Harmonize and Analyze Carta share one premium system. */
-@layer components {
-  .sx-ai-modal,
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    overflow: hidden !important;
-    border: 0.5px solid rgba(255,255,255,0.82) !important;
-    border-radius: 34px 34px 0 0 !important;
-    background:
-      radial-gradient(520px 220px at 16% -12%, rgba(200,169,106,0.14), transparent 64%),
-      radial-gradient(420px 210px at 98% 4%, rgba(58,74,46,0.08), transparent 62%),
-      linear-gradient(180deg, #fffdf8 0%, #fdfcf9 48%, #f5efe6 100%) !important;
-    box-shadow:
-      0 34px 88px -54px rgba(28,20,16,0.42),
-      0 16px 42px -38px rgba(123,30,43,0.26),
-      inset 0 1px 0 rgba(255,255,255,0.82) !important;
-    color: var(--sx-t-body);
-  }
-
-  @media (min-width: 640px) {
-    .sx-ai-modal,
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      border-radius: 34px !important;
-    }
-  }
-
-  .premium-modal-shell .modal-header,
-  .modal-header {
-    border-bottom: 0 !important;
-    padding: 24px 24px 14px !important;
-  }
-
-  .premium-modal-shell .modal-icon-wrap,
-  .modal-icon-wrap,
-  .modal-icon-circle {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    border: 0.5px solid rgba(139,26,59,0.10);
-    border-radius: 18px !important;
-    background:
-      radial-gradient(circle at 35% 18%, rgba(255,255,255,0.72), transparent 48%),
-      linear-gradient(180deg, rgba(245,236,240,0.94), rgba(253,252,249,0.78));
-    color: var(--sx-bordeaux);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), 0 12px 26px -24px rgba(139,26,59,0.32);
-  }
-
-  .premium-modal-shell .modal-icon-wrap.tone-gold,
-  .modal-icon-wrap.tone-gold {
-    border-color: rgba(200,169,106,0.18);
-    background: linear-gradient(180deg, rgba(250,243,226,0.96), rgba(253,252,249,0.78));
-    color: #B4793F;
-  }
-
-  .premium-modal-shell .modal-title,
-  .modal-title,
-  .premium-modal-shell [data-radix-dialog-title].modal-title {
-    color: var(--sx-t-head) !important;
-    font-size: clamp(24px, 6.4vw, 30px) !important;
-    font-weight: 590 !important;
-    letter-spacing: -0.042em !important;
-    line-height: 1.03 !important;
-  }
-
-  .premium-modal-shell .modal-subtitle,
-  .modal-subtitle,
-  .premium-modal-shell [data-radix-dialog-description].modal-subtitle {
-    margin-top: 6px !important;
-    max-width: 32rem;
-    color: var(--sx-t-sub) !important;
-    font-size: 14px !important;
-    line-height: 1.38 !important;
-  }
-
-  .premium-modal-shell [aria-label="Fechar modal"] {
-    top: 20px !important;
-    right: 20px !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 999px !important;
-    background: rgba(237,234,227,0.82) !important;
-    color: var(--sx-t-sub) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70), 0 12px 26px -24px rgba(28,20,16,0.30);
-  }
-
-  .premium-modal-shell .modal-body {
-    padding: 12px 24px 0 !important;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(58,74,46,0.22) transparent;
-  }
-
-  .premium-modal-shell .modal-body::-webkit-scrollbar,
-  .premium-modal-shell *::-webkit-scrollbar {
-    width: 3px !important;
-    height: 3px !important;
-  }
-
-  .premium-modal-shell .modal-body::-webkit-scrollbar-track,
-  .premium-modal-shell *::-webkit-scrollbar-track {
-    background: transparent !important;
-  }
-
-  .premium-modal-shell .modal-body::-webkit-scrollbar-thumb,
-  .premium-modal-shell *::-webkit-scrollbar-thumb {
-    border-radius: 999px !important;
-    background: rgba(58,74,46,0.18) !important;
-  }
-
-  .premium-modal-shell .modal-footer,
-  .premium-modal-shell .shrink-0:has(.modal-btn-primary) {
-    background: linear-gradient(180deg, rgba(253,252,249,0), rgba(253,252,249,0.92) 38%, rgba(245,239,230,0.98));
-  }
-
-  .premium-modal-shell .modal-btn-primary,
-  .modal-btn-primary {
-    min-height: 50px !important;
-    border-radius: 999px !important;
-    background: linear-gradient(135deg, #8B1A3B 0%, #912634 52%, #641828 100%) !important;
-    color: #fff !important;
-    font-size: 15px !important;
-    font-weight: 560 !important;
-    box-shadow: 0 20px 42px -26px rgba(139,26,59,0.54), inset 0 1px 0 rgba(255,255,255,0.22) !important;
-  }
-
-  .premium-modal-shell .modal-btn-secondary,
-  .modal-btn-secondary {
-    min-height: 48px !important;
-    border: 1px solid rgba(58,74,46,0.34) !important;
-    border-radius: 999px !important;
-    background: linear-gradient(180deg, rgba(253,252,249,0.92), rgba(238,241,234,0.62)) !important;
-    color: var(--sx-olive) !important;
-    font-size: 15px !important;
-    font-weight: 540 !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.74), 0 12px 28px -26px rgba(58,74,46,0.30) !important;
-  }
-
-  .premium-modal-shell .modal-action-card,
-  .modal-action-card,
-  .harmonizar-option {
-    border: 0.5px solid rgba(28,20,16,0.065) !important;
-    border-radius: 26px !important;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.72), transparent 34%),
-      linear-gradient(180deg, rgba(253,252,249,0.88), rgba(240,237,230,0.74)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.76), 0 16px 34px -32px rgba(28,20,16,0.28) !important;
-  }
-
-  .premium-modal-shell .modal-action-card:hover,
-  .modal-action-card:hover,
-  .harmonizar-option:hover {
-    transform: translateY(-1px);
-    border-color: rgba(58,74,46,0.13) !important;
-    background: linear-gradient(180deg, rgba(253,252,249,0.96), rgba(238,241,234,0.78)) !important;
-  }
-
-  .modal-action-title,
-  .harmonizar-option-title {
-    color: var(--sx-t-head) !important;
-    font-size: 15px !important;
-    font-weight: 590 !important;
-    letter-spacing: -0.02em !important;
-  }
-
-  .modal-action-subtitle,
-  .harmonizar-option-subtitle {
-    color: var(--sx-t-sub) !important;
-    font-size: 12.5px !important;
-    line-height: 1.38 !important;
-  }
-
-  .premium-modal-shell .premium-card-surface,
-  .premium-modal-shell .modal-wine-list,
-  .premium-modal-shell .segment-card,
-  .premium-modal-shell .carta-wine-card,
-  .consumption-details-card,
-  .consumption-selected-summary,
-  .analyze-carta-help {
-    border: 0.5px solid rgba(28,20,16,0.065) !important;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.66), transparent 38%),
-      linear-gradient(180deg, rgba(253,252,249,0.84), rgba(247,245,240,0.72)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 36px -34px rgba(28,20,16,0.26) !important;
-  }
-
-  .premium-modal-shell .form-field-label,
-  .premium-modal-shell .modal-field-label,
-  .premium-modal-shell .form-section-label,
-  .premium-modal-shell .modal-section-label {
-    color: rgba(61,53,48,0.58) !important;
-    font-size: 10.5px !important;
-    font-weight: 650 !important;
-    letter-spacing: 0.14em !important;
-  }
-
-  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input, textarea, select) {
-    min-height: 46px;
-    border: 0.5px solid rgba(28,20,16,0.07) !important;
-    border-radius: 18px !important;
-    background: linear-gradient(180deg, rgba(253,252,249,0.92), rgba(237,234,227,0.76)) !important;
-    color: var(--sx-t-body) !important;
-    font-size: 14.5px !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), 0 10px 24px -26px rgba(28,20,16,0.22) !important;
-  }
-
-  .premium-modal-shell textarea.form-input,
-  .premium-modal-shell textarea.modal-input,
-  .premium-modal-shell textarea.input-premium {
-    border-radius: 22px !important;
-  }
-
-  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input, textarea, select):focus,
-  .premium-modal-shell :is(.form-input, .modal-input, .input-premium, input, textarea, select):focus-visible {
-    border-color: rgba(139,26,59,0.28) !important;
-    background: rgba(253,252,249,0.96) !important;
-    box-shadow: 0 0 0 4px rgba(139,26,59,0.08), inset 0 1px 0 rgba(255,255,255,0.82) !important;
-  }
-
-  .premium-modal-shell .chip,
-  .premium-modal-shell button[class*="rounded-full"] {
-    transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms cubic-bezier(0.22,1,0.36,1);
-  }
-
-  .consumption-modal-body {
-    padding-top: 8px !important;
-  }
-
-  .consumption-modal-flow {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding-bottom: 4px;
-  }
-
   .consumption-section {
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
+    padding: 16px;
   }
 
   .consumption-section-head {
@@ -808,87 +633,55 @@
   }
 
   .consumption-source-card {
-    display: flex !important;
-    min-height: 82px !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 10px !important;
-    border-radius: 24px !important;
-    padding: 12px !important;
-  }
-
-  .consumption-source-card.active {
-    border-color: rgba(139,26,59,0.22) !important;
-    background:
-      radial-gradient(circle at 90% 0%, rgba(200,169,106,0.16), transparent 42%),
-      linear-gradient(180deg, rgba(245,236,240,0.76), rgba(253,252,249,0.82)) !important;
-  }
-
-  .consumption-source-icon,
-  .consumption-wine-icon {
-    display: inline-flex;
+    display: flex;
+    min-height: 92px;
     align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border: 0.5px solid rgba(139,26,59,0.10);
-    border-radius: 16px;
-    background: rgba(245,236,240,0.76);
-    color: var(--sx-bordeaux);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70);
+    gap: 12px;
+    width: 100%;
+    padding: 14px;
+    text-align: left;
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms ease, background 180ms ease;
   }
 
-  .consumption-source-icon.olive,
-  .consumption-wine-icon.is-selected {
-    border-color: rgba(58,74,46,0.14);
-    background: var(--sx-olive-06);
-    color: var(--sx-olive);
-  }
-
-  .consumption-source-title {
-    color: var(--sx-t-head) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-  }
-
-  .consumption-source-sub,
-  .consumption-wine-meta {
-    color: var(--sx-t-sub) !important;
-    font-size: 12.5px !important;
+  .consumption-source-card:hover,
+  .consumption-wine-row:hover {
+    transform: translateY(-1px);
   }
 
   .consumption-source-meta,
-  .consumption-qty-badge {
+  .consumption-qty-badge,
+  .wine-qty-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
+    min-height: 24px;
     border-radius: 999px;
-    background: rgba(237,234,227,0.74);
-    padding: 4px 8px;
+    background: rgba(237,234,227,0.84);
+    padding: 0 8px;
     color: var(--sx-t-sub);
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10.5px;
+    font-weight: 560;
     line-height: 1;
-    tab-size: 4;
   }
 
-  .consumption-picker-section {
-    border-radius: 28px;
-    background: rgba(253,252,249,0.48);
+  .consumption-search {
+    position: relative;
   }
 
   .consumption-search :is(input, .form-input, .modal-input) {
-    min-height: 44px !important;
+    min-height: 44px;
+    border-radius: 999px;
+    padding-left: 40px;
   }
 
   .consumption-chip-row {
     display: flex;
-    gap: 7px;
+    gap: 8px;
     overflow-x: auto;
-    padding-bottom: 2px;
+    padding: 0 2px 2px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    mask-image: linear-gradient(to right, black 88%, transparent 100%);
   }
 
   .consumption-chip-row::-webkit-scrollbar {
@@ -896,60 +689,55 @@
   }
 
   .consumption-filter-chip {
-    min-height: 29px !important;
-    padding-inline: 11px !important;
-    font-size: 11px !important;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .consumption-wine-list {
     display: flex;
-    max-height: min(330px, 42dvh);
+    max-height: min(340px, 40dvh);
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     overflow-y: auto;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    padding: 1px 2px 2px !important;
+    border: 0;
+    background: transparent;
+    padding: 0 2px 2px;
+    box-shadow: none;
+  }
+
+  .harmonize-picker-flow .consumption-wine-list {
+    max-height: none;
   }
 
   .consumption-wine-row {
-    min-height: 58px;
-    border: 0.5px solid rgba(28,20,16,0.055) !important;
-    border-radius: 22px !important;
-    background: rgba(253,252,249,0.66) !important;
-    padding: 10px 11px !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.62), 0 10px 26px -28px rgba(28,20,16,0.22);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    border: 0.5px solid rgba(28,20,16,0.055);
+    border-radius: 22px;
+    background: rgba(253,252,249,0.70);
+    padding: 11px 12px;
+    text-align: left;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.64);
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
   }
 
-  .consumption-wine-row:hover {
-    transform: translateY(-1px);
-    background: rgba(238,241,234,0.62) !important;
-  }
-
-  .consumption-wine-row.bg-\[rgba\(139\,26\,59\,0\.06\)\],
-  .consumption-wine-row:has(.consumption-wine-icon.is-selected) {
-    border-color: rgba(58,74,46,0.16) !important;
-    background: linear-gradient(180deg, rgba(238,241,234,0.78), rgba(253,252,249,0.76)) !important;
-  }
-
-  .consumption-wine-name {
-    color: var(--sx-t-head) !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.018em !important;
-    line-height: 1.18;
+  .consumption-wine-row.is-selected {
+    border-color: rgba(58,74,46,0.16);
+    background:
+      linear-gradient(180deg, rgba(238,241,234,0.80), rgba(253,252,249,0.82));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 16px 28px -30px rgba(58,74,46,0.28);
   }
 
   .consumption-wine-vintage {
-    margin-left: 4px;
     color: var(--sx-t-muted);
-    font-weight: 450;
+    font-weight: 420;
   }
 
   .consumption-qty-badge.is-selected {
-    background: rgba(58,74,46,0.10);
+    background: rgba(58,74,46,0.14);
     color: var(--sx-olive);
   }
 
@@ -958,17 +746,19 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    border-radius: 26px;
-    padding: 12px;
+    padding: 14px;
+    border-color: rgba(58,74,46,0.16);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255,255,255,0.70), transparent 36%),
+      linear-gradient(180deg, rgba(238,241,234,0.88), rgba(253,252,249,0.80));
   }
 
   .consumption-change-button {
-    min-width: 78px;
+    min-width: 76px;
   }
 
   .consumption-details-card {
-    border-radius: 28px !important;
-    padding: 16px !important;
+    padding: 16px;
   }
 
   .consumption-field-grid {
@@ -980,68 +770,262 @@
   .consumption-two-col {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
   }
 
   .consumption-rating-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    gap: 8px;
   }
 
   .consumption-rating-button {
-    min-height: 34px !important;
-    border-radius: 999px !important;
-    padding-inline: 4px !important;
-    font-size: 10.5px !important;
-    line-height: 1.05 !important;
+    min-height: 44px;
+    border: 0.5px solid rgba(28,20,16,0.075);
+    border-radius: 18px;
+    background: rgba(253,252,249,0.74);
+    color: var(--sx-t-sub);
+    line-height: 1.18;
+    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
   }
 
-  .harmonize-picker-flow .consumption-wine-list {
-    max-height: none;
+  .consumption-rating-button.active {
+    border-color: rgba(139,26,59,0.18);
+    background:
+      linear-gradient(180deg, rgba(245,236,240,0.86), rgba(253,252,249,0.82));
+    color: var(--sx-bordeaux);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72), 0 14px 24px -28px rgba(139,26,59,0.30);
   }
 
   .harmonize-selected-footer {
-    background: linear-gradient(180deg, rgba(253,252,249,0), rgba(253,252,249,0.90) 42%, rgba(245,239,230,0.98));
+    background:
+      linear-gradient(180deg, rgba(253,252,249,0) 0%, rgba(253,252,249,0.94) 40%, rgba(244,239,231,0.98) 100%);
+    padding-top: 10px;
     padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
-    padding-top: 8px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .analyze-carta-actions {
+    display: grid;
+    gap: 10px;
   }
 
   .analyze-carta-capture .modal-action-card {
-    min-height: 96px;
+    min-height: 108px;
+    align-items: flex-start;
+    padding: 18px;
+  }
+
+  .analyze-carta-capture .modal-action-card[data-dragging="true"] {
+    border-color: rgba(58,74,46,0.18);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(255,255,255,0.82), transparent 34%),
+      linear-gradient(180deg, rgba(238,241,234,0.84), rgba(253,252,249,0.84));
   }
 
   .analyze-carta-actions .modal-btn-primary,
   .analyze-carta-actions .modal-btn-secondary {
-    margin-top: 0 !important;
+    margin-top: 0;
   }
 
   .analyze-carta-help {
-    border-radius: 24px !important;
-    padding: 13px !important;
+    padding: 14px;
+    border-color: rgba(58,74,46,0.14);
+    background:
+      radial-gradient(circle at 10% 0%, rgba(200,169,106,0.16), transparent 38%),
+      linear-gradient(180deg, rgba(238,241,234,0.84), rgba(253,252,249,0.82));
   }
 
-  @media (max-width: 430px) {
-    .premium-modal-shell .modal-title,
-    .modal-title {
-      font-size: 24px !important;
+  .carta-results-header {
+    margin: 0 0 14px;
+    padding: 0 2px;
+  }
+
+  .carta-results-count {
+    color: var(--sx-t-head);
+    font-size: clamp(24px, 5vw, 30px);
+    font-weight: 560;
+    letter-spacing: -0.03em;
+    line-height: 1.06;
+  }
+
+  .carta-results-sub {
+    margin-top: 4px;
+    color: var(--sx-t-sub);
+    font-size: 13px;
+    line-height: 1.42;
+  }
+
+  .carta-wine-card {
+    position: relative;
+    margin-bottom: 10px;
+    padding: 15px 16px;
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .carta-wine-card:hover,
+  .carta-wine-card.is-selected {
+    transform: translateY(-1px);
+    border-color: rgba(139,26,59,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 22px 36px -34px rgba(139,26,59,0.24);
+  }
+
+  .carta-wine-number {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: var(--sx-t-head);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .carta-wine-top {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4px;
+    padding-left: 36px;
+  }
+
+  .carta-wine-name {
+    min-width: 0;
+    flex: 1;
+    color: var(--sx-t-head);
+    font-size: 15px;
+    font-weight: 560;
+    line-height: 1.26;
+  }
+
+  .carta-wine-price {
+    flex-shrink: 0;
+    white-space: nowrap;
+    color: var(--sx-bordeaux);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .carta-wine-origin,
+  .carta-wine-attrs {
+    padding-left: 36px;
+    font-size: 12px;
+    line-height: 1.42;
+  }
+
+  .carta-wine-origin {
+    margin-bottom: 5px;
+    color: var(--sx-t-sub);
+  }
+
+  .carta-wine-attrs {
+    margin-bottom: 8px;
+    color: var(--sx-t-muted);
+  }
+
+  .carta-wine-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding-left: 36px;
+  }
+
+  .carta-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    border-radius: 999px;
+    padding: 0 9px;
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .carta-badge.principal {
+    background: rgba(139,26,59,0.10);
+    color: var(--sx-bordeaux);
+  }
+
+  .carta-badge.value {
+    background: rgba(58,74,46,0.12);
+    color: var(--sx-olive);
+  }
+
+  .carta-badge.casa {
+    background: rgba(237,234,227,0.78);
+    color: var(--sx-t-sub);
+  }
+
+  .carta-wine-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 10px;
+    padding-left: 36px;
+    border-top: 0.5px solid rgba(28,20,16,0.06);
+  }
+
+  .carta-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    border: 1px solid rgba(58,74,46,0.18);
+    border-radius: 999px;
+    background: rgba(253,252,249,0.84);
+    padding: 0 11px;
+    color: var(--sx-olive);
+    font-size: 11px;
+    font-weight: 540;
+    line-height: 1;
+    transition: transform 180ms cubic-bezier(0.22,1,0.36,1), border-color 180ms ease, background 180ms ease;
+  }
+
+  .carta-action-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(58,74,46,0.28);
+    background: rgba(238,241,234,0.82);
+  }
+
+  .carta-action-btn.save {
+    border-color: rgba(139,26,59,0.18);
+    color: var(--sx-bordeaux);
+  }
+
+  .carta-action-btn.save:hover {
+    background: rgba(245,236,240,0.74);
+  }
+
+  .carta-action-btn.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 640px) {
+    .analyze-carta-actions {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 420px) {
+    .modal-title,
+    .premium-modal-shell [data-radix-dialog-title].modal-title {
+      font-size: 23px;
     }
 
     .consumption-source-grid,
     .consumption-two-col {
-      gap: 8px;
-    }
-
-    .consumption-source-card {
-      min-height: 86px !important;
-      align-items: flex-start !important;
-      flex-direction: column !important;
-    }
-
-    .consumption-source-meta {
-      align-self: flex-start;
+      grid-template-columns: 1fr;
     }
 
     .consumption-rating-grid {
@@ -1049,20 +1033,28 @@
     }
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .sx-ai-modal[data-state="open"] {
-      animation: sx-modal-rise 260ms cubic-bezier(0.22,1,0.36,1) both;
+  @media (max-width: 480px) {
+    .carta-wine-card {
+      padding: 14px;
     }
 
-    .premium-modal-shell .modal-action-card,
-    .premium-modal-shell .segment-card,
-    .premium-modal-shell .consumption-details-card,
-    .premium-modal-shell .consumption-selected-summary,
-    .premium-modal-shell .carta-wine-card {
-      animation: sx-card-in 320ms cubic-bezier(0.22,1,0.36,1) both;
+    .carta-action-btn {
+      padding-inline: 10px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .sx-ai-modal[data-state="open"],
+    .premium-modal-sheet[data-state="open"] .sx-ai-modal {
+      animation: sx-modal-rise 240ms cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .premium-modal-shell :is(.modal-action-card, .harmonizar-option, .segment-card, .consumption-section, .consumption-wine-row, .consumption-details-card, .consumption-selected-summary, .carta-wine-card) {
+      animation: sx-card-in 260ms cubic-bezier(0.22,1,0.36,1) both;
     }
   }
 }
+
 
 /* ─────────────────────────────────────────────────────────────
    Sommelyx Premium Mobile Wine App — final visual consolidation
@@ -1140,10 +1132,7 @@
   .adega-eyebrow,
   .consumo-eyebrow,
   .last-opened-eyebrow,
-  .sidebar-section-label,
-  .modal-section-label,
-  .form-section-label,
-  .form-field-label {
+  .sidebar-section-label {
     letter-spacing: 0.11em;
     color: var(--sx-t-muted);
   }
@@ -1167,7 +1156,6 @@
 
   .editorial-btn-primary,
   .btn-primary-premium,
-  .modal-btn-primary,
   .btn-adicionar-adega,
   .sidebar-cta-primary,
   .atalho-btn-primary,
@@ -1183,7 +1171,6 @@
 
   .editorial-btn-primary::after,
   .btn-primary-premium::after,
-  .modal-btn-primary::after,
   .btn-adicionar-adega::after,
   .atalho-btn-primary::after,
   .btn-wishlist-add::after {
@@ -1198,7 +1185,6 @@
 
   .editorial-btn-primary:hover::after,
   .btn-primary-premium:hover::after,
-  .modal-btn-primary:hover::after,
   .btn-adicionar-adega:hover::after,
   .atalho-btn-primary:hover::after,
   .btn-wishlist-add:hover::after {
@@ -1207,7 +1193,6 @@
 
   .editorial-btn-primary:hover,
   .btn-primary-premium:hover,
-  .modal-btn-primary:hover,
   .btn-adicionar-adega:hover,
   .atalho-btn-primary:hover,
   .btn-wishlist-add:hover {
@@ -1218,7 +1203,6 @@
 
   .editorial-btn-primary:active,
   .btn-primary-premium:active,
-  .modal-btn-primary:active,
   .btn-adicionar-adega:active,
   .atalho-btn-primary:active,
   .btn-wishlist-add:active {
@@ -1227,7 +1211,6 @@
 
   .editorial-btn-ghost,
   .btn-ver-adega,
-  .modal-btn-secondary,
   .btn-abrir,
   .btn-abrir-card,
   .atalho-btn-secondary {
@@ -1240,7 +1223,6 @@
 
   .editorial-btn-ghost:hover,
   .btn-ver-adega:hover,
-  .modal-btn-secondary:hover,
   .btn-abrir:hover,
   .btn-abrir-card:hover,
   .atalho-btn-secondary:hover {
@@ -1359,20 +1341,11 @@
   .overview-search,
   .premium-editorial-search,
   .header-search-pill,
-  .auth-input,
-  .form-input,
-  .modal-input,
-  .premium-modal-shell :is(input, textarea, select) {
+  .auth-input {
     border: 0.5px solid rgba(28,20,16,0.07);
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(253,252,249,0.88), rgba(237,234,227,0.70));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 12px 28px -26px rgba(28,20,16,0.22);
-  }
-
-  .premium-modal-shell textarea,
-  textarea.form-input,
-  textarea.modal-input {
-    border-radius: 20px;
   }
 
   .overview-search {
@@ -1384,8 +1357,7 @@
     padding-bottom: 12px;
   }
 
-  .chip,
-  .premium-modal-shell .chip {
+  .chip {
     min-height: 30px;
     border: 0.5px solid rgba(28,20,16,0.075);
     border-radius: 999px;
@@ -1396,8 +1368,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
   }
 
-  .chip.active,
-  .premium-modal-shell .chip.active {
+  .chip.active {
     border-color: rgba(58,74,46,0.14);
     background: linear-gradient(180deg, rgba(58,74,46,0.13), rgba(58,74,46,0.07));
     color: var(--sx-olive);
@@ -1549,102 +1520,6 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
   }
 
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    max-width: min(560px, calc(100vw - 20px));
-    border: 0.5px solid rgba(255,255,255,0.78);
-    border-radius: 34px 34px 0 0;
-    background:
-      radial-gradient(420px 180px at 12% -10%, rgba(200,169,106,0.14), transparent 62%),
-      linear-gradient(180deg, #fffdf8 0%, #fdfcf9 52%, #f6f1ea 100%);
-    box-shadow: var(--sx-shadow-float);
-  }
-
-  @media (min-width: 640px) {
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      border-radius: 34px;
-    }
-  }
-
-  .modal-header {
-    border-bottom: 0;
-    padding: 22px 24px 12px;
-  }
-
-  .modal-title,
-  .premium-modal-shell [data-radix-dialog-title].modal-title {
-    font-size: 21px;
-    font-weight: 610;
-    letter-spacing: -0.025em;
-  }
-
-  .modal-subtitle {
-    max-width: 30rem;
-    font-size: 13px;
-  }
-
-  .modal-body {
-    padding-top: 8px;
-  }
-
-  .modal-action-card,
-  .harmonizar-option,
-  .segment-card,
-  .modal-wine-list,
-  .carta-wine-card {
-    border-color: rgba(28,20,16,0.065);
-    background: linear-gradient(180deg, rgba(237,234,227,0.72), rgba(247,245,240,0.70));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.64);
-  }
-
-  .modal-action-card,
-  .harmonizar-option {
-    border-radius: 24px;
-    padding: 14px;
-  }
-
-  .modal-action-card:hover,
-  .harmonizar-option:hover {
-    background: linear-gradient(180deg, rgba(238,241,234,0.88), rgba(247,245,240,0.80));
-  }
-
-  .modal-action-icon,
-  .modal-action-icon-wrap,
-  .harmonizar-option-icon {
-    border-color: rgba(28,20,16,0.06);
-    border-radius: 18px;
-    background: rgba(253,252,249,0.82);
-    color: var(--sx-olive);
-  }
-
-  .segment-card {
-    border-radius: 22px;
-  }
-
-  .segment-card.active {
-    border-color: rgba(139,26,59,0.24);
-    background: linear-gradient(180deg, var(--sx-bordeaux-06), rgba(245,236,240,0.56));
-  }
-
-  .modal-wine-list {
-    border-radius: 24px;
-    padding: 4px;
-  }
-
-  .modal-wine-row {
-    border: 0;
-    border-radius: 18px;
-    padding: 10px 12px;
-  }
-
-  .carta-wine-card {
-    border-radius: 26px;
-    box-shadow: var(--sx-shadow-sm);
-  }
-
   .carta-wine-actions {
     border-top-color: rgba(28,20,16,0.06);
   }
@@ -1769,10 +1644,7 @@
     .wine-row-card,
     .wine-card,
     .ready-section,
-    .dashboard-aside-card,
-    .modal-action-card,
-    .harmonizar-option,
-    .carta-wine-card {
+    .dashboard-aside-card {
       animation: sx-card-in 420ms cubic-bezier(0.22,1,0.36,1) both;
     }
 
@@ -2605,28 +2477,6 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  .premium-modal-overlay {
-    background:
-      radial-gradient(ellipse 72% 58% at 50% 16%, rgba(255,246,232,0.12), transparent 62%),
-      rgba(18, 14, 16, 0.38);
-    backdrop-filter: blur(14px) saturate(1.06);
-    -webkit-backdrop-filter: blur(14px) saturate(1.06);
-  }
-
-  .premium-modal-shell {
-    background:
-      radial-gradient(ellipse 88% 52% at 50% -12%, rgba(255,255,255,0.72), transparent 66%),
-      linear-gradient(180deg, rgba(250, 245, 238, 0.93) 0%, rgba(244, 237, 228, 0.90) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.36);
-    box-shadow:
-      0 34px 88px -48px rgba(38, 24, 18, 0.34),
-      0 18px 42px -34px rgba(123,30,43,0.18),
-      inset 0 1px 0 rgba(255,255,255,0.58);
-    backdrop-filter: blur(24px) saturate(1.08);
-    -webkit-backdrop-filter: blur(24px) saturate(1.08);
-    transform-origin: center 58%;
-    will-change: transform, opacity, filter;
-  }
 
   .premium-header-shell {
     background: linear-gradient(180deg, rgba(246, 240, 232, 0.96) 0%, rgba(246, 240, 232, 0.82) 100%);
@@ -4386,72 +4236,6 @@
     border-color: rgba(0,0,0,0.07);
   }
 
-  .premium-modal-overlay {
-    background: rgba(26, 18, 12, 0.50);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-  }
-
-  .premium-modal-shell,
-  [role="dialog"].premium-modal-shell {
-    color: var(--color-text-primary);
-    background: var(--color-card-bg);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-color: rgba(0, 0, 0, 0.07);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .premium-modal-shell :is(h1, h2, h3, [data-radix-dialog-title]) {
-    color: var(--color-text-primary);
-  }
-
-  .premium-modal-shell :is(p, span, label, div) {
-    color: inherit;
-  }
-
-  .premium-modal-shell :is(.text-muted-foreground, [class*="text-[rgba(72,60,46"], [class*="text-[#6B6258"]) {
-    color: var(--color-text-secondary);
-  }
-
-  .premium-modal-shell :is(input, textarea, select) {
-    color: var(--color-text-primary);
-    background: #f2efe9;
-    border-color: transparent;
-    box-shadow: inset 0 -1px 0 rgba(139, 26, 59, 0.16);
-  }
-
-  .premium-modal-shell :is(input, textarea, select)::placeholder {
-    color: #b5afa7;
-  }
-
-  .premium-modal-shell :is(input, textarea, select):focus-visible {
-    background: #ede9e1;
-    box-shadow: inset 0 -1.5px 0 0 var(--color-bordeaux);
-  }
-
-  .premium-modal-shell .premium-card-surface {
-    color: var(--color-text-primary);
-    background: #f2efe9;
-    border-color: rgba(0, 0, 0, 0.08);
-  }
-
-  .premium-modal-shell [aria-label="Fechar modal"],
-  [aria-label="Pular onboarding"] {
-    color: var(--color-text-secondary);
-    background: rgba(0, 0, 0, 0.06);
-    border-color: transparent;
-  }
-
-  .premium-modal-shell [aria-label="Fechar modal"]:hover,
-  [aria-label="Pular onboarding"]:hover {
-    background: rgba(0, 0, 0, 0.11);
-  }
-
-  .premium-modal-shell .btn-primary-premium,
-  .premium-modal-shell :is(.bg-primary, button[class*="bg-[#7B1E2B"], button[class*="from-[#7B1E2B"]) {
-    color: #ffffff;
-  }
 
   .dashboard-shell :is(.editorial-btn-primary, .btn-primary-premium) {
     background: linear-gradient(135deg, var(--color-bordeaux), #a2244d);
@@ -4501,324 +4285,7 @@
     color: var(--sx-text-muted);
   }
 
-  .premium-modal-overlay {
-    background: rgba(28, 20, 16, 0.45);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
 
-  .premium-modal-shell {
-    color: var(--sx-text-body);
-    background: var(--sx-bg-card);
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 20px;
-    box-shadow: var(--sx-shadow-modal);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  .premium-modal-shell :is(h1, h2, h3, h4, [data-radix-dialog-title]) {
-    color: var(--sx-text-headline);
-  }
-
-  .premium-modal-shell :is(p, span, label, div) {
-    color: inherit;
-  }
-
-  .premium-modal-shell :is(.text-muted-foreground, [class*="text-[#6B6258"], [class*="text-[rgba(72,60,46"], [class*="text-black"]) {
-    color: var(--sx-text-secondary);
-  }
-
-  .premium-modal-shell :is(input, textarea, select) {
-    width: 100%;
-    color: var(--sx-text-body);
-    background: var(--sx-bg-input);
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 10px;
-    box-shadow: none;
-  }
-
-  .premium-modal-shell :is(input, textarea, select)::placeholder {
-    color: var(--sx-text-muted);
-  }
-
-  .premium-modal-shell :is(input, textarea, select):focus,
-  .premium-modal-shell :is(input, textarea, select):focus-visible {
-    color: var(--sx-text-body);
-    background: var(--sx-bg-card);
-    border-color: var(--sx-border-focus);
-    box-shadow: 0 0 0 3px rgba(139, 26, 59, 0.08);
-  }
-
-  .premium-modal-shell .premium-card-surface {
-    color: var(--sx-text-body);
-    background: var(--sx-bg-input);
-    border: 0.5px solid var(--sx-border-default);
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  .premium-modal-shell .premium-card-surface:hover {
-    background: #E8E4DC;
-  }
-
-  .premium-modal-shell [aria-label="Fechar modal"],
-  .premium-modal-shell [aria-label="Pular onboarding"] {
-    color: var(--sx-text-secondary);
-    background: rgba(58, 42, 30, 0.07);
-    border: 0;
-  }
-
-  .premium-modal-shell [aria-label="Fechar modal"]:hover,
-  .premium-modal-shell [aria-label="Pular onboarding"]:hover {
-    background: rgba(58, 42, 30, 0.11);
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .modal-icon-circle {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    border-radius: 10px;
-    background: var(--sx-bordeaux-light);
-    color: var(--sx-bordeaux);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .modal-icon-circle svg {
-    color: var(--sx-bordeaux);
-    width: 16px;
-    height: 16px;
-  }
-
-  .modal-title {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1.2;
-    color: var(--sx-text-headline);
-  }
-
-  .modal-subtitle {
-    margin-top: 2px;
-    font-size: 13px;
-    color: var(--sx-text-secondary);
-  }
-
-  .modal-action-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 13px 14px;
-    margin-bottom: 8px;
-    background: var(--sx-bg-input);
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background 150ms ease;
-  }
-
-  .modal-action-card:hover {
-    background: #E8E4DC;
-  }
-
-  .modal-action-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: var(--sx-bg-card);
-    color: var(--sx-text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .modal-action-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--sx-text-body);
-  }
-
-  .modal-action-subtitle {
-    margin-top: 1px;
-    font-size: 12px;
-    color: var(--sx-text-muted);
-  }
-
-  .modal-field-label,
-  .modal-section-label {
-    display: block;
-    margin: 14px 0 5px;
-    color: var(--sx-text-muted);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .modal-section-label {
-    margin: 18px 0 8px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-  }
-
-  .modal-input {
-    width: 100%;
-    padding: 11px 13px;
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 10px;
-    background: var(--sx-bg-input);
-    color: var(--sx-text-body);
-    font-size: 15px;
-    outline: none;
-    box-shadow: none;
-    transition: border 150ms ease, box-shadow 150ms ease, background 150ms ease;
-  }
-
-  .modal-input:focus,
-  .modal-input:focus-visible {
-    background: var(--sx-bg-card);
-    border-color: var(--sx-border-focus);
-    box-shadow: 0 0 0 3px rgba(139, 26, 59, 0.08);
-  }
-
-  .segment-card {
-    flex: 1;
-    padding: 13px 14px;
-    border-radius: 12px;
-    border: 0.5px solid var(--sx-border-default);
-    background: var(--sx-bg-input);
-    cursor: pointer;
-    transition: all 150ms ease;
-  }
-
-  .segment-card.active {
-    background: var(--sx-bordeaux-light);
-    border: 1.5px solid var(--sx-bordeaux);
-  }
-
-  .segment-card .seg-title,
-  .segment-card :is(p:first-child) {
-    color: var(--sx-text-body);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .segment-card.active .seg-title,
-  .segment-card.active :is(p:first-child) {
-    color: var(--sx-bordeaux);
-  }
-
-  .segment-card .seg-subtitle,
-  .segment-card :is(p + p) {
-    margin-top: 2px;
-    color: var(--sx-text-muted);
-    font-size: 12px;
-  }
-
-  .premium-modal-shell .btn-primary-premium,
-  .premium-modal-shell :is(.bg-primary, button[class*="bg-[#7B1E2B"], button[class*="from-[#7B1E2B"]) {
-    color: var(--sx-text-on-dark);
-    background: var(--sx-bordeaux);
-    border-color: var(--sx-bordeaux);
-  }
-
-  .premium-modal-shell button.premium-control-surface,
-  .premium-modal-shell :is(button[class*="variant-secondary"], button[class*="border-[#3A4A2E"]) {
-    background: transparent;
-    color: var(--sx-olive);
-    border: 1.5px solid var(--sx-olive);
-    box-shadow: none;
-  }
-
-  .modal-wine-list-wrap {
-    margin-top: 8px;
-    background: var(--sx-bg-input);
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-
-  .modal-wine-row {
-    padding: 11px 14px;
-    border-bottom: 0.5px solid var(--sx-border-default);
-    background: transparent;
-    cursor: pointer;
-    transition: background 120ms ease;
-  }
-
-  .modal-wine-row:last-child {
-    border-bottom: none;
-  }
-
-  .modal-wine-row:hover {
-    background: rgba(139, 26, 59, 0.04);
-  }
-
-  .modal-wine-row :is(p:first-child) {
-    color: var(--sx-text-body);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .modal-wine-row :is(p + p) {
-    margin-top: 2px;
-    color: var(--sx-text-muted);
-    font-size: 12px;
-  }
-
-  .harmonizar-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    background: var(--sx-bg-input);
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background 150ms ease;
-  }
-
-  .harmonizar-option:hover {
-    background: #E8E4DC;
-  }
-
-  .harmonizar-option-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: var(--sx-bg-card);
-    border: 0.5px solid var(--sx-border-default);
-    color: var(--sx-text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .harmonizar-option-title {
-    color: var(--sx-text-body);
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .harmonizar-option-subtitle {
-    margin-top: 2px;
-    color: var(--sx-text-muted);
-    font-size: 12px;
-  }
 
   .wine-row-card,
   .dashboard-shell .editorial-row {
@@ -4933,7 +4400,6 @@
     font-weight: 500;
   }
 
-  .premium-modal-shell .chip,
   .dashboard-shell .chip,
   .chip {
     height: auto;
@@ -4950,14 +4416,12 @@
     transition: all 120ms ease;
   }
 
-  .premium-modal-shell .chip:hover,
   .dashboard-shell .chip:hover,
   .chip:hover {
     border-color: var(--sx-bordeaux-mid);
     color: var(--sx-bordeaux);
   }
 
-  .premium-modal-shell .chip.active,
   .dashboard-shell .chip.active,
   .chip.active {
     background: var(--sx-bg-chip-on);
@@ -4966,205 +4430,6 @@
     font-weight: 500;
   }
 
-  .carta-results-header {
-    margin-bottom: 16px;
-  }
-
-  .carta-results-count {
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.15;
-    color: var(--sx-text-headline);
-  }
-
-  .carta-results-sub {
-    margin-top: 3px;
-    font-size: 13px;
-    color: var(--sx-text-secondary);
-  }
-
-  .carta-wine-card {
-    position: relative;
-    margin-bottom: 10px;
-    padding: 14px 16px;
-    border: 0.5px solid var(--sx-border-default);
-    border-radius: 14px;
-    background: var(--sx-bg-card);
-    box-shadow: var(--sx-shadow-card);
-    transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
-  }
-
-  .carta-wine-card:hover,
-  .carta-wine-card.is-selected {
-    border-color: rgba(139, 26, 59, 0.22);
-    box-shadow: 0 3px 16px rgba(28, 20, 16, 0.09), 0 1px 4px rgba(28, 20, 16, 0.05);
-  }
-
-  .carta-wine-number {
-    position: absolute;
-    top: 14px;
-    left: 16px;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--sx-text-headline);
-    color: var(--sx-text-on-dark);
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .carta-wine-top {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    padding-left: 36px;
-    margin-bottom: 4px;
-  }
-
-  .carta-wine-name {
-    min-width: 0;
-    flex: 1;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.25;
-    color: var(--sx-text-headline);
-  }
-
-  .carta-wine-price {
-    flex-shrink: 0;
-    white-space: nowrap;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--sx-bordeaux);
-  }
-
-  .carta-wine-origin {
-    padding-left: 36px;
-    margin-bottom: 6px;
-    font-size: 12px;
-    color: var(--sx-text-secondary);
-  }
-
-  .carta-wine-attrs {
-    padding-left: 36px;
-    margin-bottom: 8px;
-    font-size: 12px;
-    color: var(--sx-text-muted);
-  }
-
-  .carta-wine-badges {
-    padding-left: 36px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-
-  .carta-badge {
-    padding: 3px 9px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  .carta-badge.principal {
-    background: var(--sx-bordeaux-light);
-    color: var(--sx-bordeaux);
-  }
-
-  .carta-badge.value {
-    background: var(--sx-olive-light);
-    color: var(--sx-olive);
-  }
-
-  .carta-badge.casa {
-    background: var(--sx-bg-input);
-    color: var(--sx-text-secondary);
-  }
-
-  .carta-wine-actions {
-    padding-left: 36px;
-    padding-top: 10px;
-    border-top: 0.5px solid var(--sx-border-default);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .carta-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 11px;
-    border-radius: 20px;
-    border: 0.5px solid var(--sx-border-strong);
-    background: transparent;
-    color: var(--sx-text-secondary);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 1;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 120ms ease;
-  }
-
-  .carta-action-btn:hover {
-    background: var(--sx-bg-input);
-    color: var(--sx-text-body);
-  }
-
-  .carta-action-btn.save {
-    color: var(--sx-bordeaux);
-    border-color: rgba(139, 26, 59, 0.25);
-  }
-
-  .carta-action-btn.save:hover {
-    background: var(--sx-bordeaux-light);
-  }
-
-  .carta-action-btn.is-disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
-  }
-
-  .premium-modal-shell ::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .premium-modal-shell ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .premium-modal-shell ::-webkit-scrollbar-thumb {
-    background: rgba(139, 26, 59, 0.25);
-    border-radius: 3px;
-  }
-
-  .premium-modal-shell ::-webkit-scrollbar-thumb:hover {
-    background: rgba(139, 26, 59, 0.45);
-  }
-
-  @media (max-width: 480px) {
-    .carta-wine-card {
-      padding: 13px 14px;
-    }
-
-    .carta-wine-price {
-      font-size: 14px;
-    }
-
-    .carta-action-btn {
-      padding-inline: 10px;
-    }
-  }
 
   /* ── Redesign Pass 2: Overview + Minha Adega ───────── */
   .overview-greeting-wrap {
@@ -5681,638 +4946,6 @@
   .drink-badge.soon { background: rgba(180,152,60,0.15); color: #7A6420; }
   .drink-badge.now { background: var(--sx-olive-10); color: var(--sx-olive); }
   .drink-badge.aging { background: rgba(58,74,200,0.08); color: #2A3A8A; }
-
-  /* ── Redesign Pass 3: Universal modals + forms ───────── */
-  .premium-modal-overlay,
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    background: rgba(28, 20, 16, 0.50);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-
-  @media (min-width: 640px) {
-    .premium-modal-overlay,
-    .modal-overlay {
-      align-items: center;
-    }
-  }
-
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    width: 100%;
-    max-width: 520px;
-    max-height: 92dvh;
-    overflow-y: auto;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-xl) var(--sx-r-xl) 0 0;
-    background: var(--sx-bg-card);
-    color: var(--sx-t-body);
-    box-shadow: var(--sx-shadow-lg);
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  @media (min-width: 640px) {
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      max-height: 85vh;
-      border-radius: var(--sx-r-xl);
-    }
-  }
-
-  .modal-container::before {
-    content: '';
-    display: block;
-    width: 40px;
-    height: 4px;
-    margin: 12px auto 0;
-    border-radius: 2px;
-    background: var(--sx-b-medium);
-  }
-
-  @media (min-width: 640px) {
-    .modal-container::before {
-      display: none;
-    }
-  }
-
-  .modal-container::-webkit-scrollbar,
-  .modal-container *::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .modal-container::-webkit-scrollbar-track,
-  .modal-container *::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .modal-container::-webkit-scrollbar-thumb,
-  .modal-container *::-webkit-scrollbar-thumb {
-    border-radius: 3px;
-    background: rgba(139, 26, 59, 0.20);
-  }
-
-  .modal-header {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin: 0 0 4px;
-    border-bottom: 0.5px solid var(--sx-b-default);
-    padding: 20px 24px 16px;
-  }
-
-  .modal-body {
-    padding: 12px 24px 0;
-  }
-
-  .modal-icon-wrap,
-  .modal-icon-circle {
-    display: flex;
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: 10px;
-    background: var(--sx-bordeaux-06);
-    color: var(--sx-bordeaux);
-    box-shadow: none;
-  }
-
-  .modal-icon-wrap svg,
-  .modal-icon-circle svg {
-    width: 16px;
-    height: 16px;
-    color: currentColor;
-  }
-
-  .modal-title,
-  .premium-modal-shell [data-radix-dialog-title].modal-title {
-    margin: 0;
-    color: var(--sx-t-head);
-    font-size: 17px;
-    font-weight: 500;
-    line-height: 1.2;
-    letter-spacing: 0;
-  }
-
-  .modal-subtitle,
-  .premium-modal-shell [data-radix-dialog-description].modal-subtitle {
-    margin-top: 2px;
-    color: var(--sx-t-sub);
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.45;
-    letter-spacing: 0;
-  }
-
-  .modal-close,
-  .premium-modal-shell [aria-label="Fechar modal"] {
-    display: flex;
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    align-items: center;
-    justify-content: center;
-    border: 0;
-    border-radius: 50%;
-    background: var(--sx-bg-input);
-    color: var(--sx-t-sub);
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .modal-close:hover,
-  .premium-modal-shell [aria-label="Fechar modal"]:hover {
-    background: rgba(58, 42, 30, 0.11);
-    color: var(--sx-t-body);
-  }
-
-  .modal-btn-primary,
-  .premium-modal-shell .modal-btn-primary {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-    border: none;
-    border-radius: var(--sx-r-pill);
-    background: var(--sx-bordeaux);
-    padding: 15px 20px;
-    color: var(--sx-t-white);
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .modal-btn-primary:hover,
-  .premium-modal-shell .modal-btn-primary:hover {
-    opacity: 0.88;
-  }
-
-  .modal-btn-secondary,
-  .premium-modal-shell .modal-btn-secondary {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 10px;
-    border: 1.5px solid var(--sx-olive);
-    border-radius: var(--sx-r-pill);
-    background: transparent;
-    padding: 14px 20px;
-    color: var(--sx-olive);
-    font-size: 15px;
-    font-weight: 500;
-    box-shadow: none;
-    cursor: pointer;
-  }
-
-  .modal-btn-secondary:hover,
-  .premium-modal-shell .modal-btn-secondary:hover {
-    background: var(--sx-olive-06);
-  }
-
-  .modal-action-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-md);
-    background: var(--sx-bg-input);
-    padding: 13px 14px;
-    color: var(--sx-t-body);
-    box-shadow: none;
-    cursor: pointer;
-    transition: background 120ms ease;
-  }
-
-  .modal-action-card:hover {
-    background: #E5E1D8;
-  }
-
-  .modal-action-icon,
-  .modal-action-icon-wrap {
-    display: flex;
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: 8px;
-    background: var(--sx-bg-card);
-    color: var(--sx-t-sub);
-    font-size: 16px;
-  }
-
-  .modal-action-title {
-    color: var(--sx-t-body);
-    font-size: 14px;
-    font-weight: 500;
-    letter-spacing: 0;
-  }
-
-  .modal-action-sub,
-  .modal-action-subtitle {
-    margin-top: 1px;
-    color: var(--sx-t-muted);
-    font-size: 12px;
-    line-height: 1.4;
-  }
-
-  .form-section-label,
-  .modal-section-label {
-    margin: 18px 0 10px;
-    color: var(--sx-t-muted);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-  }
-
-  .form-field-label,
-  .modal-field-label {
-    display: block;
-    margin: 14px 0 6px;
-    color: var(--sx-t-muted);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .form-input,
-  .modal-input,
-  .premium-modal-shell .input-premium,
-  .premium-modal-shell :is(input, textarea, select) {
-    width: 100%;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-sm);
-    background: var(--sx-bg-input);
-    padding: 12px 13px;
-    color: var(--sx-t-body);
-    font-size: 15px;
-    outline: none;
-    box-shadow: 0 0 0 1000px var(--sx-bg-input) inset;
-  }
-
-  .form-input::placeholder,
-  .modal-input::placeholder,
-  .premium-modal-shell .input-premium::placeholder,
-  .premium-modal-shell :is(input, textarea)::placeholder {
-    color: var(--sx-t-muted);
-  }
-
-  .form-input:focus,
-  .form-input:focus-visible,
-  .modal-input:focus,
-  .modal-input:focus-visible,
-  .premium-modal-shell .input-premium:focus,
-  .premium-modal-shell .input-premium:focus-visible,
-  .premium-modal-shell :is(input, textarea, select):focus,
-  .premium-modal-shell :is(input, textarea, select):focus-visible {
-    border-color: var(--sx-b-focus);
-    background: var(--sx-bg-card);
-    box-shadow:
-      0 0 0 3px var(--sx-bordeaux-10),
-      0 0 0 1000px var(--sx-bg-card) inset;
-  }
-
-  .form-row-2col {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .form-accordion-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    border-top: 0.5px solid var(--sx-b-default);
-    padding: 13px 0;
-    cursor: pointer;
-  }
-
-  .form-accordion-title {
-    color: var(--sx-t-body);
-    font-size: 13px;
-    font-weight: 500;
-  }
-
-  .form-accordion-sub {
-    color: var(--sx-t-muted);
-    font-size: 12px;
-  }
-
-  .form-accordion-chevron {
-    color: var(--sx-t-muted);
-    font-size: 16px;
-    transition: transform 200ms ease;
-  }
-
-  .form-accordion-trigger[aria-expanded="true"] .form-accordion-chevron {
-    transform: rotate(180deg);
-  }
-
-  .harmonizar-eyebrow {
-    margin: 16px 0 10px;
-    color: var(--sx-t-muted);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.10em;
-    text-transform: uppercase;
-  }
-
-  .harmonizar-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-md);
-    background: var(--sx-bg-input);
-    padding: 14px 16px;
-    color: var(--sx-t-body);
-    box-shadow: none;
-    cursor: pointer;
-    transition: background 120ms ease;
-  }
-
-  .harmonizar-option:hover {
-    background: #E5E1D8;
-  }
-
-  .harmonizar-option-icon {
-    display: flex;
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: 10px;
-    background: var(--sx-bg-card);
-    color: var(--sx-t-sub);
-    font-size: 18px;
-  }
-
-  .harmonizar-option-title {
-    color: var(--sx-t-body);
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .harmonizar-option-sub,
-  .harmonizar-option-subtitle {
-    margin-top: 2px;
-    color: var(--sx-t-muted);
-    font-size: 12px;
-  }
-
-  .harmonizar-option-arrow {
-    margin-left: auto;
-    color: var(--sx-t-muted);
-    font-size: 16px;
-  }
-
-  .segment-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-
-  .segment-card {
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-md);
-    background: var(--sx-bg-input);
-    padding: 13px 14px;
-    cursor: pointer;
-    transition: all 150ms ease;
-  }
-
-  .segment-card.active {
-    border: 1.5px solid var(--sx-bordeaux);
-    background: var(--sx-bordeaux-06);
-  }
-
-  .segment-card-title,
-  .segment-card .seg-title,
-  .segment-card :is(p:first-child) {
-    color: var(--sx-t-body);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .segment-card.active .segment-card-title,
-  .segment-card.active .seg-title,
-  .segment-card.active :is(p:first-child) {
-    color: var(--sx-bordeaux);
-  }
-
-  .segment-card-sub,
-  .segment-card .seg-subtitle,
-  .segment-card :is(p + p) {
-    margin-top: 2px;
-    color: var(--sx-t-muted);
-    font-size: 12px;
-  }
-
-  .modal-wine-list,
-  .modal-wine-list-wrap {
-    overflow: hidden;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-md);
-    background: var(--sx-bg-input);
-  }
-
-  .modal-wine-row {
-    display: block;
-    border-bottom: 0.5px solid var(--sx-b-default);
-    background: transparent;
-    padding: 11px 14px;
-    color: var(--sx-t-body);
-    cursor: pointer;
-    transition: background 120ms ease;
-  }
-
-  .modal-wine-row:last-child {
-    border-bottom: none;
-  }
-
-  .modal-wine-row:hover {
-    background: rgba(139, 26, 59, 0.04);
-  }
-
-  .modal-wine-row-name,
-  .modal-wine-row :is(p:first-child) {
-    color: var(--sx-t-body);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  .modal-wine-row-meta,
-  .modal-wine-row :is(p + p) {
-    margin-top: 2px;
-    color: var(--sx-t-muted);
-    font-size: 12px;
-  }
-
-  .carta-results-header {
-    margin: 0;
-    padding: 16px 24px 12px;
-  }
-
-  .carta-results-title,
-  .carta-results-count {
-    margin-bottom: 4px;
-    color: var(--sx-t-head);
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.15;
-  }
-
-  .carta-results-sub {
-    color: var(--sx-t-sub);
-    font-size: 13px;
-  }
-
-  .carta-wine-card {
-    position: relative;
-    margin-bottom: 10px;
-    border: 0.5px solid var(--sx-b-default);
-    border-radius: var(--sx-r-md);
-    background: var(--sx-bg-card);
-    padding: 14px 16px;
-    box-shadow: none;
-  }
-
-  .carta-wine-number {
-    position: absolute;
-    top: 14px;
-    left: 16px;
-    display: flex;
-    width: 24px;
-    height: 24px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    background: var(--sx-t-head);
-    color: var(--sx-t-white);
-    font-size: 11px;
-    font-weight: 600;
-  }
-
-  .carta-wine-top {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 4px;
-    padding-left: 34px;
-  }
-
-  .carta-wine-name {
-    flex: 1;
-    color: var(--sx-t-head);
-    font-size: 15px;
-    font-weight: 500;
-  }
-
-  .carta-wine-price {
-    color: var(--sx-bordeaux);
-    font-size: 14px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .carta-wine-origin {
-    margin-bottom: 5px;
-    padding-left: 34px;
-    color: var(--sx-t-sub);
-    font-size: 12px;
-  }
-
-  .carta-wine-attrs {
-    margin-bottom: 8px;
-    padding-left: 34px;
-    color: var(--sx-t-muted);
-    font-size: 12px;
-  }
-
-  .carta-wine-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 10px;
-    padding-left: 34px;
-  }
-
-  .carta-badge {
-    border-radius: var(--sx-r-pill);
-    padding: 3px 8px;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-  }
-
-  .carta-badge.principal {
-    background: var(--sx-bordeaux-10);
-    color: var(--sx-bordeaux);
-  }
-
-  .carta-badge.value {
-    background: var(--sx-olive-10);
-    color: var(--sx-olive);
-  }
-
-  .carta-badge.casa {
-    background: var(--sx-bg-input);
-    color: var(--sx-t-sub);
-  }
-
-  .carta-wine-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    border-top: 0.5px solid var(--sx-b-default);
-    padding-top: 10px;
-    padding-left: 34px;
-  }
-
-  .carta-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    border: 0.5px solid var(--sx-b-medium);
-    border-radius: var(--sx-r-pill);
-    background: transparent;
-    padding: 5px 10px;
-    color: var(--sx-t-sub);
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-
-  .carta-action-btn.save {
-    border-color: rgba(139, 26, 59, 0.25);
-    color: var(--sx-bordeaux);
-  }
 
   /* ── Redesign Pass 4: Consumo + Alertas + Wishlist + Onboarding ───────── */
   .consumo-page {
@@ -6916,7 +5549,6 @@
 
   .editorial-btn-primary,
   .btn-primary-premium,
-  .modal-btn-primary,
   .btn-adicionar-adega,
   .atalho-btn-primary,
   .btn-wishlist-add {
@@ -6931,7 +5563,6 @@
 
   .editorial-btn-ghost,
   .btn-ver-adega,
-  .modal-btn-secondary,
   .btn-abrir,
   .btn-abrir-card,
   .atalho-btn-secondary {
@@ -6944,24 +5575,14 @@
   .overview-search,
   .premium-editorial-search,
   .header-search-pill,
-  .auth-input,
-  .form-input,
-  .modal-input,
-  .premium-modal-shell :is(input, textarea, select) {
+  .auth-input {
     border: 0.5px solid rgba(28,20,16,0.07);
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(253,252,249,0.88), rgba(237,234,227,0.70));
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.78), 0 12px 28px -26px rgba(28,20,16,0.22);
   }
 
-  .premium-modal-shell textarea,
-  textarea.form-input,
-  textarea.modal-input {
-    border-radius: 20px;
-  }
-
-  .chip,
-  .premium-modal-shell .chip {
+  .chip {
     min-height: 30px;
     border: 0.5px solid rgba(28,20,16,0.075);
     border-radius: 999px;
@@ -6972,8 +5593,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.58);
   }
 
-  .chip.active,
-  .premium-modal-shell .chip.active {
+  .chip.active {
     border-color: rgba(58,74,46,0.14);
     background: linear-gradient(180deg, rgba(58,74,46,0.13), rgba(58,74,46,0.07));
     color: var(--sx-olive);
@@ -7045,89 +5665,6 @@
     color: var(--sx-bordeaux);
   }
 
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    max-width: min(560px, calc(100vw - 20px));
-    border: 0.5px solid rgba(255,255,255,0.78);
-    border-radius: 34px 34px 0 0;
-    background:
-      radial-gradient(420px 180px at 12% -10%, rgba(200,169,106,0.14), transparent 62%),
-      linear-gradient(180deg, #fffdf8 0%, #fdfcf9 52%, #f6f1ea 100%);
-    box-shadow: var(--sx-shadow-float);
-  }
-
-  @media (min-width: 640px) {
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      border-radius: 34px;
-    }
-  }
-
-  .modal-header {
-    border-bottom: 0;
-    padding: 22px 24px 12px;
-  }
-
-  .modal-title,
-  .premium-modal-shell [data-radix-dialog-title].modal-title {
-    color: var(--sx-t-head);
-    font-size: 21px;
-    font-weight: 610;
-    letter-spacing: -0.025em;
-  }
-
-  .modal-action-card,
-  .harmonizar-option,
-  .segment-card,
-  .modal-wine-list,
-  .carta-wine-card {
-    border-color: rgba(28,20,16,0.065);
-    background: linear-gradient(180deg, rgba(237,234,227,0.72), rgba(247,245,240,0.70));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.64);
-  }
-
-  .modal-action-card,
-  .harmonizar-option {
-    border-radius: 24px;
-    padding: 14px;
-  }
-
-  .modal-action-icon,
-  .modal-action-icon-wrap,
-  .harmonizar-option-icon {
-    border-color: rgba(28,20,16,0.06);
-    border-radius: 18px;
-    background: rgba(253,252,249,0.82);
-    color: var(--sx-olive);
-  }
-
-  .segment-card {
-    border-radius: 22px;
-  }
-
-  .segment-card.active {
-    border-color: rgba(139,26,59,0.24);
-    background: linear-gradient(180deg, var(--sx-bordeaux-06), rgba(245,236,240,0.56));
-  }
-
-  .modal-wine-list {
-    border-radius: 24px;
-    padding: 4px;
-  }
-
-  .modal-wine-row {
-    border: 0;
-    border-radius: 18px;
-    padding: 10px 12px;
-  }
-
-  .carta-wine-card {
-    border-radius: 26px;
-    box-shadow: var(--sx-shadow-sm);
-  }
-
   .auth-card {
     max-width: 430px;
     border-color: rgba(255,255,255,0.70);
@@ -7159,415 +5696,6 @@
     .btn-adicionar-adega {
       grid-column: 1 / -1;
       justify-content: center;
-    }
-  }
-}
-
-/* Modal consistency final lock: action/AI dialogs share the same premium Sommelyx system. */
-@layer components {
-  .sx-ai-modal,
-  .modal-container,
-  .premium-modal-shell.modal-container,
-  [role="dialog"].modal-container {
-    overflow: hidden !important;
-    border: 0.5px solid rgba(255,255,255,0.74) !important;
-    border-radius: 34px 34px 0 0 !important;
-    background:
-      radial-gradient(420px 180px at 12% -10%, rgba(200,169,106,0.13), transparent 62%),
-      linear-gradient(180deg, #fffdf8 0%, var(--sx-bg-card) 54%, #f6f1ea 100%) !important;
-    box-shadow: 0 24px 70px -42px rgba(28,20,16,0.44), inset 0 1px 0 rgba(255,255,255,0.82) !important;
-  }
-
-  @media (min-width: 640px) {
-    .sx-ai-modal,
-    .modal-container,
-    .premium-modal-shell.modal-container,
-    [role="dialog"].modal-container {
-      border-radius: 34px !important;
-    }
-  }
-
-  .modal-header {
-    gap: 14px !important;
-    padding: 24px 24px 14px !important;
-    border-bottom: 0 !important;
-  }
-
-  .modal-icon-wrap,
-  .modal-icon-circle {
-    width: 42px !important;
-    height: 42px !important;
-    min-width: 42px !important;
-    border-radius: 16px !important;
-    border: 0.5px solid rgba(139,26,59,0.10) !important;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.82), transparent 34%),
-      linear-gradient(145deg, rgba(245,236,240,0.96), rgba(238,241,234,0.74)) !important;
-    color: var(--sx-bordeaux) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.82), 0 14px 28px -24px rgba(139,26,59,0.30) !important;
-  }
-
-  .modal-title,
-  .premium-modal-shell [data-radix-dialog-title].modal-title {
-    color: var(--sx-t-head) !important;
-    font-size: clamp(24px, 6vw, 30px) !important;
-    font-weight: 580 !important;
-    letter-spacing: -0.035em !important;
-    line-height: 0.98 !important;
-  }
-
-  .modal-subtitle,
-  .premium-modal-shell [data-radix-dialog-description].modal-subtitle {
-    color: var(--sx-t-sub) !important;
-    font-size: 13.5px !important;
-    line-height: 1.35 !important;
-    margin-top: 6px !important;
-  }
-
-  .modal-close {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    border-radius: 999px !important;
-    background: rgba(237,234,227,0.78) !important;
-    color: var(--sx-t-sub) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
-  }
-
-  .modal-body,
-  .premium-modal-shell .modal-body {
-    padding: 12px 24px max(24px, env(safe-area-inset-bottom)) !important;
-  }
-
-  .premium-modal-shell :is(input, textarea, select),
-  .modal-input,
-  .form-input {
-    border: 0.5px solid rgba(28,20,16,0.075) !important;
-    border-radius: 18px !important;
-    background: linear-gradient(180deg, rgba(253,252,249,0.78), rgba(237,234,227,0.72)) !important;
-    color: var(--sx-t-body) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
-  }
-
-  .premium-modal-shell :is(input, textarea, select):focus,
-  .modal-input:focus,
-  .form-input:focus {
-    border-color: rgba(139,26,59,0.30) !important;
-    background: rgba(253,252,249,0.96) !important;
-    box-shadow: 0 0 0 4px rgba(139,26,59,0.08), inset 0 1px 0 rgba(255,255,255,0.78) !important;
-  }
-
-  .modal-btn-primary,
-  .premium-modal-shell .modal-btn-primary,
-  .premium-modal-shell button[type="submit"] {
-    border-radius: 999px !important;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.14), transparent 38%),
-      linear-gradient(135deg, #912634 0%, var(--sx-bordeaux) 58%, #5A1E24 100%) !important;
-    color: #fff !important;
-    box-shadow: 0 18px 34px -24px rgba(139,26,59,0.66), inset 0 1px 0 rgba(255,255,255,0.22) !important;
-    transition: transform 160ms ease, opacity 160ms ease, box-shadow 160ms ease !important;
-  }
-
-  .modal-btn-secondary,
-  .premium-modal-shell .modal-btn-secondary {
-    border-radius: 999px !important;
-    border: 1px solid rgba(58,74,46,0.28) !important;
-    background: rgba(253,252,249,0.74) !important;
-    color: var(--sx-olive) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70) !important;
-  }
-
-  .modal-btn-primary:active,
-  .modal-btn-secondary:active,
-  .premium-modal-shell button:active {
-    transform: scale(0.985);
-  }
-
-  .modal-action-card,
-  .harmonizar-option,
-  .segment-card,
-  .carta-wine-card,
-  .consumption-section,
-  .consumption-details-card {
-    border: 0.5px solid rgba(28,20,16,0.065) !important;
-    background:
-      radial-gradient(circle at 18% 0%, rgba(255,255,255,0.78), transparent 36%),
-      linear-gradient(180deg, rgba(253,252,249,0.82), rgba(247,245,240,0.72)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.68), 0 16px 32px -30px rgba(28,20,16,0.28) !important;
-  }
-
-  .modal-action-card,
-  .harmonizar-option {
-    border-radius: 24px !important;
-    padding: 14px !important;
-  }
-
-  .consumption-modal-flow {
-    display: flex;
-    min-height: 0;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .consumption-section,
-  .consumption-details-card {
-    border-radius: 28px !important;
-    padding: 16px !important;
-  }
-
-  .consumption-source-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .consumption-source-card {
-    display: flex !important;
-    min-height: 112px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    border: 0.5px solid rgba(28,20,16,0.07) !important;
-    border-radius: 26px !important;
-    background: rgba(253,252,249,0.62) !important;
-    padding: 14px !important;
-    text-align: left !important;
-    color: var(--sx-t-body) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70) !important;
-  }
-
-  .consumption-source-card.is-selected {
-    border-color: rgba(139,26,59,0.22) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.88), rgba(253,252,249,0.70)) !important;
-  }
-
-  .consumption-source-icon,
-  .consumption-wine-icon,
-  .modal-action-icon-wrap,
-  .modal-action-icon,
-  .harmonizar-option-icon {
-    border: 0.5px solid rgba(28,20,16,0.06) !important;
-    border-radius: 16px !important;
-    background: rgba(253,252,249,0.82) !important;
-    color: var(--sx-olive) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.74) !important;
-  }
-
-  .consumption-source-icon.is-selected,
-  .consumption-wine-icon.is-selected {
-    background: linear-gradient(145deg, var(--sx-bordeaux), #6d1730) !important;
-    color: #fff !important;
-  }
-
-  .consumption-source-title,
-  .consumption-wine-name,
-  .modal-action-title,
-  .harmonizar-option-title {
-    color: var(--sx-t-body) !important;
-    font-weight: 580 !important;
-    letter-spacing: -0.01em !important;
-  }
-
-  .consumption-source-sub,
-  .consumption-source-meta,
-  .consumption-wine-meta,
-  .modal-action-sub,
-  .harmonizar-option-sub {
-    color: var(--sx-t-sub) !important;
-  }
-
-  .consumption-search {
-    position: relative;
-    margin-top: 10px;
-  }
-
-  .consumption-search input {
-    height: 44px !important;
-    border-radius: 999px !important;
-    padding-left: 40px !important;
-  }
-
-  .consumption-chip-row {
-    display: flex;
-    gap: 7px;
-    margin: 10px -2px 12px;
-    overflow-x: auto;
-    padding: 0 2px 2px;
-    scrollbar-width: none;
-  }
-
-  .consumption-chip-row::-webkit-scrollbar {
-    display: none;
-  }
-
-  .consumption-filter-chip,
-  .premium-modal-shell .chip {
-    min-height: 30px !important;
-    border-radius: 999px !important;
-    font-size: 11.5px !important;
-  }
-
-  .consumption-wine-list {
-    display: flex !important;
-    max-height: min(330px, 38dvh);
-    flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    padding: 0 2px 2px !important;
-    box-shadow: none !important;
-  }
-
-  .harmonize-picker-flow .consumption-wine-list {
-    max-height: none;
-  }
-
-  .consumption-wine-list::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  .consumption-wine-list::-webkit-scrollbar-thumb {
-    border-radius: 999px;
-    background: rgba(58,74,46,0.18);
-  }
-
-  .consumption-wine-row {
-    display: flex !important;
-    align-items: center !important;
-    gap: 11px !important;
-    width: 100% !important;
-    border: 0.5px solid rgba(28,20,16,0.055) !important;
-    border-radius: 22px !important;
-    background: rgba(253,252,249,0.66) !important;
-    padding: 11px 12px !important;
-    text-align: left !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.64) !important;
-    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease !important;
-  }
-
-  .consumption-wine-row:hover,
-  .consumption-wine-row.is-selected {
-    border-color: rgba(139,26,59,0.16) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.74), rgba(253,252,249,0.76)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70), 0 14px 28px -26px rgba(139,26,59,0.25) !important;
-  }
-
-  @media (hover: hover) {
-    .consumption-source-card:hover,
-    .consumption-wine-row:hover,
-    .modal-action-card:hover,
-    .harmonizar-option:hover {
-      transform: translateY(-1px);
-    }
-  }
-
-  .consumption-qty-badge,
-  .wine-qty-badge {
-    border-radius: 999px !important;
-    background: rgba(237,234,227,0.76) !important;
-    color: var(--sx-t-sub) !important;
-    font-size: 11px !important;
-  }
-
-  .consumption-qty-badge.is-selected {
-    background: rgba(58,74,46,0.11) !important;
-    color: var(--sx-olive) !important;
-  }
-
-  .consumption-selected-summary,
-  .harmonize-selected-footer {
-    border: 0.5px solid rgba(58,74,46,0.10) !important;
-    border-radius: 24px !important;
-    background: linear-gradient(180deg, rgba(238,241,234,0.86), rgba(253,252,249,0.74)) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.72) !important;
-  }
-
-  .consumption-change-button {
-    border: 0.5px solid rgba(58,74,46,0.18) !important;
-    border-radius: 999px !important;
-    color: var(--sx-olive) !important;
-  }
-
-  .consumption-field-grid,
-  .consumption-two-col {
-    display: grid;
-    gap: 12px;
-  }
-
-  .consumption-two-col {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .consumption-rating-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 7px;
-  }
-
-  .consumption-rating-button {
-    min-height: 42px;
-    border: 0.5px solid rgba(28,20,16,0.075) !important;
-    border-radius: 16px !important;
-    background: rgba(253,252,249,0.66) !important;
-    color: var(--sx-t-muted) !important;
-    transition: transform 150ms ease, background 150ms ease, color 150ms ease !important;
-  }
-
-  .consumption-rating-button.is-selected {
-    border-color: rgba(139,26,59,0.22) !important;
-    background: linear-gradient(180deg, rgba(245,236,240,0.92), rgba(253,252,249,0.76)) !important;
-    color: var(--sx-bordeaux) !important;
-  }
-
-  .analyze-carta-capture {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .analyze-carta-actions {
-    display: grid;
-    gap: 10px;
-  }
-
-  @media (min-width: 640px) {
-    .analyze-carta-actions {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .analyze-carta-help {
-    border: 0.5px solid rgba(58,74,46,0.10) !important;
-    border-radius: 26px !important;
-    background:
-      radial-gradient(circle at 8% 0%, rgba(200,169,106,0.16), transparent 38%),
-      linear-gradient(180deg, rgba(238,241,234,0.76), rgba(253,252,249,0.74)) !important;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .sx-ai-modal[data-state="open"] {
-      animation: sx-modal-rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-
-    .premium-modal-shell :is(.modal-action-card, .harmonizar-option, .segment-card, .carta-wine-card, .consumption-section, .consumption-wine-row) {
-      animation: sx-card-in 220ms ease both;
-    }
-  }
-
-  @media (max-width: 420px) {
-    .consumption-source-grid,
-    .consumption-two-col,
-    .consumption-rating-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .modal-title,
-    .premium-modal-shell [data-radix-dialog-title].modal-title {
-      font-size: 24px !important;
     }
   }
 }

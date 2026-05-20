@@ -222,6 +222,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <SheetContent
+        centered
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label="Adicionar consumo"
