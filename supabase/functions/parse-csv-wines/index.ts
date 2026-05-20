@@ -12,6 +12,259 @@ const MAX_CHUNKS = 5;
 const PROCESSING_TIMEOUT_MS = 25_000;
 const FUNCTION_NAME = "parse-csv-wines";
 
+const DISTRIBUTOR_COUNTRY_MAP: Record<string, string> = {
+  ARG: "Argentina",
+  FRA: "França",
+  CHI: "Chile",
+  POR: "Portugal",
+  ITA: "Itália",
+  ESP: "Espanha",
+  ALE: "Alemanha",
+  AUS: "Austrália",
+  USA: "Estados Unidos",
+  URU: "Uruguai",
+  BRA: "Brasil",
+  AFR: "África do Sul",
+};
+
+const DISTRIBUTOR_STYLE_MAP: Record<string, string> = {
+  TTO: "tinto",
+  BCO: "branco",
+  ROS: "rose",
+  ESP: "espumante",
+  SOB: "sobremesa",
+  FOR: "fortificado",
+};
+
+const DISTRIBUTOR_GRAPE_EXPAND: Record<string, { name: string; grape: string }> = {
+  "CABERNET FRANC": { name: "CABERNET FRANC", grape: "Cabernet Franc" },
+  "CAB FRANC": { name: "CABERNET FRANC", grape: "Cabernet Franc" },
+  "CAB SAUVI": { name: "CABERNET SAUVIGNON", grape: "Cabernet Sauvignon" },
+  "PINOT NOIR": { name: "PINOT NOIR", grape: "Pinot Noir" },
+  "PINOT NOI": { name: "PINOT NOIR", grape: "Pinot Noir" },
+  "CARMENERE": { name: "CARMENERE", grape: "Carmenère" },
+  "CHARDONNAY": { name: "CHARDONNAY", grape: "Chardonnay" },
+  "ALVARINHO": { name: "ALVARINHO", grape: "Alvarinho" },
+  "MALBEC": { name: "MALBEC", grape: "Malbec" },
+  "BAROLO": { name: "BAROLO", grape: "Nebbiolo" },
+  "CARM": { name: "CARMENERE", grape: "Carmenère" },
+};
+
+function fixEncoding(text: string) {
+  return text
+    .replace(/\uFFFD/g, "")
+    .replace(/Ã§/g, "ç")
+    .replace(/Ã£/g, "ã")
+    .replace(/Ã¡/g, "á")
+    .replace(/Ã©/g, "é")
+    .replace(/Ã­/g, "í")
+    .replace(/Ã³/g, "ó")
+    .replace(/Ãº/g, "ú")
+    .replace(/Ãª/g, "ê")
+    .replace(/Ã´/g, "ô")
+    .replace(/Ãµ/g, "õ")
+    .replace(/Ã‡/g, "Ç")
+    .replace(/Ã/g, "Á");
+}
+
+function detectDelimiter(firstLine: string): string {
+  const counts: Record<string, number> = {
+    ",": (firstLine.match(/,/g) || []).length,
+    ";": (firstLine.match(/;/g) || []).length,
+    "\t": (firstLine.match(/\t/g) || []).length,
+    "|": (firstLine.match(/\|/g) || []).length,
+  };
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || ",";
+}
+
+function splitDelimitedLine(line: string, delimiter: string): string[] {
+  const out: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+    if (ch === delimiter && !inQuotes) {
+      out.push(current.trim().replace(/^"|"$/g, ""));
+      current = "";
+      continue;
+    }
+    current += ch;
+  }
+  out.push(current.trim().replace(/^"|"$/g, ""));
+  return out;
+}
+
+function toDistributorTitleCase(str: string): string {
+  const lowerWords = new Set(["de", "du", "da", "do", "di", "del", "des", "et", "e", "y", "van", "von", "the", "a", "an"]);
+  return str
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word, index) => {
+      const normalized = word
+        .replace(/^nobrega$/i, "nóbrega")
+        .replace(/^fume$/i, "fumé")
+        .replace(/^fumé$/i, "fumé")
+        .replace(/^carmenere$/i, "carmenère");
+      if (index > 0 && lowerWords.has(normalized)) return normalized;
+      return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+    })
+    .join(" ");
+}
+
+function parseBRPrice(raw: string | undefined): number | null {
+  if (!raw) return null;
+  const normalized = raw.trim().replace(/\./g, "").replace(",", ".");
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) && parsed > 0 ? Number(parsed.toFixed(2)) : null;
+}
+
+function inferDistributorProducer(name: string, producerCode: string | null): string | null {
+  const upper = name.toUpperCase();
+  const byCode: Record<string, string> = {
+    CYT: "Concha y Toro",
+    DMC: "Don Melchor",
+  };
+  if (producerCode && byCode[producerCode]) return byCode[producerCode];
+  if (upper.startsWith("DOMAINE CHENE")) return "Domaine Chene";
+  if (producerCode === "DSB" && upper.startsWith("CHABLIS")) return "Chablis/DSB";
+  if (upper.startsWith("DON MELCHOR")) return "Don Melchor";
+  if (upper.startsWith("TERRAS DA NÓBREGA")) return "Terras da Nóbrega";
+  if (upper.startsWith("CHATEAUNEUF DU PAPE")) return "Chateauneuf du Pape";
+  const words = name.split(/\s+/).filter(Boolean);
+  return words[0] || null;
+}
+
+function parseDistributorDescription(desc: string): {
+  name: string;
+  producer: string | null;
+  country: string | null;
+  style: string | null;
+  vintage: number | null;
+  grape: string | null;
+} | null {
+  const upper = desc.toUpperCase().replace(/\s+/g, " ").trim();
+  if (!upper.startsWith("VINHO")) return null;
+
+  const parts = upper.replace(/^VINHO\s+/, "").split(/\s+/).filter(Boolean);
+  if (parts.length < 3) return null;
+
+  const countryCode = parts[0];
+  const country = DISTRIBUTOR_COUNTRY_MAP[countryCode] ?? null;
+  let idx = country ? 1 : 0;
+  let producerCode: string | null = null;
+
+  if (
+    parts[idx] &&
+    /^[A-Z]{2,4}$/.test(parts[idx]) &&
+    !DISTRIBUTOR_STYLE_MAP[parts[idx]] &&
+    !DISTRIBUTOR_COUNTRY_MAP[parts[idx]]
+  ) {
+    producerCode = parts[idx];
+    idx++;
+  }
+
+  const vintageIdx = parts.findIndex((part, index) => index >= idx && /^(19|20)\d{2}$/.test(part));
+  const vintage = vintageIdx >= 0 ? Number.parseInt(parts[vintageIdx], 10) : null;
+  const styleIdx = parts.findIndex((part, index) => index >= idx && !!DISTRIBUTOR_STYLE_MAP[part]);
+  const style = styleIdx >= 0 ? DISTRIBUTOR_STYLE_MAP[parts[styleIdx]] : null;
+  const endIdx = Math.min(styleIdx >= 0 ? styleIdx : parts.length, vintageIdx >= 0 ? vintageIdx : parts.length);
+  const nameTokens = parts.slice(idx, endIdx);
+  if (nameTokens.length === 0) return null;
+
+  let rawName = nameTokens.join(" ");
+  let grape: string | null = null;
+  const expansions = Object.entries(DISTRIBUTOR_GRAPE_EXPAND).sort((a, b) => b[0].length - a[0].length);
+  for (const [abbr, expanded] of expansions) {
+    if (rawName.includes(abbr)) {
+      grape = grape || expanded.grape;
+      rawName = rawName.replace(new RegExp(`\\b${abbr}\\b`, "g"), expanded.name);
+    }
+  }
+
+  const name = toDistributorTitleCase(rawName);
+  const producer = inferDistributorProducer(name, producerCode);
+  return { name, producer, country, style, vintage, grape };
+}
+
+function isDistributorDataRow(cols: string[]): boolean {
+  const item = cols[0]?.trim();
+  const desc = cols[2]?.trim();
+  return !!item && /^\d+$/.test(item) && !!desc && desc.length >= 5 && /^VINHO\b/i.test(desc);
+}
+
+function parseDistributorCsv(text: string): { wines: Array<Record<string, unknown>>; delimiter: string; ignoredRows: number; categories: string[] } {
+  const normalized = fixEncoding(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
+  const lines = normalized.split("\n").filter((line) => line.trim().length > 0);
+  const firstLine = lines.find((line) => line.trim().length > 0) || "";
+  const delimiter = detectDelimiter(firstLine);
+  const wines: Array<Record<string, unknown>> = [];
+  const categories = new Set<string>();
+  let ignoredRows = 0;
+  let currentCategoria = "";
+
+  for (const line of lines) {
+    const cols = splitDelimitedLine(line, delimiter);
+    const first = cols[0]?.trim() || "";
+    const second = cols[1]?.trim() || "";
+
+    if (!first && second && !/^\d+$/.test(second)) {
+      const possibleCat = second.toLowerCase();
+      if (!possibleCat.includes("quantidade") && possibleCat.length > 2) {
+        currentCategoria = possibleCat;
+        categories.add(possibleCat);
+      }
+      continue;
+    }
+
+    if (!isDistributorDataRow(cols)) {
+      ignoredRows++;
+      continue;
+    }
+
+    const parsed = parseDistributorDescription(cols[2]?.trim() || "");
+    if (!parsed?.name) {
+      ignoredRows++;
+      continue;
+    }
+
+    const rawQuantity = Number.parseInt((cols[3] || "").trim(), 10);
+    const quantity = Number.isFinite(rawQuantity) && rawQuantity > 0 ? rawQuantity : 1;
+    const price = parseBRPrice(cols[4]);
+    wines.push({
+      nome: parsed.name,
+      name: parsed.name,
+      produtor: parsed.producer,
+      producer: parsed.producer,
+      safra: parsed.vintage,
+      vintage: parsed.vintage,
+      quantidade: quantity,
+      quantity,
+      pais: parsed.country,
+      country: parsed.country,
+      estilo: parsed.style,
+      style: parsed.style,
+      uva: parsed.grape,
+      grape: parsed.grape,
+      preco_compra: price,
+      purchase_price: price,
+      categoria_distribuidor: currentCategoria || null,
+      confidence: 0.85,
+    });
+  }
+
+  return { wines, delimiter, ignoredRows, categories: Array.from(categories) };
+}
+
 function errorResponse(code: string, message: string, requestId: string, retryable = false) {
   return { success: false, code, message, requestId, retryable };
 }
@@ -109,7 +362,7 @@ serve(async (req) => {
       });
     }
 
-    const normalized = csvContent.replace(/\r\n/g, "\n").trim();
+    const normalized = fixEncoding(csvContent).replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim();
     const lines = normalized.split("\n").filter((l) => l.trim().length > 0);
     const detectedRows = Math.max(0, lines.length - 1);
     if (detectedRows > MAX_ROWS) {
@@ -170,6 +423,54 @@ serve(async (req) => {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (!isSmartPdf) {
+      const distributor = parseDistributorCsv(normalized);
+      if (distributor.wines.length > 0) {
+        const warnings = distributor.ignoredRows > 0
+          ? [`${distributor.ignoredRows} linha(s) sem dados de vinho foram ignoradas.`]
+          : [];
+        const result = {
+          wines: distributor.wines,
+          vinhos: distributor.wines,
+          total_encontrados: distributor.wines.length,
+          avisos: warnings,
+          column_mapping: {
+            Item: "ignored",
+            Produto: "product_code",
+            "Descrição": "name",
+            Quantidade: "quantity",
+            "Valor Unitário": "purchase_price",
+          },
+          notes: warnings.join(" "),
+          metadata: {
+            fileName: typeof fileName === "string" ? fileName : null,
+            fileType: typeof fileType === "string" ? fileType : null,
+            parseMode: "distributor-csv",
+            delimiter: distributor.delimiter,
+            categories: distributor.categories,
+            ocrUsed: false,
+            chunks: 0,
+            truncated: false,
+          },
+        };
+
+        console.log(`[${FUNCTION_NAME}] request_id=${requestId} distributor_parser_wines=${result.wines.length} ignored_rows=${distributor.ignoredRows} delimiter=${JSON.stringify(distributor.delimiter)}`);
+        await logAudit(userId, 200, "success", Date.now() - startTime, {
+          request_id: requestId,
+          parser: "distributor-csv",
+          wines_extracted: result.wines.length,
+          csv_lines: lines.length,
+          input_size_bytes: inputSizeBytes,
+          error_type: null,
+        });
+        await setCachedAiResponse("parse-csv-wines", cacheInput, result, { userId });
+        return new Response(JSON.stringify(result), {
+          status: 200,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const rateLimit = await checkRateLimit(userId, FUNCTION_NAME);
