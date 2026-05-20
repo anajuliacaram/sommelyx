@@ -88,13 +88,13 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-[var(--sx-bg-page)] px-5 py-6 text-[var(--sx-t-body)]">
-      <section className="flex w-full items-center justify-center">
+    <div className="auth-page flex min-h-[100dvh] items-center justify-center bg-[var(--sx-bg-page)] px-5 py-6 text-[var(--sx-t-body)]">
+      <section className="auth-stage flex w-full items-center justify-center">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-[400px] rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] px-8 pb-8 pt-9 shadow-[var(--sx-shadow-lg)]"
+            className="auth-card w-full max-w-[400px] rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] px-8 pb-8 pt-9 shadow-[var(--sx-shadow-lg)]"
           >
             <div className="mb-7 flex items-center gap-3">
               <Link to="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-85">

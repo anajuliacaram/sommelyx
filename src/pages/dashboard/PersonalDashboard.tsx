@@ -196,7 +196,7 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="editorial-page !px-0">
+      <div className="editorial-page premium-home-page !px-0">
         <section>
           <div className="overview-greeting-wrap flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
@@ -264,7 +264,7 @@ export default function PersonalDashboard() {
         <div className="grid grid-cols-12 gap-5 lg:gap-8">
           <section className="col-span-12 lg:col-span-8">
             <div>
-              <div className="ready-section">
+              <div className="ready-section curated-ready-card">
                 <div className="min-w-0">
                   <h2 className="ready-section-title">Escolha a próxima garrafa</h2>
                   <p className="ready-section-sub">
@@ -412,12 +412,12 @@ export default function PersonalDashboard() {
           </section>
 
           <aside className="col-span-12 lg:col-span-4">
-            <div className="px-1">
-              <div className="space-y-5 border-t border-black/[0.05] pt-4 lg:border-t-0 lg:pt-0">
+            <div className="dashboard-aside-stack px-5 lg:px-1">
+              <div className="space-y-3 pt-1 lg:pt-0">
                 {insightWine && (
                   <button
                     type="button"
-                    className="group flex w-full items-start gap-3 text-left"
+                    className="dashboard-aside-card group flex w-full items-start gap-3 text-left"
                     onClick={() => {
                       setPairingInitialWineId(insightWine.id);
                       setDishToWineOpen(true);
@@ -446,7 +446,7 @@ export default function PersonalDashboard() {
                   </button>
                 )}
 
-                <div>
+                <div className="dashboard-aside-card">
                   <Kicker>Hoje</Kicker>
                   {lastOpened ? (
                     <>
@@ -478,7 +478,7 @@ export default function PersonalDashboard() {
                   )}
                 </div>
 
-                <div className="border-t border-black/[0.05] pt-4">
+                <div className="dashboard-aside-card">
                   <div className="mb-2.5 flex items-baseline justify-between">
                     <h3 className="editorial-h3">Consumo recente</h3>
                     <span className="text-[11px] font-semibold tabular-nums" style={{ color: "#7B1E2B" }}>
@@ -488,7 +488,7 @@ export default function PersonalDashboard() {
                   <Sparkbar data={consumptionMonthly} accent="#7B1E2B" height={68} />
                 </div>
 
-                <div className="border-t border-black/[0.05] pt-4">
+                <div className="dashboard-aside-card">
                   <div className="space-y-2.5">
                     {[
                       { label: "Beber agora", value: drinkNow, tone: "#5F7F52" },
@@ -512,8 +512,8 @@ export default function PersonalDashboard() {
                   </div>
                 </div>
 
-                <div className="border-t border-black/[0.05] pt-4">
-                  <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                <div className="dashboard-aside-card">
+                  <div className="dashboard-shortcut-grid grid grid-cols-2 gap-2">
                     {[
                       { label: "Vinho", icon: Plus, action: () => setAddOpen(true) },
                       {

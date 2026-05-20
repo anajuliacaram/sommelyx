@@ -18,11 +18,11 @@ export const AI_MODAL_ACTION_TILE_CLASSNAME =
   "modal-action-card premium-card-surface";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "modal-container fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[520px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[85vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
+  "modal-container fixed z-50 left-0 right-0 bottom-0 top-auto h-auto max-h-[92dvh] w-full max-w-[560px] translate-x-0 translate-y-0 overflow-y-auto rounded-t-[var(--sx-r-xl)] border p-0 gap-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:left-1/2 sm:right-auto sm:bottom-auto sm:top-1/2 sm:max-h-[86vh] sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-[var(--sx-r-xl)] sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
   width: "100%",
-  maxWidth: "520px",
+  maxWidth: "560px",
   maxHeight: "92dvh",
   height: "auto",
   background: "var(--sx-bg-card)",

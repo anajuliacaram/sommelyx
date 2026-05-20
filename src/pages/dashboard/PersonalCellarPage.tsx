@@ -334,7 +334,7 @@ export default function PersonalCellarPage() {
 
   return (
     <>
-      <div className="editorial-page !px-0">
+      <div className="editorial-page cellar-page !px-0">
         {pageHeader(filtered.length)}
 
         {/* Results */}

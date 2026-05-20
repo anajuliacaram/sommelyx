@@ -103,7 +103,7 @@ export default function Landing() {
   };
 
   return (
-      <div className={`${designSystem.pageShell} ${designSystem.pageBackground}`}>
+      <div className={`${designSystem.pageShell} ${designSystem.pageBackground} landing-shell-premium`}>
       <LandingBackground />
       <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
       <main>
