@@ -397,7 +397,7 @@ export default function PersonalCellarPage() {
                       wine={w}
                       alt={w.name}
                       className="wine-card-image"
-                      imageClassName="h-full w-full object-cover"
+                      imageClassName="h-full w-full object-contain"
                       generated={false}
                       compact
                     />

@@ -22,6 +22,7 @@ import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 import {
   Kicker,
   Sparkbar,
@@ -340,76 +341,114 @@ export default function PersonalDashboard() {
                   className="px-6 py-10 lg:py-12"
                 />
               ) : (
-                <div className="wine-list">
-                  {ready.map((w) => {
+                <div className="wine-list home-ready-list">
+                  {ready[0] ? (() => {
+                    const w = ready[0];
                     const family = getStyleFamily(w.style);
-                    const color = STYLE_COLORS[family];
                     return (
-                      <div key={w.id} className="wine-row-card recent-wine-row">
-                        <div
-                          className="wine-row-icon recent-wine-badge"
-                          style={{ background: `${color}14`, color }}
-                        >
-                          <WineIcon className="h-4 w-4" />
-                        </div>
-                        <div className="wine-row-body">
-                          <div className="flex min-w-0 items-baseline gap-1.5">
-                            <p className="wine-row-name recent-wine-name truncate">
-                              {w.name}
-                            </p>
-                            {w.vintage && (
-                              <span className="wine-row-year recent-wine-year tabular-nums">
-                                {w.vintage}
-                              </span>
-                            )}
-                          </div>
-                          <p className="wine-row-meta truncate">
-                            {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
-                              .filter(Boolean)
-                              .join(" · ")}
+                      <article key={w.id} className="home-wine-hero sx-card sx-card-wine">
+                        <WineLabelPreview
+                          wine={w}
+                          alt={w.name}
+                          className="home-wine-hero-media"
+                          imageClassName="h-full w-full object-contain"
+                          compact
+                        />
+                        <div className="home-wine-hero-body">
+                          <div className="home-wine-hero-kicker">Recomendação</div>
+                          <h3 className="home-wine-hero-name sx-wine-name">{w.name}</h3>
+                          <p className="home-wine-hero-meta">
+                            {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Vinho da adega"}
                           </p>
-                          <div className="mt-1.5 flex items-center gap-2">
-                            <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
-                              {family}
-                            </span>
-                            <span className="wine-qty-badge">
-                              {w.quantity} un.
-                              {w.drink_until ? (
-                                <>
-                                  {" · janela até "}
-                                  <b className="tabular-nums">{w.drink_until}</b>
-                                </>
-                              ) : null}
-                            </span>
+                          <div className="home-wine-hero-tags">
+                            <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>{family}</span>
+                            <span className="wine-qty-badge">{w.quantity} un.</span>
+                            {w.drink_until ? <span className="wine-qty-badge">até {w.drink_until}</span> : null}
                           </div>
-                        </div>
-                        <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
-                          {w.rating != null && (
-                            <div className="flex items-center gap-1 text-[12.5px] font-semibold tabular-nums" style={{ color: "#B48C3A" }}>
-                              <Star className="h-3.5 w-3.5 fill-current" />
-                              <span>{Number(w.rating).toFixed(1)}</span>
-                            </div>
-                          )}
-                          {w.current_value != null && (
-                            <span
-                              className="text-[11.5px] font-semibold"
-                              style={{ color: "rgba(58,51,39,0.55)" }}
-                            >
-                              R$ {Number(w.current_value).toLocaleString("pt-BR")}
-                            </span>
-                          )}
                         </div>
                         <button
                           type="button"
-                          className="btn-abrir"
+                          className="btn-abrir home-wine-hero-action"
                           disabled={wineEvent.isPending}
                           onClick={() => handleOpenBottle(w.id, w.name)}
                         >
                           Abrir
                         </button>
-                      </div>
+                      </article>
                     );
-                  })}
+                  })() : null}
+
+                  <div className="home-ready-rows">
+                    {ready.slice(1).map((w) => {
+                      const family = getStyleFamily(w.style);
+                      return (
+                        <div key={w.id} className="wine-row-card recent-wine-row">
+                          <WineLabelPreview
+                            wine={w}
+                            alt={w.name}
+                            className="wine-row-thumb recent-wine-badge"
+                            imageClassName="h-full w-full object-contain"
+                            compact
+                          />
+                          <div className="wine-row-body">
+                            <div className="flex min-w-0 items-baseline gap-1.5">
+                              <p className="wine-row-name recent-wine-name truncate">
+                                {w.name}
+                              </p>
+                              {w.vintage && (
+                                <span className="wine-row-year recent-wine-year tabular-nums">
+                                  {w.vintage}
+                                </span>
+                              )}
+                            </div>
+                            <p className="wine-row-meta truncate">
+                              {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
+                                .filter(Boolean)
+                                .join(" · ")}
+                            </p>
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
+                                {family}
+                              </span>
+                              <span className="wine-qty-badge">
+                                {w.quantity} un.
+                                {w.drink_until ? (
+                                  <>
+                                    {" · janela até "}
+                                    <b className="tabular-nums">{w.drink_until}</b>
+                                  </>
+                                ) : null}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
+                            {w.rating != null && (
+                              <div className="flex items-center gap-1 text-[12.5px] font-semibold tabular-nums" style={{ color: "#B48C3A" }}>
+                                <Star className="h-3.5 w-3.5 fill-current" />
+                                <span>{Number(w.rating).toFixed(1)}</span>
+                              </div>
+                            )}
+                            {w.current_value != null && (
+                              <span
+                                className="text-[11.5px] font-semibold"
+                                style={{ color: "rgba(58,51,39,0.55)" }}
+                              >
+                                R$ {Number(w.current_value).toLocaleString("pt-BR")}
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn-abrir"
+                            disabled={wineEvent.isPending}
+                            onClick={() => handleOpenBottle(w.id, w.name)}
+                          >
+                            Abrir
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>

@@ -75,14 +75,14 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
           <header
-            className="mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
+            className="mobile-header sx-mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "group relative h-9.5 w-9.5 rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] p-0 text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-[0.96]",
+                    "mobile-header-menu group relative h-9.5 w-9.5 rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] p-0 text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-[0.96]",
                     "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
                   )}
                 />
@@ -92,7 +92,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "header-btn-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
+                    "mobile-header-menu header-btn-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
                     "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
                   )}
                 >
@@ -137,7 +137,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 md:pt-3 lg:px-8">
+          <div className="dashboard-scroll flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 md:pt-3 lg:px-8">
             <AnimatedOutlet />
           </div>
         </main>

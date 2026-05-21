@@ -156,7 +156,7 @@ export const DashboardCommandMenu = memo(function DashboardCommandMenu({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-9 w-9 rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] text-[var(--sx-t-muted)] md:hidden"
+        className="header-quick-search-btn h-9 w-9 rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] text-[var(--sx-t-muted)] md:hidden"
         onClick={() => setOpen(true)}
         aria-label="Abrir menu rápido"
       >
