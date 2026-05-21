@@ -41,7 +41,6 @@ import {
   AiModalBody,
   AiModalSplitLayout,
   AiFilterChip,
-  AiUploadPanel,
   AI_MODAL_CARD_CLASSNAME,
   AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_HELP_TEXT_CLASSNAME,
@@ -608,7 +607,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 <AiModalHeader
                   icon={<BookOpen className="h-5 w-5" />}
                   title="Analisar Carta"
-                  description="Encontre os destaques da carta."
                   tone="wine"
                 />
               </AiModalHeaderBar>
@@ -626,27 +624,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         className="analyze-carta-capture space-y-3"
                       >
                         <div className="space-y-2">
-                          <AiUploadPanel
-                            onDragOver={(event) => {
-                              event.preventDefault();
-                              event.currentTarget.dataset.dragging = "true";
-                            }}
-                            onDragLeave={(event) => {
-                              event.currentTarget.dataset.dragging = "false";
-                            }}
-                            onDrop={(event) => {
-                              event.preventDefault();
-                              event.currentTarget.dataset.dragging = "false";
-                              const file = event.dataTransfer.files?.[0];
-                              if (file) handleFile(file);
-                            }}
-                            onClick={() => fileInputRef.current?.click()}
-                            icon={<Camera className="h-5 w-5" strokeWidth={1.75} />}
-                            title="Enviar carta"
-                            description="Foto, imagem ou PDF."
-                            className="analyze-carta-upload"
-                          />
-
                           <div className="analyze-carta-actions grid gap-2 sm:grid-cols-2">
                             <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="analyze-carta-button w-full">
                               <Camera className="mr-2 h-4 w-4" />
@@ -657,18 +634,6 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                               Arquivo
                             </AiModalActionButton>
                           </div>
-
-                          <AiModalCard className="analyze-carta-help">
-                            <div className="flex items-start gap-3">
-                              <div className="analyze-carta-help-icon modal-action-icon-wrap modal-action-icon">
-                                <BookOpen className="h-4 w-4" />
-                              </div>
-                              <div>
-                                <p className="modal-action-title">Curadoria da carta</p>
-                                <p className="modal-action-subtitle">A leitura destaca preço, estilo e boas escolhas para decidir com calma.</p>
-                              </div>
-                            </div>
-                          </AiModalCard>
 
                           <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />
                           <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.pdf,.jpg,.jpeg,.png,.webp,.heic,.heif" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />

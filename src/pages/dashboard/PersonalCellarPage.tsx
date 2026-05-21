@@ -191,6 +191,12 @@ export default function PersonalCellarPage() {
     return countryFilter === "all" ? "País" : `País: ${selected}`;
   }, [countryFilter, countryOptions]);
 
+  const visibleStyleOptions = isMobile
+    ? ["todos", "tinto", "branco", "rosé"]
+        .map((key) => styleOptions.find((option) => option.key === key))
+        .filter((option): option is { key: string; label: string } => Boolean(option))
+    : styleOptions;
+
   const pageHeader = (filteredCount: number) => (
     <>
       <section className="adega-header">
@@ -262,7 +268,7 @@ export default function PersonalCellarPage() {
       </div>
 
       <div className="chips-row adega-filters-row">
-        {styleOptions.map((s) => {
+        {visibleStyleOptions.map((s) => {
           const styleKey = s.key === "todos" ? "todos" : s.key === "rosé" ? "rose" : s.key;
           return (
             <button
@@ -278,18 +284,18 @@ export default function PersonalCellarPage() {
         })}
       </div>
 
-      <div className="chips-row adega-filters-row">
-        {drinkWindowOptions.map((option) => (
-          <button
-            key={option.key}
-            type="button"
-            className={`chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
-            onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
-          >
-            {option.label}
-          </button>
-        ))}
-        {!isMobile && (
+      {!isMobile && (
+        <div className="chips-row adega-filters-row adega-drink-window-row">
+          {drinkWindowOptions.map((option) => (
+            <button
+              key={option.key}
+              type="button"
+              className={`chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
+              onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
+            >
+              {option.label}
+            </button>
+          ))}
           <span className="ml-auto inline-flex rounded-[var(--sx-r-pill)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-1">
             <button className={`chip !border-0 !px-3 ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
               Grade
@@ -298,8 +304,8 @@ export default function PersonalCellarPage() {
               Lista
             </button>
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 
@@ -445,8 +451,6 @@ export default function PersonalCellarPage() {
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
-              const dwRow = resolveSuggestedDrinkWindow(w);
-              const classification = classifyDrinkWindow({ current: currentYear, from: dwRow.from, until: dwRow.until });
               return (
                 <div key={w.id} className="wine-card" onClick={() => setEditWine(w)}>
                   {showLabels ? (
@@ -476,7 +480,6 @@ export default function PersonalCellarPage() {
                     <div className="wine-card-tags">
                       <span className={`wine-card-tag ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
                       <span className="wine-card-tag neutral">{w.quantity} un.</span>
-                      <span className={`wine-card-tag ${classification.status === "now" ? "" : "olive"}`}>{classification.label}</span>
                     </div>
                   </div>
                   <div className="wine-card-right">

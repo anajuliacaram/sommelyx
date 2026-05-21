@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode, CSSProperties, DragEventHandler } from "react";
-import { ActionDialogDescription, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
+import { ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -147,7 +147,7 @@ export function AiModalFooterBar({
 export function AiModalHeader({
   icon,
   title,
-  description,
+  description: _description,
   tone = "wine",
   className,
 }: {
@@ -169,11 +169,6 @@ export function AiModalHeader({
           <ActionDialogTitle className="modal-header-title modal-title">
             {title}
           </ActionDialogTitle>
-          {description ? (
-            <ActionDialogDescription className="modal-header-sub modal-subtitle max-w-[38rem]">
-              {description}
-            </ActionDialogDescription>
-          ) : null}
         </div>
       </div>
     </div>

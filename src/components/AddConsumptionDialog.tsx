@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAddConsumption } from "@/hooks/useConsumption";
 import { useWineEvent, useWines } from "@/hooks/useWines";
 import { toast } from "sonner";
-import { Wine as WineIcon, MapPin, Star, Search, Check } from "@/icons/lucide";
+import { Wine as WineIcon, MapPin, Star, Search, Check, ChevronRight } from "@/icons/lucide";
 import { cn } from "@/lib/utils";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { getWineTypeColor } from "@/lib/wine-utils";
@@ -74,7 +73,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   const addConsumption = useAddConsumption();
   const wineEvent = useWineEvent();
 
-  const [source, setSource] = useState<"cellar" | "external">("external");
+  const [source, setSource] = useState<"cellar" | "external">("cellar");
   const [selectedWineId, setSelectedWineId] = useState<string>("");
   const [wineName, setWineName] = useState("");
   const [producer, setProducer] = useState("");
@@ -108,7 +107,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   }, [open, preSelectedWine]);
 
   const resetForm = () => {
-    setSource("external");
+    setSource("cellar");
     setSelectedWineId("");
     setWineName("");
     setProducer("");
@@ -214,6 +213,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     }
   };
 
+  const canSubmit = source === "cellar" ? Boolean(selectedWineId) : Boolean(wineName.trim());
+  const submitLabel = source === "cellar" && !selectedWineId ? "Escolha uma garrafa" : "Registrar consumo";
+
   return (
     <ActionDialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <ActionDialogContent
@@ -227,7 +229,6 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             <AiModalHeader
               icon={<WineIcon className="h-5 w-5" />}
               title="Adicionar consumo"
-              description="Registre uma degustação da sua adega ou um consumo externo."
               tone="wine"
             />
           </AiModalHeaderBar>
@@ -246,20 +247,14 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                       source === "cellar" && "is-selected",
                       source === "cellar" ? AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME : AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME,
                     )}
-                    onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(true); }}
+                    onClick={() => { setSource("cellar"); setSelectedWineId(""); setShowWinePicker(false); }}
                   >
                     <div className={cn("consumption-source-icon", source === "cellar" && "is-selected")}>
                       <WineIcon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>Minha adega</p>
-                      <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          Registrar abertura
-                        </p>
                     </div>
-                    <span className="consumption-source-meta">
-                        {cellarWines.length}
-                      </span>
                   </button>
                   <button
                     type="button"
@@ -287,16 +282,48 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>Externo</p>
-                      <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          Restaurante / outro
-                        </p>
                     </div>
-                    <span className="consumption-source-meta">
-                        Manual
-                      </span>
                   </button>
                 </div>
               </section>
+
+              {source === "cellar" && !showWinePicker ? (
+                <section className="consumption-section consumption-select-intro">
+                  <AiSectionLabel>Vinho</AiSectionLabel>
+                  {selectedWine ? (
+                    <button
+                      type="button"
+                      className="consumption-selected-summary consumption-selected-button"
+                      onClick={() => setShowWinePicker(true)}
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div className="consumption-wine-icon is-selected">
+                          <WineIcon className="h-3.5 w-3.5" />
+                        </div>
+                        <div className="min-w-0 text-left">
+                          <p className="consumption-wine-name truncate">{selectedWine.name}</p>
+                          <p className={cn("consumption-wine-meta mt-0.5 truncate", AI_MODAL_HELP_TEXT_CLASSNAME)}>
+                            {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "consumption-change-button")}>Trocar</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="consumption-select-card"
+                      onClick={() => setShowWinePicker(true)}
+                    >
+                      <span className="consumption-select-icon"><Search className="h-4 w-4" /></span>
+                      <span className="min-w-0 flex-1 text-left">
+                        <span className="consumption-select-title">Escolha uma garrafa</span>
+                      </span>
+                      <ChevronRight className="h-4 w-4 opacity-55" />
+                    </button>
+                  )}
+                </section>
+              ) : null}
 
               {source === "cellar" && cellarWines.length > 0 && showWinePicker && (
                 <section className="consumption-section consumption-picker-section">
@@ -304,7 +331,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     <AiSectionLabel>
                       Selecionar garrafa
                     </AiSectionLabel>
-                    <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
+                    <button type="button" className={AI_MODAL_INLINE_ACTION_CLASSNAME} onClick={() => setShowWinePicker(false)}>Fechar</button>
                   </div>
 
                   <div className="consumption-search relative">
@@ -318,7 +345,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                   </div>
 
                   <div className="consumption-chip-row">
-                    {TYPE_FILTERS.map((f) => {
+                    {TYPE_FILTERS.slice(0, 4).map((f) => {
                       const styleKey = f.id === "all" ? "todos" : f.id;
                       return (
                         <AiFilterChip
@@ -388,32 +415,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                 </section>
               )}
 
-              {source === "cellar" && selectedWine && !showWinePicker ? (
-                <section className="consumption-selected-summary">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className="consumption-wine-icon is-selected">
-                      <WineIcon className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <AiSectionLabel>Garrafa selecionada</AiSectionLabel>
-                      <p className="consumption-wine-name mt-1 truncate">{selectedWine.name}</p>
-                      <p className={cn("consumption-wine-meta mt-0.5 truncate", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                        {[selectedWine.producer, selectedWine.vintage, selectedWine.country].filter(Boolean).join(" · ") || "Vinho da adega"}
-                      </p>
-                    </div>
-                  </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "consumption-change-button")}
-                      onClick={() => setShowWinePicker(true)}
-                    >
-                      Trocar
-                    </Button>
-                </section>
-              ) : null}
-
-              <AiModalCard className="consumption-details-card">
+              {(source === "external" || selectedWine) ? <AiModalCard className="consumption-details-card">
                 <AiSectionLabel>Vinho</AiSectionLabel>
                 <div className="consumption-field-grid mt-3">
                   <div className="space-y-1">
@@ -459,9 +461,9 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     />
                   </div>
                 </div>
-              </AiModalCard>
+              </AiModalCard> : null}
 
-              <AiModalCard className="consumption-details-card">
+              {(source === "external" || selectedWine) ? <AiModalCard className="consumption-details-card">
                 <AiSectionLabel>Detalhes</AiSectionLabel>
                 <div className="consumption-field-grid mt-3">
                   <div className="consumption-two-col">
@@ -518,7 +520,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     />
                   </div>
                 </div>
-              </AiModalCard>
+              </AiModalCard> : null}
             </div>
             </AiModalSplitLayout>
           </AiModalBody>
@@ -526,11 +528,11 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
           <AiModalFooterBar>
               <AiModalActionButton
                 onClick={handleSubmit}
-                disabled={addConsumption.isPending}
+                disabled={addConsumption.isPending || !canSubmit}
                 variant="primary"
                 className="w-full"
               >
-                {addConsumption.isPending ? "Salvando..." : "Salvar consumo"}
+                {addConsumption.isPending ? "Salvando..." : submitLabel}
               </AiModalActionButton>
           </AiModalFooterBar>
         </AiModalShell>

@@ -5,7 +5,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight,
   BookOpen,
   GlassWater,
   Plus,
@@ -141,6 +140,36 @@ export default function PersonalDashboard() {
       .slice(0, 8);
   }, [wines, currentYear, query, styleFilter]);
 
+  const recommendationWines = useMemo(() => {
+    if (ready.length > 0) return ready;
+    const q = query.toLowerCase();
+    return wines
+      .filter((wine) => {
+        if (wine.quantity <= 0) return false;
+        if (styleFilter !== "todos" && getStyleFamily(wine.style) !== styleFilter) return false;
+        if (!q) return true;
+        return (
+          wine.name.toLowerCase().includes(q) ||
+          (wine.producer || "").toLowerCase().includes(q) ||
+          (wine.country || "").toLowerCase().includes(q) ||
+          (wine.region || "").toLowerCase().includes(q) ||
+          String(wine.vintage ?? "").includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const aRating = Number(a.rating ?? 0);
+        const bRating = Number(b.rating ?? 0);
+        if (aRating !== bRating) return bRating - aRating;
+        const aValue = Number(a.current_value ?? a.purchase_price ?? 0);
+        const bValue = Number(b.current_value ?? b.purchase_price ?? 0);
+        if (aValue !== bValue) return bValue - aValue;
+        return (b.vintage ?? 0) - (a.vintage ?? 0);
+      })
+      .slice(0, 8);
+  }, [query, ready, styleFilter, wines]);
+  const featuredWine = recommendationWines[0] ?? null;
+  const secondaryRecommendationWines = recommendationWines.slice(1);
+
   const months = useMemo(() => buildMonthWindow(6), []);
   const consumptionMonthly = useMemo(() => {
     const map: Record<string, number> = {};
@@ -244,17 +273,6 @@ export default function PersonalDashboard() {
                 Olá,{" "}
                 <span className="name-accent">{firstName}</span>
               </h1>
-              <p className="overview-summary overview-greeting-sub max-w-[620px]">
-                {totalBottles > 0
-                  ? (
-                    <>
-                      Sua adega guarda <strong>{totalBottles} {totalBottles === 1 ? "garrafa" : "garrafas"}</strong>.{" "}
-                      <span className="ready-accent">{drinkNow} {drinkNow === 1 ? "está pronta" : "estão prontas"}</span>{" "}
-                      para abrir hoje, enquanto <strong>{inGuard}</strong> seguem em guarda.
-                    </>
-                  )
-                  : "Sua adega está vazia. Adicione o primeiro vinho para começar a acompanhar consumo, janelas e valor."}
-              </p>
             </div>
             <div className="dashboard-quick-actions flex w-full flex-wrap items-center gap-2 sm:w-auto">
               <button type="button" className="editorial-btn-primary btn-adicionar-wine-primary" onClick={() => setAddOpen(true)}>
@@ -275,20 +293,80 @@ export default function PersonalDashboard() {
             </div>
           </div>
 
-          <div className="stats-grid stat-cards-row md:grid-cols-4">
-            {[
-              { label: "GARRAFAS", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque", icon: WineIcon },
-              { label: "VALOR EST.", value: formatCurrencyShort(totalValue), detail: "atualizado hoje", icon: Star },
-              { label: "BEBER AGORA", value: String(drinkNow), detail: "em janela ideal", icon: GlassWater, olive: true },
-              { label: "EM GUARDA", value: String(inGuard), detail: "aguardando", icon: Sparkles, olive: true },
-            ].map((metric) => (
-              <div key={metric.label} className={`stat-card min-w-0 ${metric.olive ? "olive" : ""}`}>
-                <div className="stat-card-icon">
-                  <metric.icon className="stat-label-icon h-4 w-4" />
+          {featuredWine ? (() => {
+            const w = featuredWine;
+            const family = getStyleFamily(w.style);
+            return (
+              <article key={w.id} className="home-wine-hero home-wine-hero-primary sx-card sx-card-wine">
+                <WineLabelPreview
+                  wine={w}
+                  alt={w.name}
+                  className="home-wine-hero-media"
+                  imageClassName="h-full w-full object-contain"
+                  compact
+                />
+                <div className="home-wine-hero-body">
+                  <div className="home-wine-hero-kicker">Insight do dia</div>
+                  <h3 className="home-wine-hero-name sx-wine-name">{w.name}</h3>
+                  <p className="home-wine-hero-meta">
+                    {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Vinho da adega"}
+                  </p>
+                  <div className="home-wine-hero-tags">
+                    <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>{family}</span>
+                    <span className="wine-qty-badge">{w.quantity} un.</span>
+                  </div>
                 </div>
-                <div className="stat-value stat-card-number">{metric.value}</div>
-                <p className="stat-label stat-card-label">{metric.label}</p>
-                <p className="stat-sublabel">{metric.detail}</p>
+                <button
+                  type="button"
+                  className="btn-abrir home-wine-hero-action"
+                  disabled={wineEvent.isPending}
+                  onClick={() => handleOpenBottle(w.id, w.name)}
+                >
+                  Abrir
+                </button>
+              </article>
+            );
+          })() : null}
+
+          <button
+            type="button"
+            className="daily-insight-card daily-insight-card-mobile group flex w-full items-start gap-3 text-left"
+            disabled={!insightWine}
+            onClick={() => {
+              if (!insightWine) return;
+              setPairingInitialWineId(insightWine.id);
+              setDishToWineOpen(true);
+            }}
+          >
+            <div className="daily-insight-icon">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div className="min-w-0">
+              <Kicker>Insight do dia</Kicker>
+              {insightWine ? (
+                <>
+                  <p className="daily-insight-action">{insightReason}</p>
+                  <p className="daily-insight-name">{insightWine.name}</p>
+                  <p className="daily-insight-copy">
+                    Boa escolha para acompanhar sua próxima refeição.
+                  </p>
+                </>
+              ) : (
+                <p className="daily-insight-empty">{insightReason}</p>
+              )}
+            </div>
+          </button>
+
+          <div className="home-summary-strip">
+            {[
+              { label: "garrafas", value: totalBottles.toLocaleString("pt-BR"), icon: WineIcon },
+              { label: "beber agora", value: String(drinkNow), icon: GlassWater },
+              { label: "em guarda", value: String(inGuard), icon: Sparkles },
+            ].map((metric) => (
+              <div key={metric.label} className="home-summary-item">
+                <metric.icon className="home-summary-icon" />
+                <span className="home-summary-value">{metric.value}</span>
+                <span className="home-summary-label">{metric.label}</span>
               </div>
             ))}
           </div>
@@ -297,25 +375,6 @@ export default function PersonalDashboard() {
         <div className="grid grid-cols-12 gap-5 lg:gap-8">
           <section className="recent-section col-span-12 lg:col-span-8">
             <div>
-              <div className="ready-section curated-ready-card recent-section-header">
-                <div className="min-w-0">
-                  <h2 className="ready-section-title recent-section-title">Escolha a próxima garrafa</h2>
-                  <p className="ready-section-sub">
-                    <span className="count-badge">{ready.length}</span>{" "}
-                    {ready.length === 1
-                      ? "vinho pronto para abrir agora"
-                      : "vinhos prontos para abrir agora"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="btn-ver-adega recent-section-link"
-                  onClick={() => navigate("/dashboard/cellar")}
-                >
-                  Ver adega <ArrowRight className="h-3 w-3" />
-                </button>
-              </div>
-
               <div className="overview-search">
                   <Search className="h-4 w-4" />
                   <input
@@ -336,7 +395,7 @@ export default function PersonalDashboard() {
               </div>
 
                 <div className="chips-row">
-                    {(["todos", "tinto", "branco", "rosé", "espumante", "sobremesa"] as const).map(
+                    {(["todos", "tinto", "branco", "rosé"] as const).map(
                       (s) => {
                         const styleKey = s === "todos" ? "todos" : s === "rosé" ? "rose" : s;
                         return (
@@ -354,7 +413,7 @@ export default function PersonalDashboard() {
                     )}
                 </div>
 
-              {ready.length === 0 ? (
+              {recommendationWines.length === 0 ? (
                 <PremiumEmptyState
                   icon={GlassWater}
                   title={totalBottles === 0 ? "Você ainda não adicionou vinhos" : "Nenhum vinho encontrado"}
@@ -376,44 +435,8 @@ export default function PersonalDashboard() {
                 />
               ) : (
                 <div className="wine-list home-ready-list">
-                  {ready[0] ? (() => {
-                    const w = ready[0];
-                    const family = getStyleFamily(w.style);
-                    return (
-                      <article key={w.id} className="home-wine-hero sx-card sx-card-wine">
-                        <WineLabelPreview
-                          wine={w}
-                          alt={w.name}
-                          className="home-wine-hero-media"
-                          imageClassName="h-full w-full object-contain"
-                          compact
-                        />
-                        <div className="home-wine-hero-body">
-                          <div className="home-wine-hero-kicker">Recomendação</div>
-                          <h3 className="home-wine-hero-name sx-wine-name">{w.name}</h3>
-                          <p className="home-wine-hero-meta">
-                            {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Vinho da adega"}
-                          </p>
-                          <div className="home-wine-hero-tags">
-                            <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>{family}</span>
-                            <span className="wine-qty-badge">{w.quantity} un.</span>
-                            {w.drink_until ? <span className="wine-qty-badge">até {w.drink_until}</span> : null}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          className="btn-abrir home-wine-hero-action"
-                          disabled={wineEvent.isPending}
-                          onClick={() => handleOpenBottle(w.id, w.name)}
-                        >
-                          Abrir
-                        </button>
-                      </article>
-                    );
-                  })() : null}
-
                   <div className="home-ready-rows">
-                    {ready.slice(1).map((w) => {
+                    {secondaryRecommendationWines.slice(0, 2).map((w) => {
                       const family = getStyleFamily(w.style);
                       return (
                         <div key={w.id} className="wine-row-card recent-wine-row">
@@ -444,15 +467,7 @@ export default function PersonalDashboard() {
                               <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
                                 {family}
                               </span>
-                              <span className="wine-qty-badge">
-                                {w.quantity} un.
-                                {w.drink_until ? (
-                                  <>
-                                    {" · janela até "}
-                                    <b className="tabular-nums">{w.drink_until}</b>
-                                  </>
-                                ) : null}
-                              </span>
+                              <span className="wine-qty-badge">{w.quantity} un.</span>
                             </div>
                           </div>
                           <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
@@ -493,7 +508,7 @@ export default function PersonalDashboard() {
               <div className="space-y-3 pt-1 lg:pt-0">
                 <button
                   type="button"
-                  className="daily-insight-card group flex w-full items-start gap-3 text-left"
+                  className="daily-insight-card daily-insight-card-aside group flex w-full items-start gap-3 text-left"
                   disabled={!insightWine}
                   onClick={() => {
                     if (!insightWine) return;

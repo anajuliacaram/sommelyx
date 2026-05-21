@@ -1128,7 +1128,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           <AiModalHeader
             icon={<UtensilsCrossed className="h-5 w-5" />}
             title="Harmonizar"
-            description="Escolha o vinho certo para o prato, ou o prato certo para a garrafa."
             tone="gold"
           />
         </AiModalHeaderBar>
@@ -1172,14 +1171,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     index={0}
                     icon={WineIcon}
                     title="Da minha adega"
-                    description="Vinhos cadastrados"
                     onClick={() => handleSelectSource("cellar")}
                   />
                   <PremiumChoiceCard
                     index={1}
                     icon={Camera}
                     title="Adega externa"
-                    description="Carta ou cardápio"
                     accent="gold"
                     onClick={() => handleSelectSource("external")}
                   />

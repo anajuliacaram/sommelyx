@@ -551,7 +551,7 @@ export default function ConsumptionPage() {
       <div className="stats-grid grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <EditorialKpiCard
           icon={<GlassWater className="h-4 w-4" />}
-          accent="#8B1A3B"
+          accent="#781323"
           label="Consumo (6 meses)"
           value={total}
           sub="garrafas"
@@ -562,7 +562,7 @@ export default function ConsumptionPage() {
         />
         <EditorialKpiCard
           icon={<TrendingUp className="h-4 w-4" />}
-          accent="#3A4A2E"
+          accent="#2F432F"
           label="Ritmo mensal"
           value={avgPerMonth}
           sub="por mês"
@@ -574,7 +574,7 @@ export default function ConsumptionPage() {
         />
         <EditorialKpiCard
           icon={<Star className="h-4 w-4" />}
-          accent="#8B1A3B"
+          accent="#781323"
           label="Estilo favorito"
           value={styleStats.name}
           sub={styleStats.pct > 0 ? `${styleStats.pct}% do consumo` : ""}
@@ -584,7 +584,7 @@ export default function ConsumptionPage() {
         />
         <EditorialKpiCard
           icon={<Calendar className="h-4 w-4" />}
-          accent="#3A4A2E"
+          accent="#2F432F"
           label="Última abertura"
           value={lastLabel}
           sub={lastEntry?.wine_name || ""}
@@ -618,7 +618,7 @@ export default function ConsumptionPage() {
         </div>
         <Sparkbar
           data={chart.data}
-          accent="#8B1A3B"
+          accent="#781323"
           height={isMobile ? 84 : 100}
           showValues={!isMobile}
           activeIndex={activeChartIndex}

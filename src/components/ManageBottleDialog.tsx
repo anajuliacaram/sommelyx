@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Wine as WineIcon, Check, Search, Filter, Camera, Plus, Trash2, MapPin } from "@/icons/lucide";
+import { Wine as WineIcon, Check, Search, Filter, Camera, Plus, Trash2, MapPin, ChevronRight } from "@/icons/lucide";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWines, useWineEvent } from "@/hooks/useWines";
 import { useAddConsumption } from "@/hooks/useConsumption";
@@ -13,6 +12,7 @@ import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { normalizeWineSearchText } from "@/lib/wine-normalization";
 import { normalizeScanResult } from "@/lib/scan-normalizer";
 import { getWineTypeColor } from "@/lib/wine-utils";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import {
   AI_MODAL_FIELD_CLASSNAME,
   AI_MODAL_HELP_TEXT_CLASSNAME,
@@ -92,6 +92,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const [notes, setNotes] = useState("");
   const [searchText, setSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [showWinePicker, setShowWinePicker] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedGrapes, setSelectedGrapes] = useState<string[]>([]);
   const [styleFilter, setStyleFilter] = useState<"all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa">("all");
@@ -114,6 +115,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
 
   const resetCurrentItem = () => {
     setWineId(""); setQuantity("1"); setNotes(""); setSearchText("");
+    setShowWinePicker(false);
     setShowFilters(false); setSelectedCountries([]); setSelectedGrapes([]); setStyleFilter("all");
     setExtWineName(""); setExtProducer(""); setExtCountry(""); setExtRegion("");
     setExtGrape(""); setExtStyle(""); setExtVintage(""); setExtLocation("");
@@ -300,27 +302,25 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
   const submitLabel = submitting
     ? "Salvando..."
     : items.length === 0
-      ? "Adicione um vinho à lista"
+      ? "Escolha uma garrafa"
       : items.length === 1
-        ? "Salvar consumo"
-        : `Salvar ${items.length} consumos`;
+        ? "Registrar consumo"
+        : `Registrar ${items.length} consumos`;
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(v) => { if (!v) resetAll(); onOpenChange(v); }}>
-        <SheetContent
-          centered
+      <ActionDialog open={open} onOpenChange={(v) => { if (!v) resetAll(); onOpenChange(v); }}>
+        <ActionDialogContent
           className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "consumption-modal")}
           style={AI_MODAL_SHEET_CONTENT_STYLE}
           aria-label="Adicionar consumo"
         >
-          <SheetTitle className="sr-only">Adicionar consumo</SheetTitle>
+          <ActionDialogTitle className="sr-only">Adicionar consumo</ActionDialogTitle>
           <AiModalShell>
             <AiModalHeaderBar>
               <AiModalHeader
                 icon={<WineIcon className="h-5 w-5" />}
                 title="Adicionar consumo"
-                description="Registre uma degustação da sua adega ou um consumo externo."
                 tone="wine"
               />
             </AiModalHeaderBar>
@@ -393,8 +393,8 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                         <AiSectionLabel>Origem</AiSectionLabel>
                         <div className="consumption-source-grid">
                           {([
-                            { value: "cellar" as const, label: "Minha adega", desc: "Registrar abertura", icon: WineIcon },
-                            { value: "external" as const, label: "Externo", desc: "Restaurante / outro", icon: MapPin },
+                            { value: "cellar" as const, label: "Minha adega", icon: WineIcon },
+                            { value: "external" as const, label: "Externo", icon: MapPin },
                           ]).map((opt) => {
                             const active = source === opt.value;
                             const Icon = opt.icon;
@@ -403,7 +403,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                               <button
                                 key={opt.value}
                                 type="button"
-                                onClick={() => { setSource(opt.value); setWineId(""); }}
+                                onClick={() => { setSource(opt.value); setWineId(""); setShowWinePicker(false); }}
                                 className={cn(
                                   AI_MODAL_SELECTION_CARD_CLASSNAME,
                                   "consumption-source-card",
@@ -416,7 +416,6 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>{opt.label}</p>
-                                  <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>{opt.desc}</p>
                                 </div>
                               </button>
                             );
@@ -426,7 +425,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
 
                       {source === "cellar" ? (
                         selectedWine ? (
-                          <section className="consumption-selected-summary">
+                          <section className="consumption-selected-summary consumption-selected-button">
                             <div className="flex min-w-0 items-center gap-3">
                               <div className="consumption-wine-icon is-selected">
                                 <WineIcon className="h-3.5 w-3.5" />
@@ -441,17 +440,32 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             </div>
                             <button
                               type="button"
-                              onClick={() => setWineId("")}
+                              onClick={() => { setWineId(""); setShowWinePicker(true); }}
                               className={cn(AI_MODAL_INLINE_ACTION_CLASSNAME, "consumption-change-button")}
                             >
                               Trocar
+                            </button>
+                          </section>
+                        ) : !showWinePicker ? (
+                          <section className="consumption-section consumption-select-intro">
+                            <AiSectionLabel>Vinho</AiSectionLabel>
+                            <button
+                              type="button"
+                              className="consumption-select-card"
+                              onClick={() => setShowWinePicker(true)}
+                            >
+                              <span className="consumption-select-icon"><Search className="h-4 w-4" /></span>
+                              <span className="min-w-0 flex-1 text-left">
+                                <span className="consumption-select-title">Escolha uma garrafa</span>
+                              </span>
+                              <ChevronRight className="h-4 w-4 opacity-55" />
                             </button>
                           </section>
                         ) : (
                           <section className="consumption-section consumption-picker-section">
                             <div className="consumption-section-head">
                               <AiSectionLabel>Vinho</AiSectionLabel>
-                              <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>{filteredWines.length} vinhos</span>
+                              <button type="button" className={AI_MODAL_INLINE_ACTION_CLASSNAME} onClick={() => setShowWinePicker(false)}>Fechar</button>
                             </div>
 
                             <div className="consumption-search relative">
@@ -537,7 +551,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             </AnimatePresence>
 
                             <div className="consumption-chip-row">
-                              {STYLE_FILTERS.map((pill) => {
+                              {STYLE_FILTERS.slice(0, 4).map((pill) => {
                                 const styleKey = pill.value === "all" ? "todos" : pill.value;
                                 return (
                                   <AiFilterChip
@@ -575,7 +589,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                                     <button
                                       key={wine.id}
                                       type="button"
-                                      onClick={() => setWineId(wine.id)}
+                                      onClick={() => { setWineId(wine.id); setShowWinePicker(false); }}
                                       className={cn(
                                         AI_MODAL_LIST_ROW_CLASSNAME,
                                         "consumption-wine-row",
@@ -632,6 +646,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                         </AiModalCard>
                       )}
 
+                      {(source === "external" || selectedWine) ? (
                       <AiModalCard className="consumption-details-card">
                         <AiSectionLabel>Detalhes</AiSectionLabel>
                         <div className="consumption-field-grid mt-3">
@@ -696,10 +711,11 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                             className="w-full"
                           >
                             <Plus className="h-4 w-4" />
-                            Adicionar à lista
+                            Preparar consumo
                           </AiModalActionButton>
                         </div>
                       </AiModalCard>
+                      ) : null}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -720,8 +736,8 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
               </AiModalFooterBar>
             ) : null}
           </AiModalShell>
-        </SheetContent>
-      </Sheet>
+        </ActionDialogContent>
+      </ActionDialog>
 
       <ScanWineLabelDialog
         open={scanOpen}

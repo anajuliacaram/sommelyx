@@ -1057,7 +1057,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
             <AiModalHeader
               icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
-              description="Cadastre por rótulo, planilha ou manualmente."
               tone="wine"
             />
           </AiModalHeaderBar>
@@ -1118,10 +1117,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                         <Camera className="h-4.5 w-4.5" style={{ color: '#6F7F5B' }} />
                       </div>
-                      <div className="flex flex-col">
-                        <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Escanear foto do rótulo</p>
-                        <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>Puxe os dados principais direto da garrafa.</p>
-                      </div>
+                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Escanear rótulo</p>
                     </div>
 
                     <div
@@ -1131,10 +1127,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
                         <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
                       </div>
-                      <div className="flex flex-col">
-                        <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Importar documento</p>
-                        <p className={cn("mt-0.5", AI_MODAL_HELP_TEXT_CLASSNAME)}>Planilha, imagem ou PDF.</p>
-                      </div>
+                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Importar arquivo</p>
                     </div>
                   </div>
 
@@ -1404,8 +1397,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                             {estimateConfidence && (
                               <p className="mt-1 text-[11px] text-[var(--sx-text-muted)]">
                                 {estimateConfidence === "baixa" && estimateRange
-                                  ? `estimado pela IA: R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                  : "estimado pela IA"}
+                                  ? `estimativa: R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                  : "estimativa sugerida"}
                               </p>
                             )}
                           </div>
