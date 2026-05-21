@@ -33,7 +33,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsumption } from "@/hooks/useConsumption";
 import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useWineEvent, useWineMetrics } from "@/hooks/useWines";
 
 function buildMonthWindow(size: number) {
@@ -66,7 +65,6 @@ export default function PersonalDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
 
   const { totalBottles, totalValue, drinkNow, wines } = useWineMetrics();
@@ -196,22 +194,22 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="editorial-page premium-home-page !px-0">
+      <div className="dashboard-root editorial-page premium-home-page !px-0">
         <section>
           <div className="overview-greeting-wrap flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="min-w-0">
-              <p className="overview-date">
+              <p className="overview-date overview-greeting-eyebrow">
                 {new Date().toLocaleDateString("pt-BR", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
                 })}
               </p>
-              <h1 className={`overview-greeting ${isMobile ? "!text-[29px]" : ""}`}>
+              <h1 className="overview-greeting">
                 Olá,{" "}
                 <span className="name-accent">{firstName}</span>
               </h1>
-              <p className="overview-summary max-w-[620px]">
+              <p className="overview-summary overview-greeting-sub max-w-[620px]">
                 {totalBottles > 0
                   ? (
                     <>
@@ -242,7 +240,7 @@ export default function PersonalDashboard() {
             </div>
           </div>
 
-          <div className="stats-grid md:grid-cols-4">
+          <div className="stats-grid stat-cards-row md:grid-cols-4">
             {[
               { label: "Garrafas", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque", icon: WineIcon },
               { label: "Valor estimado", value: formatCurrencyShort(totalValue), detail: "atualizado hoje", icon: Star },
@@ -250,11 +248,11 @@ export default function PersonalDashboard() {
               { label: "Em guarda", value: String(inGuard), detail: "aguardando", icon: Sparkles, olive: true },
             ].map((metric) => (
               <div key={metric.label} className={`stat-card min-w-0 ${metric.olive ? "olive" : ""}`}>
-                <p className="stat-label">
-                  <metric.icon className="stat-label-icon h-3 w-3" />
-                  {metric.label}
-                </p>
-                <div className="stat-value">{metric.value}</div>
+                <div className="stat-card-icon">
+                  <metric.icon className="stat-label-icon h-4 w-4" />
+                </div>
+                <div className="stat-value stat-card-number">{metric.value}</div>
+                <p className="stat-label stat-card-label">{metric.label}</p>
                 <p className="stat-sublabel">{metric.detail}</p>
               </div>
             ))}
@@ -262,11 +260,11 @@ export default function PersonalDashboard() {
         </section>
 
         <div className="grid grid-cols-12 gap-5 lg:gap-8">
-          <section className="col-span-12 lg:col-span-8">
+          <section className="recent-section col-span-12 lg:col-span-8">
             <div>
-              <div className="ready-section curated-ready-card">
+              <div className="ready-section curated-ready-card recent-section-header">
                 <div className="min-w-0">
-                  <h2 className="ready-section-title">Escolha a próxima garrafa</h2>
+                  <h2 className="ready-section-title recent-section-title">Escolha a próxima garrafa</h2>
                   <p className="ready-section-sub">
                     <span className="count-badge">{ready.length}</span>{" "}
                     {ready.length === 1
@@ -276,7 +274,7 @@ export default function PersonalDashboard() {
                 </div>
                 <button
                   type="button"
-                  className="btn-ver-adega"
+                  className="btn-ver-adega recent-section-link"
                   onClick={() => navigate("/dashboard/cellar")}
                 >
                   Ver adega <ArrowRight className="h-3 w-3" />
@@ -347,20 +345,20 @@ export default function PersonalDashboard() {
                     const family = getStyleFamily(w.style);
                     const color = STYLE_COLORS[family];
                     return (
-                      <div key={w.id} className="wine-row-card">
+                      <div key={w.id} className="wine-row-card recent-wine-row">
                         <div
-                          className="wine-row-icon"
+                          className="wine-row-icon recent-wine-badge"
                           style={{ background: `${color}14`, color }}
                         >
                           <WineIcon className="h-4 w-4" />
                         </div>
                         <div className="wine-row-body">
                           <div className="flex min-w-0 items-baseline gap-1.5">
-                            <p className="wine-row-name truncate">
+                            <p className="wine-row-name recent-wine-name truncate">
                               {w.name}
                             </p>
                             {w.vintage && (
-                              <span className="wine-row-year tabular-nums">
+                              <span className="wine-row-year recent-wine-year tabular-nums">
                                 {w.vintage}
                               </span>
                             )}
@@ -518,8 +516,8 @@ export default function PersonalDashboard() {
                   </div>
                 </div>
 
-                <div className="dashboard-aside-card">
-                  <div className="dashboard-shortcut-grid grid grid-cols-2 gap-2">
+                <div className="dashboard-aside-card quick-actions-section">
+                  <div className="dashboard-shortcut-grid quick-actions-grid grid grid-cols-2 gap-2">
                     {[
                       { label: "Vinho", icon: Plus, action: () => setAddOpen(true) },
                       {
@@ -530,17 +528,19 @@ export default function PersonalDashboard() {
                           setConsumptionOpen(true);
                         },
                       },
-                      { label: "Harmonizar", icon: Sparkles, action: () => setDishToWineOpen(true) },
-                      { label: "Carta", icon: BookOpen, action: () => setWineListScanOpen(true) },
+                      { label: "Harmonizar", icon: Sparkles, action: () => setDishToWineOpen(true), olive: true },
+                      { label: "Carta", icon: BookOpen, action: () => setWineListScanOpen(true), olive: true },
                     ].map((item) => (
                       <button
                         key={item.label}
                         type="button"
-                        className="flex items-center gap-2 py-1.5 text-left text-[12px] font-medium text-[rgba(58,51,39,0.68)] transition-colors hover:text-[rgba(26,23,19,0.88)]"
+                        className={`quick-action-card flex flex-col text-left ${item.olive ? "olive" : ""}`}
                         onClick={item.action}
                       >
-                        <item.icon className="h-3.5 w-3.5 text-wine/70" />
-                        {item.label}
+                        <span className="quick-action-icon">
+                          <item.icon className="h-4 w-4" />
+                        </span>
+                        <span className="quick-action-title">{item.label}</span>
                       </button>
                     ))}
                   </div>

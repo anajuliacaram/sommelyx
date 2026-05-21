@@ -33,30 +33,31 @@ export function ModalBase({
         style={undefined}
       >
         <div
+          data-radix-dialog-content=""
           className={cn(
-            "premium-modal-shell relative flex w-full max-w-[1100px] flex-col overflow-hidden rounded-t-[24px] max-h-[calc(100dvh-8px)] sm:max-h-[92vh] sm:rounded-[28px]",
+            "modal-container premium-modal-shell relative flex w-full max-w-[1100px] flex-col overflow-hidden rounded-t-[24px] max-h-[calc(100dvh-8px)] sm:max-h-[92vh] sm:rounded-[28px]",
             className,
           )}
           style={undefined}
         >
           <div className="shrink-0 px-5 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6">
             <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 text-[#7B1E2B]">
+            <div className="modal-header-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 text-[#7B1E2B]">
               {icon}
             </div>
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="text-2xl font-semibold tracking-tight text-[#1A1714]">
+            <div className="modal-header-text min-w-0 flex-1">
+              <DialogTitle className="modal-header-title text-2xl font-semibold tracking-tight text-[#1A1714]">
                 {title}
               </DialogTitle>
               {description ? (
-                <DialogDescription className="mt-1 text-sm font-medium tracking-tight text-[#6B5E52] leading-relaxed">
+                <DialogDescription className="modal-header-sub mt-1 text-sm font-medium tracking-tight text-[#6B5E52] leading-relaxed">
                   {description}
                 </DialogDescription>
               ) : null}
             </div>
             <DialogPrimitive.Close asChild>
               <ModalCloseButton
-                className="shrink-0"
+                className="modal-close-btn shrink-0"
                 label="Fechar modal"
                 onClick={onClose}
               />

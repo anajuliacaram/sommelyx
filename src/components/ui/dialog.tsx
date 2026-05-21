@@ -18,6 +18,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DialogPrimitive.Overlay
       ref={ref}
+      data-radix-dialog-overlay=""
       className={cn(
         "premium-modal-overlay fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-300 data-[state=closed]:duration-220",
         className,
@@ -43,6 +44,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       <div
+          data-radix-dialog-content=""
           className={cn(
           "modal-container premium-modal-shell relative h-[92dvh] max-h-[92dvh] w-[94vw] max-w-[520px] overflow-y-auto rounded-[var(--sx-r-xl)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-0 shadow-[var(--sx-shadow-lg)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=open]:duration-300 data-[state=closed]:duration-220",
           className,
@@ -50,7 +52,7 @@ const DialogContent = React.forwardRef<
       >
         {children}
         <DialogPrimitive.Close asChild>
-          <ModalCloseButton className="absolute right-4 top-4 z-10" label="Fechar modal" />
+          <ModalCloseButton className="modal-close-btn absolute right-4 top-4 z-10" label="Fechar modal" />
         </DialogPrimitive.Close>
       </div>
     </DialogPrimitive.Content>

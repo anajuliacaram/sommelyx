@@ -42,7 +42,7 @@ export const AI_MODAL_TEXTAREA_CLASSNAME =
 export const AI_MODAL_COMPACT_STACK_CLASSNAME = "space-y-1";
 export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
 export const AI_MODAL_LABEL_CLASSNAME =
-  "form-field-label modal-field-label";
+  "form-field-label modal-field-label modal-input-label";
 export const AI_MODAL_HELP_TEXT_CLASSNAME =
   "text-[13px] font-normal leading-[1.42] text-[rgba(72,60,46,0.60)]";
 export const AI_MODAL_META_TEXT_CLASSNAME =
@@ -161,16 +161,16 @@ export function AiModalHeader({
     <SheetHeader className={cn("modal-header mb-0 pr-11 sm:pr-12", className)}>
       <div className="flex items-start gap-2.5">
         {icon ? (
-          <div className={cn("modal-icon-wrap modal-icon-circle", tone && `tone-${tone}`)}>
+          <div className={cn("modal-header-icon modal-icon-wrap modal-icon-circle", tone === "neutral" && "olive", tone && `tone-${tone}`)}>
             {icon}
           </div>
         ) : null}
-        <div className="min-w-0 flex-1">
-          <SheetTitle className="modal-title">
+        <div className="modal-header-text min-w-0 flex-1">
+          <SheetTitle className="modal-header-title modal-title">
             {title}
           </SheetTitle>
           {description ? (
-            <SheetDescription className="modal-subtitle max-w-[38rem]">
+            <SheetDescription className="modal-header-sub modal-subtitle max-w-[38rem]">
               {description}
             </SheetDescription>
           ) : null}
@@ -326,7 +326,7 @@ export function AiModalActionButton({
   const modalButtonClassName = variant === "secondary" || variant === "outline" || variant === "success"
     ? "modal-btn-secondary"
     : variant === "ghost"
-      ? ""
+      ? "modal-btn-ghost"
       : "modal-btn-primary";
   const variantClassName =
     variant === "ghost"
@@ -389,12 +389,12 @@ export function AiUploadPanel({
         className,
       )}
     >
-      <div className="modal-action-icon-wrap modal-action-icon">
+      <div className="modal-action-card-icon modal-action-icon-wrap modal-action-icon">
         {icon}
       </div>
       <div className="max-w-[320px]">
-        <p className="modal-action-title">{title}</p>
-        {description ? <p className="modal-action-subtitle">{description}</p> : null}
+        <p className="modal-action-card-title modal-action-title">{title}</p>
+        {description ? <p className="modal-action-card-sub modal-action-subtitle">{description}</p> : null}
       </div>
       {children}
     </div>

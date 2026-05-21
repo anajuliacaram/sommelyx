@@ -18,6 +18,8 @@ const SheetOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
     <SheetPrimitive.Overlay
+    data-radix-dialog-overlay=""
+    data-radix-sheet-overlay=""
     className={cn(
       "premium-modal-overlay fixed inset-0 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=open]:duration-300 data-[state=closed]:duration-220",
       className,
@@ -70,6 +72,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
             {...props}
           >
             <div
+              data-radix-dialog-content=""
               data-radix-sheet-content=""
               data-side="bottom"
               className={cn("premium-modal-shell pointer-events-auto flex max-h-[92dvh] flex-col", className)}
@@ -77,7 +80,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
             >
               {children}
               <SheetPrimitive.Close asChild>
-                <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
+                <ModalCloseButton className="modal-close-btn absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
               </SheetPrimitive.Close>
             </div>
           </SheetPrimitive.Content>
@@ -90,6 +93,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         <SheetOverlay />
         <SheetPrimitive.Content
           ref={ref}
+          data-radix-dialog-content=""
           data-radix-sheet-content=""
           data-side={side}
           className={cn("premium-modal-shell", !isCentered && sheetVariants({ side }), className)}
@@ -98,7 +102,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         >
           {children}
           <SheetPrimitive.Close asChild>
-            <ModalCloseButton className="absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
+            <ModalCloseButton className="modal-close-btn absolute right-3.5 top-3.5 z-50" label="Fechar modal" />
           </SheetPrimitive.Close>
         </SheetPrimitive.Content>
       </SheetPortal>

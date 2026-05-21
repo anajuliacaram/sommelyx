@@ -3,7 +3,7 @@
 // Dados reais via Supabase.
 
 import { useMemo, useState, useEffect } from "react";
-import { ArrowUpDown, Globe, Plus, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
+import { ArrowUpDown, ChevronRight, Globe, Plus, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -12,10 +12,8 @@ import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import {
   EditorialCard,
   STYLE_COLORS,
-  StyleBadge,
   getStyleFamily,
   classifyDrinkWindow,
-  getDrinkWindowIndicatorPosition,
   resolveSuggestedDrinkWindow,
 } from "@/components/editorial/EditorialPrimitives";
 import { useToast } from "@/hooks/use-toast";
@@ -196,16 +194,21 @@ export default function PersonalCellarPage() {
   const pageHeader = (filteredCount: number) => (
     <>
       <section className="adega-header">
-        <p className="adega-eyebrow">Adega</p>
-        <h1 className="adega-title">Minha Adega</h1>
-        <p className="adega-count">
-          <strong>{filteredCount}</strong> / {wines.length} vinhos
-        </p>
+        <div className="adega-title-row">
+          <div className="min-w-0">
+            <p className="adega-eyebrow">Adega</p>
+            <h1 className="adega-title">Minha Adega</h1>
+          </div>
+          <span className="adega-count adega-count-badge">
+            <strong>{filteredCount}</strong> / {wines.length} vinhos
+          </span>
+        </div>
       </section>
 
-      <div className="overview-search">
-        <Search className="h-4 w-4" />
+      <div className="overview-search adega-search-wrap">
+        <Search className="adega-search-icon h-4 w-4" />
         <input
+          className="adega-search-input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar por nome, produtor, região…"
@@ -257,7 +260,7 @@ export default function PersonalCellarPage() {
         </button>
       </div>
 
-      <div className="chips-row">
+      <div className="chips-row adega-filters-row">
         {styleOptions.map((s) => {
           const styleKey = s.key === "todos" ? "todos" : s.key === "rosé" ? "rose" : s.key;
           return (
@@ -265,7 +268,7 @@ export default function PersonalCellarPage() {
               key={s.key}
               type="button"
               data-style={styleKey}
-              className={`chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
+              className={`chip adega-filter-chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
               onClick={() => setStyleFilter(s.key)}
             >
               {s.label}
@@ -274,12 +277,12 @@ export default function PersonalCellarPage() {
         })}
       </div>
 
-      <div className="chips-row">
+      <div className="chips-row adega-filters-row">
         {drinkWindowOptions.map((option) => (
           <button
             key={option.key}
             type="button"
-            className={`chip ${drinkWindowFilter === option.key ? "active" : ""}`}
+            className={`chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
             onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
           >
             {option.label}
@@ -376,7 +379,7 @@ export default function PersonalCellarPage() {
                   }
                 : undefined
             }
-            className="px-6 py-10 lg:py-12"
+            className="adega-empty"
           />
         ) : view === "grid" ? (
           <div className="adega-grid">
@@ -386,7 +389,7 @@ export default function PersonalCellarPage() {
               return (
                 <article
                   key={w.id}
-                  className="wine-card"
+                  className="wine-card wine-card-grid"
                   onClick={() => setEditWine(w)}
                 >
                   {showLabels ? (
@@ -437,65 +440,47 @@ export default function PersonalCellarPage() {
             })}
           </div>
         ) : (
-          <EditorialCard style={{ padding: "8px" }}>
+          <div className="adega-list">
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               const dwRow = resolveSuggestedDrinkWindow(w);
               const classification = classifyDrinkWindow({ current: currentYear, from: dwRow.from, until: dwRow.until });
               return (
-                <div key={w.id} className="editorial-row" onClick={() => setEditWine(w)}>
+                <div key={w.id} className="wine-card" onClick={() => setEditWine(w)}>
                   {showLabels ? (
                     <WineLabelPreview
                       wine={w}
                       alt={w.name}
-                      className="editorial-bottle-icon overflow-hidden"
+                      className="wine-card-thumb"
                       imageClassName="h-full w-full object-contain"
                       generated={false}
                       compact
                     />
                   ) : (
                     <div
-                      className="editorial-bottle-icon"
+                      className="wine-card-thumb"
                       style={{ background: `${color}14`, color }}
                     >
-                      <WineIcon className="h-4 w-4" />
+                      <WineIcon className="wine-card-thumb-placeholder h-5 w-5" />
                     </div>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <h4 className="wine-card-name m-0" style={{ color: "#1a1713" }}>
-                        {w.name}
-                      </h4>
-                      {w.vintage && (
-                        <span
-                          className="text-[11px] tabular-nums"
-                          style={{ color: "rgba(58,51,39,0.55)" }}
-                        >
-                          {w.vintage}
-                        </span>
-                      )}
-                    </div>
-                    <p
-                      className="mt-0.5 truncate text-[11px]"
-                      style={{ color: "rgba(58,51,39,0.58)" }}
-                    >
+                  <div className="wine-card-body">
+                    <h4 className="wine-card-name m-0">{w.name}</h4>
+                    <p className="wine-card-meta">
                       {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
-                    <div className="mt-1.5 flex items-center gap-3">
-                      <StyleBadge style={w.style} />
-                      <span
-                        className="text-[10px] font-semibold"
-                        style={{ color: "rgba(58,51,39,0.5)" }}
-                      >
-                        {w.quantity} un. · janela {dwRow.from}–{dwRow.until}
-                        {dwRow.estimated ? " (sugerida)" : ""} · {classification.label}
-                      </span>
+                    <div className="wine-card-tags">
+                      <span className={`wine-card-tag ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
+                      <span className="wine-card-tag neutral">{w.quantity} un.</span>
+                      <span className={`wine-card-tag ${classification.status === "now" ? "" : "olive"}`}>{classification.label}</span>
                     </div>
                   </div>
-                  <div className="hidden shrink-0 flex-col items-end gap-1 md:flex">
+                  <div className="wine-card-right">
+                    {w.vintage && <span className="wine-card-year">{w.vintage}</span>}
+                    {w.current_value != null && <span className="wine-card-price">{formatWinePrice(w.current_value)}</span>}
                     {w.rating != null && (
                       <div
                         className="flex items-center gap-1 text-[11px] font-semibold tabular-nums"
@@ -504,30 +489,23 @@ export default function PersonalCellarPage() {
                         <Star className="h-3 w-3 fill-current" /> {Number(w.rating).toFixed(1)}
                       </div>
                     )}
-                    {w.current_value != null && (
-                      <span
-                        className="text-[10px] font-semibold"
-                        style={{ color: "rgba(58,51,39,0.45)" }}
-                      >
-                        R$ {Number(w.current_value).toLocaleString("pt-BR")}
-                      </span>
-                    )}
+                    <button
+                      type="button"
+                      className="editorial-btn-open btn-abrir shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenBottle(w);
+                      }}
+                      disabled={wineEvent.isPending}
+                    >
+                      Abrir
+                    </button>
+                    <ChevronRight className="wine-card-chevron h-3.5 w-3.5" />
                   </div>
-                  <button
-                    type="button"
-                    className="editorial-btn-open shrink-0"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenBottle(w);
-                    }}
-                    disabled={wineEvent.isPending}
-                  >
-                    Abrir
-                  </button>
                 </div>
               );
             })}
-          </EditorialCard>
+          </div>
         )}
       </div>
 

@@ -1121,7 +1121,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent centered className={AI_MODAL_SHEET_CONTENT_CLASSNAME} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
+      <SheetContent centered className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "harmonizar-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
         <SheetTitle className="sr-only">Harmonizar</SheetTitle>
         <AiModalShell>
         <AiModalHeaderBar>
