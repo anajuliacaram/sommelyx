@@ -42,12 +42,12 @@ export const QuickActions = memo(function QuickActions({
   /* ── Stacked layout (sidebar — dark context) ── */
   return (
     <div className="sidebar-actions rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
-      <div className="flex flex-col gap-0.5">
+      <div className="sidebar-actions-list flex flex-col gap-2">
         {/* ── Primary ── */}
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
+            className="sidebar-action-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
           >
             <Plus className="h-[15px] w-[15px] shrink-0" />
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
@@ -59,9 +59,9 @@ export const QuickActions = memo(function QuickActions({
             variant="secondary"
             onClick={onRegisterConsumption}
             data-action="adicionar-consumo"
-            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
+            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border border-[rgba(58,74,46,0.28)] bg-[var(--sx-bg-card)] px-3.5 py-[11px] text-[14px] font-medium text-[var(--sx-olive)] shadow-none transition-colors hover:bg-[var(--olive-surface)]"
           >
-            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--olive-surface)] text-[var(--sx-olive)]">
               <Wine className="h-[15px] w-[15px]" />
             </span>
             {isCommercial ? "Registrar venda" : "Adicionar consumo"}
@@ -74,9 +74,9 @@ export const QuickActions = memo(function QuickActions({
             variant="ghost"
             onClick={onHarmonize}
             data-action="harmonizar"
-            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
+            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
           >
-            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[rgba(180,121,63,0.13)] text-[var(--copper)]">
               <UtensilsCrossed className="h-[15px] w-[15px]" />
             </span>
             Harmonizar
@@ -87,9 +87,9 @@ export const QuickActions = memo(function QuickActions({
             variant="ghost"
             onClick={onAnalyzeList}
             data-action="analisar-carta"
-            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
+            className="sidebar-action-item group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
           >
-            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+            <span className="action-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bordeaux-10)] text-[var(--sx-bordeaux)]">
               <BookOpen className="h-[15px] w-[15px]" />
             </span>
             Analisar carta

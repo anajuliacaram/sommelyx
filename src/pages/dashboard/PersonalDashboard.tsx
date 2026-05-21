@@ -57,6 +57,12 @@ function formatCurrencyShort(value: number) {
   return `R$ ${Math.round(value).toLocaleString("pt-BR")}`;
 }
 
+function getDayOfYear(date: Date) {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date.getTime() - start.getTime();
+  return Math.floor(diff / 86_400_000);
+}
+
 function getWineTypeClass(style?: string | null) {
   const family = getStyleFamily(style);
   return family === "rosé" ? "rose" : family;
@@ -151,21 +157,49 @@ export default function PersonalDashboard() {
     ? Math.max(0, Math.round((Date.now() - new Date(lastOpened.consumed_at).getTime()) / 86_400_000))
     : null;
 
-  // Insight do dia: vinho com janela mais próxima de fechar.
-  // Fallback: se não houver janela definida, sugere qualquer vinho com estoque
-  // (prioriza maior valor para destacar o "vinho do dia").
   const insightWine = useMemo(() => {
     const inStock = wines.filter((w) => w.quantity > 0);
     if (inStock.length === 0) return null;
-    const withWindow = inStock
-      .filter((w) => w.drink_until && currentYear <= w.drink_until)
-      .sort((a, b) => (a.drink_until ?? 9999) - (b.drink_until ?? 9999));
-    if (withWindow[0]) return withWindow[0];
-    const fallback = [...inStock].sort(
+    const todayIndex = getDayOfYear(new Date());
+    const prioritized = inStock
+      .map((w) => {
+        const drinkWindow = resolveSuggestedDrinkWindow(w);
+        const classification = classifyDrinkWindow({
+          current: currentYear,
+          from: drinkWindow.from,
+          until: drinkWindow.until,
+        });
+        const priority = classification.status === "now" ? 0 : classification.status === "soon" ? 1 : 2;
+        return { wine: w, priority, until: drinkWindow.until };
+      })
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        if (a.until !== b.until) return a.until - b.until;
+        const aValue = Number(a.wine.current_value ?? a.wine.purchase_price ?? 0);
+        const bValue = Number(b.wine.current_value ?? b.wine.purchase_price ?? 0);
+        return bValue - aValue;
+      })
+      .map(({ wine }) => wine);
+
+    const preferred = prioritized.length > 0 ? prioritized : [...inStock].sort(
       (a, b) => (b.current_value ?? b.purchase_price ?? 0) - (a.current_value ?? a.purchase_price ?? 0),
     );
-    return fallback[0] ?? null;
+    return preferred[todayIndex % preferred.length] ?? null;
   }, [wines, currentYear]);
+
+  const insightReason = insightWine
+    ? (() => {
+        const drinkWindow = resolveSuggestedDrinkWindow(insightWine);
+        const classification = classifyDrinkWindow({
+          current: currentYear,
+          from: drinkWindow.from,
+          until: drinkWindow.until,
+        });
+        if (classification.status === "now") return "Abra este rótulo hoje";
+        if (classification.status === "soon") return "Vale acompanhar a janela de consumo";
+        return "Rótulo em destaque da sua adega";
+      })()
+    : "Cadastre algumas garrafas para receber sugestões diárias.";
 
   const handleOpenBottle = (wineId: string, _wineName: string) => {
     const w = wines.find((x) => x.id === wineId);
@@ -243,10 +277,10 @@ export default function PersonalDashboard() {
 
           <div className="stats-grid stat-cards-row md:grid-cols-4">
             {[
-              { label: "Garrafas", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque", icon: WineIcon },
-              { label: "Valor estimado", value: formatCurrencyShort(totalValue), detail: "atualizado hoje", icon: Star },
-              { label: "Beber agora", value: String(drinkNow), detail: "em janela ideal", icon: GlassWater, olive: true },
-              { label: "Em guarda", value: String(inGuard), detail: "aguardando", icon: Sparkles, olive: true },
+              { label: "GARRAFAS", value: totalBottles.toLocaleString("pt-BR"), detail: "em estoque", icon: WineIcon },
+              { label: "VALOR EST.", value: formatCurrencyShort(totalValue), detail: "atualizado hoje", icon: Star },
+              { label: "BEBER AGORA", value: String(drinkNow), detail: "em janela ideal", icon: GlassWater, olive: true },
+              { label: "EM GUARDA", value: String(inGuard), detail: "aguardando", icon: Sparkles, olive: true },
             ].map((metric) => (
               <div key={metric.label} className={`stat-card min-w-0 ${metric.olive ? "olive" : ""}`}>
                 <div className="stat-card-icon">
@@ -457,38 +491,34 @@ export default function PersonalDashboard() {
           <aside className="col-span-12 lg:col-span-4">
             <div className="dashboard-aside-stack px-5 lg:px-1">
               <div className="space-y-3 pt-1 lg:pt-0">
-                {insightWine && (
-                  <button
-                    type="button"
-                    className="dashboard-aside-card group flex w-full items-start gap-3 text-left"
-                    onClick={() => {
-                      setPairingInitialWineId(insightWine.id);
-                      setDishToWineOpen(true);
-                    }}
-                  >
-                    <div
-                      className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                      style={{ background: "rgba(201,180,105,0.15)", color: "#B48C3A" }}
-                    >
-                      <Sparkles className="h-3.5 w-3.5" />
-                    </div>
-                    <div className="min-w-0">
-                      <Kicker>Insight do dia</Kicker>
-                      <p
-                        className="mt-1 font-serif text-[15px] font-medium leading-[1.35] text-[rgba(26,23,19,0.88)]"
-                        style={{ fontFamily: "'Libre Baskerville', Georgia, serif", letterSpacing: "-0.01em" }}
-                      >
-                        {insightWine.name}
-                      </p>
-                      <p className="mt-1 text-[11.5px] leading-relaxed text-[rgba(58,51,39,0.56)]">
-                        {insightWine.drink_until && insightWine.drink_until - currentYear <= 1
-                          ? "Última janela ideal. Vale harmonizar antes do próximo jantar."
-                          : "Destaque tranquilo para planejar a próxima abertura."}
-                      </p>
-                    </div>
-                  </button>
-                )}
-
+                <button
+                  type="button"
+                  className="daily-insight-card group flex w-full items-start gap-3 text-left"
+                  disabled={!insightWine}
+                  onClick={() => {
+                    if (!insightWine) return;
+                    setPairingInitialWineId(insightWine.id);
+                    setDishToWineOpen(true);
+                  }}
+                >
+                  <div className="daily-insight-icon">
+                    <Sparkles className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <Kicker>Insight do dia</Kicker>
+                    {insightWine ? (
+                      <>
+                        <p className="daily-insight-action">{insightReason}</p>
+                        <p className="daily-insight-name">{insightWine.name}</p>
+                        <p className="daily-insight-copy">
+                          Boa escolha para acompanhar sua próxima refeição.
+                        </p>
+                      </>
+                    ) : (
+                      <p className="daily-insight-empty">{insightReason}</p>
+                    )}
+                  </div>
+                </button>
                 <div className="dashboard-aside-card">
                   <Kicker>Hoje</Kicker>
                   {lastOpened ? (

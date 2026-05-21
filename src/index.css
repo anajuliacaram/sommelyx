@@ -6709,34 +6709,28 @@ aside[class*="sidebar"] {
   justify-content: center !important;
 }
 
-.sidebar-action-item[data-action="harmonizar"] .action-icon,
-.sidebar-action-item:nth-child(2) .action-icon {
+.sidebar-action-item[data-action="harmonizar"] .action-icon {
   background: rgba(201, 180, 105, 0.15) !important;
   color: var(--sx-wine-branco) !important;
 }
 
-.sidebar-action-item[data-action="harmonizar"] svg,
-.sidebar-action-item:nth-child(2) svg {
+.sidebar-action-item[data-action="harmonizar"] svg {
   color: var(--sx-wine-branco) !important;
 }
 
-.sidebar-action-item[data-action="analisar-carta"] .action-icon,
-.sidebar-action-item:nth-child(3) .action-icon {
-  background: rgba(155, 93, 229, 0.12) !important;
+.sidebar-action-item[data-action="analisar-carta"] .action-icon {
+  background: var(--sx-bordeaux-10) !important;
 }
 
-.sidebar-action-item[data-action="analisar-carta"] svg,
-.sidebar-action-item:nth-child(3) svg {
-  color: #9B5DE5 !important;
+.sidebar-action-item[data-action="analisar-carta"] svg {
+  color: var(--sx-bordeaux) !important;
 }
 
-.sidebar-action-item[data-action="adicionar-consumo"] .action-icon,
-.sidebar-action-item:nth-child(1) .action-icon {
+.sidebar-action-item[data-action="adicionar-consumo"] .action-icon {
   background: var(--sx-olive-06) !important;
 }
 
-.sidebar-action-item[data-action="adicionar-consumo"] svg,
-.sidebar-action-item:nth-child(1) svg {
+.sidebar-action-item[data-action="adicionar-consumo"] svg {
   color: var(--sx-olive) !important;
 }
 
@@ -10153,5 +10147,247 @@ aside[class*="sidebar"],
 
   .cellar-page .adega-controls {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+  }
+}
+
+/* === Mobile QA fixes: drawer, dashboard top and action controls === */
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer {
+  position: fixed !important;
+  inset: 0 auto 0 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  width: min(86vw, 360px) !important;
+  max-width: 380px !important;
+  height: 100dvh !important;
+  max-height: 100dvh !important;
+  min-height: 100dvh !important;
+  transform: none;
+  border-radius: 0 24px 24px 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer > .modal-close-btn {
+  top: max(10px, env(safe-area-inset-top)) !important;
+  right: 10px !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  z-index: 20 !important;
+  background: rgba(107,94,82,0.10) !important;
+  color: var(--sx-t-sub) !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-mobile-scroll-content {
+  height: 100dvh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: max(8px, env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom)) !important;
+  scrollbar-width: none !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-mobile-scroll-content::-webkit-scrollbar {
+  display: none !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer [data-sidebar="content"] {
+  overflow: visible !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer [data-sidebar="header"] {
+  padding-top: 0 !important;
+}
+
+[data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer [data-sidebar="header"] > a {
+  margin-top: 0 !important;
+  margin-right: 38px !important;
+  padding: 12px 14px !important;
+}
+
+.sidebar-actions {
+  padding: 12px !important;
+}
+
+.sidebar-actions-list {
+  gap: 8px !important;
+}
+
+.sidebar-action-primary,
+.sidebar-action-item {
+  min-height: 48px !important;
+  padding: 0 14px !important;
+  align-items: center !important;
+}
+
+.sidebar-action-primary {
+  background:
+    linear-gradient(180deg, var(--wine-vivid), var(--sx-bordeaux)) !important;
+  color: var(--sx-t-white) !important;
+}
+
+.sidebar-action-item[data-action="adicionar-consumo"] {
+  border-color: rgba(58,74,46,0.28) !important;
+  background: rgba(253,252,249,0.72) !important;
+  color: var(--sx-olive) !important;
+}
+
+.sidebar-action-item[data-action="adicionar-consumo"] .action-icon,
+.sidebar-action-item[data-action="adicionar-consumo"] svg {
+  color: var(--sx-olive) !important;
+}
+
+.sidebar-action-item[data-action="harmonizar"] .action-icon {
+  background: rgba(180,121,63,0.14) !important;
+  color: var(--copper) !important;
+}
+
+.sidebar-action-item[data-action="harmonizar"] svg {
+  color: var(--copper) !important;
+}
+
+.sidebar-action-item[data-action="analisar-carta"] .action-icon {
+  background: var(--sx-bordeaux-10) !important;
+  color: var(--sx-bordeaux) !important;
+}
+
+.sidebar-action-item[data-action="analisar-carta"] svg {
+  color: var(--sx-bordeaux) !important;
+}
+
+.premium-home-page .dashboard-quick-actions {
+  grid-template-columns: 1fr !important;
+}
+
+.premium-home-page .btn-adicionar-wine-primary,
+.premium-home-page .btn-adicionar-consumo-secondary {
+  min-height: 46px !important;
+  justify-content: center !important;
+  color: var(--sx-t-white) !important;
+}
+
+.premium-home-page .btn-adicionar-wine-primary {
+  background:
+    linear-gradient(180deg, var(--wine-vivid), var(--sx-bordeaux)) !important;
+  border: 0 !important;
+}
+
+.premium-home-page .btn-adicionar-consumo-secondary {
+  background: rgba(253,252,249,0.78) !important;
+  border: 1px solid rgba(58,74,46,0.34) !important;
+  color: var(--sx-olive) !important;
+}
+
+.premium-home-page .stat-cards-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  overflow: visible !important;
+  padding: 12px 20px 16px !important;
+}
+
+.premium-home-page .stat-card {
+  min-width: 0 !important;
+  padding: 14px 14px !important;
+}
+
+.premium-home-page .stat-card-label,
+.premium-home-page .stat-label {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 9px !important;
+  letter-spacing: 0.08em !important;
+}
+
+.premium-home-page .stat-card-number,
+.premium-home-page .stat-value {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 23px !important;
+}
+
+.daily-insight-card {
+  border-radius: var(--sx-r-lg);
+  border: 0.5px solid rgba(180,121,63,0.18);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(201,180,105,0.30), transparent 40%),
+    linear-gradient(135deg, rgba(238,241,234,0.92), rgba(253,252,249,0.82) 48%, rgba(242,235,224,0.94));
+  box-shadow: var(--sx-shadow-sm);
+  padding: 14px;
+  color: var(--sx-t-body);
+}
+
+.daily-insight-card:disabled {
+  cursor: default;
+}
+
+.daily-insight-icon {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(180,121,63,0.14);
+  color: var(--copper);
+}
+
+.daily-insight-action {
+  margin-top: 6px;
+  color: var(--sx-olive);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.daily-insight-name {
+  margin-top: 3px;
+  color: var(--sx-t-head);
+  font-size: 16px;
+  font-weight: 560;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.daily-insight-copy,
+.daily-insight-empty {
+  margin-top: 4px;
+  color: var(--sx-t-sub);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cellar-page .cellar-add-button {
+  min-width: max-content !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  border-radius: var(--sx-r-pill) !important;
+  background:
+    linear-gradient(180deg, var(--wine-vivid), var(--sx-bordeaux)) !important;
+  color: var(--sx-t-white) !important;
+  border: 0 !important;
+  font-weight: 560 !important;
+  gap: 6px !important;
+}
+
+.cellar-page .cellar-add-short {
+  display: none;
+}
+
+@media (min-width: 520px) {
+  .premium-home-page .dashboard-quick-actions {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .cellar-page .cellar-add-full {
+    display: none;
+  }
+
+  .cellar-page .cellar-add-short {
+    display: inline;
   }
 }

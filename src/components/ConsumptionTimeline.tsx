@@ -8,15 +8,23 @@ import { getStyleColor } from "@/lib/sommelyx-data";
 import { EditConsumptionDialog } from "@/components/EditConsumptionDialog";
 
 function getMonthKey(date: Date) {
+  if (Number.isNaN(date.getTime())) return "sem-data";
   return format(date, "yyyy-MM");
 }
 
 function getMonthLabel(date: Date) {
+  if (Number.isNaN(date.getTime())) return "sem data";
   return format(date, "MMM yy", { locale: ptBR }).replace(".", "").toLowerCase();
 }
 
 function getWeekdayLabel(date: Date) {
+  if (Number.isNaN(date.getTime())) return "—";
   return format(date, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3).toUpperCase();
+}
+
+function formatRating(value: unknown) {
+  const rating = Number(value);
+  return Number.isFinite(rating) ? rating.toFixed(1) : "—";
 }
 
 type ConsumptionTimelineProps = {
@@ -127,7 +135,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                         <span className="flex items-center gap-1">
                           <Star className="h-2.5 w-2.5 fill-current" />
                           <span className="tabular-nums">
-                            {entry.rating != null ? entry.rating.toFixed(1) : "—"}
+                            {entry.rating != null ? formatRating(entry.rating) : "—"}
                           </span>
                         </span>
                         {!isDemo && (

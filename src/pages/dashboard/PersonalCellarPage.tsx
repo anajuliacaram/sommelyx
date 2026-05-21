@@ -254,9 +254,10 @@ export default function PersonalCellarPage() {
           </SelectContent>
         </Select>
 
-        <button type="button" className="btn-adicionar-adega" onClick={() => setAddOpen(true)}>
+        <button type="button" className="btn-adicionar-adega cellar-add-button" onClick={() => setAddOpen(true)} aria-label="Adicionar vinho">
           <Plus className="h-3.5 w-3.5" />
-          + Adicionar
+          <span className="cellar-add-full">Adicionar vinho</span>
+          <span className="cellar-add-short">Adicionar</span>
         </button>
       </div>
 
