@@ -218,7 +218,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
     <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <SheetContent
         centered
-        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "consumption-modal")}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label="Adicionar consumo"
       >
@@ -228,7 +228,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
             <AiModalHeader
               icon={<WineIcon className="h-5 w-5" />}
               title="Adicionar consumo"
-              description="Registre uma degustação ou abertura."
+              description="Registre uma degustação da sua adega ou um consumo externo."
               tone="wine"
             />
           </AiModalHeaderBar>

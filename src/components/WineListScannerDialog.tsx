@@ -613,7 +613,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 />
               </AiModalHeaderBar>
 
-              <AiModalBody style={{ overflowY: "auto", flex: 1, paddingBottom: 24 }}>
+              <AiModalBody className="analyze-carta-body" style={{ overflowY: "auto", flex: 1, paddingBottom: 24 }}>
                 <AiModalSplitLayout contentClassName="pb-1">
                   <AnimatePresence mode="wait">
                     {step === "capture" && (
@@ -644,23 +644,23 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                             icon={<Camera className="h-5 w-5" strokeWidth={1.75} />}
                             title="Enviar carta"
                             description="Foto, imagem ou PDF."
-                            className="upload-card enviar-carta"
+                            className="analyze-carta-upload"
                           />
 
                           <div className="analyze-carta-actions grid gap-2 sm:grid-cols-2">
-                            <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="w-full">
+                            <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="analyze-carta-button w-full">
                               <Camera className="mr-2 h-4 w-4" />
                               Tirar foto
                             </AiModalActionButton>
-                            <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="w-full">
+                            <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="analyze-carta-button w-full">
                               <Upload className="mr-2 h-4 w-4" />
                               Arquivo
                             </AiModalActionButton>
                           </div>
 
-                          <AiModalCard className="analyze-carta-help scanner-footer carta-info curadoria-card">
+                          <AiModalCard className="analyze-carta-help">
                             <div className="flex items-start gap-3">
-                              <div className="modal-action-icon-wrap modal-action-icon">
+                              <div className="analyze-carta-help-icon modal-action-icon-wrap modal-action-icon">
                                 <BookOpen className="h-4 w-4" />
                               </div>
                               <div>

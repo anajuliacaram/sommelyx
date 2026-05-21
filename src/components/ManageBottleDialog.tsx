@@ -310,7 +310,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
       <Sheet open={open} onOpenChange={(v) => { if (!v) resetAll(); onOpenChange(v); }}>
         <SheetContent
           centered
-          className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+          className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "consumption-modal")}
           style={AI_MODAL_SHEET_CONTENT_STYLE}
           aria-label="Adicionar consumo"
         >
@@ -348,7 +348,7 @@ export function ManageBottleDialog({ open, onOpenChange }: ManageBottleDialogPro
                       </AiModalCard>
                     </motion.div>
                   ) : (
-                    <motion.div key="form" className="space-y-3">
+                    <motion.div key="form" className="consumption-modal-flow">
                       {items.length > 0 ? (
                         <AiModalCard className="consumption-details-card">
                           <div className="mb-3 flex items-center justify-between gap-3">
