@@ -50,7 +50,7 @@ import {
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
 } from "@/components/ai-flow/ModalLayout";
-import { PairingLoadingState, PairingErrorState } from "@/components/pairing/shared";
+import { PairingErrorState } from "@/components/pairing/shared";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
@@ -490,24 +490,32 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0 }}
-        className="space-y-3"
+        className="carta-results-shell"
       >
         <section className="carta-results-header">
-          <div>
-            <div>
-              <p className="carta-results-count">
-                {displayWines.length} rótulos para decidir
-              </p>
-              {safeResults.topPick ? (
-                <p className="carta-results-sub">
-                  Primeiro destaque: {safeResults.topPick}
-                </p>
-              ) : null}
-            </div>
-          </div>
+          <p className="carta-results-eyebrow">Carta analisada</p>
+          <h3 className="carta-results-title">
+            {displayWines.length} rótulos para decidir
+          </h3>
+          {safeResults.topPick ? (
+            <p className="carta-results-sub">
+              Primeiro destaque: {safeResults.topPick}
+            </p>
+          ) : null}
         </section>
 
-        <div className="space-y-1">
+        {(safeResults.topPick || safeResults.bestValue) ? (
+          <section className="carta-insight-card">
+            <p className="carta-insight-label">Insight da carta</p>
+            <p className="carta-insight-text">
+              {[safeResults.topPick ? `Escolha principal: ${safeResults.topPick}` : "", safeResults.bestValue ? `Best value: ${safeResults.bestValue}` : ""]
+                .filter(Boolean)
+                .join(" · ")}
+            </p>
+          </section>
+        ) : null}
+
+        <div className="carta-results-controls">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[#6B6258]/46 sm:left-3 sm:h-3 sm:w-3" />
             <Input
@@ -539,7 +547,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
         </div>
 
         {displayWines.length > 0 ? (
-          <section className="space-y-1">
+          <section className="carta-results-list">
             {displayWines.map((wine, index) => {
               const cellarMatch = matchedCellarMap.get(wine.name) || null;
               return (
@@ -669,14 +677,19 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     )}
 
                     {step === "scanning" && (
-                      <PairingLoadingState
-                        steps={[
-                          "Lendo carta",
-                          "Organizando rótulos",
-                          "Preparando destaques",
-                        ]}
-                        subtitle="Curadoria da carta"
-                      />
+                      <motion.div
+                        key="scanning"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="carta-loading"
+                      >
+                        <div className="carta-loading-icon">
+                          <BookOpen className="h-5 w-5" />
+                        </div>
+                        <p className="carta-loading-text">Curadoria da carta</p>
+                        <p className="carta-loading-sub">Lendo carta, organizando rótulos e preparando destaques.</p>
+                      </motion.div>
                     )}
 
                     {step === "results" && renderResultsContent()}
@@ -787,7 +800,6 @@ function WineListCard({
         className="w-full text-left"
       >
         <div className="carta-wine-top">
-          <span className="wine-selector-dot" style={{ background: getWineTypeColor(wine.style) }} />
           <h4 className="carta-wine-name">{wine.name}</h4>
           {priceLabel ? (
             <span className="carta-wine-price">{priceLabel}</span>
@@ -815,6 +827,8 @@ function WineListCard({
             ))}
           </div>
         ) : null}
+
+        <div className="carta-wine-divider" />
 
         <div className="carta-wine-actions">
           <ActionPill label={cellarMatch ? "Na adega" : "Salvar"} icon={Check} onClick={onSave} disabled={Boolean(cellarMatch)} disabledReason="Esse vinho já existe na sua adega." />
@@ -858,6 +872,7 @@ function ActionPill({
       className={cn(
         "carta-action-btn",
         (label === "Salvar" || label === "Na adega") && "save",
+        label === "Wishlist" && "wish",
         disabled && "is-disabled",
       )}
       disabled={disabled}

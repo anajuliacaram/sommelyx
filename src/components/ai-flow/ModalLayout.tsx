@@ -44,15 +44,15 @@ export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
 export const AI_MODAL_LABEL_CLASSNAME =
   "form-field-label modal-field-label modal-input-label";
 export const AI_MODAL_HELP_TEXT_CLASSNAME =
-  "text-[13px] font-normal leading-[1.42] text-[rgba(72,60,46,0.60)]";
+  "sx-sub";
 export const AI_MODAL_META_TEXT_CLASSNAME =
-  "text-[10.5px] leading-[1.38] text-[rgba(72,60,46,0.56)]";
+  "sx-caption";
 export const AI_MODAL_TEXT_PRIMARY_CLASSNAME =
-  "text-[14px] font-medium text-[rgba(32,26,21,0.88)]";
+  "sx-body font-medium";
 export const AI_MODAL_TEXT_SECONDARY_CLASSNAME =
-  "text-[14px] font-medium tracking-[-0.02em] text-[rgba(32,26,21,0.88)]";
+  "sx-body font-medium";
 export const AI_MODAL_PILL_TEXT_CLASSNAME =
-  "text-[8.5px] font-medium uppercase tracking-[0.08em]";
+  "sx-label";
 export const AI_MODAL_SELECTION_CARD_CLASSNAME =
   "segment-card flex min-h-[48px] flex-col justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME =
@@ -210,7 +210,7 @@ export function AiModalEyebrow({
   className?: string;
 }) {
   return (
-    <p className={cn("text-[9.5px] font-medium uppercase tracking-[0.16em] text-[rgba(72,60,46,0.46)]", className)}>
+    <p className={cn("sx-label", className)}>
       {children}
     </p>
   );
@@ -227,8 +227,8 @@ export function AiModalKeyValue({
 }) {
   return (
     <div className={cn("flex items-start justify-between gap-3", className)}>
-      <span className="text-[9.5px] font-medium uppercase tracking-[0.12em] text-[rgba(72,60,46,0.46)]">{label}</span>
-      <span className="text-right text-[12px] font-medium leading-[1.42] text-[rgba(36,30,24,0.86)]">{value}</span>
+      <span className="sx-label">{label}</span>
+      <span className="sx-sub text-right font-medium">{value}</span>
     </div>
   );
 }
@@ -262,7 +262,7 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "premium-card-surface rounded-[var(--sx-r-md)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-input)] px-3 py-2.5 shadow-none sm:px-3.5",
+        "sx-card sx-card-compact premium-card-surface px-3 py-2.5 sm:px-3.5",
         className,
       )}
     >
@@ -467,7 +467,7 @@ export function AiSectionLabel({
   className?: string;
 }) {
   return (
-    <p className={cn("text-[9.5px] font-medium uppercase tracking-[0.16em] text-[rgba(72,60,46,0.46)]", className)}>
+    <p className={cn("sx-label", className)}>
       {children}
     </p>
   );

@@ -9,63 +9,89 @@
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
     --sx-bordeaux: #8B1A3B;
+    --brand-primary: #7B1E2B;
+    --wine: 348 55% 30%;
+    --wine-hover: #5A1E24;
+    --wine-vivid: #912634;
+    --wine-mid: #C4708A;
+    --wine-light: #F5ECF0;
     --sx-bordeaux-10: rgba(139,26,59,0.10);
     --sx-bordeaux-06: rgba(139,26,59,0.06);
-    --sx-bordeaux-light: #F5ECF0;
-    --sx-bordeaux-mid: #C4708A;
+    --sx-bordeaux-light: var(--wine-light);
+    --sx-bordeaux-mid: var(--wine-mid);
     --sx-olive: #3A4A2E;
+    --olive-mid: #4A5E38;
+    --olive-light: #6B7D55;
+    --olive-surface: #EEF1EA;
+    --cellar-forest: #1A2420;
     --sx-olive-10: rgba(58,74,46,0.10);
     --sx-olive-06: rgba(58,74,46,0.06);
-    --sx-olive-light: #EEF1EA;
+    --sx-olive-light: var(--olive-surface);
 
-    --sx-bg-page: #F5EDE6;
-    --sx-bg-card: #FFFFFF;
-    --sx-bg-input: #F0EAE4;
-    --sx-bg-row: #F7F5F0;
+    --gold: #C8A96A;
+    --champagne: #C9B469;
+    --copper: #B4793F;
+
+    --page-bg: #F2EFE9;
+    --card-bg: #FDFCF9;
+    --card-alt: #F9F7F3;
+    --row-bg: #F7F5F0;
+    --input-bg: #EDEAE3;
+    --parchment: #F2EBE0;
+    --cream: #F5EFE6;
+    --sx-bg-base: var(--page-bg);
+    --sx-bg-page: var(--page-bg);
+    --sx-bg-card: var(--card-bg);
+    --sx-bg-input: var(--input-bg);
+    --sx-bg-row: var(--row-bg);
     --sx-bg-chip-off: transparent;
     --sx-bg-chip-on: #8B1A3B;
 
     /* Wine type colors — used for chips, badges, dots, filter buttons, type labels */
     --sx-wine-tinto: #7B1E2B;
     --sx-wine-tinto-bg: rgba(123,30,43,0.10);
-    --sx-wine-branco: #C9A84C;
-    --sx-wine-branco-bg: rgba(201,168,76,0.12);
-    --sx-wine-rose: #C97B8A;
-    --sx-wine-rose-bg: rgba(201,123,138,0.12);
-    --sx-wine-espumante: #7A9A5E;
-    --sx-wine-espumante-bg: rgba(122,154,94,0.12);
-    --sx-wine-sobremesa: #B8652A;
-    --sx-wine-sobremesa-bg: rgba(184,101,42,0.12);
+    --sx-wine-branco: #C9B469;
+    --sx-wine-branco-bg: rgba(201,180,105,0.12);
+    --sx-wine-rose: #D89BA0;
+    --sx-wine-rose-bg: rgba(216,155,160,0.12);
+    --sx-wine-espumante: #B8C49A;
+    --sx-wine-espumante-bg: rgba(184,196,154,0.12);
+    --sx-wine-sobremesa: #B4793F;
+    --sx-wine-sobremesa-bg: rgba(180,121,63,0.12);
     --sx-wine-fortificado: #8B6914;
     --sx-wine-fortificado-bg: rgba(139, 105, 20, 0.12);
 
-    --sx-t-head: #2C1810;
-    --sx-t-body: #3D2B20;
-    --sx-t-sub: #8B7B72;
-    --sx-t-muted: #B5A89F;
-    --sx-t-white: #FFFFFF;
+    --text-headline: #1C1410;
+    --text-body: #3D3530;
+    --text-sub: #7A726A;
+    --text-muted: #AEA79F;
+    --sx-t-head: var(--text-headline);
+    --sx-t-body: var(--text-body);
+    --sx-t-sub: var(--text-sub);
+    --sx-t-muted: var(--text-muted);
+    --sx-t-white: #FDFCF9;
     --sx-text-headline: var(--sx-t-head);
     --sx-text-body: var(--sx-t-body);
     --sx-text-secondary: var(--sx-t-sub);
     --sx-text-muted: var(--sx-t-muted);
     --sx-text-on-dark: var(--sx-t-white);
 
-    --sx-b-default: rgba(139,80,60,0.12);
-    --sx-b-medium: rgba(139,80,60,0.22);
+    --sx-b-default: rgba(61,53,48,0.12);
+    --sx-b-medium: rgba(61,53,48,0.22);
     --sx-b-focus: #8B1A3B;
     --sx-border-default: var(--sx-b-default);
     --sx-border-strong: var(--sx-b-medium);
     --sx-border-focus: var(--sx-b-focus);
 
-    --sx-shadow-sm: 0 1px 4px rgba(44,24,16,0.06);
-    --sx-shadow-md: 0 2px 12px rgba(44,24,16,0.09);
-    --sx-shadow-lg: 0 8px 32px rgba(44,24,16,0.12);
+    --sx-shadow-sm: 0 1px 3px rgba(28,20,16,0.055), 0 1px 2px rgba(28,20,16,0.035);
+    --sx-shadow-md: 0 4px 14px rgba(28,20,16,0.08), 0 1px 4px rgba(28,20,16,0.04);
+    --sx-shadow-lg: 0 16px 38px rgba(28,20,16,0.13), 0 6px 16px rgba(28,20,16,0.06);
     --sx-shadow-card: var(--sx-shadow-md);
-    --sx-shadow-modal: var(--sx-shadow-lg);
+    --sx-shadow-modal: 0 22px 70px rgba(28,20,16,0.22), 0 8px 24px rgba(28,20,16,0.10);
 
-    --sx-font-display: 32px;
-    --sx-font-h1: 26px;
-    --sx-font-h2: 20px;
+    --sx-font-display: 30px;
+    --sx-font-h1: 25px;
+    --sx-font-h2: 19px;
     --sx-font-h3: 17px;
     --sx-font-body: 14px;
     --sx-font-small: 12px;
@@ -79,7 +105,7 @@
     --sx-r-md: 14px;
     --sx-r-lg: 20px;
     --sx-r-xl: 24px;
-    --sx-r-pill: 50px;
+    --sx-r-pill: 999px;
 
     --cellar-bg: #0d0a08;
     --cellar-bg-soft: #15110d;
