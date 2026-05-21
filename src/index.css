@@ -9492,8 +9492,7 @@ aside[class*="sidebar"],
   -webkit-backdrop-filter: blur(10px) saturate(1.03) !important;
 }
 
-.mobile-header-menu,
-.header-btn-menu {
+.sx-mobile-header .mobile-header-menu {
   min-width: 74px !important;
   height: 38px !important;
   border-radius: var(--sx-r-pill) !important;
@@ -9503,19 +9502,18 @@ aside[class*="sidebar"],
   font-weight: 520 !important;
 }
 
-.mobile-header-menu:hover,
-.header-btn-menu:hover {
+.sx-mobile-header .mobile-header-menu:hover {
   background: var(--sx-olive) !important;
 }
 
-.header-search-pill {
+.sx-mobile-header .header-search-pill {
   height: 40px !important;
   background: rgba(253,252,249,0.62) !important;
   border-color: rgba(61,53,48,0.10) !important;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.60) !important;
 }
 
-.mobile-header .header-quick-search-btn {
+.sx-mobile-header .header-quick-search-btn {
   height: 38px !important;
   width: 38px !important;
   border-radius: var(--sx-r-pill) !important;
@@ -9524,7 +9522,7 @@ aside[class*="sidebar"],
   color: var(--sx-olive) !important;
 }
 
-.header-avatar {
+.sx-mobile-header .header-avatar {
   height: 38px !important;
   width: 38px !important;
   border-radius: var(--sx-r-pill) !important;
@@ -10093,6 +10091,23 @@ aside[class*="sidebar"],
 
   .premium-home-page .recent-section {
     padding-left: 20px !important;
+  }
+
+  .cellar-page .adega-controls {
+    grid-template-columns: minmax(160px, 220px) minmax(160px, 220px) auto !important;
+    justify-content: start !important;
+  }
+
+  .cellar-page .adega-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 14px !important;
+    padding: 10px 20px 32px !important;
+  }
+
+  .cellar-page .wine-card-image,
+  .cellar-page .wine-card-image-placeholder {
+    height: 150px !important;
+    max-height: 150px !important;
   }
 }
 

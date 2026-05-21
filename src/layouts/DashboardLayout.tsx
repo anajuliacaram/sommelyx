@@ -92,7 +92,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "mobile-header-menu header-btn-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
+                    "mobile-header-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
                     "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
                   )}
                 >
