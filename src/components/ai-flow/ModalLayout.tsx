@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode, CSSProperties, DragEventHandler } from "react";
-import { SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ActionDialogDescription, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,12 +18,12 @@ export const AI_MODAL_ACTION_TILE_CLASSNAME =
   "modal-action-card";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "modal-container premium-modal-shell sx-ai-modal h-auto max-h-[92dvh] w-full max-w-[560px] gap-0 p-0";
+  "h-auto max-h-[86dvh] w-full max-w-[560px] gap-0 p-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
-  width: "100%",
+  width: "min(92vw, 560px)",
   maxWidth: "560px",
-  maxHeight: "92dvh",
+  maxHeight: "min(86dvh, 760px)",
   height: "auto",
 };
 
@@ -154,11 +154,11 @@ export function AiModalHeader({
   icon?: ReactNode;
   title: string;
   description?: string;
-  tone?: "wine" | "gold" | "purple" | "neutral";
+  tone?: "wine" | "gold" | "neutral";
   className?: string;
 }) {
   return (
-    <SheetHeader className={cn("modal-header mb-0 pr-11 sm:pr-12", className)}>
+    <div className={cn("modal-header mb-0 pr-11 sm:pr-12", className)}>
       <div className="flex items-start gap-2.5">
         {icon ? (
           <div className={cn("modal-header-icon modal-icon-wrap modal-icon-circle", tone === "neutral" && "olive", tone && `tone-${tone}`)}>
@@ -166,17 +166,17 @@ export function AiModalHeader({
           </div>
         ) : null}
         <div className="modal-header-text min-w-0 flex-1">
-          <SheetTitle className="modal-header-title modal-title">
+          <ActionDialogTitle className="modal-header-title modal-title">
             {title}
-          </SheetTitle>
+          </ActionDialogTitle>
           {description ? (
-            <SheetDescription className="modal-header-sub modal-subtitle max-w-[38rem]">
+            <ActionDialogDescription className="modal-header-sub modal-subtitle max-w-[38rem]">
               {description}
-            </SheetDescription>
+            </ActionDialogDescription>
           ) : null}
         </div>
       </div>
-    </SheetHeader>
+    </div>
   );
 }
 

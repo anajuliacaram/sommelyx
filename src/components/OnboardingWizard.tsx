@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wine, Clock, ShieldCheck, Sparkles, ArrowRight, Package, TrendingUp, Users } from "@/icons/lucide";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,7 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
   const isLast = step === totalSteps - 1;
   const iconTone = step === 0 ? "wine" : step === 1 ? "clock" : "shield";
 
-  return (
+  const content = (
     <motion.div
       className="modal-overlay onboarding-overlay fixed inset-0 z-[60] flex items-end justify-center p-0 sm:items-center sm:p-4"
       data-radix-dialog-overlay=""
@@ -148,4 +149,6 @@ export function OnboardingWizard({ profileType, onComplete, storageKey }: Props)
       </motion.div>
     </motion.div>
   );
+
+  return createPortal(content, document.body);
 }

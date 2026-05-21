@@ -58,6 +58,7 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(
   ({ side = "right", centered = false, className, children, style, ...props }, ref) => {
     const isModalContainer = typeof className === "string" && className.includes("modal-container");
+    const isActionModal = typeof className === "string" && className.includes("sx-action-modal");
     const isCentered = centered || isModalContainer;
 
     if (isCentered) {
@@ -67,14 +68,17 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
           <SheetPrimitive.Content
             ref={ref}
             className={cn(
-              "premium-modal-sheet fixed inset-0 z-50 flex items-end justify-center overflow-hidden p-0 pointer-events-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:items-center sm:p-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
+              isActionModal
+                ? "premium-modal-sheet fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 pointer-events-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-180 data-[state=open]:duration-220 data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+                : "premium-modal-sheet fixed inset-0 z-50 flex items-end justify-center overflow-hidden p-0 pointer-events-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom sm:items-center sm:p-4 sm:data-[state=closed]:zoom-out-95 sm:data-[state=open]:zoom-in-95",
             )}
             {...props}
           >
             <div
               data-radix-dialog-content=""
               data-radix-sheet-content=""
-              data-side="bottom"
+              data-side={isActionModal ? "center" : "bottom"}
+              data-modal-variant={isActionModal ? "action" : undefined}
               className={cn("premium-modal-shell pointer-events-auto flex max-h-[92dvh] flex-col", className)}
               style={style}
             >

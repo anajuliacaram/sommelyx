@@ -46,6 +46,7 @@ const sortOptions: Array<{ value: SortBy; label: string }> = [
 ];
 
 const STORAGE_KEY = "sommelyx.consumption.filters.v2";
+const EMPTY_CONSUMPTION_ENTRIES: NonNullable<ReturnType<typeof useConsumption>["data"]> = [];
 
 const FilterChoice = memo(function FilterChoice({
   active,
@@ -170,7 +171,21 @@ function FilterPanel({
 }
 
 export default function ConsumptionPage() {
-  const { data: entries = [], isLoading } = useConsumption();
+  const { data: rawEntries = EMPTY_CONSUMPTION_ENTRIES, isLoading } = useConsumption();
+  const entries = useMemo(() => {
+    return rawEntries
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => {
+        const consumedAt = new Date(entry.consumed_at);
+        const rating = entry.rating == null ? null : Number(entry.rating);
+        return {
+          ...entry,
+          wine_name: entry.wine_name?.trim() || "Vinho sem nome",
+          consumed_at: Number.isNaN(consumedAt.getTime()) ? new Date().toISOString() : entry.consumed_at,
+          rating: rating != null && Number.isFinite(rating) ? rating : null,
+        };
+      });
+  }, [rawEntries]);
   const [filters, setFilters] = useState<ConsumptionFilters>(() => {
     if (typeof window === "undefined") return defaultFilters;
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -223,18 +238,18 @@ export default function ConsumptionPage() {
     return `${labels.slice(0, 2).join(", ")} +${labels.length - 2}`;
   }, [countryOptions, filters.countries]);
   const sortValueLabel = sortOptions.find((opt) => opt.value === filters.sortBy)?.label ?? "Mais recentes";
+  const hasActiveFilters =
+    filters.period !== defaultFilters.period ||
+    filters.countries.length > 0 ||
+    filters.sortBy !== defaultFilters.sortBy;
   const activeFilterSummary = useMemo(() => {
     const parts = [
       `Período: ${periodValueLabel}`,
       `País: ${countryValueLabel}`,
       `Ordenar: ${sortValueLabel}`,
     ];
-    const hasActiveFilters =
-      filters.period !== defaultFilters.period ||
-      filters.countries.length > 0 ||
-      filters.sortBy !== defaultFilters.sortBy;
     return hasActiveFilters ? parts.join(" · ") : "";
-  }, [countryValueLabel, filters.countries.length, filters.period, filters.sortBy, periodValueLabel, sortValueLabel]);
+  }, [countryValueLabel, hasActiveFilters, periodValueLabel, sortValueLabel]);
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -468,6 +483,10 @@ export default function ConsumptionPage() {
   }, [filteredEntries, total]);
 
   const lastEntry = filteredEntries[0];
+  const filteredEntriesKey = useMemo(
+    () => filteredEntries.map((entry) => `${entry.id}:${entry.consumed_at}:${entry.rating ?? ""}`).join("|"),
+    [filteredEntries],
+  );
   const lastLabel = lastEntry
     ? (() => {
         const days = Math.max(
@@ -501,7 +520,7 @@ export default function ConsumptionPage() {
       if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
       if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
     };
-  }, [filteredEntries, hasLoadedOnce]);
+  }, [filteredEntriesKey, hasLoadedOnce]);
 
   if (isLoading) {
     return (

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { UtensilsCrossed, Search, Loader2, Wine as WineIcon, Sparkles, Camera, Upload, ArrowLeft, ChefHat, Check, ArrowUpAZ, ArrowDownAZ, Clock, History, BookOpen, Crown, DollarSign, Heart } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { generateWinePairing, analyzeMenuForWine, analyzeWineList, adaptMenuAnalysisToGeneratedWinePairing, buildUserProfile, normalizePairingResponse, normalizeWineListResponse, type GeneratedWinePairing, type WineListAnalysis, type WineListItem, type PairingIntent, type WineListAnalysisTextInput } from "@/lib/sommelier-ai";
 import { Dialog } from "@/components/ui/dialog";
@@ -27,6 +26,7 @@ import {
 } from "@/components/pairing/shared";
 import { AiProgressiveLoader } from "@/components/AiProgressiveLoader";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 
 interface DishToWineDialogProps {
   open: boolean;
@@ -1120,9 +1120,9 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   };
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent centered className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "harmonizar-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
-        <SheetTitle className="sr-only">Harmonizar</SheetTitle>
+    <ActionDialog open={open} onOpenChange={handleClose}>
+      <ActionDialogContent className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "harmonizar-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Harmonizar">
+        <ActionDialogTitle className="sr-only">Harmonizar</ActionDialogTitle>
         <AiModalShell>
         <AiModalHeaderBar>
           <AiModalHeader
@@ -1920,7 +1920,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
           </AiModalSplitLayout>
         </AiModalBody>
         </AiModalShell>
-      </SheetContent>
+      </ActionDialogContent>
 
       {/* Recipe Modal */}
       {recipeModal && (
@@ -1976,6 +1976,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
         onOpenChange={(v) => { if (!v) setConsumeWine(null); }}
         preSelectedWine={consumeWine}
       />
-    </Sheet>
+    </ActionDialog>
   );
 }

@@ -50,7 +50,10 @@ export function FloatingContactButton({ className }: Props) {
   return (
     <div
       className={cn("fab-chat-wrap fixed z-50", className)}
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 24px)", right: "20px" }}
+      style={{
+        bottom: "var(--fab-chat-bottom, calc(env(safe-area-inset-bottom) + 24px))",
+        right: "var(--fab-chat-right, 20px)",
+      }}
     >
       <Popover>
         <div className="flex items-center gap-2">
@@ -58,7 +61,7 @@ export function FloatingContactButton({ className }: Props) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] text-[var(--sx-t-sub)] shadow-[var(--sx-shadow-sm)] hover:bg-[var(--sx-bg-input)]"
+              className="fab-chat-minimize h-9 w-9 rounded-full border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] text-[var(--sx-t-sub)] shadow-[var(--sx-shadow-sm)] hover:bg-[var(--sx-bg-input)]"
               aria-label="Minimizar botão de contato"
               onClick={(e) => {
                 e.preventDefault();

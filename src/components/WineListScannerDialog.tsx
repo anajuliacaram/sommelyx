@@ -13,7 +13,6 @@ import {
   UtensilsCrossed,
 } from "@/icons/lucide";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   analyzeWineList,
@@ -55,6 +54,7 @@ import { AddWineDialog } from "@/components/AddWineDialog";
 import { EditWineDialog } from "@/components/EditWineDialog";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 
 interface WineListScannerDialogProps {
   open: boolean;
@@ -600,9 +600,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
   return (
     <>
       <TooltipProvider>
-        <Sheet open={open} onOpenChange={handleClose}>
-          <SheetContent centered className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "analyze-carta-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
-            <SheetTitle className="sr-only">Analisar Carta</SheetTitle>
+        <ActionDialog open={open} onOpenChange={handleClose}>
+          <ActionDialogContent className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "analyze-carta-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
+            <ActionDialogTitle className="sr-only">Analisar Carta</ActionDialogTitle>
             <AiModalShell>
               <AiModalHeaderBar>
                 <AiModalHeader
@@ -708,8 +708,8 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                 </AiModalSplitLayout>
               </AiModalBody>
             </AiModalShell>
-          </SheetContent>
-        </Sheet>
+          </ActionDialogContent>
+        </ActionDialog>
       </TooltipProvider>
 
       <AddWineDialog

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +39,7 @@ import {
   AiSectionLabel,
   AiModalSplitLayout,
 } from "@/components/ai-flow/ModalLayout";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 
 type WineTypeFilter = "all" | "tinto" | "branco" | "rose" | "espumante" | "sobremesa";
 
@@ -215,14 +215,13 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
-      <SheetContent
-        centered
+    <ActionDialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
+      <ActionDialogContent
         className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "consumption-modal")}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label="Adicionar consumo"
       >
-        <SheetTitle className="sr-only">Adicionar consumo</SheetTitle>
+        <ActionDialogTitle className="sr-only">Adicionar consumo</ActionDialogTitle>
         <AiModalShell>
           <AiModalHeaderBar>
             <AiModalHeader
@@ -255,7 +254,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     <div className="min-w-0 flex-1">
                       <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>Minha adega</p>
                       <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          Garrafa cadastrada
+                          Registrar abertura
                         </p>
                     </div>
                     <span className="consumption-source-meta">
@@ -289,7 +288,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
                     <div className="min-w-0 flex-1">
                       <p className={cn("consumption-source-title", AI_MODAL_TEXT_PRIMARY_CLASSNAME)}>Externo</p>
                       <p className={cn("consumption-source-sub", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          Restaurante, viagem, jantar
+                          Restaurante / outro
                         </p>
                     </div>
                     <span className="consumption-source-meta">
@@ -535,7 +534,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
               </AiModalActionButton>
           </AiModalFooterBar>
         </AiModalShell>
-      </SheetContent>
-    </Sheet>
+      </ActionDialogContent>
+    </ActionDialog>
   );
 }

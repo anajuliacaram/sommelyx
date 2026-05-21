@@ -438,14 +438,19 @@ export function Sparkbar({
   tooltipIndex?: number | null;
   onBarSelect?: (index: number) => void;
 }) {
-  const max = Math.max(...data.map((d) => d.value), 1);
+  const normalizedData = data.map((d) => ({
+    label: d.label,
+    value: Number.isFinite(Number(d.value)) ? Number(d.value) : 0,
+  }));
+  const safeHeight = Number.isFinite(height) && height > 48 ? height : 84;
+  const max = Math.max(...normalizedData.map((d) => d.value), 1);
   const resolvedActiveIndex = activeIndex ?? null;
-  const inlineValuesAllowed = showValues && data.length <= 8;
+  const inlineValuesAllowed = showValues && normalizedData.length <= 8;
 
   return (
-    <div className="relative overflow-visible" style={{ height }}>
+    <div className="relative overflow-visible" style={{ height: safeHeight }}>
       <div className="flex h-full items-end gap-2 pb-4">
-        {data.map((d, i) => {
+        {normalizedData.map((d, i) => {
           const isActive = d.value > 0;
           const isSelected = resolvedActiveIndex === i;
           const barH = Math.max(4, (d.value / max) * 100);
@@ -478,7 +483,7 @@ export function Sparkbar({
               >
                 {isActive ? d.value : "0"}
               </span>
-              <div className="relative flex w-full items-end justify-center" style={{ height: height - 42 }}>
+              <div className="relative flex w-full items-end justify-center" style={{ height: Math.max(8, safeHeight - 42) }}>
                 <div
                   className={cn(
                     "motion-chart-bar rounded-t-[4px]",

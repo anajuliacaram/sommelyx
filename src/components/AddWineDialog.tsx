@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ScanWineLabelDialog } from "@/components/ScanWineLabelDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { ImportCsvDialog } from "@/components/ImportCsvDialog";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import { LocationFields } from "@/components/LocationFields";
 import { formatLocationLabel, type StructuredLocation } from "@/lib/location";
 import { useCreateWineLocation } from "@/hooks/useWineLocations";
@@ -35,6 +35,7 @@ import {
   AiModalActionButton,
   AiModalBody,
   AiModalCard,
+  AiModalFooterBar,
   AiModalHeader,
   AiModalHeaderBar,
   AiModalShell,
@@ -1043,13 +1044,13 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   return (
     <>
-      <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent
-        centered
+      <ActionDialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+      <ActionDialogContent
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
+        aria-label={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
       >
-          <SheetTitle className="sr-only">{isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}</SheetTitle>
+          <ActionDialogTitle className="sr-only">{isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}</ActionDialogTitle>
 
           <AiModalShell>
           <AiModalHeaderBar>
@@ -1108,7 +1109,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form key="form" onSubmit={handleSubmit} className="space-y-1.5">
+                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="space-y-1.5">
                   <div className="space-y-1.5">
                     <div
                       className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
@@ -1438,18 +1439,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </CollapsibleContent>
                   </Collapsible>
 
-                    <AiModalActionButton
-                      type="submit"
-                      disabled={!name.trim()}
-                      loading={addWine.isPending}
-                      loadingText="Salvando…"
-                      variant="primary"
-                      className="w-full"
-                    >
-                      <Plus className="h-4 w-4" />
-                      {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
-                    </AiModalActionButton>
-
                   {missingFields.length > 0 && (
                     <AiModalCard className="space-y-1 rounded-[16px] px-3 py-2.5">
                       <p className="text-[12px] font-medium text-[rgba(72,60,46,0.76)]">
@@ -1465,9 +1454,25 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
             </AnimatePresence>
           </AiModalSplitLayout>
           </AiModalBody>
+          {!success && (
+            <AiModalFooterBar>
+              <AiModalActionButton
+                form="add-wine-form"
+                type="submit"
+                disabled={!name.trim()}
+                loading={addWine.isPending}
+                loadingText="Salvando…"
+                variant="primary"
+                className="w-full"
+              >
+                <Plus className="h-4 w-4" />
+                {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
+              </AiModalActionButton>
+            </AiModalFooterBar>
+          )}
           </AiModalShell>
-        </SheetContent>
-      </Sheet>
+        </ActionDialogContent>
+      </ActionDialog>
 
       <ScanWineLabelDialog
         open={scanOpen}
