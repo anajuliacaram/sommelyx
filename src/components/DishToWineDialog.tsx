@@ -1162,10 +1162,6 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 exit={{ opacity: 0, y: -8 }}
                 className="space-y-2.5 sm:space-y-3"
               >
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[rgba(58,51,39,0.55)]">
-                  De onde vem o vinho?
-                </p>
-
                 <div className="space-y-2 sm:space-y-2.5">
                   <PremiumChoiceCard
                     index={0}
@@ -1202,14 +1198,12 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     index={0}
                     icon={ChefHat}
                     title="Tenho um prato em mente"
-                    description={source === "cellar" ? "Sugerir garrafas" : "Ler a carta"}
                     onClick={() => handleSelectSubMode("by-dish")}
                   />
                   <PremiumChoiceCard
                     index={1}
                     icon={WineIcon}
                     title="Tenho um vinho em mente"
-                    description={source === "cellar" ? "Sugerir pratos" : "Ler o cardápio"}
                     onClick={() => handleSelectSubMode("by-wine")}
                   />
                 </div>

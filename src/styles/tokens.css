@@ -8,15 +8,15 @@
     --transition-slow: 420ms;
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sx-bordeaux: #7A1028;
-    --brand-primary: #7A1028;
-    --wine: 347 77% 27%;
+    --sx-bordeaux: #6F0718;
+    --brand-primary: #6F0718;
+    --wine: 347 88% 23%;
     --wine-hover: #4A0714;
-    --wine-vivid: #7A1028;
+    --wine-vivid: #8A132A;
     --wine-mid: #5E0B1F;
     --wine-light: #F3E8E5;
-    --sx-bordeaux-10: rgba(122,16,40,0.10);
-    --sx-bordeaux-06: rgba(122,16,40,0.06);
+    --sx-bordeaux-10: rgba(111,7,24,0.10);
+    --sx-bordeaux-06: rgba(111,7,24,0.06);
     --sx-bordeaux-light: var(--wine-light);
     --sx-bordeaux-mid: var(--wine-mid);
     --sx-olive: #263A2B;
@@ -45,7 +45,7 @@
     --sx-bg-input: var(--input-bg);
     --sx-bg-row: var(--row-bg);
     --sx-bg-chip-off: transparent;
-    --sx-bg-chip-on: #7A1028;
+    --sx-bg-chip-on: #6F0718;
 
     /* Wine type colors — used for chips, badges, dots, filter buttons, type labels */
     --sx-wine-tinto: #7B1424;
@@ -78,7 +78,7 @@
 
     --sx-b-default: rgba(61,53,48,0.12);
     --sx-b-medium: rgba(61,53,48,0.22);
-    --sx-b-focus: #7A1028;
+    --sx-b-focus: #6F0718;
     --sx-border-default: var(--sx-b-default);
     --sx-border-strong: var(--sx-b-medium);
     --sx-border-focus: var(--sx-b-focus);

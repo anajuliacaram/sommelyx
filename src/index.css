@@ -50,7 +50,7 @@
     --radius: 0.875rem;
 
     /* Brand — usado pelo componente <BrandName /> */
-    --brand-primary: #7A1028;
+    --brand-primary: #6F0718;
     --brand-accent: #C8A96A;
 
     /* Sidebar — Translucent Forest */
@@ -88,10 +88,10 @@
     --cream-warm: 33 18% 96%;
 
     /* === SOMMELYX DESIGN TOKENS — mobile app foundation === */
-    --sx-bordeaux: #7A1028;
-    --brand-primary: #7A1028;
+    --sx-bordeaux: #6F0718;
+    --brand-primary: #6F0718;
     --wine-hover: #4A0714;
-    --wine-vivid: #7A1028;
+    --wine-vivid: #6F0718;
     --wine-mid: #5E0B1F;
     --wine-light: #F3E8E5;
     --sx-bordeaux-10: rgba(122,16,40,0.10);
@@ -11190,7 +11190,7 @@ body,
 .cellar-page .btn-adicionar-adega,
 .fab-chat,
 .premium-modal-shell .modal-btn-primary {
-  background: linear-gradient(180deg, #821829 0%, #781323 58%, #5F0D1A 100%) !important;
+  background: linear-gradient(180deg, #7E1024 0%, #6F0718 58%, #5F0D1A 100%) !important;
   color: #FFFDF8 !important;
   border-color: transparent !important;
   box-shadow: 0 10px 22px -18px rgba(74,7,18,0.54) !important;
@@ -11203,7 +11203,7 @@ body,
 .btn-adicionar-wine-primary:hover,
 .cellar-page .cellar-add-button:hover,
 .cellar-page .btn-adicionar-adega:hover {
-  background: linear-gradient(180deg, #821829 0%, #6F1020 62%, #4A0712 100%) !important;
+  background: linear-gradient(180deg, #7E1024 0%, #6F1020 62%, #4A0712 100%) !important;
 }
 
 .modal-btn-primary:disabled,
@@ -11283,7 +11283,7 @@ body,
 .sx-action-modal .modal-icon-wrap,
 .sx-action-modal .modal-icon-circle {
   background: rgba(120,19,35,0.08) !important;
-  color: #781323 !important;
+  color: #6F0718 !important;
 }
 
 .sx-action-modal.harmonizar-modal .modal-icon-wrap,
@@ -11365,7 +11365,7 @@ body,
 [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item--active,
 [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item.active {
   background: rgba(120,19,35,0.075) !important;
-  color: #781323 !important;
+  color: #6F0718 !important;
 }
 
 .cellar-page .wine-card,
@@ -11402,7 +11402,7 @@ body,
 .cellar-page .btn-adicionar-adega,
 .fab-chat,
 .premium-modal-shell .modal-btn-primary {
-  background: linear-gradient(180deg, #7A1028 0%, #681023 56%, #4A0714 100%) !important;
+  background: linear-gradient(180deg, #6F0718 0%, #681023 56%, #4A0714 100%) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 14px 28px -22px rgba(74,7,20,0.70) !important;
 }
@@ -11447,7 +11447,7 @@ body,
 }
 
 .premium-home-page .home-wine-hero-primary {
-  margin: 10px 20px 14px !important;
+  margin: 12px 20px 14px !important;
 }
 
 @media (max-width: 639px) {
@@ -11460,15 +11460,15 @@ body,
     border-radius: 32px !important;
     border: 0 !important;
     background:
-      radial-gradient(circle at 50% 8%, rgba(255,253,248,0.96), transparent 28%),
-      radial-gradient(circle at 8% 28%, rgba(122,16,40,0.12), transparent 38%),
-      linear-gradient(145deg, rgba(248,241,232,0.98), rgba(233,239,228,0.82)) !important;
-    box-shadow: 0 20px 42px -34px rgba(74,7,20,0.36) !important;
+      radial-gradient(circle at 50% 0%, rgba(255,253,248,0.88), transparent 30%),
+      radial-gradient(circle at 8% 24%, rgba(111,7,24,0.18), transparent 38%),
+      linear-gradient(145deg, rgba(255,253,248,0.95), rgba(232,221,207,0.76)) !important;
+    box-shadow: 0 22px 46px -34px rgba(42,7,16,0.42) !important;
   }
 
   .premium-home-page .home-wine-hero-media {
     width: 100% !important;
-    height: 224px !important;
+    height: 238px !important;
     border-radius: 28px !important;
     background:
       radial-gradient(circle at 50% 10%, rgba(255,253,248,0.95), transparent 32%),
@@ -11481,9 +11481,7 @@ body,
   }
 
   .premium-home-page .home-wine-hero-kicker {
-    color: #7A1028 !important;
-    font-size: 10px !important;
-    letter-spacing: 0.16em !important;
+    display: none !important;
   }
 
   .premium-home-page .home-wine-hero-name {
@@ -11515,9 +11513,10 @@ body,
 .daily-insight-card-mobile {
   display: flex !important;
   margin: 0 20px 12px !important;
-  padding: 18px !important;
+  padding: 18px 18px 17px !important;
   border: 0 !important;
-  box-shadow: 0 18px 34px -30px rgba(38,58,43,0.56) !important;
+  background: linear-gradient(135deg, #2A0710 0%, #263A2B 54%, #2F432F 100%) !important;
+  box-shadow: 0 20px 42px -28px rgba(38,58,43,0.62) !important;
 }
 
 .daily-insight-card-aside {
@@ -11562,6 +11561,12 @@ body,
 .premium-home-page .home-ready-rows {
   display: grid !important;
   gap: 9px !important;
+}
+
+@media (max-width: 639px) {
+  .premium-home-page .home-ready-rows {
+    display: none !important;
+  }
 }
 
 .premium-home-page .home-ready-rows .recent-wine-row:nth-child(n+3) {
@@ -11659,8 +11664,9 @@ body,
 .sx-action-modal .modal-header-title,
 .sx-action-modal .modal-title,
 .premium-modal-shell .modal-title {
-  font-size: clamp(21px, 5.4vw, 24px) !important;
+  font-size: clamp(20px, 5.1vw, 23px) !important;
   font-weight: 560 !important;
+  letter-spacing: -0.025em !important;
 }
 
 .sx-action-modal .modal-icon-wrap,
@@ -11737,7 +11743,7 @@ body,
 }
 
 .sx-action-modal.consumption-modal .consumption-source-card.is-selected {
-  background: linear-gradient(180deg, #7A1028, #5E0B1F) !important;
+  background: linear-gradient(180deg, #6F0718, #5E0B1F) !important;
   border-color: transparent !important;
   color: #FFFDF8 !important;
 }
@@ -11795,7 +11801,7 @@ body,
   justify-content: center !important;
   border-radius: 13px !important;
   background: rgba(122,16,40,0.075) !important;
-  color: #7A1028 !important;
+  color: #6F0718 !important;
 }
 
 .sx-action-modal.consumption-modal .consumption-select-title {
@@ -11808,7 +11814,7 @@ body,
 }
 
 .sx-action-modal.consumption-modal .consumption-picker-section {
-  padding: 12px !important;
+  padding: 11px !important;
   border-radius: 22px !important;
   background: rgba(255,253,248,0.50) !important;
 }
@@ -11820,6 +11826,10 @@ body,
 .sx-action-modal.consumption-modal .consumption-chip-row {
   gap: 5px !important;
   padding: 8px 0 6px !important;
+}
+
+.sx-action-modal.consumption-modal .consumption-chip-row .consumption-filter-chip:nth-child(n+4) {
+  display: none !important;
 }
 
 .sx-action-modal.consumption-modal .consumption-filter-chip {
@@ -11837,7 +11847,7 @@ body,
 }
 
 .sx-action-modal.consumption-modal .consumption-wine-row {
-  min-height: 58px !important;
+  min-height: 56px !important;
   padding: 9px 8px !important;
   border-radius: 16px !important;
   border-bottom: 0 !important;
@@ -11885,5 +11895,41 @@ body,
 }
 
 .sx-action-modal.consumption-modal .modal-btn-primary:not(:disabled) {
-  background: linear-gradient(180deg, #7A1028, #5E0B1F 100%) !important;
+  background: linear-gradient(135deg, #8A132A 0%, #6F0718 56%, #2A0710 100%) !important;
+}
+
+/* Final premium direction: reduce helper copy and card-library density in action flows. */
+.sx-action-modal .sx-label {
+  font-size: 9px !important;
+  letter-spacing: 0.13em !important;
+  color: rgba(117,107,99,0.62) !important;
+}
+
+.sx-action-modal .modal-action-card {
+  min-height: 52px !important;
+  border: 0 !important;
+  background: rgba(255,253,248,0.58) !important;
+}
+
+.sx-action-modal .modal-action-icon-wrap,
+.sx-action-modal .modal-action-icon {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 12px !important;
+}
+
+.harmonizar-modal .harmonizar-option {
+  min-height: 54px !important;
+  border: 0 !important;
+  background: rgba(255,253,248,0.58) !important;
+  box-shadow: none !important;
+}
+
+.harmonizar-modal .harmonizar-option-title {
+  font-size: 13px !important;
+  font-weight: 560 !important;
+}
+
+.analyze-carta-modal .carta-loading-sub {
+  display: none !important;
 }

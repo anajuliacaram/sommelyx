@@ -534,7 +534,7 @@ export function PremiumChoiceCard({
 }: {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   title: string;
-  description: string;
+  description?: string;
   onClick: () => void;
   selected?: boolean;
   accent?: "wine" | "gold";
@@ -570,7 +570,11 @@ export function PremiumChoiceCard({
         </div>
         <div className="min-w-0 flex-1">
           <p className="harmonizar-option-title text-[13px] font-medium tracking-[-0.01em] text-[#1A1713]">{title}</p>
-          <p className="harmonizar-option-subtitle mt-0.5 text-[11px] leading-[1.4] text-[rgba(58,51,39,0.62)]">{description}</p>
+          {description ? (
+            <p className="harmonizar-option-subtitle mt-0.5 text-[11px] leading-[1.4] text-[rgba(58,51,39,0.62)]">
+              {description}
+            </p>
+          ) : null}
         </div>
       </div>
     </motion.button>

@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import { Button } from "@/components/ui/button";
 import { Upload, Check, AlertTriangle, X, FileSpreadsheet, Loader2, Search } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
@@ -3231,8 +3231,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
-      <SheetContent
+    <ActionDialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+      <ActionDialogContent
         className={cn(
           AI_MODAL_SHEET_CONTENT_CLASSNAME,
           hasDraftRows &&
@@ -3268,14 +3268,9 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 <FileSpreadsheet className="h-[18px] w-[18px]" />
               </div>
               <div className="min-w-0">
-                <SheetTitle className="text-[18px] font-medium leading-tight tracking-[-0.018em] text-[#1C1410]">
+                <ActionDialogTitle className="text-[18px] font-medium leading-tight tracking-[-0.018em] text-[#1C1410]">
                   {hasDraftRows ? "Revisar importação" : "Importar vinhos"}
-                </SheetTitle>
-                <SheetDescription className="mt-0.5 text-[13px] font-normal leading-5 tracking-tight text-[#7A726A]">
-                  {hasDraftRows
-                    ? `${draftWines.length} linha(s) carregadas.`
-                    : "CSV, Excel, PDF, texto ou imagem."}
-                </SheetDescription>
+                </ActionDialogTitle>
               </div>
             </div>
             {hasDraftRows ? (
@@ -3689,7 +3684,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
             ))}
           </datalist>
         </AiModalShell>
-      </SheetContent>
-    </Sheet>
+      </ActionDialogContent>
+    </ActionDialog>
   );
 }

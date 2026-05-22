@@ -306,7 +306,6 @@ export default function PersonalDashboard() {
                   compact
                 />
                 <div className="home-wine-hero-body">
-                  <div className="home-wine-hero-kicker">Insight do dia</div>
                   <h3 className="home-wine-hero-name sx-wine-name">{w.name}</h3>
                   <p className="home-wine-hero-meta">
                     {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Vinho da adega"}

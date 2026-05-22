@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { ActionDialog, ActionDialogContent, ActionDialogTitle } from "@/components/ai-flow/ActionDialog";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, Check, RotateCcw } from "@/icons/lucide";
 import { useToast } from "@/hooks/use-toast";
@@ -563,13 +563,13 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     : [];
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent
+    <ActionDialog open={open} onOpenChange={handleClose}>
+      <ActionDialogContent
         className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label="Escanear Rótulo"
       >
-        <SheetTitle className="sr-only">Escanear Rótulo</SheetTitle>
+        <ActionDialogTitle className="sr-only">Escanear Rótulo</ActionDialogTitle>
         <AiModalShell>
         <AiModalHeaderBar>
           <AiModalHeader
@@ -595,7 +595,6 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
                   <AiUploadPanel
                     icon={<Camera className="h-5 w-5" />}
                     title="Enviar rótulo"
-                    description="Foto ou imagem."
                     onClick={() => cameraInputRef.current?.click()}
                   />
 
@@ -730,8 +729,8 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
           </AiModalSplitLayout>
         </AiModalBody>
         </AiModalShell>
-      </SheetContent>
-    </Sheet>
+      </ActionDialogContent>
+    </ActionDialog>
   );
 }
 
