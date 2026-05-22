@@ -1,98 +1,139 @@
 import { motion } from "framer-motion";
-import { BookOpen, GlassWater, Sparkles, Wine } from "@/icons/lucide";
-import { designSystem } from "@/styles/designSystem";
+import { BookOpen, ChefHat, GlassWater, Search, Sparkles, Wine } from "@/icons/lucide";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 } as const,
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.46, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { delay: i * 0.07, duration: 0.48, ease: [0.22, 1, 0.36, 1] as const },
   }),
 } as const;
 
-const scenes = [
+const promiseCards = [
   {
     icon: Wine,
     label: "Adega",
-    title: "A próxima garrafa aparece sem procurar demais.",
-    lines: ["Brunello di Montalcino 2018", "janela ideal", "2 garrafas"],
+    title: "Acompanhe sua adega",
+    copy: "Veja o que está pronto para abrir, o que deve esperar e o que vale repor.",
   },
   {
     icon: BookOpen,
     label: "Carta",
-    title: "Uma lista externa vira leitura de serviço.",
-    lines: ["Menu de inverno", "12 rótulos reconhecidos", "3 ausências relevantes"],
+    title: "Leia cartas com mais clareza",
+    copy: "Transforme menus e listas externas em escolhas mais fáceis.",
   },
   {
     icon: GlassWater,
     label: "Mesa",
-    title: "A harmonização fecha o ciclo com naturalidade.",
-    lines: ["Risoto de funghi", "Barolo Riserva", "96% de aderência"],
+    title: "Harmonize com naturalidade",
+    copy: "Encontre combinações para o prato, a ocasião e o estilo do vinho.",
+  },
+];
+
+const experienceCards = [
+  {
+    icon: Wine,
+    label: "Adega",
+    title: "Garrafas no tempo certo.",
+    copy: "Organize rótulos, quantidades e momentos de consumo sem perder a personalidade da sua adega.",
+  },
+  {
+    icon: ChefHat,
+    label: "Harmonização",
+    title: "Mesa e garrafa conversam.",
+    copy: "Parta do prato, da ocasião ou do vinho que você quer abrir.",
+  },
+  {
+    icon: Search,
+    label: "Carta",
+    title: "Cartas ficam mais legíveis.",
+    copy: "Use fotos, PDFs e menus para entender opções sem atravessar listas intermináveis.",
   },
 ];
 
 export function LandingShowcase() {
   return (
-    <section id="features" className="relative z-10 px-5 py-12 sm:px-8 sm:py-16">
-      <div className="mx-auto max-w-6xl">
-        <motion.div
-          className="mx-auto max-w-2xl text-center"
-          initial="hidden"
-          animate="visible"
-          variants={fadeUp}
-          custom={0}
-        >
-          <span className="inline-flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-wine">
-            <Sparkles className="h-3.5 w-3.5" />
+    <>
+      <section id="experience" className="landing-promise-section">
+        <div className="landing-section-heading">
+          <motion.p className="landing-kicker" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0}>
             O ambiente Sommelyx
-          </span>
-          <h2 className="mt-3 text-[26px] font-medium leading-[1.08] tracking-[-0.025em] text-[rgba(26,23,19,0.92)] sm:text-[38px]">
-            Menos painel. Mais direção.
-          </h2>
-        </motion.div>
+          </motion.p>
+          <motion.h2 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}>
+            Adega, carta e mesa no mesmo fluxo.
+          </motion.h2>
+        </div>
 
-        <div className="mt-9 grid grid-cols-1 gap-3 lg:grid-cols-3 lg:gap-4">
-          {scenes.map((scene, index) => (
+        <div className="landing-promise-grid">
+          {promiseCards.map((card, index) => (
             <motion.article
-              key={scene.label}
+              key={card.label}
+              className="landing-note-card"
               initial="hidden"
-              animate="visible"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
               variants={fadeUp}
-              custom={index + 1}
-              className="group min-h-[260px] rounded-[28px] p-5 sm:p-6"
-              style={designSystem.glassCard}
+              custom={index + 2}
             >
-              <div className="flex h-full flex-col justify-between gap-8">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[rgba(58,51,39,0.48)]">
-                    {scene.label}
-                  </p>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/36 text-wine shadow-[inset_0_1px_0_rgba(255,255,255,0.52)] transition-transform duration-300 group-hover:-translate-y-0.5">
-                    <scene.icon className="h-4 w-4" strokeWidth={1.8} />
-                  </div>
-                </div>
-
-                <h3
-                  className="font-serif text-[22px] font-medium leading-[1.18] tracking-[-0.02em] text-[rgba(26,23,19,0.88)]"
-                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
-                >
-                  {scene.title}
-                </h3>
-
-                <div className="space-y-2 border-t border-black/[0.045] pt-4">
-                  {scene.lines.map((line) => (
-                    <div key={line} className="flex items-center justify-between gap-3 text-[12px]">
-                      <span className="truncate font-medium text-[rgba(58,51,39,0.68)]">{line}</span>
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-wine/45" />
-                    </div>
-                  ))}
-                </div>
+              <div className="landing-note-top">
+                <span>{card.label}</span>
+                <card.icon className="h-4 w-4" />
               </div>
+              <h3>{card.title}</h3>
+              <p className="landing-note-copy">{card.copy}</p>
             </motion.article>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section className="landing-experience-section">
+        <div className="landing-section-heading align-left">
+          <p className="landing-kicker">Da adega à mesa</p>
+          <h2>Escolher melhor começa antes da taça.</h2>
+        </div>
+
+        <div className="landing-experience-grid">
+          {experienceCards.map((card) => (
+            <article key={card.label} className="landing-experience-card">
+              <div className="landing-experience-icon"><card.icon className="h-5 w-5" /></div>
+              <p>{card.label}</p>
+              <h3>{card.title}</h3>
+              <span>{card.copy}</span>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="product" className="landing-product-section">
+        <div className="landing-product-inner">
+          <div className="landing-product-copy">
+            <p className="landing-kicker">Insight do dia</p>
+            <h2>Abra no tempo certo.</h2>
+            <p>
+              Sommelyx destaca a garrafa que merece atenção agora, com contexto para decidir sem pressa.
+            </p>
+          </div>
+
+          <div className="landing-product-scene">
+            <div className="landing-product-panel">
+              <div className="landing-product-header">
+                <span>Insight do dia</span>
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <h3>Abra este rótulo hoje</h3>
+              <p>Brunello 2018 está em boa janela para uma refeição de inverno.</p>
+              <div className="landing-product-actions">
+                <span>Abrir garrafa</span>
+                <span>Harmonizar</span>
+                <span>Guardar</span>
+              </div>
+            </div>
+            <div className="landing-product-float one">Janela ideal</div>
+            <div className="landing-product-float two">Adega atualizada</div>
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

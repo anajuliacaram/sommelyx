@@ -35,11 +35,11 @@ export default function Landing() {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         description:
-          "Sommelyx é uma plataforma de gestão de vinhos para adegas pessoais e comerciais, com IA para leitura de rótulos, análise de cartas e harmonização.",
+          "Sommelyx é uma experiência premium para organizar adegas, ler cartas e decidir harmonizações com curadoria.",
         featureList: [
           "Wine label scanning",
           "Wine list analysis",
-          "AI pairing recommendations",
+          "Pairing recommendations",
           "Personal and commercial cellar management",
           "CSV, PDF, image and text import",
         ],
@@ -55,7 +55,7 @@ export default function Landing() {
         "@type": "Product",
         name: "Sommelyx",
         description:
-          "Wine management platform with AI-powered label scanning, wine list analysis, pairing recommendations, and cellar control.",
+          "Premium wine companion for cellar organization, wine list analysis, pairing recommendations, and cellar control.",
         brand: {
           "@type": "Brand",
           name: "Sommelyx",
@@ -111,7 +111,7 @@ export default function Landing() {
         <LandingShowcase />
         <LandingPricing onSignup={handleStartFreeClick} />
       </main>
-      <LandingFooter onLogin={handleLoginClick} />
+      <LandingFooter onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
     </div>
   );
 }
