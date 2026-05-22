@@ -55,13 +55,13 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
   }, [entries]);
 
   return (
-    <section className="consumption-journal rounded-[28px] bg-[rgba(255,253,248,0.58)] p-5 shadow-none md:p-6">
-      <div className="mb-4 flex items-center justify-between gap-4">
+    <section className="consumption-journal rounded-[28px] bg-[rgba(255,253,248,0.58)] p-4 shadow-none md:p-6">
+      <div className="mb-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[rgba(26,23,19,0.5)]">
             Meu Consumo
           </p>
-          <h2 className="mt-1 font-serif text-[1.45rem] font-semibold leading-[0.98] tracking-[-0.04em] text-[#1A1713] md:text-[1.6rem]">
+          <h2 className="mt-1 font-serif text-[1.2rem] font-medium leading-[1.02] tracking-[-0.035em] text-[#1A1713] md:text-[1.45rem]">
             {title}
           </h2>
         </div>
@@ -77,10 +77,10 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3">
           {months.map((month) => (
             <div key={month.key}>
-              <div className="mb-3 flex items-center gap-2.5">
+              <div className="mb-2.5 flex items-center gap-2.5">
                 <span className="font-semibold text-[12px] tracking-[-0.01em] text-[var(--sx-bordeaux)]">
                   {month.label}
                 </span>
@@ -89,7 +89,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2">
                 {month.events.map((entry, index) => {
                   const date = new Date(entry.consumed_at);
                   const styleSource =
@@ -102,9 +102,9 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       key={entry.id}
                       onClick={() => !isDemo && setEditing(entry)}
                       disabled={isDemo}
-                      className="group flex items-center gap-3 rounded-[20px] bg-[rgba(255,253,248,0.66)] px-3 py-3 text-left transition-colors hover:bg-[rgba(255,253,248,0.9)] disabled:cursor-default"
+                      className="group flex items-center gap-2.5 rounded-[20px] bg-[rgba(255,253,248,0.66)] px-3 py-2.5 text-left transition-colors hover:bg-[rgba(255,253,248,0.9)] disabled:cursor-default"
                     >
-                      <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-[16px] bg-[rgba(232,221,207,0.54)] text-center">
+                      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[15px] bg-[rgba(232,221,207,0.54)] text-center">
                         <span className="font-sans text-[15px] font-semibold leading-none tracking-[-0.04em] text-[#1A1713] tabular-nums">
                           {date.getDate()}
                         </span>
@@ -122,7 +122,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 font-serif text-[16px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#1A1713]">
+                        <div className="flex items-center gap-1.5 font-serif text-[15px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#1A1713]">
                           <span className="min-w-0 truncate leading-[1.15]">{entry.wine_name}</span>
                         </div>
                         <div className="mt-0.5 truncate text-[11px] leading-[1.25] text-[rgba(26,23,19,0.55)]">

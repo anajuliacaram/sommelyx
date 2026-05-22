@@ -1145,7 +1145,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
               variant="ghost"
               size="sm"
               onClick={goBack}
-              className="-mt-1 h-7 px-1.5 text-[10px] font-medium text-[#6B6258] hover:text-[#1A1713] sm:h-8 sm:px-2 sm:text-[11px]"
+              className="harmonizar-back-inline"
             >
               <ArrowLeft className="h-3.5 w-3.5 mr-1" />
               Voltar

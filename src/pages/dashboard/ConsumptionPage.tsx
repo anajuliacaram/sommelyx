@@ -14,7 +14,14 @@ import {
 import { Calendar, Check, ChevronDown, GlassWater, Star, TrendingUp } from "@/icons/lucide";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { ActionDialog, ActionDialogContent } from "@/components/ai-flow/ActionDialog";
+import {
+  AiModalBody,
+  AiModalFooterBar,
+  AiModalHeader,
+  AiModalHeaderBar,
+  AiModalShell,
+} from "@/components/ai-flow/ModalLayout";
 import { cn } from "@/lib/utils";
 
 type PeriodFilter = "all" | "week" | "month" | "year";
@@ -122,51 +129,23 @@ const CountryChoice = memo(function CountryChoice({
 
 function FilterPanel({
   title,
-  mobileTitle,
   description,
-  open,
-  onOpenChange,
-  mobile,
   children,
 }: {
   title: string;
-  mobileTitle: string;
   description?: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  mobile: boolean;
   children: ReactNode;
 }) {
-  if (mobile) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="border-t border-white/50 p-4 pt-5">
-          <SheetHeader className="mb-3 flex-col gap-1">
-            <SheetTitle className="text-[17px] font-semibold tracking-tight text-[#1E1E1E]">
-              {mobileTitle}
-            </SheetTitle>
-            {description ? (
-              <p className="text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
-            ) : null}
-          </SheetHeader>
-          <div className="space-y-2">{children}</div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverContent align="start" sideOffset={10} className="w-[280px] p-3">
-        <div className="mb-2">
-          <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">{title}</p>
-          {description ? (
-            <p className="mt-1 text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
-          ) : null}
-        </div>
-        <div className="space-y-1.5">{children}</div>
-      </PopoverContent>
-    </Popover>
+    <PopoverContent align="start" sideOffset={10} className="w-[280px] p-3">
+      <div className="mb-2">
+        <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">{title}</p>
+        {description ? (
+          <p className="mt-1 text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
+        ) : null}
+      </div>
+      <div className="space-y-1.5">{children}</div>
+    </PopoverContent>
   );
 }
 
@@ -212,9 +191,7 @@ export default function ConsumptionPage() {
   const [isFiltering, setIsFiltering] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const isMobile = useIsMobile();
-  const resultsRef = useRef<HTMLDivElement | null>(null);
   const filterTimeoutRef = useRef<number | null>(null);
-  const scrollTimeoutRef = useRef<number | null>(null);
 
   const countryOptions = useMemo(() => {
     const map = new Map<string, number>();
@@ -483,6 +460,15 @@ export default function ConsumptionPage() {
   }, [filteredEntries, total]);
 
   const lastEntry = filteredEntries[0];
+  const chartDisplayData = useMemo(() => {
+    if (!isMobile || chart.data.length <= 6) return chart.data;
+    const step = chart.data.length > 8 ? 3 : 2;
+    const lastIndex = chart.data.length - 1;
+    return chart.data.map((item, index) => ({
+      ...item,
+      label: index % step === 0 || index === lastIndex ? item.label : "",
+    }));
+  }, [chart.data, isMobile]);
   const filteredEntriesKey = useMemo(
     () => filteredEntries.map((entry) => `${entry.id}:${entry.consumed_at}:${entry.rating ?? ""}`).join("|"),
     [filteredEntries],
@@ -505,20 +491,15 @@ export default function ConsumptionPage() {
     }
 
     if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
-    if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
 
     setIsFiltering(true);
     setDisplayEntries(filteredEntries);
     filterTimeoutRef.current = window.setTimeout(() => {
       setIsFiltering(false);
     }, 120);
-    scrollTimeoutRef.current = window.setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 160);
 
     return () => {
       if (filterTimeoutRef.current) window.clearTimeout(filterTimeoutRef.current);
-      if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
     };
   }, [filteredEntriesKey, hasLoadedOnce]);
 
@@ -536,15 +517,9 @@ export default function ConsumptionPage() {
 
   return (
     <div className="editorial-page consumo-page">
-      <header>
-        <Kicker className="consumo-eyebrow">Histórico pessoal</Kicker>
-        <h1 className="editorial-page-h1 consumo-title mt-1">Meu Consumo</h1>
-        <p
-          className="mt-1 max-w-[560px] text-[12.5px] leading-[1.35]"
-          style={{ color: "rgba(58,51,39,0.6)" }}
-        >
-          Tudo que você abriu nos últimos meses, com ocasiões e ritmo.
-        </p>
+      <header className="consumption-page-header">
+        <Kicker className="consumo-eyebrow">Meu Consumo</Kicker>
+        <h1 className="editorial-page-h1 consumo-title mt-1">Brindes recentes</h1>
       </header>
 
       {/* KPIs */}
@@ -606,7 +581,7 @@ export default function ConsumptionPage() {
       ) : null}
 
       {/* Monthly chart */}
-      <EditorialCard className="consumo-chart-card consumo-chart-wrap" style={{ padding: "18px 20px" }}>
+      <EditorialCard className="consumo-chart-card consumo-chart-wrap">
         <div className="chart-header mb-2 flex items-baseline justify-between">
           <div>
             <Kicker>Ritmo de consumo</Kicker>
@@ -617,9 +592,9 @@ export default function ConsumptionPage() {
           </span>
         </div>
         <Sparkbar
-          data={chart.data}
+          data={chartDisplayData}
           accent="#781323"
-          height={isMobile ? 84 : 100}
+          height={isMobile ? 68 : 100}
           showValues={!isMobile}
           activeIndex={activeChartIndex}
           tooltipIndex={isMobile ? tooltipChartIndex : null}
@@ -627,7 +602,7 @@ export default function ConsumptionPage() {
             setActiveChartIndex(index);
             if (isMobile) setTooltipChartIndex(index);
           }}
-          barWidth={filters.period === "year" ? 6 : 10}
+          barWidth={isMobile ? (chartDisplayData.length > 8 ? 7 : 9) : filters.period === "year" ? 6 : 10}
         />
       </EditorialCard>
 
@@ -638,7 +613,7 @@ export default function ConsumptionPage() {
             type="button"
             onClick={() => setMobileFiltersOpen(true)}
             className={cn(
-              "flex h-[40px] w-full items-center justify-between rounded-[12px] border px-3 text-left text-[13px] font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+              "consumption-filter-trigger flex w-full items-center justify-between border text-left font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
               hasActiveFilters
                 ? "border-[rgba(95,127,82,0.24)] bg-[rgba(95,127,82,0.08)] text-[#213b26]"
                 : "border-[rgba(95,127,82,0.18)] bg-[rgba(255,255,255,0.82)] text-[#1E1E1E]",
@@ -653,90 +628,90 @@ export default function ConsumptionPage() {
             <ChevronDown className={cn("h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out", mobileFiltersOpen && "rotate-180")} />
           </button>
 
-          <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-            <SheetContent side="bottom" className="border-t border-white/50 p-4 pt-5">
-              <SheetHeader className="mb-3 flex-col gap-1">
-                <SheetTitle className="text-[17px] font-semibold tracking-tight text-[#1E1E1E]">
-                  Filtros de consumo
-                </SheetTitle>
-                <p className="text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">
-                  Ajuste período, país e ordenação antes de aplicar.
-                </p>
-              </SheetHeader>
+          <ActionDialog open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+            <ActionDialogContent className="consumption-filter-modal sx-action-modal" aria-label="Filtros de consumo">
+              <AiModalShell>
+                <AiModalHeaderBar>
+                  <AiModalHeader
+                    icon={<Calendar className="h-5 w-5" />}
+                    title="Filtros de consumo"
+                    tone="neutral"
+                  />
+                </AiModalHeaderBar>
 
-              <div className="max-h-[62vh] space-y-4 overflow-y-auto pr-1">
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Período</p>
-                  <div className="space-y-1.5">
-                    {periodOptions.map((opt) => (
-                      <FilterChoice
-                        key={opt.value}
-                        active={draftFilters.period === opt.value}
-                        label={opt.label}
-                        onClick={() => setDraftFilters((current) => ({ ...current, period: opt.value }))}
-                      />
-                    ))}
+                <AiModalBody className="consumption-filter-body">
+                  <div className="consumption-filter-sections">
+                    <div className="consumption-filter-section">
+                      <p className="consumption-filter-section-label">Período</p>
+                      <div className="space-y-1.5">
+                        {periodOptions.map((opt) => (
+                          <FilterChoice
+                            key={opt.value}
+                            active={draftFilters.period === opt.value}
+                            label={opt.label}
+                            onClick={() => setDraftFilters((current) => ({ ...current, period: opt.value }))}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="consumption-filter-section">
+                      <p className="consumption-filter-section-label">País</p>
+                      <div className="space-y-1.5">
+                        <FilterChoice
+                          active={draftFilters.countries.length === 0}
+                          label="Todos"
+                          onClick={() => setDraftFilters((current) => ({ ...current, countries: [] }))}
+                        />
+                        {countryOptions.map((opt) => (
+                          <CountryChoice
+                            key={opt.value}
+                            active={draftFilters.countries.includes(opt.value)}
+                            label={opt.label}
+                            count={opt.count}
+                            onClick={() => toggleCountry(opt.value, "draft")}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="consumption-filter-section">
+                      <p className="consumption-filter-section-label">Ordenar</p>
+                      <div className="space-y-1.5">
+                        {sortOptions.map((opt) => (
+                          <FilterChoice
+                            key={opt.value}
+                            active={draftFilters.sortBy === opt.value}
+                            label={opt.label}
+                            onClick={() => setDraftFilters((current) => ({ ...current, sortBy: opt.value }))}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </AiModalBody>
 
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">País</p>
-                  <div className="space-y-1.5">
-                    <FilterChoice
-                      active={draftFilters.countries.length === 0}
-                      label="Todos"
-                      onClick={() => setDraftFilters((current) => ({ ...current, countries: [] }))}
-                    />
-                    {countryOptions.map((opt) => (
-                      <CountryChoice
-                        key={opt.value}
-                        active={draftFilters.countries.includes(opt.value)}
-                        label={opt.label}
-                        count={opt.count}
-                        onClick={() => toggleCountry(opt.value, "draft")}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Ordenar</p>
-                  <div className="space-y-1.5">
-                    {sortOptions.map((opt) => (
-                      <FilterChoice
-                        key={opt.value}
-                        active={draftFilters.sortBy === opt.value}
-                        label={opt.label}
-                        onClick={() => setDraftFilters((current) => ({ ...current, sortBy: opt.value }))}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 flex gap-2">
-                {hasActiveFilters ? (
+                <AiModalFooterBar className="consumption-filter-footer">
+                  {hasActiveFilters ? (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="consumption-filter-clear"
+                    >
+                      Limpar
+                    </button>
+                  ) : null}
                   <button
                     type="button"
-                    onClick={clearFilters}
-                    className="h-11 flex-1 rounded-[10px] border border-[rgba(95,127,82,0.18)] bg-white/75 px-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:bg-white"
+                    onClick={applyDraftFilters}
+                    className="consumption-filter-apply"
                   >
-                    Limpar
+                    Aplicar
                   </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={applyDraftFilters}
-                  className={cn(
-                    "h-11 rounded-[10px] bg-[#7a2c34] px-4 text-[12px] font-semibold uppercase tracking-[0.08em] text-white transition-all duration-150 ease-out hover:-translate-y-px hover:bg-[#5a1e24]",
-                    hasActiveFilters ? "flex-1" : "w-full",
-                  )}
-                >
-                  Aplicar
-                </button>
-              </div>
-            </SheetContent>
-          </Sheet>
+                </AiModalFooterBar>
+              </AiModalShell>
+            </ActionDialogContent>
+          </ActionDialog>
         </div>
       ) : (
         <div className="grid gap-2 md:grid-cols-3">
@@ -826,7 +801,6 @@ export default function ConsumptionPage() {
                   <PopoverTrigger asChild>{trigger}</PopoverTrigger>
                   <FilterPanel
                     title={box.title}
-                    mobileTitle={box.title}
                     description={
                       box.kind === "period"
                         ? "Escolha a janela de análise."
@@ -834,9 +808,6 @@ export default function ConsumptionPage() {
                           ? "Selecione um ou mais países."
                           : "Escolha a ordem da lista."
                     }
-                    open={open}
-                    onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}
-                    mobile={false}
                   >
                     <div className="space-y-1.5">{options}</div>
                   </FilterPanel>
@@ -862,7 +833,7 @@ export default function ConsumptionPage() {
         </div>
       ) : null}
 
-      <div ref={resultsRef} className={cn("transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
+      <div className={cn("transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
         {isFiltering ? (
           <EditorialCard style={{ padding: "14px 14px 12px" }}>
             <div className="space-y-3">
@@ -896,7 +867,7 @@ export default function ConsumptionPage() {
             </div>
           </EditorialCard>
         ) : (
-          <ConsumptionTimeline entries={displayEntries} />
+          <ConsumptionTimeline entries={displayEntries} title="Registros" />
         )}
       </div>
     </div>

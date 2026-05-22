@@ -81,26 +81,26 @@ export function AppSidebar() {
           boxShadow: "none",
         }}
       >
-        <SidebarHeader className="px-0 pt-3">
+        <SidebarHeader className="px-0 pt-2">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="mx-3 mt-0 flex items-center gap-3 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-[18px] py-4 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
+            className="mx-2.5 mt-0 flex items-center gap-2.5 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-3 py-3 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
             aria-label="Ir para o início do dashboard"
           >
-            <img src="/logo-sommelyx-mark.png" className="h-11 w-11 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]" alt="Sommelyx" />
+            <img src="/logo-sommelyx-mark.png" className="h-9 w-9 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]" alt="Sommelyx" />
 
             <div className="flex min-w-0 flex-col text-left">
-              <BrandName tone="light" className="text-[18px] font-medium leading-none tracking-[-0.01em]" />
+              <BrandName tone="light" className="text-[16px] font-medium leading-none tracking-[-0.01em]" />
 
-              <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-white/65">
+              <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
                 {isCommercial ? "COMERCIAL" : "PESSOAL"}
               </span>
             </div>
           </Link>
 
           {/* CTAs */}
-          <div className="mx-3 my-2">
+          <div className="mx-2.5 my-2">
             {isCommercial ? (
               <div className="sidebar-actions flex flex-col gap-0.5 rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
                 <Button
@@ -147,7 +147,7 @@ export function AppSidebar() {
 
         <SidebarContent className="gap-0 px-0 pt-1">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="mb-1.5 mt-4 px-5 text-[10px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
+            <SidebarGroupLabel className="mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -174,7 +174,7 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-0 py-0">
-            <SidebarGroupLabel className="mb-1.5 mt-4 px-5 text-[10px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
+            <SidebarGroupLabel className="mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
