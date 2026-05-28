@@ -4,8 +4,11 @@
 
 import { useMemo, useState } from "react";
 import {
+  CircleDollarSign,
+  Clock,
   GlassWater,
   Plus,
+  ShieldCheck,
   Sparkles,
   Wine as WineIcon,
 } from "@/icons/lucide";
@@ -21,6 +24,7 @@ import {
 } from "@/components/editorial/EditorialPrimitives";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWineMetrics } from "@/hooks/useWines";
+import { useConsumption } from "@/hooks/useConsumption";
 
 function getDayOfYear(date: Date) {
   const start = new Date(date.getFullYear(), 0, 0);
@@ -32,7 +36,8 @@ export default function PersonalDashboard() {
   const { user } = useAuth();
   const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
 
-  const { totalBottles, drinkNow, wines } = useWineMetrics();
+  const { totalBottles, totalValue, drinkNow, lowStock, wines } = useWineMetrics();
+  const { data: consumptionEntries = [] } = useConsumption();
 
   const [addOpen, setAddOpen] = useState(false);
   const [dishToWineOpen, setDishToWineOpen] = useState(false);
@@ -97,6 +102,51 @@ export default function PersonalDashboard() {
       })()
     : "Cadastre algumas garrafas para receber sugestões diárias.";
 
+  const readyWines = useMemo(() => {
+    return wines
+      .filter((wine) => wine.quantity > 0)
+      .map((wine) => {
+        const drinkWindow = resolveSuggestedDrinkWindow(wine);
+        const classification = classifyDrinkWindow({
+          current: currentYear,
+          from: drinkWindow.from,
+          until: drinkWindow.until,
+        });
+        const priority = classification.status === "now" ? 0 : classification.status === "soon" ? 1 : 2;
+        const value = Number(wine.current_value ?? wine.purchase_price ?? 0);
+        return { wine, classification, priority, value };
+      })
+      .sort((a, b) => {
+        if (a.priority !== b.priority) return a.priority - b.priority;
+        if (b.value !== a.value) return b.value - a.value;
+        return a.wine.name.localeCompare(b.wine.name, "pt-BR");
+      })
+      .slice(0, 3);
+  }, [wines, currentYear]);
+
+  const recentToasts = useMemo(() => consumptionEntries.slice(0, 3), [consumptionEntries]);
+
+  const formattedTotalValue = totalValue > 0
+    ? totalValue.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      })
+    : "R$ 0";
+
+  const formatWineMeta = (wine: {
+    producer?: string | null;
+    region?: string | null;
+    country?: string | null;
+    vintage?: number | null;
+  }) => [wine.producer, wine.vintage, wine.region ?? wine.country].filter(Boolean).join(" · ");
+
+  const formatDate = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "sem data";
+    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  };
+
   return (
     <>
       {showOnboarding && (
@@ -144,47 +194,114 @@ export default function PersonalDashboard() {
             </div>
           </div>
 
-          <button
-            type="button"
-            className="daily-insight-card daily-insight-card-mobile group flex w-full items-start gap-3 text-left"
-            disabled={!insightWine}
-            onClick={() => {
-              if (!insightWine) return;
-              setPairingInitialWineId(insightWine.id);
-              setDishToWineOpen(true);
-            }}
-          >
-            <div className="daily-insight-icon">
-              <Sparkles className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <Kicker>Insight do dia</Kicker>
-              {insightWine ? (
-                <>
-                  <p className="daily-insight-action">{insightReason}</p>
-                  <p className="daily-insight-name">{insightWine.name}</p>
-                  <p className="daily-insight-copy">
-                    Boa escolha para acompanhar sua próxima refeição.
-                  </p>
-                </>
-              ) : (
-                <p className="daily-insight-empty">{insightReason}</p>
-              )}
-            </div>
-          </button>
+          <div className="overview-command-grid">
+            <div className="overview-main-column">
+              <button
+                type="button"
+                className="daily-insight-card daily-insight-card-mobile group flex items-start gap-3 text-left"
+                disabled={!insightWine}
+                onClick={() => {
+                  if (!insightWine) return;
+                  setPairingInitialWineId(insightWine.id);
+                  setDishToWineOpen(true);
+                }}
+              >
+                <div className="daily-insight-icon">
+                  <Sparkles className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <Kicker>Insight do dia</Kicker>
+                  {insightWine ? (
+                    <>
+                      <p className="daily-insight-action">{insightReason}</p>
+                      <p className="daily-insight-name">{insightWine.name}</p>
+                      <p className="daily-insight-copy">
+                        {formatWineMeta(insightWine) || "Boa escolha para acompanhar sua próxima refeição."}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="daily-insight-empty">{insightReason}</p>
+                  )}
+                </div>
+              </button>
 
-          <div className="home-summary-strip">
-            {[
-              { label: "garrafas", value: totalBottles.toLocaleString("pt-BR"), icon: WineIcon },
-              { label: "beber agora", value: String(drinkNow), icon: GlassWater },
-              { label: "em guarda", value: String(inGuard), icon: Sparkles },
-            ].map((metric) => (
-              <div key={metric.label} className="home-summary-item">
-                <metric.icon className="home-summary-icon" />
-                <span className="home-summary-value">{metric.value}</span>
-                <span className="home-summary-label">{metric.label}</span>
+              <section className="overview-panel overview-ready-panel">
+                <div className="overview-panel-head">
+                  <div>
+                    <p className="overview-panel-kicker">Próximas garrafas</p>
+                    <h2>Para abrir com calma</h2>
+                  </div>
+                  <span>{readyWines.length} rótulos</span>
+                </div>
+                <div className="overview-ready-list">
+                  {readyWines.length > 0 ? readyWines.map(({ wine, classification }) => (
+                    <button
+                      type="button"
+                      key={wine.id}
+                      className="overview-wine-row"
+                      onClick={() => {
+                        setPreSelectedWine(wine);
+                        setConsumptionOpen(true);
+                      }}
+                    >
+                      <span className="overview-wine-mark"><WineIcon className="h-4 w-4" /></span>
+                      <span className="overview-wine-copy">
+                        <strong>{wine.name}</strong>
+                        <small>{formatWineMeta(wine) || wine.style || "Rótulo da adega"}</small>
+                      </span>
+                      <span className="overview-wine-status">{classification.label}</span>
+                    </button>
+                  )) : (
+                    <div className="overview-empty-line">Cadastre garrafas para acompanhar o momento de abrir.</div>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <aside className="overview-side-column">
+              <div className="home-summary-strip overview-summary-grid">
+                {[
+                  { label: "garrafas", value: totalBottles.toLocaleString("pt-BR"), icon: WineIcon },
+                  { label: "beber agora", value: String(drinkNow), icon: GlassWater },
+                  { label: "em guarda", value: String(inGuard), icon: ShieldCheck },
+                  { label: "valor estimado", value: formattedTotalValue, icon: CircleDollarSign },
+                ].map((metric) => (
+                  <div key={metric.label} className="home-summary-item">
+                    <metric.icon className="home-summary-icon" />
+                    <span className="home-summary-value">{metric.value}</span>
+                    <span className="home-summary-label">{metric.label}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+
+              <section className="overview-panel overview-toast-panel">
+                <div className="overview-panel-head">
+                  <div>
+                    <p className="overview-panel-kicker">Últimos brindes</p>
+                    <h2>Consumo recente</h2>
+                  </div>
+                </div>
+                <div className="overview-toast-list">
+                  {recentToasts.length > 0 ? recentToasts.map((entry) => (
+                    <div key={entry.id} className="overview-toast-row">
+                      <span className="overview-toast-date">{formatDate(entry.consumed_at)}</span>
+                      <span className="overview-toast-copy">
+                        <strong>{entry.wine_name}</strong>
+                        <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Consumo externo" : "Da adega")}</small>
+                      </span>
+                      <span className="overview-toast-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
+                    </div>
+                  )) : (
+                    <div className="overview-empty-line">Registre consumos para formar seu histórico.</div>
+                  )}
+                </div>
+              </section>
+
+              <section className="overview-alert-strip">
+                <Clock className="h-4 w-4" />
+                <span>{lowStock > 0 ? `${lowStock} rótulos com poucas unidades.` : "Adega sem alertas críticos de estoque."}</span>
+              </section>
+            </aside>
           </div>
         </section>
       </div>
