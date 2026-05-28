@@ -254,6 +254,296 @@
   }
 }
 
+/* Editorial premium refinement: materiality, object focus and softer hierarchy. */
+body:not(.landing-page) {
+  background:
+    radial-gradient(circle at 82% -10%, rgba(200, 168, 90, 0.08), transparent 26%),
+    radial-gradient(circle at 6% 2%, rgba(233, 239, 229, 0.56), transparent 30%),
+    linear-gradient(180deg, #F7F2EA 0%, #EFE8DC 100%) !important;
+}
+
+body:not(.landing-page) .dashboard-scroll {
+  background:
+    radial-gradient(circle at 76% 0%, rgba(200, 168, 90, 0.055), transparent 25%),
+    linear-gradient(180deg, rgba(247, 242, 234, 0.98) 0%, rgba(241, 234, 223, 0.98) 100%) !important;
+}
+
+body:not(.landing-page) :is(.premium-home-page.dashboard-root, .cellar-page, .consumo-page) {
+  padding-inline: 0 !important;
+}
+
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] {
+  width: 224px !important;
+  max-width: 224px !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] {
+  width: min(59vw, 232px) !important;
+  max-width: 232px !important;
+}
+
+body:not(.landing-page) :is(.dashboard-shell [data-sidebar="sidebar"], [data-mobile="true"][data-sidebar="sidebar"]) {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(233, 239, 229, 0.58), transparent 36%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96) 0%, rgba(247, 242, 234, 0.96) 100%) !important;
+}
+
+body:not(.landing-page) .sidebar-actions {
+  padding: 5px !important;
+  border-color: rgba(61, 53, 48, 0.08) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 253, 248, 0.78), rgba(241, 234, 223, 0.42)) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .sidebar-item) {
+  min-height: 34px !important;
+  height: 34px !important;
+  border-radius: 13px !important;
+  font-size: 12.35px !important;
+  font-weight: 485 !important;
+}
+
+body:not(.landing-page) .sidebar-action-primary {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.20), transparent 28%),
+    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item) {
+  background: rgba(255, 253, 248, 0.34) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
+body:not(.landing-page) .dashboard-shell .sidebar-item--active,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
+  background:
+    linear-gradient(90deg, rgba(101, 10, 24, 0.070), rgba(255, 253, 248, 0.36)) !important;
+  border-color: rgba(101, 10, 24, 0.08) !important;
+}
+
+body:not(.landing-page) .premium-home-page .overview-greeting-wrap {
+  padding-bottom: 12px !important;
+}
+
+body:not(.landing-page) .overview-command-grid {
+  gap: 13px !important;
+}
+
+body:not(.landing-page) .daily-insight-card {
+  position: relative !important;
+  isolation: isolate !important;
+  width: min(100%, 500px) !important;
+  padding: 20px 20px 19px !important;
+  overflow: hidden !important;
+  border-radius: 32px !important;
+  border-color: rgba(200, 168, 90, 0.16) !important;
+  background:
+    radial-gradient(circle at 86% 12%, rgba(200, 168, 90, 0.17), transparent 25%),
+    radial-gradient(circle at 8% 0%, rgba(255, 253, 248, 0.12), transparent 28%),
+    linear-gradient(135deg, #22040A 0%, #16231B 48%, #263A2B 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.10),
+    0 24px 52px -38px rgba(24, 37, 29, 0.84) !important;
+}
+
+body:not(.landing-page) .daily-insight-card::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto -18% -42% 18% !important;
+  z-index: -1 !important;
+  height: 92px !important;
+  border-radius: 999px !important;
+  background: rgba(200, 168, 90, 0.08) !important;
+  filter: blur(18px) !important;
+}
+
+body:not(.landing-page) .daily-insight-icon {
+  background: rgba(200, 168, 90, 0.12) !important;
+  color: #C8A85A !important;
+}
+
+body:not(.landing-page) .daily-insight-action {
+  margin-top: 8px !important;
+  color: rgba(255, 253, 248, 0.66) !important;
+  font-size: 12.25px !important;
+  line-height: 1.35 !important;
+}
+
+body:not(.landing-page) .daily-insight-name {
+  margin-top: 5px !important;
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: clamp(26px, 2.15vw, 34px) !important;
+  font-weight: 560 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.025em !important;
+}
+
+body:not(.landing-page) .daily-insight-copy,
+body:not(.landing-page) .daily-insight-empty {
+  margin-top: 7px !important;
+  color: rgba(255, 253, 248, 0.58) !important;
+  font-size: 12px !important;
+}
+
+body:not(.landing-page) .home-summary-item {
+  align-content: end !important;
+  min-height: 78px !important;
+  padding: 12px 13px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(233, 239, 229, 0.62), transparent 34%),
+    linear-gradient(145deg, rgba(255, 253, 248, 0.80), rgba(241, 234, 223, 0.56)) !important;
+  border-color: rgba(61, 53, 48, 0.075) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.72),
+    0 14px 34px -34px rgba(34, 4, 10, 0.30) !important;
+}
+
+body:not(.landing-page) .home-summary-icon {
+  opacity: 0.58 !important;
+}
+
+body:not(.landing-page) .home-summary-value {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .home-summary-label {
+  color: rgba(116, 107, 99, 0.78) !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .overview-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 253, 248, 0.78), rgba(241, 234, 223, 0.48)) !important;
+  border-color: rgba(61, 53, 48, 0.075) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.72),
+    0 14px 36px -36px rgba(34, 4, 10, 0.28) !important;
+}
+
+body:not(.landing-page) :is(.overview-wine-row, .overview-toast-row) {
+  background: rgba(255, 253, 248, 0.44) !important;
+  border: 1px solid rgba(61, 53, 48, 0.055) !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.adega-search-wrap, .adega-filter-btn, .chip, .wine-card, .adega-empty),
+body:not(.landing-page) .consumo-page :is(.consumo-stat-card, .consumo-chart-card, .consumo-filter-card, .consumo-list-card, .last-opened-card, .consumo-entry-card) {
+  background:
+    linear-gradient(145deg, rgba(255, 253, 248, 0.78), rgba(241, 234, 223, 0.42)) !important;
+  border-color: rgba(61, 53, 48, 0.075) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.70),
+    0 12px 34px -36px rgba(34, 4, 10, 0.26) !important;
+}
+
+body:not(.landing-page) .cellar-page .wine-card {
+  border-radius: 24px !important;
+  padding: 12px !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.wine-card-image, .wine-card-thumb, .wine-thumb, .bottle-thumb) {
+  border-radius: 18px !important;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(200, 168, 90, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.74), rgba(232, 221, 207, 0.42)) !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.wine-card-name, .adega-wine-name) {
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-weight: 560 !important;
+  letter-spacing: -0.018em !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.chip, .wine-card-tag, .type-chip, .wine-type-chip) {
+  border-color: rgba(61, 53, 48, 0.07) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.btn-abrir, .wine-card-action, .open-wine-button) {
+  min-height: 28px !important;
+  border-radius: 999px !important;
+  background: rgba(233, 239, 229, 0.70) !important;
+  border: 1px solid rgba(38, 58, 43, 0.12) !important;
+  color: #263A2B !important;
+  font-size: 11.5px !important;
+  font-weight: 540 !important;
+}
+
+body:not(.landing-page) .consumo-title {
+  font-size: clamp(25px, 2.3vw, 34px) !important;
+}
+
+body:not(.landing-page) .consumo-chart-card {
+  min-height: 0 !important;
+  padding: 15px !important;
+}
+
+body:not(.landing-page) .consumo-stat-card {
+  min-height: 64px !important;
+}
+
+body:not(.landing-page) .consumo-page :is(.consumo-entry-card, .journal-entry, .consumption-entry) {
+  border-radius: 20px !important;
+  background: rgba(255, 253, 248, 0.48) !important;
+}
+
+body:not(.landing-page) .sx-action-modal {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(200, 168, 90, 0.08), transparent 28%),
+    linear-gradient(180deg, #FFFDF8 0%, #F7F2EA 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 253, 248, 0.74),
+    0 26px 70px rgba(32, 23, 20, 0.20) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .analyze-carta-button, .consumption-section, .consumption-details-card, .consumption-selected-summary, .consumption-select-card, .segment-card) {
+  background:
+    linear-gradient(145deg, rgba(255, 253, 248, 0.82), rgba(241, 234, 223, 0.50)) !important;
+  border-color: rgba(61, 53, 48, 0.075) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title]) {
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-action-button-primary, .consumption-filter-apply) {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.16), transparent 30%),
+    linear-gradient(180deg, #650A18 0%, #4E0712 62%, #22040A 100%) !important;
+}
+
+@media (max-width: 767px) {
+  body:not(.landing-page) .premium-home-page.dashboard-root,
+  body:not(.landing-page) .cellar-page,
+  body:not(.landing-page) .consumo-page {
+    padding-top: 8px !important;
+  }
+
+  body:not(.landing-page) .daily-insight-card {
+    padding: 16px !important;
+    border-radius: 28px !important;
+  }
+
+  body:not(.landing-page) .daily-insight-name {
+    font-size: 25px !important;
+  }
+
+  body:not(.landing-page) .overview-ready-panel {
+    padding: 12px !important;
+  }
+
+  body:not(.landing-page) .cellar-page .wine-card {
+    min-height: 0 !important;
+    padding: 10px !important;
+  }
+
+  body:not(.landing-page) .consumo-title {
+    font-size: 28px !important;
+  }
+}
+
 /* Mobile UI system reset: single app scroll, compact dashboard, premium drawer and action modals. */
 @media (max-width: 767px) {
   html:has(body:not(.landing-page)),
