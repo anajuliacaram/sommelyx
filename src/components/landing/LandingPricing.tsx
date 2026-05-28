@@ -113,21 +113,6 @@ export function LandingPricing({ onSignup }: LandingPricingProps) {
         ))}
       </div>
 
-      <div className="landing-comparison-card">
-        <div>
-        <p>Sommelyx</p>
-        <span>Adega, carta e mesa no mesmo fluxo.</span>
-          <span>Janelas de consumo e histórico em um só lugar.</span>
-          <span>Escolhas mais simples para abrir, guardar ou harmonizar.</span>
-        </div>
-        <div>
-          <p>Apps tradicionais</p>
-          <span>Catálogo ou notas isoladas.</span>
-          <span>Pouco contexto entre adega, carta e mesa.</span>
-          <span>Organização mais próxima de inventário.</span>
-        </div>
-      </div>
-
       <div className="landing-faq-section">
         <div className="landing-section-heading">
           <p className="landing-kicker">Dúvidas</p>

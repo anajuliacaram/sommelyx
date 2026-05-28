@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { BookOpen, ChefHat, GlassWater, Search, Sparkles, Wine } from "@/icons/lucide";
+import { BookOpen, GlassWater, Sparkles, Wine } from "@/icons/lucide";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 22 } as const,
@@ -28,27 +28,6 @@ const promiseCards = [
     label: "Mesa",
     title: "Harmonize com naturalidade",
     copy: "Encontre combinações para o prato, a ocasião e o estilo do vinho.",
-  },
-];
-
-const experienceCards = [
-  {
-    icon: Wine,
-    label: "Adega",
-    title: "Garrafas no tempo certo.",
-    copy: "Organize rótulos, quantidades e momentos de consumo sem perder a personalidade da sua adega.",
-  },
-  {
-    icon: ChefHat,
-    label: "Harmonização",
-    title: "Mesa e garrafa conversam.",
-    copy: "Parta do prato, da ocasião ou do vinho que você quer abrir.",
-  },
-  {
-    icon: Search,
-    label: "Carta",
-    title: "Cartas ficam mais legíveis.",
-    copy: "Use fotos, PDFs e menus para entender opções sem atravessar listas intermináveis.",
   },
 ];
 
@@ -83,24 +62,6 @@ export function LandingShowcase() {
               <h3>{card.title}</h3>
               <p className="landing-note-copy">{card.copy}</p>
             </motion.article>
-          ))}
-        </div>
-      </section>
-
-      <section className="landing-experience-section">
-        <div className="landing-section-heading align-left">
-          <p className="landing-kicker">Da adega à mesa</p>
-          <h2>Escolher melhor começa antes da taça.</h2>
-        </div>
-
-        <div className="landing-experience-grid">
-          {experienceCards.map((card) => (
-            <article key={card.label} className="landing-experience-card">
-              <div className="landing-experience-icon"><card.icon className="h-5 w-5" /></div>
-              <p>{card.label}</p>
-              <h3>{card.title}</h3>
-              <span>{card.copy}</span>
-            </article>
           ))}
         </div>
       </section>
