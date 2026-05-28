@@ -1498,11 +1498,553 @@ body:not(.landing-page) .home-v2-empty {
     width: min(100%, 150px) !important;
   }
 
-  body:not(.landing-page) .home-v2-summary,
-  body:not(.landing-page) .home-v2-section {
+body:not(.landing-page) .home-v2-summary,
+body:not(.landing-page) .home-v2-section {
+  padding: 14px !important;
+}
+
+}
+
+/* Phase 4 — Minha Adega recomposition */
+body:not(.landing-page) .cellar-v2-page {
+  width: 100% !important;
+  padding-block: 0 28px !important;
+}
+
+body:not(.landing-page) .cellar-v2-rail {
+  display: grid !important;
+  gap: 18px !important;
+  padding-top: 14px !important;
+}
+
+body:not(.landing-page) .cellar-v2-header {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+body:not(.landing-page) .cellar-v2-header-copy {
+  min-width: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-kicker {
+  margin-bottom: 6px !important;
+  color: rgba(74, 67, 60, 0.58) !important;
+}
+
+body:not(.landing-page) .cellar-v2-title {
+  color: var(--sx-v2-text) !important;
+  font-size: clamp(2.2rem, 4.4vw, 3.2rem) !important;
+  line-height: 0.96 !important;
+}
+
+body:not(.landing-page) .cellar-v2-subtitle {
+  margin: 10px 0 0 !important;
+  color: rgba(74, 67, 60, 0.72) !important;
+  font-size: 0.95rem !important;
+}
+
+body:not(.landing-page) .cellar-v2-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+}
+
+body:not(.landing-page) .cellar-v2-count {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.62) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  color: rgba(47, 67, 47, 0.78) !important;
+  font-size: 0.8rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .cellar-v2-add-button {
+  min-height: 42px !important;
+  padding-inline: 16px !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary {
+  display: grid !important;
+  gap: 14px !important;
+  padding: 16px !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-head {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-note {
+  margin: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-tile {
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 88px !important;
+  padding: 14px !important;
+  border-radius: 22px !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-label {
+  color: rgba(117, 107, 99, 0.7) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .cellar-v2-summary-value {
+  color: var(--sx-v2-text) !important;
+  font-size: clamp(1.2rem, 2.3vw, 1.65rem) !important;
+  font-weight: 560 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1 !important;
+}
+
+body:not(.landing-page) .cellar-v2-controls {
+  display: grid !important;
+  gap: 12px !important;
+  padding: 14px !important;
+}
+
+body:not(.landing-page) .cellar-v2-search {
+  margin: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-control-row {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  padding: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-btn {
+  min-height: 42px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 253, 248, 0.64) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  box-shadow: none !important;
+  color: var(--sx-v2-text) !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-btn svg {
+  color: var(--sx-v2-olive) !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-btn .filter-label {
+  display: block !important;
+  margin-bottom: 1px !important;
+  color: rgba(117, 107, 99, 0.62) !important;
+  font-size: 0.62rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .cellar-v2-select-content {
+  border-radius: 18px !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  background: rgba(255, 253, 248, 0.96) !important;
+  box-shadow: 0 18px 44px rgba(27, 20, 17, 0.12) !important;
+}
+
+body:not(.landing-page) .cellar-v2-view-toggle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 4px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.62) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+}
+
+body:not(.landing-page) .cellar-v2-view-btn {
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(74, 67, 60, 0.74) !important;
+  font-size: 0.78rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .cellar-v2-view-btn.active {
+  background: rgba(101, 10, 24, 0.1) !important;
+  color: var(--sx-v2-wine) !important;
+}
+
+body:not(.landing-page) .cellar-v2-filters {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 8px !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+
+body:not(.landing-page) .cellar-v2-filters::-webkit-scrollbar {
+  display: none !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-chip {
+  min-height: 31px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.72) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  color: rgba(74, 67, 60, 0.74) !important;
+  font-size: 0.77rem !important;
+  font-weight: 540 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-chip.active,
+body:not(.landing-page) .cellar-v2-filter-chip.active.todos {
+  background: rgba(101, 10, 24, 0.1) !important;
+  border-color: rgba(101, 10, 24, 0.16) !important;
+  color: var(--sx-v2-wine) !important;
+}
+
+body:not(.landing-page) .cellar-v2-filter-chip.active.olive {
+  background: rgba(38, 58, 43, 0.1) !important;
+  border-color: rgba(38, 58, 43, 0.16) !important;
+  color: var(--sx-v2-olive) !important;
+}
+
+body:not(.landing-page) .cellar-v2-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 14px !important;
+  padding: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-card {
+  display: grid !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(198, 168, 90, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.9), rgba(249, 244, 236, 0.82)) !important;
+  box-shadow: 0 18px 38px rgba(27, 20, 17, 0.06) !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-stage {
+  min-height: 198px !important;
+  padding: 16px !important;
+  border-bottom: 1px solid rgba(61, 53, 48, 0.05) !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-image,
+body:not(.landing-page) .cellar-v2-card-image-placeholder {
+  height: 166px !important;
+  max-height: 166px !important;
+  width: 100% !important;
+  background: transparent !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-body {
+  display: grid !important;
+  gap: 8px !important;
+  padding: 14px 14px 16px !important;
+}
+
+body:not(.landing-page) .cellar-v2-drink-badge {
+  justify-self: start !important;
+  margin: 0 !important;
+  font-size: 0.58rem !important;
+  letter-spacing: 0.11em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-name {
+  margin: 0 !important;
+  color: var(--sx-v2-text) !important;
+  font-size: 1.35rem !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.035em !important;
+  text-wrap: balance !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-meta {
+  margin: 0 !important;
+  min-height: 2.5em !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-tags {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-chip,
+body:not(.landing-page) .cellar-v2-row-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 24px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+  font-size: 0.62rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  margin-top: 2px !important;
+}
+
+body:not(.landing-page) .cellar-v2-card-price,
+body:not(.landing-page) .cellar-v2-row-price {
+  color: rgba(74, 67, 60, 0.7) !important;
+  font-size: 0.8rem !important;
+  font-weight: 540 !important;
+}
+
+body:not(.landing-page) .cellar-v2-open {
+  flex-shrink: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-list {
+  display: grid !important;
+  gap: 10px !important;
+  padding: 12px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .cellar-v2-row {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px !important;
+  margin: 0 !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(198, 168, 90, 0.06), transparent 30%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.86), rgba(249, 244, 236, 0.74)) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  box-shadow: 0 12px 24px rgba(27, 20, 17, 0.05) !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-stage {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 72px !important;
+  min-width: 72px !important;
+  height: 86px !important;
+  padding: 8px !important;
+  border-radius: 22px !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-thumb {
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-body {
+  display: grid !important;
+  gap: 6px !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-name {
+  margin: 0 !important;
+  color: var(--sx-v2-text) !important;
+  font-size: 1.28rem !important;
+  line-height: 1 !important;
+  letter-spacing: -0.03em !important;
+  text-wrap: balance !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-meta {
+  margin: 0 !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-tags {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-right {
+  display: grid !important;
+  justify-items: end !important;
+  gap: 6px !important;
+  max-width: 110px !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-year {
+  color: var(--sx-v2-text) !important;
+  font-size: 0.9rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .cellar-v2-row-chevron {
+  color: rgba(117, 107, 99, 0.42) !important;
+}
+
+body:not(.landing-page) .cellar-v2-empty,
+body:not(.landing-page) .cellar-v2-loading {
+  padding: 26px !important;
+}
+
+@media (max-width: 1023px) {
+  body:not(.landing-page) .cellar-v2-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:not(.landing-page) .cellar-v2-page {
+    padding-bottom: calc(30px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-rail {
+    gap: 14px !important;
+    padding-top: 8px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-title {
+    font-size: clamp(2rem, 9vw, 2.55rem) !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-subtitle {
+    font-size: 0.88rem !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-header-actions {
+    justify-content: space-between !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-summary,
+  body:not(.landing-page) .cellar-v2-controls {
     padding: 14px !important;
   }
 
+  body:not(.landing-page) .cellar-v2-control-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-view-toggle {
+    grid-column: 1 / -1 !important;
+    justify-self: start !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-stage {
+    min-height: 154px !important;
+    padding: 12px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-image,
+  body:not(.landing-page) .cellar-v2-card-image-placeholder {
+    height: 126px !important;
+    max-height: 126px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-body {
+    padding: 12px !important;
+    gap: 7px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-name {
+    font-size: 1.08rem !important;
+    line-height: 1.04 !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-meta {
+    font-size: 0.73rem !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-card-footer {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-list {
+    padding: 0 !important;
+    gap: 10px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-row {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-items: start !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-row-right {
+    grid-column: 2 !important;
+    justify-items: start !important;
+    max-width: none !important;
+    grid-auto-flow: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-row-stage {
+    width: 64px !important;
+    min-width: 64px !important;
+    height: 78px !important;
+    border-radius: 20px !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-row-name {
+    font-size: 1.06rem !important;
+  }
+
+  body:not(.landing-page) .cellar-v2-row-chevron {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
   body:not(.landing-page) .home-v2-metrics {
     gap: 8px !important;
   }

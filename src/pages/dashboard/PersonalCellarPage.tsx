@@ -3,7 +3,7 @@
 // Dados reais via Supabase.
 
 import { useMemo, useState, useEffect } from "react";
-import { ArrowUpDown, ChevronRight, Globe, Plus, Search, Star, Wine as WineIcon, X } from "@/icons/lucide";
+import { ArrowUpDown, ChevronRight, Globe, Plus, Search, Wine as WineIcon, X } from "@/icons/lucide";
 
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
@@ -186,6 +186,51 @@ export default function PersonalCellarPage() {
     return sort === "recent" ? "Ordenar" : `Ordenar: ${labels[sort]}`;
   }, [sort]);
 
+  const totalBottles = useMemo(
+    () => wines.reduce((sum, wine) => sum + Math.max(0, Number(wine.quantity) || 0), 0),
+    [wines],
+  );
+
+  const uniqueLabels = wines.length;
+
+  const drinkNowCount = useMemo(
+    () =>
+      wines.reduce((sum, wine) => {
+        const dw = resolveSuggestedDrinkWindow(wine);
+        const status = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until }).status;
+        return status === "now" ? sum + 1 : sum;
+      }, 0),
+    [wines],
+  );
+
+  const agingCount = useMemo(
+    () =>
+      wines.reduce((sum, wine) => {
+        const dw = resolveSuggestedDrinkWindow(wine);
+        const status = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until }).status;
+        return status !== "now" ? sum + 1 : sum;
+      }, 0),
+    [wines],
+  );
+
+  const totalEstimatedValue = useMemo(
+    () =>
+      wines.reduce((sum, wine) => {
+        const unitValue = Number(wine.current_value ?? wine.purchase_price ?? 0);
+        const quantity = Math.max(0, Number(wine.quantity) || 0);
+        return sum + (Number.isFinite(unitValue) ? unitValue * quantity : 0);
+      }, 0),
+    [wines],
+  );
+
+  const formattedEstimatedValue = totalEstimatedValue > 0
+    ? totalEstimatedValue.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+        maximumFractionDigits: 0,
+      })
+    : "R$ 0";
+
   const countryLabel = useMemo(() => {
     const selected = countryOptions.find((option) => option.key === countryFilter)?.label ?? "Todos";
     return countryFilter === "all" ? "País" : `País: ${selected}`;
@@ -199,75 +244,109 @@ export default function PersonalCellarPage() {
 
   const pageHeader = (filteredCount: number) => (
     <>
-      <section className="adega-header">
-        <div className="adega-title-row">
-          <div className="min-w-0">
-            <p className="adega-eyebrow">Adega</p>
-            <h1 className="adega-title">Minha Adega</h1>
-          </div>
-          <span className="adega-count adega-count-badge">
-            <strong>{filteredCount}</strong> / {wines.length} vinhos
-          </span>
+      <section className="cellar-v2-header sx-v2-page-shell">
+        <div className="cellar-v2-header-copy">
+          <p className="cellar-v2-kicker sx-v2-kicker">Adega</p>
+          <h1 className="cellar-v2-title sx-v2-display">Minha Adega</h1>
+          <p className="cellar-v2-subtitle sx-v2-body">
+            {totalBottles} garrafas em {uniqueLabels} rótulos · {formattedEstimatedValue}
+          </p>
+        </div>
+        <div className="cellar-v2-header-actions">
+          <span className="cellar-v2-count">{filteredCount} / {wines.length} vinhos</span>
+          <button type="button" className="sx-v2-btn sx-v2-btn-primary cellar-v2-add-button" onClick={() => setAddOpen(true)} aria-label="Adicionar vinho">
+            <Plus className="h-4 w-4" />
+            <span>Adicionar vinho</span>
+          </button>
         </div>
       </section>
 
-      <div className="overview-search adega-search-wrap">
-        <Search className="adega-search-icon h-4 w-4" />
-        <input
-          className="adega-search-input"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar por nome, produtor, região…"
-        />
-        {query && (
-          <button type="button" onClick={() => setQuery("")} aria-label="Limpar" className="text-[var(--sx-t-muted)]">
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
+      <section className="cellar-v2-summary sx-v2-floating-panel">
+        <div className="cellar-v2-summary-head">
+          <p className="cellar-v2-summary-kicker sx-v2-kicker">Coleção em foco</p>
+          <p className="cellar-v2-summary-note sx-v2-muted">Um panorama calmo da sua adega privada.</p>
+        </div>
+        <div className="cellar-v2-summary-grid">
+          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
+            <span className="cellar-v2-summary-label">Garrafas</span>
+            <strong className="cellar-v2-summary-value">{totalBottles}</strong>
+          </article>
+          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
+            <span className="cellar-v2-summary-label">Rótulos</span>
+            <strong className="cellar-v2-summary-value">{uniqueLabels}</strong>
+          </article>
+          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
+            <span className="cellar-v2-summary-label">Beber agora</span>
+            <strong className="cellar-v2-summary-value">{drinkNowCount}</strong>
+          </article>
+          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
+            <span className="cellar-v2-summary-label">Em guarda</span>
+            <strong className="cellar-v2-summary-value">{agingCount}</strong>
+          </article>
+        </div>
+      </section>
 
-      <div className="adega-controls">
-        <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-          <SelectTrigger aria-label="Ordenar vinhos" className="adega-filter-btn h-auto min-w-0 shadow-none">
-            <ArrowUpDown className="h-3.5 w-3.5 shrink-0 text-[var(--sx-bordeaux)]" />
-            <span className="min-w-0 text-left">
-              <span className="filter-label">Ordenar</span>
-              <span className="block truncate">{sortLabel.replace("Ordenar: ", "")}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recent">Ordenar: Mais recentes</SelectItem>
-            <SelectItem value="value_low">Ordenar: Mais baratos</SelectItem>
-            <SelectItem value="value">Ordenar: Mais caros</SelectItem>
-            <SelectItem value="vintage_old">Ordenar: Safra antiga</SelectItem>
-            <SelectItem value="vintage">Ordenar: Safra nova</SelectItem>
-          </SelectContent>
-        </Select>
+      <section className="cellar-v2-controls sx-v2-floating-panel">
+        <div className="cellar-v2-search overview-search adega-search-wrap">
+          <Search className="adega-search-icon h-4 w-4" />
+          <input
+            className="adega-search-input"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por nome, produtor ou região"
+          />
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Limpar" className="text-[var(--sx-t-muted)]">
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
-        <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-          <SelectTrigger aria-label="Filtrar por país" className="adega-filter-btn h-auto min-w-0 shadow-none">
-            <Globe className="h-3.5 w-3.5 shrink-0 text-[var(--sx-olive)]" />
-            <span className="min-w-0 text-left">
-              <span className="filter-label">País</span>
-              <span className="block truncate">{countryLabel.replace("País: ", "")}</span>
-            </span>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">País</SelectItem>
-            {countryOptions.filter((o) => o.key !== "all").map((option) => (
-              <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="cellar-v2-control-row adega-controls">
+          <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
+            <SelectTrigger aria-label="Ordenar vinhos" className="cellar-v2-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
+              <ArrowUpDown className="h-3.5 w-3.5 shrink-0" />
+              <span className="min-w-0 text-left">
+                <span className="filter-label">Ordenar</span>
+                <span className="block truncate">{sortLabel.replace("Ordenar: ", "")}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent className="cellar-v2-select-content">
+              <SelectItem value="recent">Mais recentes</SelectItem>
+              <SelectItem value="value_low">Mais baratos</SelectItem>
+              <SelectItem value="value">Mais caros</SelectItem>
+              <SelectItem value="vintage_old">Safra antiga</SelectItem>
+              <SelectItem value="vintage">Safra nova</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <button type="button" className="btn-adicionar-adega cellar-add-button" onClick={() => setAddOpen(true)} aria-label="Adicionar vinho">
-          <Plus className="h-3.5 w-3.5" />
-          <span className="cellar-add-full">Adicionar vinho</span>
-          <span className="cellar-add-short">Adicionar</span>
-        </button>
-      </div>
+          <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
+            <SelectTrigger aria-label="Filtrar por país" className="cellar-v2-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
+              <Globe className="h-3.5 w-3.5 shrink-0" />
+              <span className="min-w-0 text-left">
+                <span className="filter-label">País</span>
+                <span className="block truncate">{countryLabel.replace("País: ", "")}</span>
+              </span>
+            </SelectTrigger>
+            <SelectContent className="cellar-v2-select-content">
+              <SelectItem value="all">Todos os países</SelectItem>
+              {countryOptions.filter((o) => o.key !== "all").map((option) => (
+                <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <div className="chips-row adega-filters-row">
+          <div className="cellar-v2-view-toggle">
+            <button type="button" className={`cellar-v2-view-btn ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
+              Grade
+            </button>
+            <button type="button" className={`cellar-v2-view-btn ${view === "list" ? "active" : ""}`} onClick={() => setView("list")}>
+              Lista
+            </button>
+          </div>
+        </div>
+
+        <div className="cellar-v2-filters chips-row adega-filters-row">
         {visibleStyleOptions.map((s) => {
           const styleKey = s.key === "todos" ? "todos" : s.key === "rosé" ? "rose" : s.key;
           return (
@@ -275,37 +354,28 @@ export default function PersonalCellarPage() {
               key={s.key}
               type="button"
               data-style={styleKey}
-              className={`chip adega-filter-chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
+              className={`sx-v2-chip cellar-v2-filter-chip adega-filter-chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
               onClick={() => setStyleFilter(s.key)}
             >
               {s.label}
             </button>
           );
         })}
-      </div>
+        </div>
 
-      {!isMobile && (
-        <div className="chips-row adega-filters-row adega-drink-window-row">
+        <div className="cellar-v2-filters chips-row adega-filters-row adega-drink-window-row">
           {drinkWindowOptions.map((option) => (
             <button
               key={option.key}
               type="button"
-              className={`chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
+              className={`sx-v2-chip cellar-v2-filter-chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
               onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
             >
               {option.label}
             </button>
           ))}
-          <span className="ml-auto inline-flex rounded-[var(--sx-r-pill)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-1">
-            <button className={`chip !border-0 !px-3 ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
-              Grade
-            </button>
-            <button className={`chip !border-0 !px-3 ${view === "list" ? "active" : ""}`} onClick={() => setView("list")}>
-              Lista
-            </button>
-          </span>
         </div>
-      )}
+      </section>
     </>
   );
 
@@ -348,16 +418,17 @@ export default function PersonalCellarPage() {
 
   return (
     <>
-      <div className="editorial-page cellar-page !px-0">
-        {pageHeader(filtered.length)}
+      <div className="editorial-page cellar-page cellar-v2-page sx-v2-page-shell !px-0">
+        <section className="sx-v2-content-rail cellar-v2-rail">
+          {pageHeader(filtered.length)}
 
-        {/* Results */}
-        {isLoading ? (
-          <EditorialCard>
+          {/* Results */}
+          {isLoading ? (
+            <EditorialCard className="cellar-v2-loading sx-v2-matte-panel">
             <p style={{ color: "rgba(58,51,39,0.5)" }}>Carregando adega…</p>
-          </EditorialCard>
-        ) : filtered.length === 0 ? (
-          <PremiumEmptyState
+            </EditorialCard>
+          ) : filtered.length === 0 ? (
+            <PremiumEmptyState
             icon={WineIcon}
             title={wines.length === 0 ? "Sua adega está vazia" : "Nenhum vinho encontrado"}
             description={
@@ -386,52 +457,56 @@ export default function PersonalCellarPage() {
                   }
                 : undefined
             }
-            className="adega-empty"
-          />
-        ) : view === "grid" ? (
-          <div className="adega-grid">
+              className="adega-empty cellar-v2-empty"
+            />
+          ) : view === "grid" ? (
+            <div className="adega-grid cellar-v2-grid">
             {filtered.map((w) => {
               const dw = resolveSuggestedDrinkWindow(w);
               const classification = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until });
               return (
                 <article
                   key={w.id}
-                  className="wine-card wine-card-grid"
+                  className="wine-card wine-card-grid cellar-v2-card sx-v2-collectible-surface"
                   onClick={() => setEditWine(w)}
                 >
-                  {showLabels ? (
-                    <WineLabelPreview
-                      wine={w}
-                      alt={w.name}
-                      className="wine-card-image"
-                      imageClassName="h-full w-full object-contain"
-                      generated={false}
-                      compact
-                    />
-                  ) : (
-                    <div className="wine-card-image-placeholder">
-                      <WineIcon className="h-8 w-8" />
-                    </div>
-                  )}
+                  <div className="cellar-v2-card-stage sx-v2-bottle-stage">
+                    {showLabels ? (
+                      <WineLabelPreview
+                        wine={w}
+                        alt={w.name}
+                        className="wine-card-image cellar-v2-card-image"
+                        imageClassName="h-full w-full object-contain"
+                        generated={false}
+                        compact
+                      />
+                    ) : (
+                      <div className="wine-card-image-placeholder cellar-v2-card-image-placeholder">
+                        <WineIcon className="h-8 w-8" />
+                      </div>
+                    )}
+                  </div>
 
-                  <div className="wine-card-body">
-                    <span className={`drink-badge ${getDrinkBadgeClass(classification.status)}`}>
+                  <div className="wine-card-body cellar-v2-card-body">
+                    <span className={`drink-badge cellar-v2-drink-badge ${getDrinkBadgeClass(classification.status)}`}>
                       {classification.label}
                     </span>
-                    <h3 className="wine-card-name">{w.name}</h3>
-                    <p className="wine-card-vintage">
-                      {[w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Safra NV · Região n/i"}
+                    <h3 className="wine-card-name cellar-v2-card-name sx-v2-wine-title">{w.name}</h3>
+                    <p className="wine-card-vintage cellar-v2-card-meta sx-v2-wine-meta">
+                      {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Produtor e origem n/i"}
                     </p>
-                    <span className={`wine-type-chip ${getWineTypeClass(w.style)}`}>
-                      {getStyleFamily(w.style)}
-                    </span>
-                    <span className="wine-qty-badge">{w.quantity} un.</span>
+                    <div className="cellar-v2-card-tags">
+                      <span className={`wine-type-chip cellar-v2-card-chip ${getWineTypeClass(w.style)}`}>
+                        {getStyleFamily(w.style)}
+                      </span>
+                      <span className="wine-qty-badge cellar-v2-card-chip neutral">{w.quantity} garrafas</span>
+                    </div>
 
-                    <div className="wine-card-footer">
-                      <span className="wine-card-price">{formatWinePrice(w.current_value)}</span>
+                    <div className="wine-card-footer cellar-v2-card-footer">
+                      <span className="wine-card-price cellar-v2-card-price">{formatWinePrice(w.current_value)}</span>
                       <button
                         type="button"
-                        className="btn-abrir-card"
+                        className="btn-abrir-card sx-v2-btn-capsule cellar-v2-open"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenBottle(w);
@@ -445,57 +520,51 @@ export default function PersonalCellarPage() {
                 </article>
               );
             })}
-          </div>
-        ) : (
-          <div className="adega-list">
+            </div>
+          ) : (
+            <div className="adega-list cellar-v2-list sx-v2-floating-panel">
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               return (
-                <div key={w.id} className="wine-card" onClick={() => setEditWine(w)}>
-                  {showLabels ? (
-                    <WineLabelPreview
-                      wine={w}
-                      alt={w.name}
-                      className="wine-card-thumb"
-                      imageClassName="h-full w-full object-contain"
-                      generated={false}
-                      compact
-                    />
-                  ) : (
-                    <div
-                      className="wine-card-thumb"
-                      style={{ background: `${color}14`, color }}
-                    >
-                      <WineIcon className="wine-card-thumb-placeholder h-5 w-5" />
-                    </div>
-                  )}
-                  <div className="wine-card-body">
-                    <h4 className="wine-card-name m-0">{w.name}</h4>
-                    <p className="wine-card-meta">
+                <div key={w.id} className="wine-card cellar-v2-row sx-v2-collectible-surface" onClick={() => setEditWine(w)}>
+                  <div className="cellar-v2-row-stage sx-v2-object-stage">
+                    {showLabels ? (
+                      <WineLabelPreview
+                        wine={w}
+                        alt={w.name}
+                        className="wine-card-thumb cellar-v2-row-thumb"
+                        imageClassName="h-full w-full object-contain"
+                        generated={false}
+                        compact
+                      />
+                    ) : (
+                      <div
+                        className="wine-card-thumb cellar-v2-row-thumb"
+                        style={{ background: `${color}14`, color }}
+                      >
+                        <WineIcon className="wine-card-thumb-placeholder h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="wine-card-body cellar-v2-row-body">
+                    <h4 className="wine-card-name cellar-v2-row-name sx-v2-wine-title m-0">{w.name}</h4>
+                    <p className="wine-card-meta cellar-v2-row-meta sx-v2-wine-meta">
                       {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
-                    <div className="wine-card-tags">
-                      <span className={`wine-card-tag ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
-                      <span className="wine-card-tag neutral">{w.quantity} un.</span>
+                    <div className="wine-card-tags cellar-v2-row-tags">
+                      <span className={`wine-card-tag cellar-v2-row-chip ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
+                      <span className="wine-card-tag cellar-v2-row-chip neutral">{w.quantity} garrafas</span>
                     </div>
                   </div>
-                  <div className="wine-card-right">
-                    {w.vintage && <span className="wine-card-year">{w.vintage}</span>}
-                    {w.current_value != null && <span className="wine-card-price">{formatWinePrice(w.current_value)}</span>}
-                    {w.rating != null && (
-                      <div
-                        className="flex items-center gap-1 text-[11px] font-semibold tabular-nums"
-                        style={{ color: "#B48C3A" }}
-                      >
-                        <Star className="h-3 w-3 fill-current" /> {Number(w.rating).toFixed(1)}
-                      </div>
-                    )}
+                  <div className="wine-card-right cellar-v2-row-right">
+                    {w.vintage && <span className="wine-card-year cellar-v2-row-year">{w.vintage}</span>}
+                    {w.current_value != null && <span className="wine-card-price cellar-v2-row-price">{formatWinePrice(w.current_value)}</span>}
                     <button
                       type="button"
-                      className="editorial-btn-open btn-abrir shrink-0"
+                      className="editorial-btn-open btn-abrir shrink-0 sx-v2-btn-capsule cellar-v2-open"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenBottle(w);
@@ -504,13 +573,14 @@ export default function PersonalCellarPage() {
                     >
                       Abrir
                     </button>
-                    <ChevronRight className="wine-card-chevron h-3.5 w-3.5" />
+                    <ChevronRight className="wine-card-chevron cellar-v2-row-chevron h-3.5 w-3.5" />
                   </div>
                 </div>
               );
             })}
-          </div>
-        )}
+            </div>
+          )}
+        </section>
       </div>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
