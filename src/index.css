@@ -746,6 +746,572 @@ body:not(.landing-page) ::-webkit-scrollbar {
   background: transparent !important;
 }
 
+/* Phase 5 — Meu Consumo recomposition */
+body:not(.landing-page) .consumo-v2-page {
+  width: 100% !important;
+  padding-block: 0 28px !important;
+}
+
+body:not(.landing-page) .consumo-v2-rail {
+  display: grid !important;
+  gap: 18px !important;
+  padding-top: 14px !important;
+}
+
+body:not(.landing-page) .consumo-v2-header {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+body:not(.landing-page) .consumo-v2-header-copy {
+  max-width: 54rem !important;
+}
+
+body:not(.landing-page) .consumo-v2-kicker {
+  margin-bottom: 6px !important;
+  color: rgba(74, 67, 60, 0.58) !important;
+}
+
+body:not(.landing-page) .consumo-v2-title {
+  color: var(--sx-v2-text) !important;
+  font-size: clamp(2.2rem, 4.4vw, 3.2rem) !important;
+  line-height: 0.96 !important;
+}
+
+body:not(.landing-page) .consumo-v2-subtitle {
+  margin: 10px 0 0 !important;
+  color: rgba(74, 67, 60, 0.72) !important;
+  font-size: 0.95rem !important;
+  max-width: 45ch !important;
+}
+
+body:not(.landing-page) .consumo-v2-top {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero {
+  min-height: 290px !important;
+  padding: 22px !important;
+  border-radius: 30px !important;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(200, 168, 90, 0.22), transparent 34%),
+    linear-gradient(145deg, #22040A 0%, #263A2B 56%, #304434 100%) !important;
+  box-shadow: 0 24px 58px rgba(28, 21, 17, 0.18) !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  min-height: 100% !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-kicker {
+  color: var(--sx-v2-gold) !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-time {
+  color: rgba(248, 243, 236, 0.66) !important;
+  font-size: 0.76rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-title {
+  color: #FFF8EF !important;
+  font-size: clamp(2rem, 4vw, 3rem) !important;
+  line-height: 0.96 !important;
+  letter-spacing: -0.04em !important;
+  max-width: 11ch !important;
+  text-wrap: balance !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-meta {
+  color: rgba(248, 243, 236, 0.68) !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-note {
+  max-width: 36ch !important;
+  color: rgba(248, 243, 236, 0.84) !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-foot {
+  margin-top: auto !important;
+  padding-top: 10px !important;
+}
+
+body:not(.landing-page) .consumo-v2-hero-rating {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 248, 239, 0.12) !important;
+  border: 1px solid rgba(255, 248, 239, 0.12) !important;
+  color: var(--sx-v2-gold) !important;
+  font-size: 0.79rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-side {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+body:not(.landing-page) .consumo-v2-stats {
+  padding: 14px !important;
+}
+
+body:not(.landing-page) .consumo-v2-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .consumo-v2-stat {
+  display: grid !important;
+  gap: 6px !important;
+  min-height: 86px !important;
+  padding: 14px !important;
+  border-radius: 22px !important;
+}
+
+body:not(.landing-page) .consumo-v2-stat-label {
+  color: rgba(117, 107, 99, 0.7) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .consumo-v2-stat-value {
+  color: var(--sx-v2-text) !important;
+  font-size: clamp(1.15rem, 2.3vw, 1.5rem) !important;
+  font-weight: 560 !important;
+  line-height: 1 !important;
+  letter-spacing: -0.03em !important;
+}
+
+body:not(.landing-page) .consumo-v2-stat-value--text {
+  font-size: 1rem !important;
+}
+
+body:not(.landing-page) .consumo-v2-chart {
+  padding: 14px !important;
+  border-radius: 28px !important;
+}
+
+body:not(.landing-page) .consumo-v2-chart-head {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+body:not(.landing-page) .consumo-v2-chart-kicker {
+  margin-bottom: 4px !important;
+}
+
+body:not(.landing-page) .consumo-v2-chart-title {
+  margin: 0 !important;
+  color: var(--sx-v2-text) !important;
+  font-size: 1.05rem !important;
+  font-weight: 560 !important;
+  letter-spacing: -0.02em !important;
+}
+
+body:not(.landing-page) .consumo-v2-chart-total {
+  color: rgba(74, 67, 60, 0.64) !important;
+  font-size: 1rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-filters-wrap {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .consumo-v2-filter-trigger {
+  min-height: 58px !important;
+  padding: 10px 14px !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .consumo-v2-active-filters {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 253, 248, 0.52) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+}
+
+body:not(.landing-page) .consumo-v2-active-summary {
+  margin: 0 !important;
+  min-width: 0 !important;
+  flex: 1 !important;
+  color: rgba(74, 67, 60, 0.7) !important;
+  font-size: 0.75rem !important;
+  line-height: 1.3 !important;
+}
+
+body:not(.landing-page) .consumo-v2-filter-clear-inline {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.72) !important;
+  border: 1px solid rgba(47, 67, 47, 0.14) !important;
+  color: var(--sx-v2-olive) !important;
+  font-size: 0.72rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-journal {
+  min-width: 0 !important;
+}
+
+body:not(.landing-page) .consumo-v2-skeleton,
+body:not(.landing-page) .consumo-v2-empty {
+  padding: 16px !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline {
+  padding: 16px !important;
+  border-radius: 30px !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline-head {
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline-kicker {
+  margin: 0 0 4px !important;
+  color: rgba(117, 107, 99, 0.6) !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline-title {
+  margin: 0 !important;
+  color: var(--sx-v2-text) !important;
+  font-family: var(--sx-v2-font-serif) !important;
+  font-size: clamp(1.28rem, 2.4vw, 1.7rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.035em !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline-count {
+  display: inline-flex !important;
+  align-items: center !important;
+  min-height: 30px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.62) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  color: rgba(74, 67, 60, 0.62) !important;
+  font-size: 0.72rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-timeline-empty {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 48px 18px !important;
+  text-align: center !important;
+}
+
+body:not(.landing-page) .consumo-v2-empty-title {
+  margin: 0 !important;
+  font-family: var(--sx-v2-font-serif) !important;
+  font-size: 1rem !important;
+  color: rgba(32, 23, 20, 0.7) !important;
+}
+
+body:not(.landing-page) .consumo-v2-empty-copy {
+  margin: 6px 0 0 !important;
+  font-size: 0.8rem !important;
+  color: rgba(117, 107, 99, 0.72) !important;
+}
+
+body:not(.landing-page) .consumo-v2-months {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+body:not(.landing-page) .consumo-v2-month {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .consumo-v2-month-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+body:not(.landing-page) .consumo-v2-month-label {
+  color: var(--sx-v2-wine) !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+}
+
+body:not(.landing-page) .consumo-v2-month-count {
+  color: rgba(117, 107, 99, 0.58) !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-list {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry {
+  display: grid !important;
+  grid-template-columns: auto auto minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px !important;
+  border-radius: 22px !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(200, 168, 90, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.82), rgba(249, 244, 236, 0.72)) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  box-shadow: 0 10px 22px rgba(27, 20, 17, 0.05) !important;
+  transition: background-color 160ms ease, transform 160ms ease !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry:hover {
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(249, 244, 236, 0.82)) !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-date {
+  display: grid !important;
+  place-items: center !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 52px !important;
+  border-radius: 16px !important;
+  background: rgba(232, 221, 207, 0.46) !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-day {
+  color: var(--sx-v2-text) !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-weekday {
+  color: rgba(117, 107, 99, 0.58) !important;
+  font-size: 0.58rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-line-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-line {
+  display: inline-block !important;
+  width: 3px !important;
+  height: 40px !important;
+  border-radius: 999px !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-copy {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 4px !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-title {
+  display: block !important;
+  color: var(--sx-v2-text) !important;
+  font-family: var(--sx-v2-font-serif) !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  line-height: 1.03 !important;
+  letter-spacing: -0.03em !important;
+  text-wrap: balance !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-meta,
+body:not(.landing-page) .consumo-v2-entry-note {
+  color: rgba(74, 67, 60, 0.68) !important;
+  font-size: 0.78rem !important;
+  line-height: 1.3 !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-side {
+  display: grid !important;
+  justify-items: end !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-rating {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-height: 28px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  background: rgba(200, 168, 90, 0.12) !important;
+  color: #8E6A1E !important;
+  font-size: 0.74rem !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry-edit {
+  width: 14px !important;
+  height: 14px !important;
+  color: rgba(74, 67, 60, 0.28) !important;
+  opacity: 0 !important;
+  transition: opacity 160ms ease !important;
+}
+
+body:not(.landing-page) .consumo-v2-entry:hover .consumo-v2-entry-edit {
+  opacity: 1 !important;
+}
+
+body:not(.landing-page) .consumption-filter-modal {
+  width: min(90vw, 420px) !important;
+  max-height: min(82dvh, 640px) !important;
+  border-radius: 32px !important;
+}
+
+body:not(.landing-page) .consumption-filter-modal .modal-header {
+  padding-bottom: 8px !important;
+}
+
+body:not(.landing-page) .consumption-filter-modal .consumption-filter-body {
+  padding-top: 4px !important;
+  padding-bottom: 8px !important;
+}
+
+body:not(.landing-page) .consumption-filter-section-label {
+  color: rgba(117, 107, 99, 0.62) !important;
+  font-size: 0.62rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.14em !important;
+}
+
+@media (max-width: 1023px) {
+  body:not(.landing-page) .consumo-v2-top {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 767px) {
+  body:not(.landing-page) .consumo-v2-page {
+    padding-bottom: calc(30px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-rail {
+    gap: 14px !important;
+    padding-top: 8px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-title {
+    font-size: clamp(2rem, 9vw, 2.55rem) !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-subtitle {
+    font-size: 0.88rem !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-hero {
+    min-height: 0 !important;
+    padding: 18px !important;
+    border-radius: 28px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-hero-title {
+    max-width: 12ch !important;
+    font-size: clamp(1.7rem, 8vw, 2.1rem) !important;
+    line-height: 0.98 !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-stats,
+  body:not(.landing-page) .consumo-v2-chart,
+  body:not(.landing-page) .consumo-v2-timeline {
+    padding: 14px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-stat {
+    min-height: 78px !important;
+    padding: 12px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-filter-trigger {
+    min-height: 54px !important;
+    padding: 10px 12px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-entry {
+    grid-template-columns: auto auto minmax(0, 1fr) !important;
+    align-items: start !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-entry-side {
+    grid-column: 3 !important;
+    justify-items: start !important;
+    grid-auto-flow: column !important;
+    gap: 10px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-entry-date {
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 48px !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-entry-title {
+    font-size: 1rem !important;
+  }
+
+  body:not(.landing-page) .consumo-v2-entry-meta,
+  body:not(.landing-page) .consumo-v2-entry-note {
+    font-size: 0.74rem !important;
+  }
+}
+
 /* Phase 2 — Sommelyx V2 shell/sidebar migration authority */
 html:has(body:not(.landing-page)),
 body:not(.landing-page),

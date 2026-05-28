@@ -55,91 +55,91 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
   }, [entries]);
 
   return (
-    <section className="consumption-journal rounded-[28px] bg-[rgba(255,253,248,0.58)] p-4 shadow-none md:p-6">
-      <div className="mb-3 flex items-center justify-between gap-4">
+    <section className="consumption-journal consumo-v2-timeline sx-v2-floating-panel">
+      <div className="consumo-v2-timeline-head">
         <div className="min-w-0">
-          <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-[rgba(26,23,19,0.5)]">
-            Meu Consumo
-          </p>
-          <h2 className="mt-1 font-serif text-[1.2rem] font-medium leading-[1.02] tracking-[-0.035em] text-[#1A1713] md:text-[1.45rem]">
-            {title}
-          </h2>
+          <p className="consumo-v2-timeline-kicker">Journal</p>
+          <h2 className="consumo-v2-timeline-title">{title}</h2>
         </div>
+        <span className="consumo-v2-timeline-count">
+          {entries.length} {entries.length === 1 ? "registro" : "registros"}
+        </span>
       </div>
 
       {months.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-14 text-center">
-          <p className="font-serif text-[15px] text-[rgba(26,23,19,0.55)]">
+        <div className="consumo-v2-timeline-empty">
+          <p className="consumo-v2-empty-title">
             Nenhum consumo encontrado neste período
           </p>
-          <p className="mt-1 text-[12px] text-[#7A746B]">
+          <p className="consumo-v2-empty-copy">
             Ajuste os filtros acima para ver mais brindes
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="consumo-v2-months">
           {months.map((month) => (
-            <div key={month.key}>
-              <div className="mb-2.5 flex items-center gap-2.5">
-                <span className="font-semibold text-[12px] tracking-[-0.01em] text-[var(--sx-bordeaux)]">
-                  {month.label}
-                </span>
-                <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-[rgba(117,107,99,0.52)] tabular-nums">
+            <div key={month.key} className="consumo-v2-month">
+              <div className="consumo-v2-month-head">
+                <span className="consumo-v2-month-label">{month.label}</span>
+                <span className="consumo-v2-month-count">
                   {month.events.length} {month.events.length === 1 ? "ABERTURA" : "ABERTURAS"}
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2">
-                {month.events.map((entry, index) => {
+              <div className="consumo-v2-entry-list">
+                {month.events.map((entry) => {
                   const date = new Date(entry.consumed_at);
                   const styleSource =
                     entry.style ?? (entry.wine_id ? wineStyleById.get(entry.wine_id) ?? null : null);
                   const color = styleSource ? getStyleColor(styleSource) : "rgba(95,111,82,0.25)";
                   const isDemo = entry.user_id === "demo";
+                  const meta = [entry.producer, entry.vintage, entry.country].filter(Boolean).join(" · ");
+                  const note = entry.tasting_notes?.trim() || entry.location?.trim() || "";
                   return (
                     <button
                       type="button"
                       key={entry.id}
                       onClick={() => !isDemo && setEditing(entry)}
                       disabled={isDemo}
-                      className="group flex items-center gap-2.5 rounded-[20px] bg-[rgba(255,253,248,0.66)] px-3 py-2.5 text-left transition-colors hover:bg-[rgba(255,253,248,0.9)] disabled:cursor-default"
+                      className="consumo-v2-entry group text-left disabled:cursor-default"
                     >
-                      <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[15px] bg-[rgba(232,221,207,0.54)] text-center">
-                        <span className="font-sans text-[15px] font-semibold leading-none tracking-[-0.04em] text-[#1A1713] tabular-nums">
-                          {date.getDate()}
-                        </span>
-                        <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[rgba(26,23,19,0.45)]">
-                          {getWeekdayLabel(date)}
-                        </span>
+                      <div className="consumo-v2-entry-date">
+                        <span className="consumo-v2-entry-day">{date.getDate()}</span>
+                        <span className="consumo-v2-entry-weekday">{getWeekdayLabel(date)}</span>
                       </div>
 
-                      <div className="flex h-full min-h-[36px] items-center justify-center">
+                      <div className="consumo-v2-entry-line-wrap">
                         <span
                           aria-hidden
-                          className="inline-block h-[34px] w-[3px] rounded-[2px]"
+                          className="consumo-v2-entry-line"
                           style={{ background: color }}
                         />
                       </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 font-serif text-[15px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#1A1713]">
-                          <span className="min-w-0 truncate leading-[1.15]">{entry.wine_name}</span>
+                      <div className="consumo-v2-entry-copy">
+                        <div className="consumo-v2-entry-title-row">
+                          <span className="consumo-v2-entry-title">{entry.wine_name}</span>
                         </div>
-                        <div className="mt-0.5 truncate text-[11px] leading-[1.25] text-[rgba(26,23,19,0.55)]">
-                          {entry.location || entry.tasting_notes || "—"}
-                        </div>
+                        {meta ? (
+                          <div className="consumo-v2-entry-meta">{meta}</div>
+                        ) : null}
+                        {note ? (
+                          <div className="consumo-v2-entry-note">{note}</div>
+                        ) : null}
                       </div>
 
-                      <div className="flex shrink-0 items-center justify-end gap-1.5 rounded-full bg-[rgba(199,168,90,0.10)] px-2 py-1 text-[10px] font-medium text-[#9A7A2C]">
-                        <span className="flex items-center gap-1">
-                          <Star className="h-2.5 w-2.5 fill-current" />
+                      <div className="consumo-v2-entry-side">
+                        <div className="consumo-v2-entry-rating">
+                          <span className="consumo-v2-entry-rating-icon">
+                            <Star className="h-2.5 w-2.5 fill-current" />
+                          </span>
                           <span className="tabular-nums">
                             {entry.rating != null ? formatRating(entry.rating) : "—"}
                           </span>
-                        </span>
+                        </div>
                         {!isDemo && (
                           <Pencil
-                            className="h-3 w-3 text-[rgba(26,23,19,0.3)] opacity-0 transition-opacity group-hover:opacity-100"
+                            className="consumo-v2-entry-edit"
                             aria-hidden
                           />
                         )}

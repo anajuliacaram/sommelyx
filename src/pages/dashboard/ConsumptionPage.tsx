@@ -1,19 +1,17 @@
 // Meu Consumo — perfil Pessoal
 // Design "Editorial" fiel ao design-reference (extras.jsx ConsumptionPage).
 
-import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useConsumption } from "@/hooks/useConsumption";
 import { ConsumptionTimeline } from "@/components/ConsumptionTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   EditorialCard,
-  EditorialKpiCard,
   Kicker,
   Sparkbar,
 } from "@/components/editorial/EditorialPrimitives";
-import { Calendar, Check, ChevronDown, GlassWater, Star, TrendingUp } from "@/icons/lucide";
+import { Calendar, Check, ChevronDown, Star } from "@/icons/lucide";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ActionDialog, ActionDialogContent } from "@/components/ai-flow/ActionDialog";
 import {
   AiModalBody,
@@ -127,28 +125,6 @@ const CountryChoice = memo(function CountryChoice({
   );
 });
 
-function FilterPanel({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description?: string;
-  children: ReactNode;
-}) {
-  return (
-    <PopoverContent align="start" sideOffset={10} className="w-[280px] p-3">
-      <div className="mb-2">
-        <p className="text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">{title}</p>
-        {description ? (
-          <p className="mt-1 text-[11.5px] leading-[1.35] text-[rgba(58,51,39,0.58)]">{description}</p>
-        ) : null}
-      </div>
-      <div className="space-y-1.5">{children}</div>
-    </PopoverContent>
-  );
-}
-
 export default function ConsumptionPage() {
   const { data: rawEntries = EMPTY_CONSUMPTION_ENTRIES, isLoading } = useConsumption();
   const entries = useMemo(() => {
@@ -184,8 +160,7 @@ export default function ConsumptionPage() {
       return defaultFilters;
     }
   });
-  const [openFilter, setOpenFilter] = useState<"period" | "country" | "sort" | null>(null);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState<ConsumptionFilters>(filters);
   const [displayEntries, setDisplayEntries] = useState(entries);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -240,25 +215,19 @@ export default function ConsumptionPage() {
   }, [filters]);
 
   useEffect(() => {
-    if (mobileFiltersOpen) {
+    if (filtersOpen) {
       setDraftFilters(filters);
     }
-  }, [filters, mobileFiltersOpen]);
+  }, [filters, filtersOpen]);
 
   const clearFilters = () => {
     setFilters(defaultFilters);
     setDraftFilters(defaultFilters);
-    setOpenFilter(null);
-    setMobileFiltersOpen(false);
+    setFiltersOpen(false);
   };
 
-  const setFilter = (updater: Partial<ConsumptionFilters>) => {
-    setFilters((current) => ({ ...current, ...updater }));
-  };
-
-  const toggleCountry = (country: string, target: "filters" | "draft" = "filters") => {
-    const setter = target === "filters" ? setFilters : setDraftFilters;
-    setter((current) => {
+  const toggleCountry = (country: string) => {
+    setDraftFilters((current) => {
       const hasCountry = current.countries.includes(country);
       const nextCountries = hasCountry
         ? current.countries.filter((value) => value !== country)
@@ -272,7 +241,7 @@ export default function ConsumptionPage() {
 
   const applyDraftFilters = () => {
     setFilters(draftFilters);
-    setMobileFiltersOpen(false);
+    setFiltersOpen(false);
   };
 
   const filteredEntries = useMemo(() => {
@@ -440,6 +409,13 @@ export default function ConsumptionPage() {
   const total = filteredEntries.length;
   const avgPerMonthValue = filters.period === "week" ? total * 4.33 : filters.period === "month" ? total : filters.period === "year" ? total / 12 : total / 12;
   const avgPerMonth = avgPerMonthValue.toFixed(1).replace(".", ",");
+  const averageRatingValue = useMemo(() => {
+    const rated = filteredEntries.filter((entry) => entry.rating != null);
+    if (!rated.length) return null;
+    const sum = rated.reduce((acc, entry) => acc + Number(entry.rating ?? 0), 0);
+    return sum / rated.length;
+  }, [filteredEntries]);
+  const averageRating = averageRatingValue != null ? averageRatingValue.toFixed(1).replace(".", ",") : "—";
 
   const styleStats = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -483,6 +459,16 @@ export default function ConsumptionPage() {
       })()
     : "—";
 
+  const lastEntryMeta = lastEntry
+    ? [lastEntry.producer, lastEntry.vintage, lastEntry.country].filter(Boolean).join(" · ")
+    : "";
+
+  const lastEntryNote = lastEntry?.tasting_notes?.trim()
+    ? lastEntry.tasting_notes.trim()
+    : lastEntry?.location?.trim()
+      ? `Registrado em ${lastEntry.location.trim()}.`
+      : "Um registro recente da sua mesa para voltar com calma quando quiser.";
+
   useEffect(() => {
     if (!hasLoadedOnce) {
       setDisplayEntries(filteredEntries);
@@ -516,125 +502,138 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <div className="editorial-page consumo-page">
-      <header className="consumption-page-header">
-        <Kicker className="consumo-eyebrow">Meu Consumo</Kicker>
-        <h1 className="editorial-page-h1 consumo-title mt-1">Brindes recentes</h1>
-      </header>
-
-      {/* KPIs */}
-      <div className="stats-grid grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-        <EditorialKpiCard
-          icon={<GlassWater className="h-4 w-4" />}
-          accent="#781323"
-          label="Consumo (6 meses)"
-          value={total}
-          sub="garrafas"
-          layout="row"
-          animatedValue={total}
-          motionIndex={0}
-          className="consumo-stat-card"
-        />
-        <EditorialKpiCard
-          icon={<TrendingUp className="h-4 w-4" />}
-          accent="#2F432F"
-          label="Ritmo mensal"
-          value={avgPerMonth}
-          sub="por mês"
-          layout="row"
-          animatedValue={avgPerMonthValue}
-          valueFormatter={(value) => value.toFixed(1).replace(".", ",")}
-          motionIndex={1}
-          className="consumo-stat-card"
-        />
-        <EditorialKpiCard
-          icon={<Star className="h-4 w-4" />}
-          accent="#781323"
-          label="Estilo favorito"
-          value={styleStats.name}
-          sub={styleStats.pct > 0 ? `${styleStats.pct}% do consumo` : ""}
-          layout="row"
-          motionIndex={2}
-          className="consumo-stat-card"
-        />
-        <EditorialKpiCard
-          icon={<Calendar className="h-4 w-4" />}
-          accent="#2F432F"
-          label="Última abertura"
-          value={lastLabel}
-          sub={lastEntry?.wine_name || ""}
-          layout="row"
-          motionIndex={3}
-          className="consumo-stat-card"
-        />
-      </div>
-
-      {lastEntry ? (
-        <section className="last-opened-card">
-          <p className="last-opened-eyebrow">Último aberto</p>
-          <p className="last-opened-time">{lastLabel}</p>
-          <h2 className="last-opened-name">{lastEntry.wine_name}</h2>
-          <p className="last-opened-rating">
-            {[lastEntry.producer, lastEntry.vintage, lastEntry.country].filter(Boolean).join(" · ") || "Registro de consumo"}
-          </p>
-        </section>
-      ) : null}
-
-      {/* Monthly chart */}
-      <EditorialCard className="consumo-chart-card consumo-chart-wrap">
-        <div className="chart-header mb-2 flex items-baseline justify-between">
-          <div>
-            <Kicker>Ritmo de consumo</Kicker>
-            <h2 className="chart-title editorial-h2 mt-1 text-[18px] md:text-[22px]">{chart.title}</h2>
+    <div className="editorial-page consumo-page consumo-v2-page sx-v2-page-shell">
+      <section className="sx-v2-content-rail consumo-v2-rail">
+        <header className="consumo-v2-header">
+          <div className="consumo-v2-header-copy">
+            <Kicker className="consumo-v2-kicker">Journal</Kicker>
+            <h1 className="consumo-v2-title sx-v2-display">Meu Consumo</h1>
+            <p className="consumo-v2-subtitle sx-v2-body">
+              Um registro calmo das garrafas abertas, do ritmo da adega e dos momentos que valem lembrar.
+            </p>
           </div>
-          <span className="chart-total">
-            {total}
-          </span>
-        </div>
-        <Sparkbar
-          data={chartDisplayData}
-          accent="#781323"
-          height={isMobile ? 68 : 100}
-          showValues={!isMobile}
-          activeIndex={activeChartIndex}
-          tooltipIndex={isMobile ? tooltipChartIndex : null}
-          onBarSelect={(index) => {
-            setActiveChartIndex(index);
-            if (isMobile) setTooltipChartIndex(index);
-          }}
-          barWidth={isMobile ? (chartDisplayData.length > 8 ? 7 : 9) : filters.period === "year" ? 6 : 10}
-        />
-      </EditorialCard>
+        </header>
 
-      {/* Filtros inteligentes */}
-      {isMobile ? (
-        <div className="mt-3 w-full">
+        <div className="consumo-v2-top">
+          {lastEntry ? (
+            <section className="consumo-v2-hero sx-v2-dark-panel sx-v2-ai-aura">
+              <div className="consumo-v2-hero-copy">
+                <div className="consumo-v2-hero-head">
+                  <Kicker className="consumo-v2-hero-kicker">Ritual recente</Kicker>
+                  <span className="consumo-v2-hero-time">{lastLabel}</span>
+                </div>
+                <h2 className="consumo-v2-hero-title sx-v2-wine-title">{lastEntry.wine_name}</h2>
+                {lastEntryMeta ? (
+                  <p className="consumo-v2-hero-meta sx-v2-wine-meta">{lastEntryMeta}</p>
+                ) : null}
+                <p className="consumo-v2-hero-note sx-v2-body">{lastEntryNote}</p>
+                <div className="consumo-v2-hero-foot">
+                  <span className="consumo-v2-hero-rating">
+                    <Star className="h-3.5 w-3.5" />
+                    {lastEntry.rating != null ? Number(lastEntry.rating).toFixed(1) : "Sem nota"}
+                  </span>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section className="consumo-v2-hero sx-v2-dark-panel">
+              <div className="consumo-v2-hero-copy">
+                <Kicker className="consumo-v2-hero-kicker">Journal</Kicker>
+                <h2 className="consumo-v2-hero-title sx-v2-wine-title">Seu diário de taças começa aqui</h2>
+                <p className="consumo-v2-hero-note sx-v2-body">
+                  Quando você registrar as primeiras aberturas, este espaço vai refletir o ritmo e a memória da sua adega.
+                </p>
+              </div>
+            </section>
+          )}
+
+          <aside className="consumo-v2-side">
+            <section className="consumo-v2-stats sx-v2-floating-panel">
+              <div className="consumo-v2-stats-grid">
+                <article className="consumo-v2-stat sx-v2-matte-panel">
+                  <span className="consumo-v2-stat-label">Registros</span>
+                  <strong className="consumo-v2-stat-value">{total}</strong>
+                </article>
+                <article className="consumo-v2-stat sx-v2-matte-panel">
+                  <span className="consumo-v2-stat-label">Ritmo mensal</span>
+                  <strong className="consumo-v2-stat-value">{avgPerMonth}</strong>
+                </article>
+                <article className="consumo-v2-stat sx-v2-matte-panel">
+                  <span className="consumo-v2-stat-label">Nota média</span>
+                  <strong className="consumo-v2-stat-value">{averageRating}</strong>
+                </article>
+                <article className="consumo-v2-stat sx-v2-matte-panel">
+                  <span className="consumo-v2-stat-label">Estilo recorrente</span>
+                  <strong className="consumo-v2-stat-value consumo-v2-stat-value--text">{styleStats.name}</strong>
+                </article>
+              </div>
+            </section>
+
+            <EditorialCard className="consumo-v2-chart consumo-chart-card consumo-chart-wrap">
+              <div className="consumo-v2-chart-head">
+                <div>
+                  <Kicker className="consumo-v2-chart-kicker">Ritmo</Kicker>
+                  <h2 className="consumo-v2-chart-title">{chart.title}</h2>
+                </div>
+                <span className="consumo-v2-chart-total">{total}</span>
+              </div>
+              <Sparkbar
+                data={chartDisplayData}
+                accent="#6F0718"
+                height={isMobile ? 56 : 76}
+                showValues={!isMobile}
+                activeIndex={activeChartIndex}
+                tooltipIndex={isMobile ? tooltipChartIndex : null}
+                onBarSelect={(index) => {
+                  setActiveChartIndex(index);
+                  if (isMobile) setTooltipChartIndex(index);
+                }}
+                barWidth={isMobile ? (chartDisplayData.length > 8 ? 6 : 8) : filters.period === "year" ? 6 : 8}
+              />
+            </EditorialCard>
+          </aside>
+        </div>
+
+        <section className="consumo-v2-filters-wrap">
           <button
             type="button"
-            onClick={() => setMobileFiltersOpen(true)}
+            onClick={() => setFiltersOpen(true)}
             className={cn(
-              "consumption-filter-trigger flex w-full items-center justify-between border text-left font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
+              "consumo-v2-filter-trigger consumption-filter-trigger sx-v2-btn-capsule flex w-full items-center justify-between border text-left font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
               hasActiveFilters
-                ? "border-[rgba(95,127,82,0.24)] bg-[rgba(95,127,82,0.08)] text-[#213b26]"
-                : "border-[rgba(95,127,82,0.18)] bg-[rgba(255,255,255,0.82)] text-[#1E1E1E]",
+                ? "border-[rgba(101,10,24,0.18)] bg-[rgba(101,10,24,0.08)] text-[#4A0712]"
+                : "border-[rgba(61,53,48,0.10)] bg-[rgba(255,255,255,0.82)] text-[#1E1E1E]",
             )}
           >
             <span className="flex min-w-0 flex-col items-start">
-              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">Filtros</span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6F0718]">Filtros</span>
               <span className="min-w-0 truncate text-[12px] font-semibold text-[#1E1E1E]">
                 {hasActiveFilters ? activeFilterSummary || "Todos os filtros" : "Período, país e ordenação"}
               </span>
             </span>
-            <ChevronDown className={cn("h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out", mobileFiltersOpen && "rotate-180")} />
+            <ChevronDown className={cn("h-4 w-4 shrink-0 text-[#6F0718] transition-transform duration-150 ease-out", filtersOpen && "rotate-180")} />
           </button>
 
-          <ActionDialog open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+          {activeFilterSummary ? (
+            <div className="consumo-v2-active-filters">
+              <p className="consumo-v2-active-summary">{activeFilterSummary}</p>
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="consumo-v2-filter-clear-inline"
+              >
+                Limpar
+              </button>
+            </div>
+          ) : null}
+
+          <ActionDialog open={filtersOpen} onOpenChange={setFiltersOpen}>
             <ActionDialogContent className="consumption-filter-modal sx-action-modal" aria-label="Filtros de consumo">
               <AiModalShell>
                 <AiModalHeaderBar>
                   <AiModalHeader
                     icon={<Calendar className="h-5 w-5" />}
-                    title="Filtros de consumo"
+                    title="Filtros"
                     tone="neutral"
                   />
                 </AiModalHeaderBar>
@@ -669,7 +668,7 @@ export default function ConsumptionPage() {
                             active={draftFilters.countries.includes(opt.value)}
                             label={opt.label}
                             count={opt.count}
-                            onClick={() => toggleCountry(opt.value, "draft")}
+                            onClick={() => toggleCountry(opt.value)}
                           />
                         ))}
                       </div>
@@ -712,164 +711,46 @@ export default function ConsumptionPage() {
               </AiModalShell>
             </ActionDialogContent>
           </ActionDialog>
-        </div>
-      ) : (
-        <div className="grid gap-2 md:grid-cols-3">
-          {[
-            { kind: "period" as const, title: "Período", value: periodValueLabel },
-            { kind: "country" as const, title: "País", value: countryValueLabel },
-            { kind: "sort" as const, title: "Ordenar", value: sortValueLabel },
-          ].map((box) => {
-            const open = openFilter === box.kind;
-            const options =
-              box.kind === "period"
-                ? periodOptions.map((opt) => (
-                    <FilterChoice
-                      key={opt.value}
-                      active={filters.period === opt.value}
-                      label={opt.label}
-                      onClick={() => {
-                        setFilter({ period: opt.value });
-                        setOpenFilter(null);
-                      }}
-                    />
-                  ))
-                : box.kind === "country"
-                  ? [
-                      <FilterChoice
-                        key="all"
-                        active={filters.countries.length === 0}
-                        label="Todos"
-                        onClick={() => {
-                          setFilter({ countries: [] });
-                          setOpenFilter(null);
-                        }}
-                      />,
-                      ...countryOptions.map((opt) => (
-                        <CountryChoice
-                          key={opt.value}
-                          active={filters.countries.includes(opt.value)}
-                          label={opt.label}
-                          count={opt.count}
-                          onClick={() => toggleCountry(opt.value)}
-                        />
-                      )),
-                    ]
-                  : sortOptions.map((opt) => (
-                      <FilterChoice
-                        key={opt.value}
-                        active={filters.sortBy === opt.value}
-                        label={opt.label}
-                        onClick={() => {
-                          setFilter({ sortBy: opt.value });
-                          setOpenFilter(null);
-                        }}
-                      />
-                    ));
+        </section>
 
-            const trigger = (
-              <button
-                type="button"
-                onClick={() => setOpenFilter(open ? null : box.kind)}
-                className={cn(
-                  "filter-dropdown flex min-h-[66px] w-full items-center justify-between rounded-[20px] border px-4 text-left transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-[0_10px_24px_-18px_rgba(95,127,82,0.22)]",
-                  open
-                    ? "border-[rgba(95,111,82,0.26)] bg-[rgba(95,111,82,0.08)]"
-                    : "border-[rgba(95,111,82,0.14)] bg-[rgba(255,255,255,0.88)]",
-                )}
-              >
-                <span className="min-w-0">
-                  <span className="filter-label block text-[9.5px] font-bold uppercase tracking-[0.16em] text-[#5F7F52]">
-                    {box.title}
-                  </span>
-                  <span className="filter-value mt-1 block truncate text-[13.5px] font-semibold leading-[1.15] text-[#1E1E1E]">
-                    {box.value}
-                  </span>
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "h-4 w-4 shrink-0 text-[#5F7F52] transition-transform duration-150 ease-out",
-                    open && "rotate-180",
-                  )}
-                />
-              </button>
-            );
-
-            return (
-              <div key={box.kind} className="min-w-0">
-                <Popover open={open} onOpenChange={(next) => setOpenFilter(next ? box.kind : null)}>
-                  <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-                  <FilterPanel
-                    title={box.title}
-                    description={
-                      box.kind === "period"
-                        ? "Escolha a janela de análise."
-                        : box.kind === "country"
-                          ? "Selecione um ou mais países."
-                          : "Escolha a ordem da lista."
-                    }
-                  >
-                    <div className="space-y-1.5">{options}</div>
-                  </FilterPanel>
-                </Popover>
+        <div className={cn("consumo-v2-journal transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
+          {isFiltering ? (
+            <EditorialCard className="consumo-v2-skeleton">
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
+                <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
+                <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
               </div>
-            );
-          })}
+            </EditorialCard>
+          ) : displayEntries.length === 0 ? (
+            <EditorialCard className="consumo-v2-empty">
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="font-serif text-[15px] text-[rgba(26,23,19,0.72)]">
+                  {entries.length === 0
+                    ? "Você ainda não registrou nenhum consumo"
+                    : "Nenhum vinho encontrado para esses filtros"}
+                </p>
+                <p className="mt-1 text-[12px] text-[#7A746B]">
+                  {entries.length === 0
+                    ? "Quando você abrir uma garrafa, ela aparecerá aqui."
+                    : "Ajuste os filtros ou limpe a seleção para ver mais brindes."}
+                </p>
+                {activeFilterSummary ? (
+                  <button
+                    type="button"
+                    onClick={clearFilters}
+                    className="consumo-v2-filter-clear-inline mt-4"
+                  >
+                    Limpar filtros
+                  </button>
+                ) : null}
+              </div>
+            </EditorialCard>
+          ) : (
+            <ConsumptionTimeline entries={displayEntries} title="Diário de taças" />
+          )}
         </div>
-      )}
-
-      {activeFilterSummary ? (
-        <div className="flex items-center justify-between gap-3 rounded-[16px] border border-[rgba(95,111,82,0.12)] bg-[rgba(95,111,82,0.05)] px-3 py-2 text-[11.5px] leading-[1.25] text-[rgba(58,51,39,0.72)]">
-          <p className="min-w-0 flex-1 truncate">
-            {activeFilterSummary}
-          </p>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="shrink-0 rounded-full border border-[rgba(95,111,82,0.14)] bg-white/75 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:scale-[1.01] hover:bg-white"
-          >
-            Limpar filtros
-          </button>
-        </div>
-      ) : null}
-
-      <div className={cn("transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
-        {isFiltering ? (
-          <EditorialCard style={{ padding: "14px 14px 12px" }}>
-            <div className="space-y-3">
-              <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
-              <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
-              <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
-            </div>
-          </EditorialCard>
-        ) : displayEntries.length === 0 ? (
-          <EditorialCard style={{ padding: "16px 16px 18px" }}>
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <p className="font-serif text-[15px] text-[rgba(26,23,19,0.72)]">
-                {entries.length === 0
-                  ? "Você ainda não registrou nenhum consumo"
-                  : "Nenhum vinho encontrado para esses filtros"}
-              </p>
-              <p className="mt-1 text-[12px] text-[#7A746B]">
-                {entries.length === 0
-                  ? "Quando você abrir uma garrafa, ela aparecerá aqui."
-                  : "Ajuste os filtros ou limpe a seleção para ver mais brindes."}
-              </p>
-              {activeFilterSummary ? (
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="mt-4 rounded-full border border-[rgba(95,111,82,0.14)] bg-[rgba(95,111,82,0.06)] px-3 py-1.5 text-[11px] font-semibold text-[#5F7F52] transition-all duration-150 ease-out hover:-translate-y-px hover:scale-[1.01]"
-                >
-                  Limpar filtros
-                </button>
-              ) : null}
-            </div>
-          </EditorialCard>
-        ) : (
-          <ConsumptionTimeline entries={displayEntries} title="Registros" />
-        )}
-      </div>
+      </section>
     </div>
   );
 }
