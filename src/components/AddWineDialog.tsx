@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -25,13 +24,7 @@ import { cn } from "@/lib/utils";
 import {
   AI_MODAL_SHEET_CONTENT_CLASSNAME,
   AI_MODAL_SHEET_CONTENT_STYLE,
-  AI_MODAL_ACTION_TILE_CLASSNAME,
-  AI_MODAL_COMPACT_STACK_CLASSNAME,
-  AI_MODAL_HELP_TEXT_CLASSNAME,
-  AI_MODAL_LABEL_CLASSNAME,
-  AI_MODAL_SECTION_STACK_CLASSNAME,
   AI_MODAL_TEXTAREA_CLASSNAME,
-  AI_MODAL_TEXT_PRIMARY_CLASSNAME,
   AiModalActionButton,
   AiModalBody,
   AiModalCard,
@@ -40,7 +33,6 @@ import {
   AiModalHeaderBar,
   AiModalShell,
   AiModalSplitLayout,
-  AiSectionLabel,
 } from "@/components/ai-flow/ModalLayout";
 
 interface AddWineDialogProps {
@@ -435,7 +427,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
   const [aiPrefilledFields, setAiPrefilledFields] = useState<Record<string, boolean>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [originOpen, setOriginOpen] = useState(false);
+  const [cellarOpen, setCellarOpen] = useState(false);
+  const [valueOpen, setValueOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
@@ -468,7 +463,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   }, [open, initialScan]);
 
   useEffect(() => {
-    if (open && isCommercial) setMoreOpen(true);
+    if (open && isCommercial) setValueOpen(true);
   }, [open, isCommercial]);
 
   // Debounced AI price estimation
@@ -528,7 +523,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setScanHydrated(false);
     setAiPrefilledFields({});
     setMissingFields([]);
-    setMoreOpen(false); setSuccess(false);
+    setOriginOpen(false); setCellarOpen(false); setValueOpen(false); setNotesOpen(false); setSuccess(false);
   }, []);
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
@@ -598,9 +593,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
     setAiPrefilledFields(nextPrefilled);
 
-    if (Object.keys(nextPrefilled).length > 0) {
-      setMoreOpen(true);
-    }
+    if (nextPrefilled.country || nextPrefilled.region || nextPrefilled.grape) setOriginOpen(true);
+    if (nextPrefilled.cellar_location) setCellarOpen(true);
+    if (nextPrefilled.purchase_price || nextPrefilled.current_value || nextPrefilled.drink_from || nextPrefilled.drink_until) setValueOpen(true);
+    if (nextPrefilled.food_pairing) setNotesOpen(true);
     return nextPrefilled;
   }, []);
 
@@ -1046,7 +1042,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     <>
       <ActionDialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <ActionDialogContent
-        className={AI_MODAL_SHEET_CONTENT_CLASSNAME}
+        className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "add-wine-modal")}
         style={AI_MODAL_SHEET_CONTENT_STYLE}
         aria-label={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
       >
@@ -1108,48 +1104,50 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="space-y-1.5">
-                  <div className="space-y-1.5">
-                    <div
-                      className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
+                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="add-wine-form">
+                  <div className="add-wine-quick-actions">
+                    <button
+                      type="button"
+                      className="add-wine-quick-action"
                       onClick={() => setScanOpen(true)}
                     >
-                      <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
-                        <Camera className="h-4.5 w-4.5" style={{ color: '#6F7F5B' }} />
-                      </div>
-                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Escanear rótulo</p>
-                    </div>
+                      <span className="add-wine-quick-icon">
+                        <Camera className="h-4 w-4" />
+                      </span>
+                      Escanear rótulo
+                    </button>
 
-                    <div
-                      className={cn("group flex cursor-pointer items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
+                    <button
+                      type="button"
+                      className="add-wine-quick-action"
                       onClick={() => setImportCsvOpen(true)}
                     >
-                      <div className="modal-action-icon-wrap modal-action-icon shrink-0 transition-transform duration-200 group-hover:scale-[1.03]">
-                        <FileSpreadsheet className="h-4 w-4" style={{ color: '#C8A96A' }} />
-                      </div>
-                      <p className={AI_MODAL_TEXT_PRIMARY_CLASSNAME}>Importar arquivo</p>
-                    </div>
+                      <span className="add-wine-quick-icon is-gold">
+                        <FileSpreadsheet className="h-4 w-4" />
+                      </span>
+                      Importar arquivo
+                    </button>
                   </div>
 
                   {labelImagePreview && (
-                    <div className={cn("flex items-center gap-2.5 px-3 py-2.5", AI_MODAL_ACTION_TILE_CLASSNAME)}>
-                      <div className="w-14 h-[4.5rem] rounded-[12px] overflow-hidden shrink-0 border border-[rgba(95,111,82,0.08)] bg-[rgba(255,251,244,0.58)]">
+                    <div className="add-wine-label-preview">
+                      <div className="add-wine-label-image">
                         <img
                           src={labelImagePreview}
                           alt="Foto do rótulo analisado"
-                          className="w-full h-full object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-[12.5px] font-medium text-[rgba(26,23,19,0.9)]">Foto do rótulo analisada</p>
-                        <p className="mt-0.5 text-[11px] leading-5 text-[rgba(72,60,46,0.66)]">Os campos confiáveis já foram sugeridos abaixo.</p>
+                        <p className="truncate text-[12.5px] font-medium text-[rgba(26,23,19,0.9)]">Rótulo analisado</p>
+                        <p className="mt-0.5 text-[11px] leading-5 text-[rgba(72,60,46,0.66)]">Revise os dados antes de salvar.</p>
                       </div>
                     </div>
                   )}
 
-                  <AiModalCard className="space-y-2">
-                    <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                      <label htmlFor="name" className={AI_MODAL_LABEL_CLASSNAME}>{isCommercial ? "Nome do vinho *" : "Nome do vinho *"}</label>
+                  <div className="add-wine-identity">
+                    <div className="add-wine-field">
+                      <label htmlFor="name">Vinho *</label>
                       <input
                         id="name"
                         value={getRenderedFieldValue("name", name)}
@@ -1160,8 +1158,8 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         style={aiFieldStyle("name")}
                       />
                     </div>
-                    <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                      <label htmlFor="producer" className={AI_MODAL_LABEL_CLASSNAME}>Produtor</label>
+                    <div className="add-wine-field">
+                      <label htmlFor="producer">Produtor</label>
                       <input
                         id="producer"
                         value={getRenderedFieldValue("producer", producer)}
@@ -1171,20 +1169,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         style={aiFieldStyle("producer")}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-1.5">
-                      <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                        <label htmlFor="qty" className={AI_MODAL_LABEL_CLASSNAME}>Quantidade</label>
-                        <input
-                          id="qty"
-                          type="number"
-                          min="1"
-                          value={quantity}
-                          onChange={e => setQuantity(e.target.value)}
-                        className="input-premium"
-                        />
-                      </div>
-                      <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                        <label htmlFor="vintage" className={AI_MODAL_LABEL_CLASSNAME}>Safra</label>
+                    <div className="add-wine-field-grid">
+                      <div className="add-wine-field">
+                        <label htmlFor="vintage">Safra</label>
                         <input
                           id="vintage"
                           type="number"
@@ -1195,242 +1182,214 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         style={aiFieldStyle("vintage")}
                         />
                       </div>
-                    </div>
-                    <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                      <label className={AI_MODAL_LABEL_CLASSNAME}>Estilo</label>
-                      <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
-                        <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
-                          <SelectValue placeholder="Selecionar estilo..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
-                          {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </AiModalCard>
-
-                  {isCommercial ? (
-                    <AiModalCard className="space-y-1.5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-medium uppercase tracking-[0.16em]" style={{ color: 'rgba(95,127,82,0.82)' }}>
-                            Precificação comercial
-                          </p>
-                        </div>
-                        {commercialMarginPct != null && (
-                          <div
-                            className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium"
-                            style={{
-                              backgroundColor: commercialMargin != null && commercialMargin >= 0 ? 'rgba(111,127,91,0.12)' : 'rgba(180,80,80,0.10)',
-                              color: commercialMargin != null && commercialMargin >= 0 ? '#6F7F5B' : '#9B4444',
-                            }}
-                          >
-                            Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
-                          </div>
-                        )}
+                      <div className="add-wine-field">
+                        <label>Estilo</label>
+                        <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
+                          <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
+                            <SelectValue placeholder="Estilo" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
+                            {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
                       </div>
-                      <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                        <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                          <label className={AI_MODAL_LABEL_CLASSNAME}>
-                            Preço de custo (R$)
-                          </label>
-                          <Input
+                    </div>
+                  </div>
+
+                  <div className="add-wine-accordions">
+                    <Collapsible open={originOpen} onOpenChange={setOriginOpen}>
+                      <CollapsibleTrigger asChild>
+                        <button type="button" className="add-wine-accordion-trigger">
+                          <span>
+                            <strong>Origem e uva</strong>
+                            <small>País, região e variedade</small>
+                          </span>
+                          <ChevronDown className={cn("h-4 w-4 transition-transform", originOpen && "rotate-180")} />
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="add-wine-accordion-content">
+                        <div className="add-wine-field-grid">
+                          <div className="add-wine-field">
+                            <label>País</label>
+                            <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País no rótulo" className="input-premium" style={aiFieldStyle("country")} />
+                          </div>
+                          <div className="add-wine-field">
+                            <label>Região</label>
+                            <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região" className="input-premium" style={aiFieldStyle("region")} />
+                          </div>
+                        </div>
+                        <div className="add-wine-field">
+                          <label>Uva</label>
+                          <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva ou corte" className="input-premium" style={aiFieldStyle("grape")} />
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    <Collapsible open={cellarOpen} onOpenChange={setCellarOpen}>
+                      <CollapsibleTrigger asChild>
+                        <button type="button" className="add-wine-accordion-trigger">
+                          <span>
+                            <strong>Adega</strong>
+                            <small>Quantidade e localização</small>
+                          </span>
+                          <ChevronDown className={cn("h-4 w-4 transition-transform", cellarOpen && "rotate-180")} />
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="add-wine-accordion-content">
+                        <div className="add-wine-field add-wine-quantity-field">
+                          <label htmlFor="qty">Quantidade</label>
+                          <input
+                            id="qty"
                             type="number"
-                            step="0.01"
-                            min="0"
-                            value={lastPaid}
-                            onChange={e => setLastPaid(e.target.value)}
-                            placeholder="0,00"
+                            min="1"
+                            value={quantity}
+                            onChange={e => setQuantity(e.target.value)}
                             className="input-premium"
-                            style={aiFieldStyle("purchase_price")}
                           />
                         </div>
-                        <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                          <label className={AI_MODAL_LABEL_CLASSNAME}>
-                            Preço de venda (R$)
-                          </label>
-                          <div className="relative">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={currentValue}
-                              onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }}
-                              placeholder={estimating ? "Calculando..." : "0,00"}
-                              className="input-premium"
-                              style={{ opacity: estimating ? 0.6 : 1 }}
-                            />
-                            {estimating && (
-                              <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </AiModalCard>
-                  ) : null}
-
-                  {/* Collapsible advanced fields */}
-                  <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
-                    <CollapsibleTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn("w-full px-3 py-2 text-left sm:px-3.5", AI_MODAL_ACTION_TILE_CLASSNAME)}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <div>
-                            <p className="text-[11px] font-medium tracking-[-0.01em] text-[rgba(32,26,21,0.82)]">
-                              Detalhes extras
-                            </p>
-                            <p className={cn("mt-0.25", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                              Origem, uva, valores e guarda.
-                            </p>
-                          </div>
-                          <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`} style={{ color: '#6F7F5B' }} />
-                        </div>
-                      </button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-2">
-                      <AiModalCard className="space-y-2">
-                        <div className="grid grid-cols-2 gap-1.5">
-                        <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                          <label className={AI_MODAL_LABEL_CLASSNAME}>País</label>
-                          <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País no rótulo" className="input-premium" style={aiFieldStyle("country")} />
-                        </div>
-                        <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                          <label className={AI_MODAL_LABEL_CLASSNAME}>Região</label>
-                          <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região no rótulo" className="input-premium" style={aiFieldStyle("region")} />
-                        </div>
-                      </div>
-                      {drinkFrom && drinkUntil && (
-                        <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(72,60,46,0.68)' }}>
-                          Janela de consumo sugerida: <span className="font-medium text-[rgba(26,23,19,0.9)]">{drinkFrom} - {drinkUntil}</span>
-                        </p>
-                      )}
-                      <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                        <label className={AI_MODAL_LABEL_CLASSNAME}>Uva</label>
-                        <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva no rótulo" className="input-premium" style={aiFieldStyle("grape")} />
-                      </div>
-                      <div className="flex items-center gap-2 -mt-1">
-                        <input
-                          id="no-location-info"
-                          type="checkbox"
-                          checked={noLocationInfo}
-                          onChange={(e) => {
-                            setNoLocationInfo(e.target.checked);
-                            if (e.target.checked) setLocation({});
-                          }}
-                          className="w-4 h-4 rounded border accent-[#6F7F5B]"
-                          style={{ borderColor: '#D0CDC6' }}
-                        />
-                        <label htmlFor="no-location-info" className={cn("select-none", AI_MODAL_HELP_TEXT_CLASSNAME)}>
-                          Não quero definir localização agora
+                        <label className="add-wine-check-row">
+                          <input
+                            id="no-location-info"
+                            type="checkbox"
+                            checked={noLocationInfo}
+                            onChange={(e) => {
+                              setNoLocationInfo(e.target.checked);
+                              if (e.target.checked) setLocation({});
+                            }}
+                          />
+                          <span>Definir localização depois</span>
                         </label>
-                      </div>
-                      {!isCommercial && (
-                        <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                          <label className={AI_MODAL_LABEL_CLASSNAME}>
-                            Último valor pago (opcional)
-                          </label>
-                          <label className="flex items-center gap-2 mb-2 cursor-pointer select-none">
-                            <input
-                              type="checkbox"
-                              checked={noPriceInfo}
-                              onChange={e => {
-                                setNoPriceInfo(e.target.checked);
-                                if (e.target.checked) {
-                                  setLastPaid("");
-                                  setLastPaidDate(new Date().toISOString().split("T")[0]);
-                                }
-                              }}
-                              className="w-4 h-4 rounded border accent-[#6F7F5B]"
-                              style={{ borderColor: '#D0CDC6' }}
-                            />
-                            <span className={AI_MODAL_HELP_TEXT_CLASSNAME}>Não fui eu que comprei / não sei o valor</span>
-                          </label>
-                          {!noPriceInfo && (
-                          <div className="grid grid-cols-2 gap-2">
-                              <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0.00" className="input-premium" style={aiFieldStyle("purchase_price")} />
-                            <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
-                          </div>
-                        )}
-                        {!noPriceInfo && (
-                          <p className={AI_MODAL_HELP_TEXT_CLASSNAME}>
-                            Quanto e quando você pagou por último.
-                          </p>
-                        )}
-                        </div>
-                      )}
-                      <div>
                         <LocationFields
                           value={location}
                           onChange={setLocation}
-                          label="Localização na adega"
+                          label="Localização"
                           disabled={noLocationInfo}
+                          className="add-wine-location-fields"
                         />
-                      </div>
-                      <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                        <label className={AI_MODAL_LABEL_CLASSNAME}>Harmonização</label>
-                        <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
-                      </div>
-                        {!isCommercial && (
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    <Collapsible open={valueOpen} onOpenChange={setValueOpen}>
+                      <CollapsibleTrigger asChild>
+                        <button type="button" className="add-wine-accordion-trigger">
+                          <span>
+                            <strong>Valores e guarda</strong>
+                            <small>Preço, estimativa e janela</small>
+                          </span>
+                          <ChevronDown className={cn("h-4 w-4 transition-transform", valueOpen && "rotate-180")} />
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="add-wine-accordion-content">
+                        {isCommercial ? (
                           <>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <label className={AI_MODAL_LABEL_CLASSNAME}>
-                                Valor atual estimado (R$)
-                              </label>
-                              <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#6F7F5B]/80">
-                                <Sparkles className="h-3 w-3" />
-                                {estimating ? "Estimando..." : "Estimativa Sommelyx"}
-                              </span>
+                            {commercialMarginPct != null && (
+                              <div className="add-wine-margin-pill">
+                                Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
+                              </div>
+                            )}
+                            <div className="add-wine-field-grid">
+                              <div className="add-wine-field">
+                                <label>Preço de custo</label>
+                                <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
+                              </div>
+                              <div className="add-wine-field">
+                                <label>Preço de venda</label>
+                                <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
+                              </div>
                             </div>
-                            <div className="relative">
-                              <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0.00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
-                              {estimating && (
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                  <div className="w-4 h-4 border-2 border-[#6F7F5B] border-t-transparent rounded-full animate-spin" />
+                          </>
+                        ) : (
+                          <>
+                            <label className="add-wine-check-row">
+                              <input
+                                type="checkbox"
+                                checked={noPriceInfo}
+                                onChange={e => {
+                                  setNoPriceInfo(e.target.checked);
+                                  if (e.target.checked) {
+                                    setLastPaid("");
+                                    setLastPaidDate(new Date().toISOString().split("T")[0]);
+                                  }
+                                }}
+                              />
+                              <span>Não sei o valor pago</span>
+                            </label>
+                            {!noPriceInfo && (
+                              <div className="add-wine-field-grid">
+                                <div className="add-wine-field">
+                                  <label>Último valor pago</label>
+                                  <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
                                 </div>
+                                <div className="add-wine-field">
+                                  <label>Data</label>
+                                  <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
+                                </div>
+                              </div>
+                            )}
+                            <div className="add-wine-field">
+                              <label>Valor atual estimado</label>
+                              <div className="relative">
+                                <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
+                                {estimating && (
+                                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6F7F5B] border-t-transparent" />
+                                  </div>
+                                )}
+                              </div>
+                              {estimateConfidence && (
+                                <p className="add-wine-microcopy">
+                                  {estimateConfidence === "baixa" && estimateRange
+                                    ? `R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                    : "Estimativa sugerida"}
+                                </p>
                               )}
                             </div>
-                            {estimateConfidence && (
-                              <p className="mt-1 text-[11px] text-[var(--sx-text-muted)]">
-                                {estimateConfidence === "baixa" && estimateRange
-                                  ? `estimativa: R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                  : "estimativa sugerida"}
-                              </p>
-                            )}
-                          </div>
-                          <div>
-                            <p className={AI_MODAL_LABEL_CLASSNAME}>Janela de consumo</p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                              <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                                <label className={AI_MODAL_LABEL_CLASSNAME}>A partir de</label>
+                            <div className="add-wine-field-grid">
+                              <div className="add-wine-field">
+                                <label>Abrir a partir de</label>
                                 <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
                               </div>
-                              <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                                <label className={AI_MODAL_LABEL_CLASSNAME}>Até</label>
+                              <div className="add-wine-field">
+                                <label>Guardar até</label>
                                 <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
                               </div>
                             </div>
-                          </div>
-                          <div className={AI_MODAL_COMPACT_STACK_CLASSNAME}>
-                            <label className={AI_MODAL_LABEL_CLASSNAME}>Notas de degustação</label>
+                          </>
+                        )}
+                      </CollapsibleContent>
+                    </Collapsible>
+
+                    <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
+                      <CollapsibleTrigger asChild>
+                        <button type="button" className="add-wine-accordion-trigger">
+                          <span>
+                            <strong>Notas de serviço</strong>
+                            <small>Harmonização e observações</small>
+                          </span>
+                          <ChevronDown className={cn("h-4 w-4 transition-transform", notesOpen && "rotate-180")} />
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="add-wine-accordion-content">
+                        <div className="add-wine-field">
+                          <label>Harmonização</label>
+                          <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
+                        </div>
+                        {!isCommercial && (
+                          <div className="add-wine-field">
+                            <label>Notas de degustação</label>
                             <Textarea
                               value={notes}
                               onChange={e => setNotes(e.target.value)}
                               placeholder="Aromas, sabores, impressões..."
                               rows={3}
-                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none")}
+                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none input-premium")}
                               style={aiFieldStyle("tasting_notes")}
                             />
                           </div>
-                          </>
                         )}
-                      </AiModalCard>
-                    </CollapsibleContent>
-                  </Collapsible>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
 
                   {missingFields.length > 0 && (
                     <AiModalCard className="space-y-1 rounded-[16px] px-3 py-2.5">
