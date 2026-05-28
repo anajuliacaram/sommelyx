@@ -1,4 +1,5 @@
 @import "./styles/tokens.css";
+@import "./styles/sommelyx-v2-foundation.css";
 
 @tailwind base;
 @tailwind components;

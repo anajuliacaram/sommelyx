@@ -144,5 +144,125 @@
 
     --surface-noise:
       radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 0);
+
+    /* === Sommelyx V2 — Visual foundation namespace === */
+    --sx-v2-font-serif: "Cormorant Garamond", "Instrument Serif", "Libre Baskerville", Georgia, serif;
+    --sx-v2-font-ui: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+
+    --sx-v2-bg-app: #f7f2ea;
+    --sx-v2-bg-page: #f4ede2;
+    --sx-v2-bg-surface: #fffaf2;
+    --sx-v2-bg-surface-soft: #f1eadf;
+    --sx-v2-bg-surface-matte: #f6f0e6;
+    --sx-v2-bg-collectible: #fbf6ee;
+    --sx-v2-bg-dark: #1b130f;
+    --sx-v2-bg-dark-soft: #241a15;
+    --sx-v2-bg-dark-panel: #201714;
+    --sx-v2-bg-glass: rgba(255, 250, 242, 0.72);
+    --sx-v2-bg-glass-strong: rgba(255, 250, 242, 0.82);
+
+    --sx-v2-wine: #650a18;
+    --sx-v2-wine-deep: #3b0710;
+    --sx-v2-wine-dark: #22040a;
+    --sx-v2-wine-soft: rgba(101, 10, 24, 0.08);
+    --sx-v2-wine-border: rgba(101, 10, 24, 0.14);
+
+    --sx-v2-olive: #263a2b;
+    --sx-v2-olive-deep: #18251d;
+    --sx-v2-olive-moss: #435547;
+    --sx-v2-olive-soft: #e9efe5;
+    --sx-v2-olive-haze: rgba(38, 58, 43, 0.10);
+
+    --sx-v2-gold: #c8a85a;
+    --sx-v2-gold-soft: rgba(200, 168, 90, 0.16);
+    --sx-v2-gold-ember: rgba(184, 120, 62, 0.18);
+
+    --sx-v2-text: #201714;
+    --sx-v2-text-soft: #4d433c;
+    --sx-v2-text-muted: #746b63;
+    --sx-v2-text-subtle: #9a9188;
+    --sx-v2-text-on-dark: #f8f3ec;
+
+    --sx-v2-border: rgba(61, 53, 48, 0.10);
+    --sx-v2-border-strong: rgba(61, 53, 48, 0.16);
+    --sx-v2-border-dark: rgba(255, 248, 239, 0.12);
+    --sx-v2-border-glass: rgba(255, 255, 255, 0.30);
+    --sx-v2-ring: rgba(101, 10, 24, 0.26);
+    --sx-v2-ring-olive: rgba(38, 58, 43, 0.22);
+    --sx-v2-ring-gold: rgba(200, 168, 90, 0.26);
+
+    --sx-v2-shadow-ambient: 0 24px 72px -56px rgba(32, 23, 20, 0.34);
+    --sx-v2-shadow-panel: 0 20px 52px -34px rgba(32, 23, 20, 0.20), 0 2px 6px rgba(32, 23, 20, 0.04);
+    --sx-v2-shadow-floating: 0 32px 82px -42px rgba(32, 23, 20, 0.28), 0 10px 24px rgba(32, 23, 20, 0.08);
+    --sx-v2-shadow-modal: 0 42px 120px -54px rgba(20, 14, 11, 0.44), 0 18px 36px rgba(20, 14, 11, 0.12);
+    --sx-v2-shadow-object: 0 34px 82px -50px rgba(59, 7, 16, 0.38), 0 22px 48px -40px rgba(24, 37, 29, 0.34);
+    --sx-v2-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.34), inset 0 -1px 0 rgba(61, 53, 48, 0.04);
+
+    --sx-v2-gradient-bg:
+      radial-gradient(circle at 0% 0%, rgba(233, 239, 229, 0.92), transparent 34%),
+      radial-gradient(circle at 86% -8%, rgba(200, 168, 90, 0.14), transparent 26%),
+      linear-gradient(180deg, #f7f2ea 0%, #f1eadf 100%);
+    --sx-v2-gradient-wine-glow:
+      radial-gradient(circle at 12% 0%, rgba(200, 168, 90, 0.18), transparent 30%),
+      linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+    --sx-v2-gradient-olive-haze:
+      radial-gradient(circle at 0% 0%, rgba(233, 239, 229, 0.54), transparent 38%),
+      linear-gradient(135deg, rgba(38, 58, 43, 0.12), rgba(38, 58, 43, 0.04));
+    --sx-v2-gradient-gold-ember:
+      radial-gradient(circle at center, rgba(200, 168, 90, 0.16), rgba(184, 120, 62, 0.04) 48%, transparent 72%);
+    --sx-v2-gradient-ivory-wash:
+      linear-gradient(145deg, rgba(255, 250, 242, 0.96), rgba(241, 234, 223, 0.78));
+    --sx-v2-gradient-ai-dark:
+      radial-gradient(circle at 84% 10%, rgba(200, 168, 90, 0.16), transparent 22%),
+      radial-gradient(circle at 0% 0%, rgba(255, 250, 242, 0.08), transparent 24%),
+      linear-gradient(135deg, #22040a 0%, #18251d 48%, #263a2b 100%);
+
+    --sx-v2-radius-panel: 28px;
+    --sx-v2-radius-floating: 32px;
+    --sx-v2-radius-capsule: 999px;
+    --sx-v2-radius-modal: 32px;
+    --sx-v2-radius-object: 30px;
+    --sx-v2-radius-field: 18px;
+    --sx-v2-radius-chip: 999px;
+
+    --sx-v2-space-1: 4px;
+    --sx-v2-space-2: 8px;
+    --sx-v2-space-3: 12px;
+    --sx-v2-space-4: 16px;
+    --sx-v2-space-5: 20px;
+    --sx-v2-space-6: 24px;
+    --sx-v2-space-7: 32px;
+    --sx-v2-space-8: 40px;
+    --sx-v2-space-9: 48px;
+    --sx-v2-space-10: 64px;
+
+    --sx-v2-density-compact: 10px;
+    --sx-v2-density-base: 14px;
+    --sx-v2-density-editorial: 20px;
+    --sx-v2-rhythm-section: 28px;
+
+    --sx-v2-font-display: clamp(2rem, 5vw, 3.6rem);
+    --sx-v2-font-title: clamp(1.5rem, 3vw, 2.2rem);
+    --sx-v2-font-section: clamp(1.125rem, 2vw, 1.5rem);
+    --sx-v2-font-body: 0.9375rem;
+    --sx-v2-font-small: 0.8125rem;
+    --sx-v2-font-kicker: 0.6875rem;
+    --sx-v2-font-meta: 0.75rem;
+
+    --sx-v2-weight-display: 520;
+    --sx-v2-weight-title: 560;
+    --sx-v2-weight-body: 460;
+    --sx-v2-weight-strong: 590;
+
+    --sx-v2-tracking-display: -0.035em;
+    --sx-v2-tracking-title: -0.025em;
+    --sx-v2-tracking-body: -0.01em;
+    --sx-v2-tracking-kicker: 0.16em;
+
+    --sx-v2-ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
+    --sx-v2-dur-reveal: 420ms;
+    --sx-v2-dur-hover: 180ms;
+    --sx-v2-dur-modal: 320ms;
+    --sx-v2-dur-breathe: 5200ms;
   }
 }
