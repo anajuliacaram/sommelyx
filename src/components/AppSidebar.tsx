@@ -163,7 +163,9 @@ export function AppSidebar() {
                         data-nav={item.navKey}
                         onClick={closeMobileSidebar}
                       >
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="sidebar-item-icon">
+                          <item.icon className="h-4 w-4 shrink-0" />
+                        </span>
                         <span className="flex-1">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
@@ -182,7 +184,9 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
                     <NavLink to="/dashboard/settings" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
-                      <Settings className="h-4 w-4 shrink-0" />
+                      <span className="sidebar-item-icon">
+                        <Settings className="h-4 w-4 shrink-0" />
+                      </span>
                       <span>Preferências</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -190,7 +194,9 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
                     <NavLink to="/dashboard/plans" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
-                      <CreditCard className="h-4 w-4 shrink-0" />
+                      <span className="sidebar-item-icon">
+                        <CreditCard className="h-4 w-4 shrink-0" />
+                      </span>
                       <span>Meu Plano</span>
                     </NavLink>
                   </SidebarMenuButton>
@@ -209,7 +215,9 @@ export function AppSidebar() {
                   data-nav="sair"
                   className="sidebar-item md:!h-[38px] md:!text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
                 >
-                  <LogOut className="h-4 w-4 shrink-0" />
+                  <span className="sidebar-item-icon">
+                    <LogOut className="h-4 w-4 shrink-0" />
+                  </span>
                   <span className="font-medium">Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

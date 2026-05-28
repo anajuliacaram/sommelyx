@@ -49,7 +49,9 @@ export const QuickActions = memo(function QuickActions({
             onClick={onAddWine}
             className="sidebar-action-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
           >
-            <Plus className="h-[15px] w-[15px] shrink-0" />
+            <span className="action-icon action-icon-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+              <Plus className="h-[15px] w-[15px]" />
+            </span>
             {isCommercial ? "Cadastrar produto" : "Adicionar vinho"}
           </Button>
 
