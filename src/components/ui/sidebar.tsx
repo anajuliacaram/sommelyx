@@ -14,8 +14,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "216px";
-const SIDEBAR_WIDTH_MOBILE = "min(58vw, 226px)";
+const SIDEBAR_WIDTH = "228px";
+const SIDEBAR_WIDTH_MOBILE = "min(60vw, 236px)";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -112,11 +112,12 @@ const SidebarProvider = React.forwardRef<
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
               "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties
           }
-          className={cn("group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", className)}
+          className={cn("group/sidebar-wrapper sx-v2-sidebar-provider flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar", className)}
           ref={ref}
           {...props}
         >
@@ -161,7 +162,7 @@ const Sidebar = React.forwardRef<
         data-sidebar="sidebar"
         data-mobile="true"
         aria-describedby={undefined}
-        className="mobile-sidebar-drawer w-[--sidebar-width] max-w-[255px] p-0 text-sidebar-foreground !bg-[#F6F4F1] !backdrop-blur-none !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)] overflow-hidden"
+        className="mobile-sidebar-drawer sx-v2-mobile-drawer w-[--sidebar-width] max-w-[255px] overflow-hidden p-0 text-sidebar-foreground !bg-[#F6F4F1] !backdrop-blur-none !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)]"
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -175,7 +176,7 @@ const Sidebar = React.forwardRef<
             <div className="sidebar-mobile-scroll-topfade" aria-hidden="true" />
             <div className="sidebar-mobile-scroll-bottomfade" aria-hidden="true" />
             <div className="sidebar-mobile-scrollbar" aria-hidden="true" />
-            <div className="sidebar-mobile-scroll-content">{children}</div>
+            <div className="sidebar-mobile-scroll-content sx-v2-mobile-drawer-content">{children}</div>
           </div>
         </SheetContent>
       </Sheet>
@@ -218,7 +219,7 @@ const Sidebar = React.forwardRef<
       >
         <div
           data-sidebar="sidebar"
-          className="flex h-full w-full flex-col overflow-hidden text-sidebar-foreground bg-transparent backdrop-blur-none shadow-none group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-white/10 group-data-[variant=floating]:shadow"
+          className="sx-v2-sidebar-shell flex h-full w-full flex-col overflow-hidden bg-transparent text-sidebar-foreground shadow-none backdrop-blur-none group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-white/10 group-data-[variant=floating]:shadow"
         >
           {children}
         </div>
@@ -239,7 +240,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         variant="ghost"
         size={children ? "default" : "icon"}
         className={cn(
-          "relative h-9 w-9 rounded-2xl text-white ring-1 ring-black/[0.06] bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(123,30,43,0.28)] hover:brightness-[1.03] active:brightness-[0.98]",
+          "sx-v2-shell-trigger relative h-9 w-9 rounded-2xl bg-[linear-gradient(135deg,#7B1E2B,#A12C3A)] text-white ring-1 ring-black/[0.06] shadow-[0_10px_24px_rgba(123,30,43,0.22)] hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(123,30,43,0.28)] hover:brightness-[1.03] active:brightness-[0.98]",
           className,
         )}
         onClick={(event) => {
@@ -251,13 +252,7 @@ const SidebarTrigger = React.forwardRef<React.ElementRef<typeof Button>, React.C
         <PanelLeft className="h-4 w-4" />
         {children}
         {!children && (
-          <>
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-1 -right-1 w-3 h-3 bg-[#6F8F6B] border-2 border-white rounded-full"
-            />
-            <span className="sr-only">Toggle Sidebar</span>
-          </>
+          <span className="sr-only">Toggle Sidebar</span>
         )}
       </Button>
     );

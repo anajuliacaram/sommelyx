@@ -74,18 +74,18 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="w-[216px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
+        className="sx-v2-sidebar w-[216px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
         style={{
           background: "var(--sx-bg-card)",
           borderColor: "var(--sx-b-default)",
           boxShadow: "none",
         }}
       >
-        <SidebarHeader className="px-0 pt-2">
+        <SidebarHeader className="sx-v2-sidebar-header px-0 pt-2">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="mx-2.5 mt-0 flex items-center gap-2.5 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-3 py-3 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
+            className="sx-v2-sidebar-brand mx-2.5 mt-0 flex items-center gap-2.5 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-3 py-3 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
             aria-label="Ir para o início do dashboard"
           >
             <img src="/logo-sommelyx-mark.png" className="h-9 w-9 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]" alt="Sommelyx" />
@@ -100,36 +100,38 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="mx-2.5 my-2">
+          <div className="sx-v2-sidebar-actions-wrap mx-2.5 my-2">
             {isCommercial ? (
-              <div className="sidebar-actions flex flex-col gap-0.5 rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
+              <div className="sidebar-actions sx-v2-nav-shell flex flex-col gap-0.5 rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
                 <Button
                   variant="primary"
-                  className="h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
+                  className="sidebar-action-primary sx-v2-btn-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
-                  <Plus className="h-[15px] w-[15px] shrink-0" />
+                  <span className="action-icon sx-v2-nav-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
+                    <Plus className="h-[15px] w-[15px] shrink-0" />
+                  </span>
                   Cadastrar produto
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
+                  className="sidebar-action-item sx-v2-nav-row group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
                   onClick={() => { setSaleOpen(true); closeMobileSidebar(); }}
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+                  <span className="action-icon sx-v2-nav-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
                     <ShoppingCart className="h-[15px] w-[15px]" />
                   </span>
-                  Registrar venda
+                  <span className="sx-v2-nav-label">Registrar venda</span>
                 </Button>
                 <Button
                   variant="ghost"
-                  className="group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
+                  className="sidebar-action-item sx-v2-nav-row group h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-sm)] border-0 bg-transparent px-3.5 py-[11px] text-[14px] font-normal text-[var(--sx-t-body)] shadow-none transition-colors hover:bg-[var(--sx-bg-input)]"
                   onClick={() => { setBreakageOpen(true); closeMobileSidebar(); }}
                 >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
+                  <span className="action-icon sx-v2-nav-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--sx-bg-input)] text-[var(--sx-t-sub)]">
                     <AlertTriangle className="h-[15px] w-[15px]" />
                   </span>
-                  Ruptura
+                  <span className="sx-v2-nav-label">Ruptura</span>
                 </Button>
               </div>
             ) : (
@@ -145,9 +147,9 @@ export function AppSidebar() {
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="gap-0 px-0 pt-1">
+        <SidebarContent className="sx-v2-sidebar-content gap-0 px-0 pt-1">
           <SidebarGroup className="py-0">
-            <SidebarGroupLabel className="mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
+            <SidebarGroupLabel className="sx-v2-sidebar-group-label mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               {isCommercial ? "Operação" : "Navegação"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
@@ -158,15 +160,15 @@ export function AppSidebar() {
                       <NavLink
                         to={item.url}
                         end={item.url === "/dashboard"}
-                        className="sidebar-item"
-                        activeClassName="sidebar-item--active"
+                        className="sidebar-item sx-v2-nav-row"
+                        activeClassName="sidebar-item--active sx-v2-nav-row-active"
                         data-nav={item.navKey}
                         onClick={closeMobileSidebar}
                       >
-                        <span className="sidebar-item-icon">
+                        <span className="sidebar-item-icon sx-v2-nav-icon">
                           <item.icon className="h-4 w-4 shrink-0" />
                         </span>
-                        <span className="flex-1">{item.title}</span>
+                        <span className="sx-v2-nav-label flex-1">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -176,28 +178,28 @@ export function AppSidebar() {
           </SidebarGroup>
 
           <SidebarGroup className="mt-0 py-0">
-            <SidebarGroupLabel className="mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
+            <SidebarGroupLabel className="sx-v2-sidebar-group-label mb-1.5 mt-3 px-4 text-[10.5px] font-semibold uppercase tracking-[0.10em] text-[var(--sx-t-muted)]">
               Sistema
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-1.5">
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/settings" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
-                      <span className="sidebar-item-icon">
+                    <NavLink to="/dashboard/settings" className="sidebar-item sx-v2-nav-row" activeClassName="sidebar-item--active sx-v2-nav-row-active" data-nav="neutral" onClick={closeMobileSidebar}>
+                      <span className="sidebar-item-icon sx-v2-nav-icon">
                         <Settings className="h-4 w-4 shrink-0" />
                       </span>
-                      <span>Preferências</span>
+                      <span className="sx-v2-nav-label">Preferências</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className="p-0 h-auto bg-transparent hover:bg-transparent">
-                    <NavLink to="/dashboard/plans" className="sidebar-item" activeClassName="sidebar-item--active" data-nav="neutral" onClick={closeMobileSidebar}>
-                      <span className="sidebar-item-icon">
+                    <NavLink to="/dashboard/plans" className="sidebar-item sx-v2-nav-row" activeClassName="sidebar-item--active sx-v2-nav-row-active" data-nav="neutral" onClick={closeMobileSidebar}>
+                      <span className="sidebar-item-icon sx-v2-nav-icon">
                         <CreditCard className="h-4 w-4 shrink-0" />
                       </span>
-                      <span>Meu Plano</span>
+                      <span className="sx-v2-nav-label">Meu Plano</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -206,19 +208,19 @@ export function AppSidebar() {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter>
+        <SidebarFooter className="sx-v2-sidebar-footer">
           <div className="px-2 pb-[calc(10px+env(safe-area-inset-bottom))] pt-2">
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={signOut}
                   data-nav="sair"
-                  className="sidebar-item md:!h-[38px] md:!text-[12px] hover:!bg-red-500/10 hover:!text-red-600 hover:!border-red-500/15"
+                  className="sidebar-item sx-v2-nav-row md:!h-[38px] md:!text-[12px]"
                 >
-                  <span className="sidebar-item-icon">
+                  <span className="sidebar-item-icon sx-v2-nav-icon">
                     <LogOut className="h-4 w-4 shrink-0" />
                   </span>
-                  <span className="font-medium">Sair</span>
+                  <span className="sx-v2-nav-label">Sair</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

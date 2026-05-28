@@ -68,14 +68,14 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div
-        className="dashboard-shell h-dvh overflow-hidden flex w-full relative app-background"
+        className="dashboard-shell sx-v2-auth-shell sx-v2-app-bg sx-v2-atmosphere flex h-dvh w-full overflow-hidden relative app-background"
         data-theme={profileType === "commercial" ? "business" : undefined}
       >
         <LandingBackground />
         <AppSidebar />
-        <main className="flex-1 flex h-full flex-col min-w-0 overflow-hidden">
+        <main className="sx-v2-shell-main flex-1 flex h-full min-w-0 flex-col overflow-hidden">
           <header
-            className="mobile-header sx-mobile-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
+            className="mobile-header sx-mobile-header sx-v2-shell-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
@@ -137,7 +137,7 @@ export default function DashboardLayout() {
             </div>
           </header>
 
-          <div className="dashboard-scroll flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 md:pt-3 lg:px-8">
+          <div className="dashboard-scroll sx-v2-shell-scroll flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))] md:px-6 md:pt-3 lg:px-8">
             <AnimatedOutlet />
           </div>
         </main>
