@@ -16715,3 +16715,718 @@ body:not(.landing-page) .sx-action-modal :is(.modal-btn-secondary, .consumption-
     border-radius: 30px !important;
   }
 }
+
+/* Authenticated app visual-system recovery: keep this last. */
+:root {
+  --sx-bg-app: #F7F2EA;
+  --sx-bg-base: #F7F2EA;
+  --sx-bg-page: #F7F2EA;
+  --sx-bg-surface: #FFFDF8;
+  --sx-bg-card: #FFFDF8;
+  --sx-bg-soft: #F1EADF;
+  --sx-bg-input: #F1EADF;
+  --sx-wine: #650A18;
+  --sx-wine-deep: #3B0710;
+  --sx-wine-dark: #22040A;
+  --sx-bordeaux: #650A18;
+  --brand-primary: #650A18;
+  --wine-hover: #3B0710;
+  --wine-vivid: #650A18;
+  --wine-mid: #5A0713;
+  --sx-bordeaux-10: rgba(101, 10, 24, 0.10);
+  --sx-bordeaux-06: rgba(101, 10, 24, 0.06);
+  --sx-olive: #263A2B;
+  --sx-olive-deep: #18251D;
+  --sx-olive-soft: #E9EFE5;
+  --olive-surface: #E9EFE5;
+  --sx-gold: #C8A85A;
+  --gold: #C8A85A;
+  --sx-text: #201714;
+  --sx-muted: #746B63;
+  --sx-subtle: #9A9188;
+  --sx-t-head: #201714;
+  --sx-t-body: #3D3530;
+  --sx-t-sub: #746B63;
+  --sx-t-muted: #9A9188;
+  --sx-border: rgba(61, 53, 48, 0.10);
+  --sx-border-strong: rgba(61, 53, 48, 0.16);
+  --sx-b-default: rgba(61, 53, 48, 0.10);
+  --sx-b-medium: rgba(61, 53, 48, 0.16);
+  --sx-b-focus: #650A18;
+}
+
+body:not(.landing-page) {
+  background:
+    radial-gradient(circle at 80% -12%, rgba(233, 239, 229, 0.60), transparent 30%),
+    radial-gradient(circle at 0% 0%, rgba(241, 234, 223, 0.76), transparent 34%),
+    var(--sx-bg-app) !important;
+  color: var(--sx-text) !important;
+}
+
+body:not(.landing-page) :is(.dashboard-shell, .dashboard-root, .editorial-page, .premium-home-page, .cellar-page, .consumo-page) {
+  background: transparent !important;
+  color: var(--sx-text) !important;
+}
+
+body:not(.landing-page) .dashboard-scroll {
+  background:
+    radial-gradient(circle at 88% -10%, rgba(233, 239, 229, 0.48), transparent 30%),
+    linear-gradient(180deg, rgba(247, 242, 234, 0.96), rgba(247, 242, 234, 0.98)) !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(38, 58, 43, 0.22) transparent !important;
+}
+
+body:not(.landing-page) ::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+body:not(.landing-page) ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body:not(.landing-page) ::-webkit-scrollbar-thumb {
+  background: rgba(38, 58, 43, 0.20);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+body:not(.landing-page) :is([data-sidebar="sidebar"], [data-sidebar="content"], .sidebar-mobile-scroll-content)::-webkit-scrollbar,
+body:not(.landing-page) :is([data-sidebar="sidebar"], [data-sidebar="content"], .sidebar-mobile-scroll-content) ::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body:not(.landing-page) :is(.dashboard-shell [data-sidebar="sidebar"], [data-mobile="true"][data-sidebar="sidebar"]) {
+  background: linear-gradient(180deg, #FFFDF8 0%, #F7F2EA 100%) !important;
+  border-color: var(--sx-border) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] {
+  width: 230px !important;
+  max-width: 230px !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] {
+  width: min(60vw, 238px) !important;
+  max-width: 238px !important;
+  border-radius: 0 18px 18px 0 !important;
+  overflow: hidden !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-mobile-scroll-content {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  padding: max(8px, env(safe-area-inset-top)) 7px calc(8px + env(safe-area-inset-bottom)) !important;
+  scrollbar-width: none !important;
+}
+
+body:not(.landing-page) [data-sidebar="header"] {
+  padding: 0 !important;
+}
+
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"],
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"] {
+  margin: 0 7px 7px !important;
+  padding: 9px 10px !important;
+  min-height: 50px !important;
+  border-radius: 17px !important;
+  background: linear-gradient(135deg, var(--sx-olive-deep), var(--sx-olive)) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"] img {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+body:not(.landing-page) .sidebar-actions {
+  margin: 0 !important;
+  padding: 6px !important;
+  border-radius: 18px !important;
+  border: 1px solid var(--sx-border) !important;
+  background: rgba(255, 253, 248, 0.70) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sidebar-actions-list {
+  gap: 5px !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .sidebar-item) {
+  min-height: 36px !important;
+  height: 36px !important;
+  width: 100% !important;
+  gap: 8px !important;
+  padding: 5px 8px !important;
+  border-radius: 14px !important;
+  border: 1px solid transparent !important;
+  font-size: 12.75px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: var(--sx-t-body) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sidebar-action-primary {
+  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  color: #FFFDF8 !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item) {
+  background: rgba(255, 253, 248, 0.45) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover) {
+  background: rgba(233, 239, 229, 0.72) !important;
+  border-color: rgba(38, 58, 43, 0.12) !important;
+  color: var(--sx-olive-deep) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item-icon, .sidebar-action-item .action-icon, .sidebar-action-primary .action-icon) {
+  display: inline-flex !important;
+  width: 25px !important;
+  height: 25px !important;
+  min-width: 25px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 9px !important;
+  background: rgba(233, 239, 229, 0.82) !important;
+  color: var(--sx-olive) !important;
+}
+
+body:not(.landing-page) .sidebar-action-primary .action-icon {
+  background: rgba(255, 253, 248, 0.14) !important;
+  color: #FFFDF8 !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item-icon svg, .sidebar-action-item .action-icon svg, .sidebar-action-primary .action-icon svg) {
+  width: 14px !important;
+  height: 14px !important;
+  stroke-width: 1.75 !important;
+}
+
+body:not(.landing-page) [data-sidebar="content"] {
+  gap: 0 !important;
+  padding: 0 7px !important;
+}
+
+body:not(.landing-page) [data-sidebar="group"] {
+  padding: 0 !important;
+}
+
+body:not(.landing-page) [data-sidebar="group-label"] {
+  margin: 9px 4px 5px !important;
+  padding: 0 !important;
+  color: var(--sx-subtle) !important;
+  font-size: 9.75px !important;
+  font-weight: 520 !important;
+  letter-spacing: 0.10em !important;
+}
+
+body:not(.landing-page) [data-sidebar="menu"] {
+  gap: 4px !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
+body:not(.landing-page) .dashboard-shell .sidebar-item--active,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
+  position: relative !important;
+  background: rgba(101, 10, 24, 0.055) !important;
+  border-color: rgba(101, 10, 24, 0.10) !important;
+  color: var(--sx-wine) !important;
+  font-weight: 520 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active)::before,
+body:not(.landing-page) .dashboard-shell .sidebar-item--active::before,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 4px !important;
+  top: 10px !important;
+  bottom: 10px !important;
+  width: 2px !important;
+  border-radius: 999px !important;
+  background: var(--sx-wine) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) .sidebar-item-icon,
+body:not(.landing-page) .dashboard-shell .sidebar-item--active .sidebar-item-icon,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active .sidebar-item-icon {
+  background: rgba(101, 10, 24, 0.09) !important;
+  color: var(--sx-wine) !important;
+}
+
+body:not(.landing-page) [data-sidebar="footer"] {
+  padding: 0 7px 8px !important;
+}
+
+body:not(.landing-page) .premium-home-page.dashboard-root,
+body:not(.landing-page) .cellar-page,
+body:not(.landing-page) .consumo-page {
+  width: 100% !important;
+  max-width: 1120px !important;
+  margin: 0 auto !important;
+  padding-top: 18px !important;
+}
+
+body:not(.landing-page) .premium-home-page .overview-greeting-wrap {
+  padding: 4px 0 14px !important;
+}
+
+body:not(.landing-page) .premium-home-page .overview-date {
+  color: rgba(38, 58, 43, 0.74) !important;
+  font-size: 10px !important;
+  font-weight: 540 !important;
+  letter-spacing: 0.12em !important;
+}
+
+body:not(.landing-page) .premium-home-page .overview-greeting {
+  color: var(--sx-text) !important;
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-weight: 560 !important;
+  letter-spacing: -0.035em !important;
+}
+
+body:not(.landing-page) .premium-home-page .dashboard-quick-actions {
+  gap: 8px !important;
+}
+
+body:not(.landing-page) .premium-home-page :is(.btn-adicionar-wine-primary, .btn-adicionar-consumo-secondary),
+body:not(.landing-page) :is(.editorial-btn-primary, .editorial-btn-ghost, .btn-adicionar-adega) {
+  min-height: 42px !important;
+  border-radius: 18px !important;
+  font-size: 13px !important;
+  font-weight: 560 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) :is(.btn-adicionar-wine-primary, .editorial-btn-primary, .btn-adicionar-adega, .modal-btn-primary, .consumption-filter-apply) {
+  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  border-color: transparent !important;
+  color: #FFFDF8 !important;
+}
+
+body:not(.landing-page) :is(.btn-adicionar-consumo-secondary, .editorial-btn-ghost, .modal-btn-secondary, .consumption-filter-clear) {
+  background: rgba(255, 253, 248, 0.72) !important;
+  border: 1px solid rgba(38, 58, 43, 0.16) !important;
+  color: var(--sx-olive) !important;
+}
+
+body:not(.landing-page) .overview-command-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr) !important;
+  gap: 14px !important;
+  align-items: start !important;
+}
+
+body:not(.landing-page) :is(.overview-main-column, .overview-side-column) {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+body:not(.landing-page) .daily-insight-card {
+  width: min(100%, 520px) !important;
+  min-height: 0 !important;
+  padding: 18px !important;
+  border-radius: 30px !important;
+  border: 1px solid rgba(200, 168, 90, 0.18) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(200, 168, 90, 0.20), transparent 32%),
+    linear-gradient(135deg, #22040A 0%, #18251D 52%, #263A2B 100%) !important;
+  box-shadow: 0 18px 40px -30px rgba(24, 37, 29, 0.74) !important;
+}
+
+body:not(.landing-page) .daily-insight-card .editorial-kicker,
+body:not(.landing-page) .daily-insight-card [class*="kicker"] {
+  color: var(--sx-gold) !important;
+  font-size: 9.5px !important;
+  font-weight: 620 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .daily-insight-icon {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 14px !important;
+  background: rgba(255, 253, 248, 0.10) !important;
+  color: var(--sx-gold) !important;
+}
+
+body:not(.landing-page) .daily-insight-name {
+  color: #FFFDF8 !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .daily-insight-action,
+body:not(.landing-page) .daily-insight-copy,
+body:not(.landing-page) .daily-insight-empty {
+  color: rgba(255, 253, 248, 0.74) !important;
+}
+
+body:not(.landing-page) .overview-summary-grid,
+body:not(.landing-page) .home-summary-strip {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .home-summary-item {
+  min-height: 82px !important;
+  padding: 13px !important;
+  border-radius: 22px !important;
+  border: 1px solid var(--sx-border) !important;
+  background: rgba(255, 253, 248, 0.72) !important;
+  box-shadow: 0 10px 28px -28px rgba(34, 4, 10, 0.24) !important;
+}
+
+body:not(.landing-page) .home-summary-value {
+  color: var(--sx-text) !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+}
+
+body:not(.landing-page) .home-summary-label {
+  color: var(--sx-muted) !important;
+  font-size: 9px !important;
+  font-weight: 620 !important;
+  letter-spacing: 0.10em !important;
+}
+
+body:not(.landing-page) .overview-panel {
+  border-radius: 26px !important;
+  border: 1px solid var(--sx-border) !important;
+  background: rgba(255, 253, 248, 0.72) !important;
+  box-shadow: 0 12px 32px -30px rgba(34, 4, 10, 0.24) !important;
+}
+
+body:not(.landing-page) .overview-panel-head :is(h2, span) {
+  color: var(--sx-text) !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .overview-panel-kicker {
+  color: var(--sx-olive) !important;
+}
+
+body:not(.landing-page) .overview-wine-row,
+body:not(.landing-page) .overview-toast-row {
+  min-height: 60px !important;
+  border-radius: 18px !important;
+  background: rgba(247, 242, 234, 0.74) !important;
+}
+
+body:not(.landing-page) .overview-ready-list .overview-wine-row:nth-child(n+4),
+body:not(.landing-page) .overview-toast-list .overview-toast-row:nth-child(n+4) {
+  display: none !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.adega-header, .adega-controls, .adega-filters-row, .adega-grid, .adega-list),
+body:not(.landing-page) .consumo-page :is(.consumo-journal-grid, .consumo-stat-grid, .consumo-chart-card, .consumo-filter-card, .consumo-list-card, .last-opened-card) {
+  border-color: var(--sx-border) !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.adega-search-wrap, .adega-filter-btn, .chip, .wine-card, .adega-empty),
+body:not(.landing-page) .consumo-page :is(.consumo-stat-card, .consumo-chart-card, .consumo-filter-card, .consumo-list-card, .last-opened-card, .consumo-entry-card) {
+  background: rgba(255, 253, 248, 0.72) !important;
+  border-color: var(--sx-border) !important;
+  box-shadow: 0 10px 30px -30px rgba(34, 4, 10, 0.22) !important;
+}
+
+body:not(.landing-page) .cellar-page :is(.chip.active, .adega-filter-btn[data-state="open"]),
+body:not(.landing-page) .consumo-page :is(.consumption-filter-chip.active, .consumo-filter-card[aria-expanded="true"]) {
+  background: var(--sx-wine) !important;
+  border-color: var(--sx-wine) !important;
+  color: #FFFDF8 !important;
+}
+
+body:not(.landing-page) .consumo-title,
+body:not(.landing-page) .adega-title,
+body:not(.landing-page) .editorial-page-h1 {
+  color: var(--sx-text) !important;
+  font-weight: 560 !important;
+  letter-spacing: -0.035em !important;
+}
+
+body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-modal, [data-radix-dialog-content].sx-action-modal, [data-radix-sheet-content].sx-action-modal, .consumption-filter-modal) {
+  width: min(90vw, 420px) !important;
+  max-width: min(90vw, 420px) !important;
+  max-height: min(86dvh, 680px) !important;
+  overflow: hidden !important;
+  border-radius: 32px !important;
+  border: 1px solid var(--sx-border) !important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(241, 234, 223, 0.66), transparent 34%),
+    linear-gradient(180deg, #FFFDF8 0%, #F7F2EA 100%) !important;
+  box-shadow: 0 24px 70px rgba(32, 23, 20, 0.20) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-header, .modal-header-bar) {
+  padding: 15px 17px 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) {
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 16px !important;
+  background: rgba(101, 10, 24, 0.07) !important;
+  color: var(--sx-wine) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title]) {
+  color: var(--sx-text) !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 21px !important;
+  font-weight: 580 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.03em !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-subtitle, .modal-header-sub, [data-radix-dialog-description], .modal-action-card-sub, .modal-action-subtitle, .modal-action-sub, .harmonizar-option-subtitle, .analyze-carta-help, .carta-loading-sub) {
+  display: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body) {
+  padding: 0 15px 12px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(38, 58, 43, 0.18) transparent !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body)::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body)::-webkit-scrollbar-thumb {
+  background: rgba(38, 58, 43, 0.18) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .analyze-carta-button, .consumption-section, .consumption-details-card, .consumption-selected-summary, .consumption-select-card, .segment-card) {
+  border-radius: 19px !important;
+  border: 1px solid var(--sx-border) !important;
+  background: rgba(255, 253, 248, 0.70) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(input, textarea, select, button[role="combobox"]) {
+  min-height: 42px !important;
+  border-radius: 16px !important;
+  border-color: var(--sx-border) !important;
+  background: rgba(255, 253, 248, 0.76) !important;
+  color: var(--sx-text) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-footer, .modal-footer-bar, .consumption-filter-footer) {
+  padding: 9px 15px calc(12px + env(safe-area-inset-bottom)) !important;
+  border: 0 !important;
+  background: linear-gradient(180deg, rgba(247, 242, 234, 0), rgba(247, 242, 234, 0.94) 24%) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-action-button-primary, .consumption-filter-apply) {
+  min-height: 46px !important;
+  border-radius: 18px !important;
+  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  color: #FFFDF8 !important;
+  font-size: 13.5px !important;
+  font-weight: 560 !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary:disabled, .modal-action-button-primary:disabled, button:disabled) {
+  background: #E8DDCF !important;
+  color: rgba(61, 53, 48, 0.52) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-btn-secondary, .consumption-filter-clear) {
+  min-height: 44px !important;
+  border-radius: 18px !important;
+  background: rgba(255, 253, 248, 0.78) !important;
+  border: 1px solid rgba(38, 58, 43, 0.16) !important;
+  color: var(--sx-olive) !important;
+  font-size: 13.5px !important;
+  font-weight: 540 !important;
+}
+
+body:not(.landing-page) .sx-action-modal .consumption-source-card {
+  min-height: 46px !important;
+  padding: 7px 9px !important;
+}
+
+body:not(.landing-page) .sx-action-modal .consumption-wine-list {
+  max-height: 210px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(38, 58, 43, 0.18) transparent !important;
+}
+
+body:not(.landing-page) .sx-action-modal .harmonizar-back-inline {
+  min-height: 31px !important;
+  height: 31px !important;
+  margin: 0 0 7px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  color: var(--sx-olive) !important;
+}
+
+@media (max-width: 767px) {
+  html:has(body:not(.landing-page)),
+  body:not(.landing-page),
+  body:not(.landing-page) #root,
+  body:not(.landing-page) .dashboard-shell {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.landing-page) *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  body:not(.landing-page) .dashboard-shell main,
+  body:not(.landing-page) .dashboard-shell main > div.flex-1 {
+    height: calc(100dvh - 56px) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:not(.landing-page) .dashboard-shell main > div.flex-1.dashboard-scroll,
+  body:not(.landing-page) .dashboard-scroll {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 0 12px calc(18px + env(safe-area-inset-bottom)) !important;
+    scrollbar-width: none !important;
+  }
+
+  body:not(.landing-page) .premium-home-page.dashboard-root,
+  body:not(.landing-page) .cellar-page,
+  body:not(.landing-page) .consumo-page {
+    max-width: 430px !important;
+    padding-top: 10px !important;
+  }
+
+  body:not(.landing-page) .premium-home-page .overview-greeting-wrap {
+    padding: 8px 2px 10px !important;
+    gap: 10px !important;
+  }
+
+  body:not(.landing-page) .premium-home-page .overview-greeting {
+    font-size: 33px !important;
+    line-height: 0.98 !important;
+  }
+
+  body:not(.landing-page) .premium-home-page .dashboard-quick-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  body:not(.landing-page) .premium-home-page :is(.btn-adicionar-wine-primary, .btn-adicionar-consumo-secondary) {
+    width: 100% !important;
+    min-height: 42px !important;
+    padding: 0 10px !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.landing-page) .overview-command-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 0 2px 14px !important;
+  }
+
+  body:not(.landing-page) .overview-main-column,
+  body:not(.landing-page) .overview-side-column {
+    display: contents !important;
+  }
+
+  body:not(.landing-page) .daily-insight-card {
+    order: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 15px !important;
+    border-radius: 26px !important;
+  }
+
+  body:not(.landing-page) .daily-insight-name {
+    font-size: 23px !important;
+    line-height: 1.02 !important;
+  }
+
+  body:not(.landing-page) .overview-summary-grid,
+  body:not(.landing-page) .home-summary-strip {
+    order: 2 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  body:not(.landing-page) .home-summary-item {
+    min-height: 70px !important;
+    padding: 11px !important;
+    border-radius: 20px !important;
+  }
+
+  body:not(.landing-page) .home-summary-value {
+    font-size: 18px !important;
+  }
+
+  body:not(.landing-page) .overview-ready-panel {
+    order: 3 !important;
+    display: block !important;
+    padding: 13px !important;
+    border-radius: 22px !important;
+  }
+
+  body:not(.landing-page) :is(.overview-toast-panel, .overview-alert-strip) {
+    display: none !important;
+  }
+
+  body:not(.landing-page) .overview-panel-head {
+    margin-bottom: 8px !important;
+  }
+
+  body:not(.landing-page) .overview-panel-head h2 {
+    font-size: 16px !important;
+    line-height: 1.1 !important;
+  }
+
+  body:not(.landing-page) .overview-wine-row {
+    min-height: 56px !important;
+    padding: 8px 9px !important;
+  }
+
+  body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer,
+  body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] {
+    width: min(60vw, 238px) !important;
+    max-width: 238px !important;
+  }
+
+  body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .sidebar-item) {
+    min-height: 35px !important;
+    height: 35px !important;
+    font-size: 12.5px !important;
+  }
+
+  body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-modal, [data-radix-dialog-content].sx-action-modal, [data-radix-sheet-content].sx-action-modal, .consumption-filter-modal) {
+    width: 88vw !important;
+    max-width: 88vw !important;
+    border-radius: 30px !important;
+  }
+}
