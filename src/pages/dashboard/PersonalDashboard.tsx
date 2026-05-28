@@ -4,6 +4,7 @@
 
 import { useMemo, useState } from "react";
 import {
+  ArrowRight,
   CircleDollarSign,
   Clock,
   GlassWater,
@@ -147,6 +148,16 @@ export default function PersonalDashboard() {
     return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
   };
 
+  const insightMeta = insightWine ? formatWineMeta(insightWine) : "";
+
+  const insightSentence = insightWine
+    ? insightReason === "Abra este rótulo hoje"
+      ? "Boa escolha para acompanhar sua próxima refeição."
+      : insightReason === "Vale acompanhar a janela de consumo"
+        ? "Vale observar a evolução e decidir com calma."
+        : "Um rótulo da sua adega que merece atenção agora."
+    : insightReason;
+
   return (
     <>
       {showOnboarding && (
@@ -159,30 +170,30 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="dashboard-root editorial-page premium-home-page !px-0">
-        <section>
-          <div className="overview-greeting-wrap flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="min-w-0">
-              <p className="overview-date overview-greeting-eyebrow">
+      <div className="dashboard-root editorial-page home-v2-page sx-v2-page-shell !px-0">
+        <section className="sx-v2-content-rail home-v2-rail">
+          <div className="home-v2-header">
+            <div className="home-v2-greeting">
+              <p className="home-v2-date sx-v2-kicker">
                 {new Date().toLocaleDateString("pt-BR", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
                 })}
               </p>
-              <h1 className="overview-greeting">
+              <h1 className="home-v2-title sx-v2-display">
                 Olá,{" "}
-                <span className="name-accent">{firstName}</span>
+                <span className="home-v2-name">{firstName}</span>
               </h1>
             </div>
-            <div className="dashboard-quick-actions flex w-full flex-wrap items-center gap-2 sm:w-auto">
-              <button type="button" className="editorial-btn-primary btn-adicionar-wine-primary" onClick={() => setAddOpen(true)}>
+            <div className="home-v2-actions">
+              <button type="button" className="sx-v2-btn sx-v2-btn-primary home-v2-primary-action" onClick={() => setAddOpen(true)}>
                 <Plus className="h-4 w-4" />
                 <span>Adicionar vinho</span>
               </button>
               <button
                 type="button"
-                className="editorial-btn-ghost btn-adicionar-consumo-secondary"
+                className="sx-v2-btn sx-v2-btn-secondary home-v2-secondary-action"
                 onClick={() => {
                   setPreSelectedWine(null);
                   setConsumptionOpen(true);
@@ -194,114 +205,152 @@ export default function PersonalDashboard() {
             </div>
           </div>
 
-          <div className="overview-command-grid">
-            <div className="overview-main-column">
-              <button
-                type="button"
-                className="daily-insight-card daily-insight-card-mobile group flex items-start gap-3 text-left"
-                disabled={!insightWine}
-                onClick={() => {
-                  if (!insightWine) return;
-                  setPairingInitialWineId(insightWine.id);
-                  setDishToWineOpen(true);
-                }}
-              >
-                <div className="daily-insight-icon">
-                  <Sparkles className="h-4 w-4" />
+          <div className="home-v2-stage">
+            <article className="home-v2-hero sx-v2-insight-card sx-v2-ai-aura">
+              <div className="home-v2-hero-copy">
+                <div className="home-v2-hero-kicker-row">
+                  <span className="home-v2-hero-sigil">
+                    <Sparkles className="h-4 w-4" />
+                  </span>
+                  <Kicker className="home-v2-hero-kicker">Insight do dia</Kicker>
                 </div>
-                <div className="min-w-0">
-                  <Kicker>Insight do dia</Kicker>
-                  {insightWine ? (
-                    <>
-                      <p className="daily-insight-action">{insightReason}</p>
-                      <p className="daily-insight-name">{insightWine.name}</p>
-                      <p className="daily-insight-copy">
-                        {formatWineMeta(insightWine) || "Boa escolha para acompanhar sua próxima refeição."}
-                      </p>
-                    </>
-                  ) : (
-                    <p className="daily-insight-empty">{insightReason}</p>
-                  )}
-                </div>
-              </button>
 
-              <section className="overview-panel overview-ready-panel">
-                <div className="overview-panel-head">
-                  <div>
-                    <p className="overview-panel-kicker">Próximas garrafas</p>
-                    <h2>Para abrir com calma</h2>
+                {insightWine ? (
+                  <>
+                    <p className="home-v2-hero-eyebrow">{insightReason}</p>
+                    <h2 className="home-v2-hero-wine sx-v2-wine-title">{insightWine.name}</h2>
+                    {insightMeta ? (
+                      <p className="home-v2-hero-meta sx-v2-wine-meta">{insightMeta}</p>
+                    ) : null}
+                    <p className="home-v2-hero-note sx-v2-body">{insightSentence}</p>
+
+                    <div className="home-v2-hero-actions">
+                      <button
+                        type="button"
+                        className="sx-v2-btn-capsule home-v2-hero-action"
+                        onClick={() => {
+                          setPairingInitialWineId(insightWine.id);
+                          setDishToWineOpen(true);
+                        }}
+                      >
+                        <span>Harmonizar</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="home-v2-hero-eyebrow">Sua adega começa a ganhar vida aqui.</p>
+                    <h2 className="home-v2-hero-wine sx-v2-wine-title">Cadastre os primeiros rótulos</h2>
+                    <p className="home-v2-hero-note sx-v2-body">Adicione algumas garrafas para receber sugestões diárias e acompanhar o melhor momento de abrir.</p>
+                  </>
+                )}
+              </div>
+
+              <div className="home-v2-hero-stage sx-v2-bottle-stage">
+                {insightWine?.image_url ? (
+                  <img
+                    src={insightWine.image_url}
+                    alt={insightWine.name}
+                    className="home-v2-hero-image"
+                  />
+                ) : (
+                  <div className="home-v2-hero-placeholder sx-v2-wine-object">
+                    <WineIcon className="h-10 w-10" />
                   </div>
-                  <span>{readyWines.length} rótulos</span>
-                </div>
-                <div className="overview-ready-list">
-                  {readyWines.length > 0 ? readyWines.map(({ wine, classification }) => (
-                    <button
-                      type="button"
-                      key={wine.id}
-                      className="overview-wine-row"
-                      onClick={() => {
-                        setPreSelectedWine(wine);
-                        setConsumptionOpen(true);
-                      }}
-                    >
-                      <span className="overview-wine-mark"><WineIcon className="h-4 w-4" /></span>
-                      <span className="overview-wine-copy">
-                        <strong>{wine.name}</strong>
-                        <small>{formatWineMeta(wine) || wine.style || "Rótulo da adega"}</small>
-                      </span>
-                      <span className="overview-wine-status">{classification.label}</span>
-                    </button>
-                  )) : (
-                    <div className="overview-empty-line">Cadastre garrafas para acompanhar o momento de abrir.</div>
-                  )}
-                </div>
-              </section>
-            </div>
+                )}
+              </div>
+            </article>
 
-            <aside className="overview-side-column">
-              <div className="home-summary-strip overview-summary-grid">
+            <aside className="home-v2-summary sx-v2-floating-panel">
+              <div className="home-v2-summary-head">
+                <Kicker className="home-v2-summary-kicker">Sua adega em resumo</Kicker>
+                <p className="home-v2-summary-copy sx-v2-muted">Quatro sinais para decidir com calma o próximo passo.</p>
+              </div>
+
+              <div className="home-v2-metrics">
                 {[
                   { label: "garrafas", value: totalBottles.toLocaleString("pt-BR"), icon: WineIcon },
                   { label: "beber agora", value: String(drinkNow), icon: GlassWater },
                   { label: "em guarda", value: String(inGuard), icon: ShieldCheck },
                   { label: "valor estimado", value: formattedTotalValue, icon: CircleDollarSign },
                 ].map((metric) => (
-                  <div key={metric.label} className="home-summary-item">
-                    <metric.icon className="home-summary-icon" />
-                    <span className="home-summary-value">{metric.value}</span>
-                    <span className="home-summary-label">{metric.label}</span>
+                  <div key={metric.label} className="home-v2-metric sx-v2-collectible-surface">
+                    <metric.icon className="home-v2-metric-icon" />
+                    <span className="home-v2-metric-value">{metric.value}</span>
+                    <span className="home-v2-metric-label">{metric.label}</span>
                   </div>
                 ))}
               </div>
-
-              <section className="overview-panel overview-toast-panel">
-                <div className="overview-panel-head">
-                  <div>
-                    <p className="overview-panel-kicker">Últimos brindes</p>
-                    <h2>Consumo recente</h2>
-                  </div>
-                </div>
-                <div className="overview-toast-list">
-                  {recentToasts.length > 0 ? recentToasts.map((entry) => (
-                    <div key={entry.id} className="overview-toast-row">
-                      <span className="overview-toast-date">{formatDate(entry.consumed_at)}</span>
-                      <span className="overview-toast-copy">
-                        <strong>{entry.wine_name}</strong>
-                        <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Consumo externo" : "Da adega")}</small>
-                      </span>
-                      <span className="overview-toast-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
-                    </div>
-                  )) : (
-                    <div className="overview-empty-line">Registre consumos para formar seu histórico.</div>
-                  )}
-                </div>
-              </section>
-
-              <section className="overview-alert-strip">
-                <Clock className="h-4 w-4" />
-                <span>{lowStock > 0 ? `${lowStock} rótulos com poucas unidades.` : "Adega sem alertas críticos de estoque."}</span>
-              </section>
             </aside>
+          </div>
+
+          <div className="home-v2-sections">
+            <section className="home-v2-section sx-v2-collection-card">
+              <div className="home-v2-section-head">
+                <div>
+                  <Kicker className="home-v2-section-kicker">Próximas garrafas</Kicker>
+                  <h2 className="home-v2-section-title sx-v2-section-title">Para abrir com calma</h2>
+                </div>
+                <span className="home-v2-section-count">{readyWines.length} rótulos</span>
+              </div>
+
+              <div className="home-v2-collection-list">
+                {readyWines.length > 0 ? readyWines.map(({ wine, classification }) => (
+                  <button
+                    type="button"
+                    key={wine.id}
+                    className="home-v2-wine-row sx-v2-wine-row"
+                    onClick={() => {
+                      setPreSelectedWine(wine);
+                      setConsumptionOpen(true);
+                    }}
+                  >
+                    <span className="home-v2-wine-mark">
+                      <WineIcon className="h-4 w-4" />
+                    </span>
+                    <span className="home-v2-wine-copy">
+                      <strong>{wine.name}</strong>
+                      <small>{formatWineMeta(wine) || wine.style || "Rótulo da adega"}</small>
+                    </span>
+                    <span className="home-v2-wine-status">{classification.label}</span>
+                  </button>
+                )) : (
+                  <div className="home-v2-empty">Cadastre garrafas para acompanhar o momento de abrir.</div>
+                )}
+              </div>
+            </section>
+
+            <section className="home-v2-section home-v2-ritual sx-v2-floating-panel">
+              <div className="home-v2-section-head">
+                <div>
+                  <Kicker className="home-v2-section-kicker">Movimentos recentes</Kicker>
+                  <h2 className="home-v2-section-title sx-v2-section-title">Ritual recente</h2>
+                </div>
+              </div>
+
+              <div className="home-v2-ritual-list">
+                {recentToasts.length > 0 ? recentToasts.map((entry) => (
+                  <div key={entry.id} className="home-v2-ritual-row">
+                    <span className="home-v2-ritual-date">
+                      <Clock className="h-3.5 w-3.5" />
+                      {formatDate(entry.consumed_at)}
+                    </span>
+                    <span className="home-v2-ritual-copy">
+                      <strong>{entry.wine_name}</strong>
+                      <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Consumo externo" : "Da adega")}</small>
+                    </span>
+                    <span className="home-v2-ritual-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
+                  </div>
+                )) : (
+                  <div className="home-v2-empty">Registre consumos para formar seu histórico.</div>
+                )}
+              </div>
+
+              <div className="home-v2-ritual-foot">
+                <span className="home-v2-ritual-note">{lowStock > 0 ? `${lowStock} rótulos com poucas unidades.` : "Adega sem alertas críticos de estoque."}</span>
+              </div>
+            </section>
           </div>
         </section>
       </div>
