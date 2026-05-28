@@ -727,6 +727,398 @@ body:not(.landing-page) [data-sidebar="content"] {
   }
 }
 
+/* Final overflow authority: no colored scrollbar trails in authenticated app views. */
+body:not(.landing-page),
+body:not(.landing-page) * {
+  scrollbar-color: transparent transparent !important;
+}
+
+body:not(.landing-page) :is(.dashboard-scroll, .modal-body, .sx-action-modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body, .consumption-chip-row, .harmonizar-sort-row, .harmonizar-style-grid, .harmonizar-wine-scroll, .consumption-wine-list, .sidebar-mobile-scroll-content, [data-sidebar="content"]) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body:not(.landing-page) ::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+/* Modal + scroll system recovery: keep this block last. */
+body:not(.landing-page) {
+  scrollbar-width: none !important;
+}
+
+body:not(.landing-page)::-webkit-scrollbar,
+body:not(.landing-page) *::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+body:not(.landing-page) :is(
+  .dashboard-scroll,
+  .dashboard-main,
+  .modal-body,
+  .sx-action-modal,
+  .sx-action-modal-body,
+  .consumption-modal-body,
+  .analyze-carta-body,
+  .consumption-filter-body,
+  .consumption-chip-row,
+  .harmonizar-sort-row,
+  .harmonizar-style-grid,
+  .harmonizar-wine-scroll,
+  .consumption-wine-list,
+  .sidebar-mobile-scroll-content,
+  [data-sidebar="content"]
+) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body:not(.landing-page) :is(
+  [data-radix-dialog-content].sx-action-modal,
+  [data-radix-sheet-content].sx-action-modal,
+  .premium-modal-shell.sx-action-modal,
+  .sx-action-modal,
+  .consumption-filter-modal
+) {
+  width: min(88vw, 430px) !important;
+  max-width: min(88vw, 430px) !important;
+  max-height: min(82dvh, 660px) !important;
+  border-radius: 30px !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(200, 168, 90, 0.08), transparent 34%),
+    linear-gradient(145deg, #FFFDF8 0%, #F7F2EA 100%) !important;
+  border: 1px solid rgba(61, 53, 48, 0.10) !important;
+}
+
+body:not(.landing-page) .harmonizar-modal {
+  width: min(88vw, 420px) !important;
+  max-width: min(88vw, 420px) !important;
+  max-height: min(82dvh, 650px) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-header, .ai-modal-header) {
+  padding: 14px 16px 8px !important;
+  gap: 9px !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-title, [data-radix-dialog-title]) {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: clamp(20px, 5vw, 23px) !important;
+  line-height: 1.08 !important;
+  font-weight: 570 !important;
+  letter-spacing: -0.03em !important;
+  color: #201714 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body) {
+  padding: 10px 16px 14px !important;
+  gap: 10px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-close, .dialog-close, button[aria-label="Close"], button[aria-label="Fechar"]) {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.74) !important;
+  border-color: rgba(61, 53, 48, 0.08) !important;
+  color: #3D3530 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(input, textarea, select, .modal-input, .consumption-search input) {
+  min-height: 40px !important;
+  height: 40px !important;
+  border-radius: 15px !important;
+  border-color: rgba(61, 53, 48, 0.10) !important;
+  background: rgba(255, 253, 248, 0.72) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.48) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-button, .ai-modal-action-button, .modal-footer button) {
+  min-height: 44px !important;
+  border-radius: 18px !important;
+  font-size: 13.5px !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(button, [role="button"], input, textarea, select):focus,
+body:not(.landing-page) .sx-action-modal :is(button, [role="button"], input, textarea, select):focus-visible {
+  outline: none !important;
+  --tw-ring-color: rgba(101, 10, 24, 0.14) !important;
+  --tw-ring-offset-width: 0px !important;
+  box-shadow: 0 0 0 2px rgba(101, 10, 24, 0.12) !important;
+}
+
+body:not(.landing-page) .harmonize-picker-flow {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .harmonize-picker-flow .consumption-section {
+  padding: 10px !important;
+  border-radius: 20px !important;
+  background:
+    linear-gradient(145deg, rgba(255, 253, 248, 0.76), rgba(241, 234, 223, 0.40)) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+}
+
+body:not(.landing-page) .harmonize-picker-flow .consumption-section-head {
+  margin-bottom: 8px !important;
+}
+
+body:not(.landing-page) .harmonizar-sort-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  overflow: visible !important;
+}
+
+body:not(.landing-page) .harmonizar-style-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  overflow: visible !important;
+}
+
+body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip,
+body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  padding: 0 7px !important;
+  border-radius: 999px !important;
+  font-size: 10.5px !important;
+  font-weight: 520 !important;
+  letter-spacing: 0 !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  border-color: rgba(61, 53, 48, 0.09) !important;
+  background: rgba(255, 253, 248, 0.56) !important;
+  color: #3D3530 !important;
+}
+
+body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip[data-state="on"],
+body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip[data-state="on"],
+body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip[aria-pressed="true"],
+body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip[aria-pressed="true"],
+body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip.active,
+body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip.active {
+  background: rgba(101, 10, 24, 0.09) !important;
+  border-color: rgba(101, 10, 24, 0.16) !important;
+  color: #650A18 !important;
+}
+
+body:not(.landing-page) .harmonizar-wine-scroll {
+  max-height: min(34dvh, 270px) !important;
+  overflow: hidden !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-list {
+  padding: 6px !important;
+  border-radius: 20px !important;
+  max-height: min(34dvh, 270px) !important;
+  overflow-y: auto !important;
+  background: rgba(255, 253, 248, 0.42) !important;
+  border-color: rgba(61, 53, 48, 0.07) !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-row {
+  min-height: 54px !important;
+  padding: 7px 8px !important;
+  gap: 8px !important;
+  border-radius: 15px !important;
+  background: rgba(255, 253, 248, 0.58) !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-icon {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 11px !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-name {
+  font-size: 13.5px !important;
+  line-height: 1.12 !important;
+  font-weight: 560 !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-meta {
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-qty-badge {
+  min-width: 26px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+}
+
+body:not(.landing-page) .harmonize-selected-footer {
+  margin-top: 0 !important;
+  padding-top: 4px !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-premium {
+  min-height: 250px !important;
+  padding: 22px 16px 18px !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(circle at 50% 6%, rgba(200, 168, 90, 0.13), transparent 34%),
+    linear-gradient(145deg, rgba(255, 253, 248, 0.80), rgba(241, 234, 223, 0.52)) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  text-align: center !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-orb {
+  position: relative !important;
+  width: 58px !important;
+  height: 58px !important;
+  border-radius: 22px !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #FFFDF8 !important;
+  background:
+    radial-gradient(circle at 28% 10%, rgba(200, 168, 90, 0.45), transparent 34%),
+    linear-gradient(135deg, #650A18 0%, #263A2B 100%) !important;
+  box-shadow: 0 14px 34px rgba(34, 4, 10, 0.16) !important;
+  overflow: hidden !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-orb::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: -35% !important;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent) !important;
+  transform: translateX(-70%) rotate(18deg) !important;
+  animation: sx-carta-shimmer 1.5s ease-in-out infinite !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-copy {
+  max-width: 270px !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-kicker {
+  margin: 0 0 5px !important;
+  display: block !important;
+  color: #8A6C2A !important;
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-text {
+  margin: 0 !important;
+  display: block !important;
+  color: #201714 !important;
+  font-size: 18px !important;
+  line-height: 1.08 !important;
+  font-weight: 570 !important;
+  letter-spacing: -0.025em !important;
+}
+
+body:not(.landing-page) .sx-action-modal .carta-loading-premium .carta-loading-note {
+  margin: 7px 0 0 !important;
+  display: block !important;
+  color: rgba(61, 53, 48, 0.70) !important;
+  font-size: 12.5px !important;
+  line-height: 1.4 !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-progress {
+  width: min(100%, 250px) !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(61, 53, 48, 0.08) !important;
+  overflow: hidden !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-progress span {
+  display: block !important;
+  width: 42% !important;
+  height: 100% !important;
+  border-radius: inherit !important;
+  background: linear-gradient(90deg, #C8A85A, #650A18, #263A2B) !important;
+  animation: sx-carta-progress 1.8s ease-in-out infinite !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-steps {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .carta-loading-steps span {
+  padding: 5px 8px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 253, 248, 0.56) !important;
+  border: 1px solid rgba(61, 53, 48, 0.08) !important;
+  color: rgba(61, 53, 48, 0.68) !important;
+  font-size: 10.5px !important;
+  line-height: 1 !important;
+}
+
+@keyframes sx-carta-shimmer {
+  0% { transform: translateX(-70%) rotate(18deg); }
+  62%, 100% { transform: translateX(70%) rotate(18deg); }
+}
+
+@keyframes sx-carta-progress {
+  0% { transform: translateX(-110%); }
+  52% { transform: translateX(72%); }
+  100% { transform: translateX(160%); }
+}
+
+@media (max-width: 767px) {
+  body:not(.landing-page) :is(
+    [data-radix-dialog-content].sx-action-modal,
+    [data-radix-sheet-content].sx-action-modal,
+    .premium-modal-shell.sx-action-modal,
+    .sx-action-modal,
+    .consumption-filter-modal
+  ) {
+    width: 88vw !important;
+    max-width: 88vw !important;
+    max-height: 80dvh !important;
+    border-radius: 30px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body) {
+    padding-inline: 14px !important;
+    padding-bottom: 12px !important;
+  }
+
+  body:not(.landing-page) .harmonizar-style-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip {
+    font-size: 10px !important;
+    padding-inline: 5px !important;
+  }
+
+  body:not(.landing-page) .harmonizar-wine-scroll,
+  body:not(.landing-page) .harmonizar-modal .consumption-wine-list {
+    max-height: min(32dvh, 230px) !important;
+  }
+}
+
 /* Final sidebar color correction: remove leftover green/olive secondary action states. */
 body:not(.landing-page) .dashboard-shell .sidebar-action-item,
 body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="adicionar-consumo"],
@@ -18180,4 +18572,22 @@ body:not(.landing-page) [data-sidebar="content"] {
     height: 33px !important;
     font-size: 12.2px !important;
   }
+}
+
+/* Final overflow authority: no colored scrollbar trails in authenticated app views. */
+body:not(.landing-page),
+body:not(.landing-page) * {
+  scrollbar-color: transparent transparent !important;
+}
+
+body:not(.landing-page) :is(.dashboard-scroll, .modal-body, .sx-action-modal-body, .consumption-modal-body, .analyze-carta-body, .consumption-filter-body, .consumption-chip-row, .harmonizar-sort-row, .harmonizar-style-grid, .harmonizar-wine-scroll, .consumption-wine-list, .sidebar-mobile-scroll-content, [data-sidebar="content"]) {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body:not(.landing-page) ::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
 }

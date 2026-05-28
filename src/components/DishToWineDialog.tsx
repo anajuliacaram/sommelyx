@@ -109,7 +109,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const [lastMenuAttachment, setLastMenuAttachment] = useState<WineListAnalysisTextInput | null>(null);
   const [wineSearchState, setWineSearchState] = useState("");
   const [wineSortState, setWineSortState] = useState<"az" | "za" | "newest" | "oldest">("az");
-  const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante">("all");
+  const [wineStyleFilter, setWineStyleFilter] = useState<"all" | "tinto" | "branco" | "rosé" | "espumante" | "sobremesa" | "fortificado">("all");
   const [recipeModal, setRecipeModal] = useState<{ recipe: Recipe; dish: string } | null>(null);
   const [intent, setIntent] = useState<PairingIntent>("everyday");
   const [consumeWine, setConsumeWine] = useState<{ id: string; name: string; producer?: string | null; country?: string | null; region?: string | null; grape?: string | null; style?: string | null; vintage?: number | null } | null>(null);
@@ -1385,6 +1385,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 if (wineStyleFilter === "branco") return s.includes("branc") || s.includes("white");
                 if (wineStyleFilter === "rosé") return s.includes("ros");
                 if (wineStyleFilter === "espumante") return s.includes("espum") || s.includes("champ") || s.includes("sparkl");
+                if (wineStyleFilter === "sobremesa") return s.includes("sobrem") || s.includes("dessert") || s.includes("doce");
+                if (wineStyleFilter === "fortificado") return s.includes("fort") || s.includes("porto") || s.includes("port") || s.includes("madeira") || s.includes("jerez") || s.includes("sherry");
                 return true;
               };
 
@@ -1431,6 +1433,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   key: "espumante",
                   label: "Espumante",
                 },
+                {
+                  key: "sobremesa",
+                  label: "Sobremesa",
+                },
+                {
+                  key: "fortificado",
+                  label: "Fortificado",
+                },
               ];
 
               return (
@@ -1463,7 +1473,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                     />
                   </div>
 
-                  <div className="consumption-chip-row">
+                  <div className="harmonizar-sort-row consumption-chip-row">
                     {sortOptions.map((opt) => {
                       const Icon = opt.icon;
                       const active = sortKey === opt.key;
@@ -1479,6 +1489,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                         </AiFilterChip>
                       );
                     })}
+                  </div>
+                  <div className="harmonizar-style-grid">
                     {styleFilterOptions.map((opt) => {
                       const active = wineStyleFilter === opt.key;
                       const styleKey = opt.key === "all" ? "todos" : opt.key === "rosé" ? "rose" : opt.key;
@@ -1498,7 +1510,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   </div>
                 </div>
 
-                <ScrollArea className="min-h-0 flex-1">
+                <ScrollArea className="harmonizar-wine-scroll min-h-0 flex-1">
                   <div className={cn("consumption-wine-list pb-24", AI_MODAL_LIST_SURFACE_CLASSNAME)}>
                     {filtered.map((w) => {
                       const isSelected = selectedWineId === w.id;

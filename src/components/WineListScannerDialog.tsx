@@ -644,16 +644,28 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                     {step === "scanning" && (
                       <motion.div
                         key="scanning"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="carta-loading"
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="carta-loading carta-loading-premium"
                       >
-                        <div className="carta-loading-icon">
+                        <div className="carta-loading-orb">
                           <BookOpen className="h-5 w-5" />
                         </div>
-                        <p className="carta-loading-text">Curadoria da carta</p>
-                        <p className="carta-loading-sub">Lendo carta, organizando rótulos e preparando destaques.</p>
+                        <div className="carta-loading-copy">
+                          <p className="carta-loading-kicker">Curadoria da carta</p>
+                          <p className="carta-loading-text">Leitura em andamento</p>
+                          <p className="carta-loading-note">Organizando rótulos, estilos e destaques para uma leitura clara.</p>
+                        </div>
+                        <div className="carta-loading-progress" aria-hidden="true">
+                          <span />
+                        </div>
+                        <div className="carta-loading-steps" aria-label="Etapas da leitura">
+                          <span>Lendo rótulos</span>
+                          <span>Comparando estilos</span>
+                          <span>Preparando destaques</span>
+                        </div>
                       </motion.div>
                     )}
 
