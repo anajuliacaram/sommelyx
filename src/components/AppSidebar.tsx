@@ -74,7 +74,7 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="w-[224px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
+        className="w-[216px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
         style={{
           background: "var(--sx-bg-card)",
           borderColor: "var(--sx-b-default)",
