@@ -491,11 +491,21 @@ export default function ConsumptionPage() {
 
   if (isLoading) {
     return (
-      <div className="editorial-page">
-        <EditorialCard style={{ padding: "14px 14px 12px" }}>
-          <Skeleton className="h-3 w-28 rounded-full bg-black/5" />
-          <Skeleton className="mt-2 h-7 w-52 rounded-full bg-black/5" />
-          <Skeleton className="mt-2 h-4 w-64 rounded-full bg-black/5" />
+      <div className="editorial-page consumo-page consumo-v2-page sx-v2-page-shell">
+        <EditorialCard className="sx-v2-matte-panel consumo-v2-loading">
+          <div className="sx-v2-state-loader">
+            <span className="sx-v2-kicker">Journal</span>
+            <p>Reunindo seus brindes</p>
+            <div className="mt-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
+              <Skeleton className="h-28 rounded-[24px]" />
+              <div className="grid grid-cols-2 gap-3">
+                <Skeleton className="h-16 rounded-[18px]" />
+                <Skeleton className="h-16 rounded-[18px]" />
+                <Skeleton className="h-16 rounded-[18px]" />
+                <Skeleton className="h-16 rounded-[18px]" />
+              </div>
+            </div>
+          </div>
         </EditorialCard>
       </div>
     );
@@ -725,15 +735,15 @@ export default function ConsumptionPage() {
           ) : displayEntries.length === 0 ? (
             <EditorialCard className="consumo-v2-empty">
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="font-serif text-[15px] text-[rgba(26,23,19,0.72)]">
+                <p className="font-serif text-[16px] text-[rgba(26,23,19,0.82)]">
                   {entries.length === 0
-                    ? "Você ainda não registrou nenhum consumo"
-                    : "Nenhum vinho encontrado para esses filtros"}
+                    ? "Seu journal ainda não tem brindes"
+                    : "Nenhum brinde nessa seleção"}
                 </p>
                 <p className="mt-1 text-[12px] text-[#7A746B]">
                   {entries.length === 0
-                    ? "Quando você abrir uma garrafa, ela aparecerá aqui."
-                    : "Ajuste os filtros ou limpe a seleção para ver mais brindes."}
+                    ? "Quando abrir uma garrafa, o momento aparece aqui com contexto e memória."
+                    : "Limpe os filtros para reencontrar outros momentos da sua adega."}
                 </p>
                 {activeFilterSummary ? (
                   <button

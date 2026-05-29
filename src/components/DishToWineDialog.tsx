@@ -955,14 +955,14 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
   const currentDishContext = dish || extWineName || selectedWine?.name || "prato";
   const loadingSteps = requestMode === "dish_only"
     ? [
-        "Analisando prato",
-        "Comparando estrutura",
-        "Preparando harmonização",
+        "Buscando harmonizações",
+        "Lendo estrutura do prato",
+        "Organizando recomendações",
       ]
     : [
-        "Lendo carta",
+        "Interpretando a carta",
         "Selecionando destaques",
-        "Preparando recomendação",
+        "Organizando recomendações",
       ];
   const loadingSubtitle = requestMode === "dish_only"
     ? `Harmonização para ${dish}`

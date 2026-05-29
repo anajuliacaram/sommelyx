@@ -155,7 +155,7 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
 
   const handleSubmit = async () => {
     if (!wineName.trim()) {
-      toast.error("Informe o nome do vinho");
+      toast.error("Escolha uma garrafa");
       return;
     }
 
@@ -205,11 +205,11 @@ export function AddConsumptionDialog({ open, onOpenChange, preSelectedWine }: Ad
         throw consumptionError;
       }
 
-      toast.success("Consumo adicionado com sucesso!");
+      toast.success("Consumo registrado");
       resetForm();
       onOpenChange(false);
     } catch {
-      toast.error("Não conseguimos registrar o consumo", { description: "Verifique sua conexão e tente novamente. Se o problema persistir, recarregue a página." });
+      toast.error("Não foi possível concluir", { description: "Tente novamente em instantes." });
     }
   };
 

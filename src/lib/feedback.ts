@@ -4,7 +4,7 @@ import { toast as sonnerToast } from "sonner";
  * Helpers de feedback unificados.
  * Use SEMPRE estas funções em vez de toast.error("Erro").
  *
- * Tom: detalhado com motivo + sugestão de ação alternativa.
+ * Tom: curto, humano e sem mensagens técnicas cruas.
  */
 
 interface FeedbackOptions {
@@ -74,10 +74,18 @@ export function notifyPromise<T>(
  * Use para popular `description` em notifyError.
  */
 export function getErrorReason(err: unknown, fallback = "Verifique sua conexão e tente novamente."): string {
+  const normalize = (message: string) => {
+    const msg = message.trim();
+    if (/failed to fetch|networkerror|unexpected error|not authenticated|jwt|supabase|edge function|fetch failed/i.test(msg)) {
+      return fallback;
+    }
+    if (msg.length > 200) return fallback;
+    return msg;
+  };
   if (err instanceof Error) {
     const msg = err.message?.trim();
-    if (msg && msg.length < 200) return msg;
+    if (msg) return normalize(msg);
   }
-  if (typeof err === "string" && err.length < 200) return err;
+  if (typeof err === "string") return normalize(err);
   return fallback;
 }

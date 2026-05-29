@@ -36,7 +36,7 @@ export function PremiumEmptyState({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-                "relative flex flex-col items-center justify-center overflow-hidden rounded-[14px] border border-[rgba(58,51,39,0.08)] bg-[rgba(255,251,244,0.70)] px-4 py-7 text-center lg:py-8",
+                "sx-v2-empty-state sx-v2-floating-panel relative flex flex-col items-center justify-center overflow-hidden px-4 py-7 text-center lg:py-8",
                 className
             )}
         >
@@ -45,15 +45,15 @@ export function PremiumEmptyState({
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="relative mb-3 flex h-10 w-10 items-center justify-center"
             >
-                <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-[14px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.06)]">
-                    <Icon className="w-4.5 h-4.5 text-[#7B1E2B]" strokeWidth={1.5} />
+                <div className="sx-v2-empty-state-icon relative z-10 flex h-10 w-10 items-center justify-center rounded-[14px]">
+                    <Icon className="w-4.5 h-4.5" strokeWidth={1.5} />
                 </div>
             </motion.div>
 
-            <h3 className="relative z-10 mb-1 text-[15px] font-semibold tracking-[-0.01em] text-[#1A1713]">
+            <h3 className="sx-v2-empty-state-title relative z-10 mb-1 text-[15px] font-semibold tracking-[-0.01em]">
                 {title}
             </h3>
-            <p className="relative z-10 mb-4 max-w-[340px] text-[12.5px] leading-5 text-[#6B6258]">
+            <p className="sx-v2-empty-state-copy relative z-10 mb-4 max-w-[340px] text-[12.5px] leading-5">
                 {description}
             </p>
 

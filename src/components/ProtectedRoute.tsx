@@ -9,7 +9,14 @@ export default function ProtectedRoute({ requireProfile = false }: ProtectedRout
   const { loading, session, user, profileType } = useAuth();
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F4F1EC] text-sm font-medium text-neutral-600">Carregando...</div>;
+    return (
+      <div className="sx-v2-app-bg sx-v2-auth-loading min-h-screen">
+        <div className="sx-v2-thinking-state">
+          <span className="sx-v2-kicker">Sommelyx</span>
+          <p>Preparando sua adega</p>
+        </div>
+      </div>
+    );
   }
 
   if (!session || !user) {

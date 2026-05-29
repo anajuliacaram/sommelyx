@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData, normalizeWineSearchText, normalizeWineText } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
+import { getErrorReason } from "@/lib/feedback";
 import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
 import { cn } from "@/lib/utils";
@@ -895,7 +896,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
     const populatedCount = Object.keys(appliedFields).filter((field) => SCAN_PREFILL_FORM_FIELDS.includes(field as (typeof SCAN_PREFILL_FORM_FIELDS)[number])).length;
     if (populatedCount > 0) {
-      toast({ title: isCommercial ? "Dados do vinho aplicados" : "🍷 Dados do rótulo aplicados" });
+      toast({ title: isCommercial ? "Vinho interpretado" : "Rótulo interpretado" });
     } else {
       console.warn("[SCAN FAILURE REASON]", {
         source: "scan-wine-label",
@@ -1037,7 +1038,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       setSuccess(true);
     } catch (err: unknown) {
       console.error("Wine save error:", err);
-      toast({ title: isCommercial ? "Erro ao cadastrar vinho" : "Erro ao adicionar vinho", description: err instanceof Error ? err.message : "Tente novamente", variant: "destructive" });
+      toast({
+        title: "Não foi possível concluir",
+        description: getErrorReason(err, "Tente novamente em instantes."),
+        variant: "destructive",
+      });
     }
   };
 

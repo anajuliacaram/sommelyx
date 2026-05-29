@@ -24,11 +24,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             "group-[.toast]:rounded-full group-[.toast]:bg-muted/60 group-[.toast]:px-3 group-[.toast]:text-sm group-[.toast]:text-foreground/80 hover:group-[.toast]:bg-muted/75",
           success:
-            "group-[.toast]:border-[#D5E4D2] group-[.toast]:bg-[#F4FAF2] group-[.toast]:text-[#214128]",
+            "group-[.toast]:border-[rgba(101,10,24,0.14)] group-[.toast]:bg-[rgba(255,253,248,0.96)] group-[.toast]:text-[#201714]",
           error:
-            "group-[.toast]:border-[#E7B5BD] group-[.toast]:bg-[#FFF7F8] group-[.toast]:text-[#5A1822]",
+            "group-[.toast]:border-[rgba(101,10,24,0.22)] group-[.toast]:bg-[rgba(255,253,248,0.98)] group-[.toast]:text-[#650A18]",
           warning:
-            "group-[.toast]:border-[#E9D9B0] group-[.toast]:bg-[#FFF9EF] group-[.toast]:text-[#664B12]",
+            "group-[.toast]:border-[rgba(200,168,90,0.28)] group-[.toast]:bg-[rgba(255,251,240,0.98)] group-[.toast]:text-[#5B4616]",
           loading:
             "group-[.toast]:border-[#D9D4CB] group-[.toast]:bg-[#FAF8F5] group-[.toast]:text-[#4F463F]",
         },

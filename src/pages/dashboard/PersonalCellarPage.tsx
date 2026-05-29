@@ -21,6 +21,7 @@ import { useWineEvent, useWines, type Wine } from "@/hooks/useWines";
 import { useResolveWineImages } from "@/hooks/useResolveWineImages";
 import { WineLabelPreview } from "@/components/WineLabelPreview";
 import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const currentYear = new Date().getFullYear();
@@ -425,16 +426,28 @@ export default function PersonalCellarPage() {
           {/* Results */}
           {isLoading ? (
             <EditorialCard className="cellar-v2-loading sx-v2-matte-panel">
-            <p style={{ color: "rgba(58,51,39,0.5)" }}>Carregando adega…</p>
+              <div className="sx-v2-state-loader">
+                <span className="sx-v2-kicker">Adega</span>
+                <p>Organizando seus rótulos</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {[0, 1, 2].map((item) => (
+                    <div key={item} className="sx-v2-loading-card">
+                      <Skeleton className="h-24 w-full rounded-[20px]" />
+                      <Skeleton className="mt-3 h-3 w-3/4 rounded-full" />
+                      <Skeleton className="mt-2 h-3 w-1/2 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </EditorialCard>
           ) : filtered.length === 0 ? (
             <PremiumEmptyState
             icon={WineIcon}
-            title={wines.length === 0 ? "Sua adega está vazia" : "Nenhum vinho encontrado"}
+            title={wines.length === 0 ? "Sua adega começa com a primeira garrafa" : "Nenhum rótulo nessa seleção"}
             description={
               wines.length === 0
-                ? "Adicione seu primeiro vinho para começar a organizar a coleção e acompanhar janelas de consumo."
-                : "Ajuste a busca ou os filtros para encontrar outro rótulo."
+                ? "Adicione um vinho para criar sua coleção, acompanhar janelas de consumo e receber curadoria."
+                : "Ajuste a busca ou limpe os filtros para voltar à coleção completa."
             }
             primaryAction={
               wines.length === 0

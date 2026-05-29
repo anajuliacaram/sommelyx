@@ -326,6 +326,10 @@ export function PairingErrorState({
   onClose?: () => void;
   title?: string;
 }) {
+  const safeMessage = /failed to fetch|networkerror|unexpected error|not authenticated|jwt|supabase|edge function|fetch failed/i.test(message)
+    ? "Tente novamente em instantes."
+    : message;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
@@ -335,16 +339,16 @@ export function PairingErrorState({
     >
       <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[11px]"
         style={{
-          background: "linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(251,240,240,0.82) 100%)",
-          border: "1px solid rgba(220,38,38,0.10)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 12px 24px -24px rgba(220,38,38,0.24)",
+          background: "linear-gradient(180deg, rgba(255,253,248,0.88) 0%, rgba(241,234,223,0.82) 100%)",
+          border: "1px solid rgba(101,10,24,0.14)",
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 12px 24px -24px rgba(59,7,16,0.28)",
         }}
       >
-        <X className="h-4 w-4 text-destructive/60" />
+        <X className="h-4 w-4 text-[#650A18]/70" />
       </div>
       <div className="mt-2.5 space-y-1">
         <p className="text-[13.5px] font-medium text-[#1A1713]">{title}</p>
-        <p className="mx-auto max-w-[360px] text-[11.5px] leading-[1.5] text-[#6B6258]">{message}</p>
+        <p className="mx-auto max-w-[360px] text-[11.5px] leading-[1.5] text-[#6B6258]">{safeMessage}</p>
       </div>
       <AiModalActions className="mx-auto mt-2.5 w-full max-w-[320px]">
         <AiModalActionButton onClick={onRetry} variant="secondary" className="w-full">

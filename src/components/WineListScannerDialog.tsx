@@ -348,7 +348,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
     if (!isSupportedUploadFile(file)) {
-      toast({ title: "Envie uma imagem ou PDF válido", variant: "destructive" });
+      toast({ title: "Arquivo não reconhecido", description: "Envie uma foto ou PDF da carta.", variant: "destructive" });
       prepareBusyRef.current = false;
       return;
     }
@@ -654,9 +654,9 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                           <BookOpen className="h-5 w-5" />
                         </div>
                         <div className="carta-loading-copy">
-                          <p className="carta-loading-kicker">Curadoria da carta</p>
-                          <p className="carta-loading-text">Leitura em andamento</p>
-                          <p className="carta-loading-note">Organizando rótulos, estilos e destaques para uma leitura clara.</p>
+                          <p className="carta-loading-kicker">Analisar carta</p>
+                          <p className="carta-loading-text">Interpretando a carta</p>
+                          <p className="carta-loading-note">Organizando rótulos e destaques para uma leitura clara.</p>
                         </div>
                         <div className="carta-loading-progress" aria-hidden="true">
                           <span />
@@ -664,7 +664,7 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         <div className="carta-loading-steps" aria-label="Etapas da leitura">
                           <span>Lendo rótulos</span>
                           <span>Comparando estilos</span>
-                          <span>Preparando destaques</span>
+                          <span>Organizando recomendações</span>
                         </div>
                       </motion.div>
                     )}

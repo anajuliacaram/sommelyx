@@ -364,7 +364,7 @@ export function ScanWineLabelDialog({ open, onOpenChange, onScanComplete }: Scan
     const prepareSeq = beginRequest();
     logFileRequestStart("SCAN_FILE_SELECTED", file, { source: "label_scan" });
     if (!isAcceptedMobileImage(file)) {
-      toast({ title: "Selecione uma imagem válida", variant: "destructive" });
+      toast({ title: "Imagem não reconhecida", description: "Use uma foto nítida do rótulo.", variant: "destructive" });
       return;
     }
 
