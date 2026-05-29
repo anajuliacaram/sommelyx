@@ -739,6 +739,60 @@ body:not(.landing-page) :is(.dashboard-scroll, .modal-body, .sx-action-modal-bod
   -ms-overflow-style: none !important;
 }
 
+/* Phase 9 mobile navigation polish: quiet drawer overlay, native tap feel, no stuck backdrop. */
+body:not(.landing-page) .mobile-sidebar-overlay {
+  background:
+    radial-gradient(circle at 0% 12%, rgba(101, 10, 24, 0.10), transparent 34%),
+    rgba(32, 23, 20, 0.20) !important;
+  backdrop-filter: blur(3px) saturate(0.95) !important;
+}
+
+body:not(.landing-page) .mobile-sidebar-overlay[data-state="closed"] {
+  pointer-events: none !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer {
+  touch-action: pan-y !important;
+  border-top-right-radius: 24px !important;
+  border-bottom-right-radius: 24px !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-mobile-scroll-content {
+  overscroll-behavior: contain !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-action-primary, .sidebar-action-item, .sidebar-item) {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding-inline: 8px !important;
+  border-radius: 14px !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-action-primary:active, .sidebar-action-item:active, .sidebar-item:active) {
+  transform: scale(0.985) !important;
+  transition-duration: 90ms !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-action-item:hover, .sidebar-item:hover) {
+  transform: none !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-item--active, .sidebar-nav-item.active) {
+  background:
+    linear-gradient(90deg, rgba(101, 10, 24, 0.070), rgba(255, 253, 248, 0.48)) !important;
+  border-color: rgba(101, 10, 24, 0.10) !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-item--active, .sidebar-nav-item.active)::before {
+  top: 12px !important;
+  bottom: 12px !important;
+}
+
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-primary {
+  box-shadow: 0 14px 30px -25px rgba(59, 7, 16, 0.58) !important;
+}
+
 body:not(.landing-page) ::-webkit-scrollbar {
   width: 0 !important;
   height: 0 !important;

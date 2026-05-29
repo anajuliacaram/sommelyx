@@ -59,6 +59,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
   ({ side = "right", centered = false, className, children, style, ...props }, ref) => {
     const isModalContainer = typeof className === "string" && className.includes("modal-container");
     const isActionModal = typeof className === "string" && className.includes("sx-action-modal");
+    const isMobileSidebar = typeof className === "string" && className.includes("mobile-sidebar-drawer");
     const isCentered = centered || isModalContainer;
 
     if (isCentered) {
@@ -94,7 +95,7 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
 
     return (
       <SheetPortal>
-        <SheetOverlay />
+        <SheetOverlay className={isMobileSidebar ? "mobile-sidebar-overlay" : undefined} />
         <SheetPrimitive.Content
           ref={ref}
           data-radix-dialog-content=""

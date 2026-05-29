@@ -3,7 +3,7 @@ import { NavLink } from "@/components/NavLink";
 import { BrandName } from "@/components/BrandName";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddWineDialog } from "@/components/AddWineDialog";
 import { ManageBottleDialog } from "@/components/ManageBottleDialog";
 import { BreakageDialog } from "@/components/BreakageDialog";
@@ -12,7 +12,7 @@ import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
 import { QuickActions } from "@/components/QuickActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -55,6 +55,7 @@ const commercialMenu: MenuItem[] = [
 export function AppSidebar() {
   const { profileType, signOut, user } = useAuth();
   const { setOpenMobile } = useSidebar();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [addOpen, setAddOpen] = useState(false);
   const [addWithScan, setAddWithScan] = useState(false);
@@ -70,6 +71,12 @@ export function AppSidebar() {
   const closeMobileSidebar = () => {
     if (isMobile) setOpenMobile(false);
   };
+
+  useEffect(() => {
+    if (!isMobile) return;
+    setOpenMobile(false);
+  }, [isMobile, location.pathname, location.search, setOpenMobile]);
+
   return (
     <>
       <Sidebar
