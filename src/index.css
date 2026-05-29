@@ -2019,6 +2019,11 @@ body:not(.landing-page) .home-v2-secondary-action {
   padding-inline: 15px !important;
 }
 
+body:not(.landing-page) .home-v2-primary-action,
+body:not(.landing-page) .home-v2-primary-action :is(span, svg) {
+  color: #FFFDF8 !important;
+}
+
 body:not(.landing-page) .home-v2-stage {
   display: grid !important;
   grid-template-columns: minmax(0, 1.16fr) minmax(300px, 0.84fr) !important;
