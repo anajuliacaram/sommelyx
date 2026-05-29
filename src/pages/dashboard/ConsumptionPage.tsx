@@ -512,18 +512,18 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <div className="editorial-page consumo-page consumo-v3-page sx-v2-page-shell">
-      <section className="sx-v2-content-rail consumo-v3-rail">
-        <header className="consumo-v3-header">
-          <div className="consumo-v3-header-copy">
-            <Kicker className="consumo-v3-kicker">Meu Consumo</Kicker>
-            <h1 className="consumo-v3-title sx-v2-display">Meu Consumo</h1>
+    <div className="editorial-page consumo-page consumo-rebuild-page sx-v2-page-shell">
+      <section className="sx-v2-content-rail consumo-rebuild-rail">
+        <header className="consumo-rebuild-header">
+          <div className="consumo-rebuild-header-copy">
+            <Kicker className="consumo-rebuild-kicker">Meu Consumo</Kicker>
+            <h1 className="consumo-rebuild-title sx-v2-display">Meu Consumo</h1>
           </div>
           <button
             type="button"
             onClick={() => setFiltersOpen(true)}
             className={cn(
-              "consumo-v3-filter-button sx-v2-btn-capsule",
+              "consumo-rebuild-filter-button sx-v2-btn-capsule",
               hasActiveFilters && "is-active",
             )}
           >
@@ -532,23 +532,23 @@ export default function ConsumptionPage() {
           </button>
         </header>
 
-        <div className="consumo-v3-filter-summary">
+        <div className="consumo-rebuild-filter-summary">
           <span>{hasActiveFilters ? activeFilterSummary : "Todos os consumos"}</span>
           {activeFilterSummary ? (
             <button
               type="button"
               onClick={clearFilters}
-              className="consumo-v3-clear-filter"
+              className="consumo-rebuild-clear-filter"
             >
               Limpar
             </button>
           ) : null}
         </div>
 
-        <div className="consumo-v3-layout">
-          <main className={cn("consumo-v3-journal transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
+        <div className="consumo-rebuild-layout">
+          <main className={cn("consumo-rebuild-history transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
             {isFiltering ? (
-              <EditorialCard className="consumo-v3-skeleton">
+              <EditorialCard className="consumo-rebuild-skeleton">
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
                   <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
@@ -556,7 +556,7 @@ export default function ConsumptionPage() {
                 </div>
               </EditorialCard>
             ) : displayEntries.length === 0 ? (
-              <EditorialCard className="consumo-v3-empty">
+              <EditorialCard className="consumo-rebuild-empty">
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <p className="font-serif text-[16px] text-[rgba(26,23,19,0.82)]">
                     {entries.length === 0
@@ -572,7 +572,7 @@ export default function ConsumptionPage() {
                     <button
                       type="button"
                       onClick={clearFilters}
-                      className="consumo-v3-clear-filter mt-4"
+                      className="consumo-rebuild-clear-filter mt-4"
                     >
                       Limpar filtros
                     </button>
@@ -584,21 +584,21 @@ export default function ConsumptionPage() {
             )}
           </main>
 
-          <aside className="consumo-v3-side">
+          <aside className="consumo-rebuild-side">
           {lastEntry ? (
-            <section className="consumo-v3-last sx-v2-dark-panel sx-v2-ai-aura">
-              <div className="consumo-v3-last-copy">
-                <div className="consumo-v3-last-head">
-                  <Kicker className="consumo-v3-last-kicker">Último consumo</Kicker>
-                  <span className="consumo-v3-last-time">{lastLabel}</span>
+            <section className="consumo-rebuild-last sx-v2-dark-panel sx-v2-ai-aura">
+              <div className="consumo-rebuild-last-copy">
+                <div className="consumo-rebuild-last-head">
+                  <Kicker className="consumo-rebuild-last-kicker">Último consumo</Kicker>
+                  <span className="consumo-rebuild-last-time">{lastLabel}</span>
                 </div>
-                <h2 className="consumo-v3-last-title sx-v2-wine-title">{lastEntry.wine_name}</h2>
+                <h2 className="consumo-rebuild-last-title sx-v2-wine-title">{lastEntry.wine_name}</h2>
                 {lastEntryMeta ? (
-                  <p className="consumo-v3-last-meta sx-v2-wine-meta">{lastEntryMeta}</p>
+                  <p className="consumo-rebuild-last-meta sx-v2-wine-meta">{lastEntryMeta}</p>
                 ) : null}
-                <p className="consumo-v3-last-note sx-v2-body">{lastEntryNote}</p>
-                <div className="consumo-v3-last-foot">
-                  <span className="consumo-v3-last-rating">
+                <p className="consumo-rebuild-last-note sx-v2-body">{lastEntryNote}</p>
+                <div className="consumo-rebuild-last-foot">
+                  <span className="consumo-rebuild-last-rating">
                     <Star className="h-3.5 w-3.5" />
                     {lastEntry.rating != null ? Number(lastEntry.rating).toFixed(1) : "Sem nota"}
                   </span>
@@ -606,45 +606,45 @@ export default function ConsumptionPage() {
               </div>
             </section>
           ) : (
-            <section className="consumo-v3-last sx-v2-dark-panel">
-              <div className="consumo-v3-last-copy">
-                <Kicker className="consumo-v3-last-kicker">Meu Consumo</Kicker>
-                <h2 className="consumo-v3-last-title sx-v2-wine-title">Nenhum consumo registrado</h2>
-                <p className="consumo-v3-last-note sx-v2-body">
+            <section className="consumo-rebuild-last sx-v2-dark-panel">
+              <div className="consumo-rebuild-last-copy">
+                <Kicker className="consumo-rebuild-last-kicker">Meu Consumo</Kicker>
+                <h2 className="consumo-rebuild-last-title sx-v2-wine-title">Nenhum consumo registrado</h2>
+                <p className="consumo-rebuild-last-note sx-v2-body">
                   Registre uma garrafa aberta para acompanhar seu histórico.
                 </p>
               </div>
             </section>
           )}
 
-            <section className="consumo-v3-stats">
-              <div className="consumo-v3-stats-grid">
-                <article className="consumo-v3-stat">
-                  <span className="consumo-v3-stat-label">Total</span>
-                  <strong className="consumo-v3-stat-value">{total}</strong>
+            <section className="consumo-rebuild-stats">
+              <div className="consumo-rebuild-stats-grid">
+                <article className="consumo-rebuild-stat">
+                  <span className="consumo-rebuild-stat-label">Total</span>
+                  <strong className="consumo-rebuild-stat-value">{total}</strong>
                 </article>
-                <article className="consumo-v3-stat">
-                  <span className="consumo-v3-stat-label">Este mês</span>
-                  <strong className="consumo-v3-stat-value">{avgPerMonth}</strong>
+                <article className="consumo-rebuild-stat">
+                  <span className="consumo-rebuild-stat-label">Este mês</span>
+                  <strong className="consumo-rebuild-stat-value">{avgPerMonth}</strong>
                 </article>
-                <article className="consumo-v3-stat">
-                  <span className="consumo-v3-stat-label">Nota média</span>
-                  <strong className="consumo-v3-stat-value">{averageRating}</strong>
+                <article className="consumo-rebuild-stat">
+                  <span className="consumo-rebuild-stat-label">Nota média</span>
+                  <strong className="consumo-rebuild-stat-value">{averageRating}</strong>
                 </article>
-                <article className="consumo-v3-stat">
-                  <span className="consumo-v3-stat-label">Estilo</span>
-                  <strong className="consumo-v3-stat-value consumo-v3-stat-value--text">{styleStats.name}</strong>
+                <article className="consumo-rebuild-stat">
+                  <span className="consumo-rebuild-stat-label">Estilo recorrente</span>
+                  <strong className="consumo-rebuild-stat-value consumo-rebuild-stat-value--text">{styleStats.name}</strong>
                 </article>
               </div>
             </section>
 
-            <EditorialCard className="consumo-v3-chart consumo-chart-card consumo-chart-wrap">
-              <div className="consumo-v3-chart-head">
+            <EditorialCard className="consumo-rebuild-chart consumo-chart-card consumo-chart-wrap">
+              <div className="consumo-rebuild-chart-head">
                 <div>
-                  <Kicker className="consumo-v3-chart-kicker">Ritmo</Kicker>
-                  <h2 className="consumo-v3-chart-title">{chart.title}</h2>
+                  <Kicker className="consumo-rebuild-chart-kicker">Ritmo</Kicker>
+                  <h2 className="consumo-rebuild-chart-title">{chart.title}</h2>
                 </div>
-                <span className="consumo-v3-chart-total">{total}</span>
+                <span className="consumo-rebuild-chart-total">{total}</span>
               </div>
               <Sparkbar
                 data={chartDisplayData}

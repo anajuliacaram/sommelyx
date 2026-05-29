@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Check, Camera, FileSpreadsheet, Sparkles, Wine, ArrowLeft, ArrowRight, Search } from "@/icons/lucide";
+import { Plus, Check, Camera, FileSpreadsheet, Sparkles, Wine } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,18 +86,6 @@ const styles = [
   { value: "sobremesa", label: "Sobremesa" },
   { value: "fortificado", label: "Fortificado" },
 ];
-
-type AddWineStep = "choice" | "identity" | "storage" | "purchase" | "aging" | "review";
-
-const addWineStepOrder: AddWineStep[] = ["identity", "storage", "purchase", "aging", "review"];
-
-const addWineStepLabels: Record<Exclude<AddWineStep, "choice">, string> = {
-  identity: "Identificar",
-  storage: "Adega",
-  purchase: "Compra",
-  aging: "Guarda",
-  review: "Revisar",
-};
 
 type ScanResultEnvelope = {
   raw?: Record<string, unknown> | null;
@@ -394,7 +382,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
   const [manualFormVisible, setManualFormVisible] = useState(false);
-  const [addWineStep, setAddWineStep] = useState<AddWineStep>("choice");
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
   const [estimateRange, setEstimateRange] = useState<{ min: number; max: number } | null>(null);
@@ -482,7 +469,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setMissingFields([]);
     setSuccess(false);
     setManualFormVisible(false);
-    setAddWineStep("choice");
   }, []);
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
@@ -559,7 +545,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     pendingHydrationTraceRef.current = { source, payload: prefill };
     finalFormStateLoggedRef.current = false;
     setManualFormVisible(true);
-    setAddWineStep("identity");
     const appliedFields = applyScanPrefill(prefill);
 
     return appliedFields;
@@ -650,7 +635,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (addWineStep !== "review") return;
     if (!name.trim()) return;
 
     try {
@@ -780,40 +764,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     }
   };
 
-  const startManualFlow = (step: AddWineStep = "identity") => {
+  const startManualFlow = () => {
     setManualFormVisible(true);
-    setAddWineStep(step);
   };
-
-  const currentStepIndex = addWineStep === "choice" ? -1 : addWineStepOrder.indexOf(addWineStep);
-  const currentStepLabel = addWineStep !== "choice" ? addWineStepLabels[addWineStep] : "";
-  const canGoBack = manualFormVisible && currentStepIndex >= 0;
-  const canGoNext = manualFormVisible && addWineStep !== "review";
-  const goBackStep = () => {
-    if (!manualFormVisible || addWineStep === "choice") return;
-    if (currentStepIndex <= 0) {
-      setManualFormVisible(false);
-      setAddWineStep("choice");
-      return;
-    }
-    setAddWineStep(addWineStepOrder[currentStepIndex - 1]);
-  };
-  const goNextStep = () => {
-    if (!manualFormVisible || addWineStep === "review") return;
-    const nextStep = addWineStepOrder[Math.min(currentStepIndex + 1, addWineStepOrder.length - 1)];
-    setAddWineStep(nextStep);
-  };
-
-  const reviewRows = [
-    ["Vinho", name || "—"],
-    ["Produtor", producer || "—"],
-    ["Safra", vintage || "—"],
-    ["Estilo", styles.find((item) => item.value === style)?.label || style || "—"],
-    ["Quantidade", quantity || "1"],
-    ["Local", noLocationInfo ? "Depois" : formatLocationLabel(location) || "—"],
-    ["Valor", currentValue ? `R$ ${Number(currentValue).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}` : "—"],
-    ["Janela", [drinkFrom, drinkUntil].filter(Boolean).join("–") || "—"],
-  ];
 
   return (
     <>
@@ -881,15 +834,15 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="add-wine-form add-wine-v3-form">
+                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="add-wine-form add-wine-rebuild-form">
                   {!manualFormVisible ? (
-                    <div className="add-wine-v3-choice">
+                    <div className="add-wine-rebuild-choice">
                       <button
                         type="button"
-                        className="add-wine-v3-option is-primary"
+                        className="add-wine-rebuild-option is-primary"
                         onClick={() => setScanOpen(true)}
                       >
-                        <span className="add-wine-v3-option-icon">
+                        <span className="add-wine-rebuild-option-icon">
                           <Camera className="h-4 w-4" />
                         </span>
                         <span>Escanear rótulo</span>
@@ -897,10 +850,10 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                       <button
                         type="button"
-                        className="add-wine-v3-option"
+                        className="add-wine-rebuild-option"
                         onClick={() => setImportCsvOpen(true)}
                       >
-                        <span className="add-wine-v3-option-icon is-gold">
+                        <span className="add-wine-rebuild-option-icon is-gold">
                           <FileSpreadsheet className="h-4 w-4" />
                         </span>
                         <span>Importar arquivo</span>
@@ -908,45 +861,19 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
                       <button
                         type="button"
-                        className="add-wine-v3-option"
-                        onClick={() => startManualFlow("identity")}
+                        className="add-wine-rebuild-option"
+                        onClick={() => startManualFlow()}
                       >
-                        <span className="add-wine-v3-option-icon is-olive">
+                        <span className="add-wine-rebuild-option-icon is-olive">
                           <Sparkles className="h-4 w-4" />
                         </span>
                         <span>Adicionar manualmente</span>
                       </button>
-
-                      <button
-                        type="button"
-                        className="add-wine-v3-option"
-                        onClick={() => startManualFlow("identity")}
-                      >
-                        <span className="add-wine-v3-option-icon">
-                          <Search className="h-4 w-4" />
-                        </span>
-                        <span>Buscar</span>
-                      </button>
                     </div>
                   ) : (
-                    <div className="add-wine-v3-flow">
-                      <div className="add-wine-v3-progress" aria-label={`Etapa ${currentStepLabel}`}>
-                        {addWineStepOrder.map((step, index) => (
-                          <span
-                            key={step}
-                            className={cn(
-                              "add-wine-v3-step-dot",
-                              index === currentStepIndex && "is-current",
-                              index < currentStepIndex && "is-done",
-                            )}
-                          >
-                            {addWineStepLabels[step]}
-                          </span>
-                        ))}
-                      </div>
-
+                    <div className="add-wine-rebuild-manual">
                       {labelImagePreview && (
-                        <div className="add-wine-label-preview add-wine-v3-label-preview">
+                        <div className="add-wine-label-preview add-wine-rebuild-label-preview">
                           <div className="add-wine-label-image">
                             <img
                               src={labelImagePreview}
@@ -960,20 +887,23 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                         </div>
                       )}
 
-                      {addWineStep === "identity" && (
-                        <section className="add-wine-v3-step-panel">
-                          <div className="add-wine-field">
-                            <label htmlFor="name">Vinho *</label>
-                            <input
-                              id="name"
-                              value={getRenderedFieldValue("name", name)}
-                              onChange={e => { setScanHydrated(false); setName(e.target.value); }}
-                              placeholder="Nome no rótulo"
-                              required
-                              className="input-premium"
-                              style={aiFieldStyle("name")}
-                            />
-                          </div>
+                      <section className="add-wine-rebuild-section add-wine-rebuild-section-primary">
+                        <div className="add-wine-rebuild-section-head">
+                          <span>Identificação</span>
+                        </div>
+                        <div className="add-wine-field">
+                          <label htmlFor="name">Vinho *</label>
+                          <input
+                            id="name"
+                            value={getRenderedFieldValue("name", name)}
+                            onChange={e => { setScanHydrated(false); setName(e.target.value); }}
+                            placeholder="Nome no rótulo"
+                            required
+                            className="input-premium"
+                            style={aiFieldStyle("name")}
+                          />
+                        </div>
+                        <div className="add-wine-field-grid">
                           <div className="add-wine-field">
                             <label htmlFor="producer">Produtor</label>
                             <input
@@ -985,204 +915,194 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                               style={aiFieldStyle("producer")}
                             />
                           </div>
-                          <div className="add-wine-field-grid">
-                            <div className="add-wine-field">
-                              <label htmlFor="vintage">Safra</label>
-                              <input
-                                id="vintage"
-                                type="number"
-                                value={getRenderedFieldValue("vintage", vintage)}
-                                onChange={e => setVintage(e.target.value)}
-                                placeholder="2020"
-                                className="input-premium"
-                                style={aiFieldStyle("vintage")}
-                              />
-                            </div>
-                            <div className="add-wine-field">
-                              <label>Estilo</label>
-                              <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
-                                <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
-                                  <SelectValue placeholder="Estilo" />
-                                </SelectTrigger>
-                                <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
-                                  {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                          <div className="add-wine-field">
+                            <label htmlFor="vintage">Safra</label>
+                            <input
+                              id="vintage"
+                              type="number"
+                              value={getRenderedFieldValue("vintage", vintage)}
+                              onChange={e => setVintage(e.target.value)}
+                              placeholder="2020"
+                              className="input-premium"
+                              style={aiFieldStyle("vintage")}
+                            />
                           </div>
-                          <div className="add-wine-field-grid">
-                            <div className="add-wine-field">
-                              <label>País</label>
-                              <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País" className="input-premium" style={aiFieldStyle("country")} />
-                            </div>
-                            <div className="add-wine-field">
-                              <label>Região</label>
-                              <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região" className="input-premium" style={aiFieldStyle("region")} />
-                            </div>
+                        </div>
+                        <div className="add-wine-field">
+                          <label>Estilo</label>
+                          <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
+                            <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
+                              <SelectValue placeholder="Estilo" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
+                              {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </section>
+
+                      <section className="add-wine-rebuild-section">
+                        <div className="add-wine-rebuild-section-head">
+                          <span>Origem</span>
+                        </div>
+                        <div className="add-wine-field-grid">
+                          <div className="add-wine-field">
+                            <label>País</label>
+                            <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País" className="input-premium" style={aiFieldStyle("country")} />
                           </div>
                           <div className="add-wine-field">
-                            <label>Uva</label>
-                            <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva ou corte" className="input-premium" style={aiFieldStyle("grape")} />
+                            <label>Região</label>
+                            <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região" className="input-premium" style={aiFieldStyle("region")} />
                           </div>
-                        </section>
-                      )}
+                        </div>
+                        <div className="add-wine-field">
+                          <label>Uva</label>
+                          <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva ou corte" className="input-premium" style={aiFieldStyle("grape")} />
+                        </div>
+                      </section>
 
-                      {addWineStep === "storage" && (
-                        <section className="add-wine-v3-step-panel">
-                          <div className="add-wine-field-grid">
-                            <div className="add-wine-field">
-                              <label htmlFor="qty">Quantidade</label>
-                              <input
-                                id="qty"
-                                type="number"
-                                min="1"
-                                value={quantity}
-                                onChange={e => setQuantity(e.target.value)}
-                                className="input-premium"
-                              />
+                      <section className="add-wine-rebuild-section add-wine-rebuild-section-storage">
+                        <div className="add-wine-rebuild-section-head">
+                          <span>Adega</span>
+                        </div>
+                        <div className="add-wine-field-grid add-wine-rebuild-compact-grid">
+                          <div className="add-wine-field add-wine-quantity-field">
+                            <label htmlFor="qty">Quantidade</label>
+                            <input
+                              id="qty"
+                              type="number"
+                              min="1"
+                              value={quantity}
+                              onChange={e => setQuantity(e.target.value)}
+                              className="input-premium"
+                            />
+                          </div>
+                          <label className="add-wine-check-row">
+                            <input
+                              id="no-location-info"
+                              type="checkbox"
+                              checked={noLocationInfo}
+                              onChange={(e) => {
+                                setNoLocationInfo(e.target.checked);
+                                if (e.target.checked) setLocation({});
+                              }}
+                            />
+                            <span>Local depois</span>
+                          </label>
+                        </div>
+                        <LocationFields
+                          value={location}
+                          onChange={setLocation}
+                          label="Localização"
+                          disabled={noLocationInfo}
+                          className="add-wine-location-fields add-wine-rebuild-location"
+                        />
+                      </section>
+
+                      <section className="add-wine-rebuild-section add-wine-rebuild-section-values">
+                        <div className="add-wine-rebuild-section-head">
+                          <span>Valores e guarda</span>
+                        </div>
+                        {isCommercial ? (
+                          <>
+                            {commercialMarginPct != null && (
+                              <div className="add-wine-margin-pill">
+                                Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
+                              </div>
+                            )}
+                            <div className="add-wine-field-grid">
+                              <div className="add-wine-field">
+                                <label>Preço de custo</label>
+                                <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
+                              </div>
+                              <div className="add-wine-field">
+                                <label>Preço de venda</label>
+                                <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
+                              </div>
                             </div>
-                            <label className="add-wine-check-row add-wine-v3-check">
+                          </>
+                        ) : (
+                          <>
+                            <label className="add-wine-check-row">
                               <input
-                                id="no-location-info"
                                 type="checkbox"
-                                checked={noLocationInfo}
-                                onChange={(e) => {
-                                  setNoLocationInfo(e.target.checked);
-                                  if (e.target.checked) setLocation({});
+                                checked={noPriceInfo}
+                                onChange={e => {
+                                  setNoPriceInfo(e.target.checked);
+                                  if (e.target.checked) {
+                                    setLastPaid("");
+                                    setLastPaidDate(new Date().toISOString().split("T")[0]);
+                                  }
                                 }}
                               />
-                              <span>Definir localização depois</span>
+                              <span>Não sei o valor pago</span>
                             </label>
-                          </div>
-                          <LocationFields
-                            value={location}
-                            onChange={setLocation}
-                            label="Localização"
-                            disabled={noLocationInfo}
-                            className="add-wine-location-fields add-wine-v3-location"
-                          />
-                        </section>
-                      )}
-
-                      {addWineStep === "purchase" && (
-                        <section className="add-wine-v3-step-panel">
-                          {isCommercial ? (
-                            <>
-                              {commercialMarginPct != null && (
-                                <div className="add-wine-margin-pill">
-                                  Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
-                                </div>
-                              )}
+                            {!noPriceInfo && (
                               <div className="add-wine-field-grid">
                                 <div className="add-wine-field">
-                                  <label>Preço de custo</label>
+                                  <label>Último valor pago</label>
                                   <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
                                 </div>
                                 <div className="add-wine-field">
-                                  <label>Preço de venda</label>
-                                  <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
+                                  <label>Data</label>
+                                  <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
                                 </div>
                               </div>
-                            </>
-                          ) : (
-                            <>
-                              <label className="add-wine-check-row add-wine-v3-check">
-                                <input
-                                  type="checkbox"
-                                  checked={noPriceInfo}
-                                  onChange={e => {
-                                    setNoPriceInfo(e.target.checked);
-                                    if (e.target.checked) {
-                                      setLastPaid("");
-                                      setLastPaidDate(new Date().toISOString().split("T")[0]);
-                                    }
-                                  }}
-                                />
-                                <span>Não sei o valor pago</span>
-                              </label>
-                              {!noPriceInfo && (
-                                <div className="add-wine-field-grid">
-                                  <div className="add-wine-field">
-                                    <label>Último valor pago</label>
-                                    <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
+                            )}
+                            <div className="add-wine-field">
+                              <label>Valor atual estimado</label>
+                              <div className="relative">
+                                <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
+                                {estimating && (
+                                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6F7F5B] border-t-transparent" />
                                   </div>
-                                  <div className="add-wine-field">
-                                    <label>Data</label>
-                                    <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
-                                  </div>
-                                </div>
-                              )}
-                              <div className="add-wine-field">
-                                <label>Valor atual estimado</label>
-                                <div className="relative">
-                                  <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
-                                  {estimating && (
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6F7F5B] border-t-transparent" />
-                                    </div>
-                                  )}
-                                </div>
-                                {estimateConfidence && (
-                                  <p className="add-wine-microcopy">
-                                    {estimateConfidence === "baixa" && estimateRange
-                                      ? `R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                      : "Estimativa sugerida"}
-                                  </p>
                                 )}
                               </div>
-                            </>
-                          )}
-                        </section>
-                      )}
-
-                      {addWineStep === "aging" && (
-                        <section className="add-wine-v3-step-panel">
-                          <div className="add-wine-field-grid">
-                            <div className="add-wine-field">
-                              <label>Abrir a partir de</label>
-                              <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
+                              {estimateConfidence && (
+                                <p className="add-wine-microcopy">
+                                  {estimateConfidence === "baixa" && estimateRange
+                                    ? `R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                    : "Estimativa sugerida"}
+                                </p>
+                              )}
                             </div>
-                            <div className="add-wine-field">
-                              <label>Guardar até</label>
-                              <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
-                            </div>
+                          </>
+                        )}
+                        <div className="add-wine-field-grid">
+                          <div className="add-wine-field">
+                            <label>Abrir a partir de</label>
+                            <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
                           </div>
                           <div className="add-wine-field">
-                            <label>Harmonização</label>
-                            <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes, massas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
+                            <label>Guardar até</label>
+                            <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
                           </div>
-                          {!isCommercial && (
-                            <div className="add-wine-field">
-                              <label>Notas</label>
-                              <Textarea
-                                value={notes}
-                                onChange={e => setNotes(e.target.value)}
-                                placeholder="Observações"
-                                rows={3}
-                                className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none input-premium")}
-                                style={aiFieldStyle("tasting_notes")}
-                              />
-                            </div>
-                          )}
-                        </section>
-                      )}
+                        </div>
+                      </section>
 
-                      {addWineStep === "review" && (
-                        <section className="add-wine-v3-step-panel add-wine-v3-review">
-                          <div className="add-wine-v3-review-head">
-                            <Wine className="h-5 w-5" />
-                            <span>Resumo</span>
+                      <section className="add-wine-rebuild-section">
+                        <div className="add-wine-rebuild-section-head">
+                          <span>Notas</span>
+                        </div>
+                        <div className="add-wine-field">
+                          <label>Harmonização</label>
+                          <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes, massas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
+                        </div>
+                        {!isCommercial && (
+                          <div className="add-wine-field">
+                            <label>Notas</label>
+                            <Textarea
+                              value={notes}
+                              onChange={e => setNotes(e.target.value)}
+                              placeholder="Observações"
+                              rows={2}
+                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none input-premium")}
+                              style={aiFieldStyle("tasting_notes")}
+                            />
                           </div>
-                          <dl className="add-wine-v3-review-list">
-                            {reviewRows.map(([label, value]) => (
-                              <div key={label}>
-                                <dt>{label}</dt>
-                                <dd>{value}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        </section>
-                      )}
+                        )}
+                      </section>
                     </div>
                   )}
 
@@ -1202,42 +1122,28 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
           </AiModalSplitLayout>
           </AiModalBody>
           {!success && manualFormVisible && (
-            <AiModalFooterBar className="add-wine-v3-footer">
-              {canGoBack ? (
-                <button
-                  type="button"
-                  className="add-wine-v3-back"
-                  onClick={goBackStep}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Voltar
-                </button>
-              ) : null}
-
-              {canGoNext ? (
-                <button
-                  type="button"
-                  className="add-wine-v3-next"
-                  onClick={goNextStep}
-                  disabled={addWineStep === "identity" && !name.trim()}
-                >
-                  Continuar
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              ) : (
-                <AiModalActionButton
-                  form="add-wine-form"
-                  type="submit"
-                  disabled={!name.trim()}
-                  loading={addWine.isPending}
-                  loadingText="Salvando…"
-                  variant="primary"
-                  className="add-wine-v3-submit"
-                >
-                  <Plus className="h-4 w-4" />
-                  {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
-                </AiModalActionButton>
-              )}
+            <AiModalFooterBar className="add-wine-rebuild-footer">
+              <button
+                type="button"
+                className="add-wine-rebuild-back"
+                onClick={() => {
+                  setManualFormVisible(false);
+                }}
+              >
+                Voltar
+              </button>
+              <AiModalActionButton
+                form="add-wine-form"
+                type="submit"
+                disabled={!name.trim()}
+                loading={addWine.isPending}
+                loadingText="Salvando…"
+                variant="primary"
+                className="add-wine-rebuild-submit"
+              >
+                <Plus className="h-4 w-4" />
+                {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
+              </AiModalActionButton>
             </AiModalFooterBar>
           )}
           </AiModalShell>

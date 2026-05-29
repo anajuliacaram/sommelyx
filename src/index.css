@@ -2259,6 +2259,1175 @@ body:not(.landing-page) ::-webkit-scrollbar {
   background: transparent !important;
 }
 
+/* True rebuild pass: authenticated product hierarchy and core action flows. */
+body:not(.landing-page) :is(.home-rebuild-page, .cellar-rebuild-page, .consumo-rebuild-page) {
+  width: 100%;
+  color: #201714;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(101, 10, 24, 0.06), transparent 24rem),
+    radial-gradient(circle at 88% 2%, rgba(38, 58, 43, 0.09), transparent 22rem),
+    linear-gradient(180deg, #f7f2ea 0%, #f1eadf 100%);
+}
+
+body:not(.landing-page) :is(.home-rebuild-rail, .cellar-rebuild-rail, .consumo-rebuild-rail) {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  padding: 16px clamp(12px, 2.4vw, 26px) 28px;
+}
+
+body:not(.landing-page) :is(.home-rebuild-title, .cellar-rebuild-title, .consumo-rebuild-title) {
+  margin: 0;
+  color: #201714;
+  font-size: clamp(30px, 3.6vw, 46px);
+  font-weight: 520;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+}
+
+body:not(.landing-page) :is(.home-rebuild-date, .cellar-rebuild-kicker, .consumo-rebuild-kicker, .home-rebuild-kicker) {
+  color: rgba(101, 10, 24, 0.72);
+}
+
+body:not(.landing-page) .home-rebuild-header,
+body:not(.landing-page) .cellar-rebuild-header,
+body:not(.landing-page) .consumo-rebuild-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+body:not(.landing-page) .home-rebuild-name {
+  color: #650a18;
+}
+
+body:not(.landing-page) .home-rebuild-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(270px, 0.65fr);
+  gap: 14px;
+  align-items: start;
+}
+
+body:not(.landing-page) .home-rebuild-main,
+body:not(.landing-page) .home-rebuild-side {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+}
+
+body:not(.landing-page) .home-rebuild-mobile-actions {
+  display: none;
+}
+
+body:not(.landing-page) .home-rebuild-highlight {
+  position: relative;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 166px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 253, 248, 0.14);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(200, 168, 90, 0.24), transparent 13rem),
+    linear-gradient(135deg, #22040a 0%, #18251d 52%, #263a2b 100%);
+  padding: 14px;
+  color: #fff8ed;
+  box-shadow: 0 28px 58px -44px rgba(32, 23, 20, 0.74);
+}
+
+body:not(.landing-page) .home-rebuild-bottle-stage {
+  display: grid;
+  min-height: 138px;
+  place-items: center;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 253, 248, 0.18), transparent 52%),
+    rgba(255, 253, 248, 0.08);
+}
+
+body:not(.landing-page) .home-rebuild-bottle,
+body:not(.landing-page) .home-rebuild-bottle-placeholder {
+  width: 74px;
+  height: 116px;
+}
+
+body:not(.landing-page) .home-rebuild-bottle-placeholder {
+  display: grid;
+  place-items: center;
+  border-radius: 999px 999px 18px 18px;
+  background: rgba(255, 253, 248, 0.12);
+  color: #c8a85a;
+}
+
+body:not(.landing-page) .home-rebuild-highlight-copy {
+  display: grid;
+  align-content: center;
+  min-width: 0;
+  gap: 7px;
+}
+
+body:not(.landing-page) .home-rebuild-highlight-top,
+body:not(.landing-page) .home-rebuild-highlight-foot,
+body:not(.landing-page) .home-rebuild-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body:not(.landing-page) .home-rebuild-window,
+body:not(.landing-page) .home-rebuild-status {
+  display: inline-flex;
+  min-height: 25px;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(200, 168, 90, 0.14);
+  padding: 0 8px;
+  color: #f5dc9a;
+  font-size: 10.5px;
+  font-weight: 640;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .home-rebuild-wine {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #fff8ed;
+  font-size: clamp(24px, 2.8vw, 36px);
+  font-weight: 520;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:not(.landing-page) .home-rebuild-meta {
+  margin: 0;
+  color: rgba(255, 248, 237, 0.72);
+  font-size: 12px;
+}
+
+body:not(.landing-page) .home-rebuild-open,
+body:not(.landing-page) .home-rebuild-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+body:not(.landing-page) .home-rebuild-open {
+  min-height: 34px;
+  border: 1px solid rgba(255, 248, 237, 0.18);
+  background: rgba(255, 248, 237, 0.12);
+  padding: 0 12px;
+  color: #fff8ed;
+}
+
+body:not(.landing-page) .home-rebuild-action {
+  min-height: 40px;
+  width: 100%;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.62);
+  padding: 0 12px;
+  color: #263a2b;
+}
+
+body:not(.landing-page) .home-rebuild-action-primary {
+  border-color: rgba(101, 10, 24, 0.14);
+  background: linear-gradient(180deg, #7a1225 0%, #650a18 58%, #3b0710 100%);
+  color: #fff8ed;
+}
+
+body:not(.landing-page) .home-rebuild-actions-card,
+body:not(.landing-page) .home-rebuild-summary,
+body:not(.landing-page) .home-rebuild-panel,
+body:not(.landing-page) .cellar-rebuild-summary,
+body:not(.landing-page) .cellar-rebuild-controls,
+body:not(.landing-page) .consumo-rebuild-chart,
+body:not(.landing-page) .consumo-rebuild-timeline,
+body:not(.landing-page) .consumo-rebuild-stat {
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 253, 248, 0.62);
+  box-shadow: 0 14px 34px -34px rgba(32, 23, 20, 0.44);
+}
+
+body:not(.landing-page) .home-rebuild-actions-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 10px;
+}
+
+body:not(.landing-page) .home-rebuild-summary,
+body:not(.landing-page) .home-rebuild-panel {
+  padding: 14px;
+}
+
+body:not(.landing-page) .home-rebuild-section-head {
+  margin-bottom: 10px;
+}
+
+body:not(.landing-page) .home-rebuild-section-head h2 {
+  margin: 0;
+  color: #201714;
+  font-size: 17px;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+
+body:not(.landing-page) .home-rebuild-section-head span {
+  color: #746b63;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+body:not(.landing-page) .home-rebuild-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body:not(.landing-page) .home-rebuild-metrics span {
+  display: grid;
+  gap: 3px;
+  min-height: 64px;
+  align-content: center;
+  border-radius: 18px;
+  background: rgba(241, 234, 223, 0.55);
+  padding: 10px;
+  color: #746b63;
+  font-size: 10.5px;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .home-rebuild-metrics strong {
+  color: #201714;
+  font-size: 18px;
+  font-weight: 620;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+body:not(.landing-page) .home-rebuild-metric-wide {
+  grid-column: 1 / -1;
+}
+
+body:not(.landing-page) .home-rebuild-upcoming-list,
+body:not(.landing-page) .home-rebuild-recent-list {
+  display: grid;
+  gap: 7px;
+}
+
+body:not(.landing-page) .home-rebuild-wine-row,
+body:not(.landing-page) .home-rebuild-consumption-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  border-radius: 18px;
+  background: rgba(247, 242, 234, 0.66);
+  padding: 7px 9px;
+  text-align: left;
+}
+
+body:not(.landing-page) .home-rebuild-thumb {
+  width: 38px;
+  height: 50px;
+}
+
+body:not(.landing-page) .home-rebuild-row-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+body:not(.landing-page) .home-rebuild-row-copy strong {
+  overflow: hidden;
+  color: #201714;
+  font-size: 13.5px;
+  font-weight: 620;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .home-rebuild-row-copy small {
+  overflow: hidden;
+  color: #746b63;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .home-rebuild-row-status,
+body:not(.landing-page) .home-rebuild-rating,
+body:not(.landing-page) .home-rebuild-consumption-date {
+  border-radius: 999px;
+  background: rgba(233, 239, 229, 0.70);
+  padding: 5px 8px;
+  color: #263a2b;
+  font-size: 10.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .home-rebuild-row-status.now {
+  background: rgba(101, 10, 24, 0.10);
+  color: #650a18;
+}
+
+body:not(.landing-page) .home-rebuild-empty {
+  border-radius: 17px;
+  background: rgba(247, 242, 234, 0.62);
+  padding: 12px;
+  color: #746b63;
+  font-size: 12px;
+}
+
+body:not(.landing-page) .cellar-rebuild-workspace {
+  display: grid;
+  grid-template-columns: 282px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+body:not(.landing-page) .cellar-rebuild-control-panel {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-main strong {
+  display: block;
+  color: #650a18;
+  font-size: 36px;
+  font-weight: 620;
+  line-height: 0.92;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-main span,
+body:not(.landing-page) .cellar-rebuild-summary-stats span {
+  color: #746b63;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats span {
+  border-radius: 15px;
+  background: rgba(241, 234, 223, 0.62);
+  padding: 8px;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats strong {
+  display: block;
+  color: #201714;
+  font-size: 14px;
+}
+
+body:not(.landing-page) .cellar-rebuild-controls {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+}
+
+body:not(.landing-page) .cellar-rebuild-control-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+body:not(.landing-page) .cellar-rebuild-filter-btn,
+body:not(.landing-page) .cellar-rebuild-view-toggle,
+body:not(.landing-page) .cellar-rebuild-search {
+  min-height: 40px;
+  border-radius: 16px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.70);
+}
+
+body:not(.landing-page) .cellar-rebuild-view-toggle {
+  display: flex;
+  padding: 4px;
+}
+
+body:not(.landing-page) .cellar-rebuild-view-btn {
+  flex: 1;
+  min-height: 30px;
+  border-radius: 12px;
+  color: #746b63;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+body:not(.landing-page) .cellar-rebuild-view-btn.active {
+  background: rgba(101, 10, 24, 0.10);
+  color: #650a18;
+}
+
+body:not(.landing-page) .cellar-rebuild-filters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+body:not(.landing-page) .cellar-rebuild-filter-chip {
+  min-height: 30px;
+  flex: 0 0 auto;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.70);
+  color: #4f463e;
+  font-size: 11px;
+  font-weight: 560;
+}
+
+body:not(.landing-page) .cellar-rebuild-filter-chip.active {
+  background: rgba(101, 10, 24, 0.11);
+  color: #650a18;
+}
+
+body:not(.landing-page) .cellar-rebuild-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 10px;
+}
+
+body:not(.landing-page) .cellar-rebuild-card {
+  display: grid;
+  grid-template-rows: 126px minmax(0, 1fr);
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.70);
+  padding: 7px;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-stage {
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  background: rgba(241, 234, 223, 0.58);
+}
+
+body:not(.landing-page) .cellar-rebuild-card-image,
+body:not(.landing-page) .cellar-rebuild-card-image-placeholder {
+  width: 64px;
+  height: 104px;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-body {
+  display: grid;
+  gap: 5px;
+  padding: 9px 3px 3px;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-name,
+body:not(.landing-page) .cellar-rebuild-row-name {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #201714;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-meta,
+body:not(.landing-page) .cellar-rebuild-row-meta {
+  overflow: hidden;
+  margin: 0;
+  color: #746b63;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-tags,
+body:not(.landing-page) .cellar-rebuild-card-footer,
+body:not(.landing-page) .cellar-rebuild-row-tags,
+body:not(.landing-page) .cellar-rebuild-row-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-chip,
+body:not(.landing-page) .cellar-rebuild-row-chip,
+body:not(.landing-page) .cellar-rebuild-drink-badge {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  border-radius: 999px;
+  background: rgba(38, 58, 43, 0.07);
+  padding: 0 7px;
+  color: #263a2b;
+  font-size: 9px;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .cellar-rebuild-drink-badge {
+  justify-self: start;
+  background: rgba(200, 168, 90, 0.15);
+  color: #650a18;
+}
+
+body:not(.landing-page) .cellar-rebuild-open {
+  min-height: 28px;
+  border: 1px solid rgba(101, 10, 24, 0.12);
+  background: rgba(101, 10, 24, 0.08);
+  color: #650a18;
+  padding: 0 10px;
+  font-size: 11px;
+}
+
+body:not(.landing-page) .cellar-rebuild-list {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body:not(.landing-page) .cellar-rebuild-row {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 72px;
+  border-radius: 20px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.68);
+  padding: 8px;
+}
+
+body:not(.landing-page) .cellar-rebuild-row-stage {
+  display: grid;
+  width: 50px;
+  height: 58px;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(241, 234, 223, 0.58);
+}
+
+body:not(.landing-page) .cellar-rebuild-row-thumb {
+  width: 42px;
+  height: 54px;
+}
+
+body:not(.landing-page) .consumo-rebuild-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+  gap: 14px;
+  align-items: start;
+}
+
+body:not(.landing-page) .consumo-rebuild-history,
+body:not(.landing-page) .consumo-rebuild-side {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+body:not(.landing-page) .consumo-rebuild-filter-button,
+body:not(.landing-page) .consumo-rebuild-clear-filter {
+  min-height: 34px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.70);
+  color: #263a2b;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body:not(.landing-page) .consumo-rebuild-filter-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  color: #746b63;
+  font-size: 12px;
+}
+
+body:not(.landing-page) .consumo-rebuild-last {
+  overflow: hidden;
+  border-radius: 26px;
+  padding: 15px;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-head,
+body:not(.landing-page) .consumo-rebuild-chart-head,
+body:not(.landing-page) .consumo-rebuild-timeline-head,
+body:not(.landing-page) .consumo-rebuild-month-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-title {
+  display: -webkit-box;
+  margin: 8px 0 4px;
+  overflow: hidden;
+  color: #fff8ed;
+  font-size: 23px;
+  font-weight: 520;
+  line-height: 1;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-meta,
+body:not(.landing-page) .consumo-rebuild-last-note {
+  margin: 0;
+  color: rgba(255, 248, 237, 0.72);
+  font-size: 12px;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  border-radius: 999px;
+  background: rgba(200, 168, 90, 0.16);
+  padding: 5px 8px;
+  color: #f5dc9a;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+body:not(.landing-page) .consumo-rebuild-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat {
+  min-height: 58px;
+  padding: 9px;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat-label,
+body:not(.landing-page) .consumo-rebuild-timeline-kicker,
+body:not(.landing-page) .consumo-rebuild-chart-kicker {
+  color: #746b63;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat-value {
+  display: block;
+  margin-top: 4px;
+  color: #201714;
+  font-size: 21px;
+  font-weight: 620;
+  line-height: 1;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat-value--text {
+  font-size: 15px;
+}
+
+body:not(.landing-page) .consumo-rebuild-chart,
+body:not(.landing-page) .consumo-rebuild-timeline,
+body:not(.landing-page) .consumo-rebuild-empty,
+body:not(.landing-page) .consumo-rebuild-skeleton {
+  padding: 13px;
+}
+
+body:not(.landing-page) .consumo-rebuild-timeline-title,
+body:not(.landing-page) .consumo-rebuild-chart-title {
+  margin: 0;
+  color: #201714;
+  font-size: 15px;
+  font-weight: 620;
+}
+
+body:not(.landing-page) .consumo-rebuild-months,
+body:not(.landing-page) .consumo-rebuild-entry-list {
+  display: grid;
+  gap: 8px;
+}
+
+body:not(.landing-page) .consumo-rebuild-months {
+  margin-top: 10px;
+}
+
+body:not(.landing-page) .consumo-rebuild-month-label {
+  color: #650a18;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry {
+  display: grid;
+  grid-template-columns: 40px 42px 4px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 60px;
+  border-radius: 18px;
+  border: 1px solid rgba(61, 53, 48, 0.07);
+  background: rgba(247, 242, 234, 0.62);
+  padding: 7px;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-date {
+  display: grid;
+  justify-items: center;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-day {
+  color: #201714;
+  font-size: 21px;
+  font-weight: 620;
+  line-height: 0.9;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-weekday {
+  color: #746b63;
+  font-size: 8.5px;
+  font-weight: 700;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-bottle {
+  display: grid;
+  width: 40px;
+  height: 52px;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(241, 234, 223, 0.72);
+  color: #650a18;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-label {
+  width: 32px;
+  height: 48px;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-line {
+  display: block;
+  width: 3px;
+  height: 34px;
+  border-radius: 999px;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-title {
+  display: block;
+  overflow: hidden;
+  color: #201714;
+  font-size: 13.5px;
+  font-weight: 620;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-meta,
+body:not(.landing-page) .consumo-rebuild-entry-note {
+  overflow: hidden;
+  color: #746b63;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  background: rgba(200, 168, 90, 0.14);
+  padding: 5px 7px;
+  color: #650a18;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+body:not(.landing-page) [data-action-dialog-root] {
+  padding: 18px !important;
+}
+
+body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-modal, [data-radix-dialog-content].sx-action-modal) {
+  width: min(92vw, 620px) !important;
+  max-width: min(92vw, 620px) !important;
+  max-height: min(88dvh, 760px) !important;
+  border-radius: 34px !important;
+}
+
+body:not(.landing-page) .add-wine-modal {
+  width: min(92vw, 640px) !important;
+  max-width: min(92vw, 640px) !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-choice {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option {
+  display: grid;
+  min-height: 102px;
+  align-content: center;
+  justify-items: center;
+  gap: 9px;
+  border-radius: 22px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.68);
+  color: #201714;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option.is-primary {
+  border-color: rgba(101, 10, 24, 0.18);
+  background: linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+  color: #fff8ed;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(101, 10, 24, 0.08);
+  color: #650a18;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option.is-primary .add-wine-rebuild-option-icon {
+  background: rgba(255, 248, 237, 0.16);
+  color: #f5dc9a;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option-icon.is-gold {
+  background: rgba(200, 168, 90, 0.14);
+  color: #8a6b25;
+}
+
+body:not(.landing-page) .add-wine-rebuild-option-icon.is-olive {
+  background: rgba(38, 58, 43, 0.10);
+  color: #263a2b;
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual {
+  display: grid;
+  gap: 8px;
+}
+
+body:not(.landing-page) .add-wine-rebuild-section {
+  display: grid;
+  gap: 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(61, 53, 48, 0.08);
+  background: rgba(255, 253, 248, 0.58);
+  padding: 10px;
+}
+
+body:not(.landing-page) .add-wine-rebuild-section-primary {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(101, 10, 24, 0.045), transparent 11rem),
+    rgba(255, 253, 248, 0.68);
+}
+
+body:not(.landing-page) .add-wine-rebuild-section-head {
+  color: #650a18;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual .add-wine-field-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual :is(.input-premium, input:not([type="checkbox"]):not([type="radio"]), textarea, button[role="combobox"]) {
+  min-height: 38px !important;
+  height: 38px !important;
+  border-radius: 14px !important;
+  font-size: 13px !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual textarea.input-premium {
+  height: auto !important;
+  min-height: 66px !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual .add-wine-check-row {
+  min-height: 32px !important;
+  grid-template-columns: 18px minmax(0, 1fr) !important;
+  border-radius: 12px !important;
+  padding: 5px 8px !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-manual .add-wine-check-row input[type="checkbox"],
+body:not(.landing-page) .add-wine-rebuild-manual .add-wine-check-row input[type="radio"] {
+  width: 15px !important;
+  min-width: 15px !important;
+  max-width: 15px !important;
+  height: 15px !important;
+  min-height: 15px !important;
+  max-height: 15px !important;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-location {
+  border-radius: 16px;
+  background: rgba(241, 234, 223, 0.42);
+  padding: 8px;
+}
+
+body:not(.landing-page) .add-wine-rebuild-footer {
+  display: grid !important;
+  grid-template-columns: 0.42fr 1fr;
+  gap: 8px;
+}
+
+body:not(.landing-page) .add-wine-rebuild-back,
+body:not(.landing-page) .add-wine-rebuild-submit {
+  min-height: 42px !important;
+  border-radius: 17px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+body:not(.landing-page) .add-wine-rebuild-back {
+  border: 1px solid rgba(61, 53, 48, 0.10);
+  background: rgba(255, 253, 248, 0.70);
+  color: #263a2b;
+}
+
+body:not(.landing-page) .consumption-modal .consumption-source-grid,
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body:not(.landing-page) .consumption-modal .consumption-source-card,
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-button,
+body:not(.landing-page) .harmonizar-modal .harmonizar-option,
+body:not(.landing-page) .sx-action-modal .modal-action-card {
+  min-height: 52px !important;
+  border-radius: 20px !important;
+  padding: 10px 12px !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .harmonizar-style-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+body:not(.landing-page) .harmonizar-modal .consumption-wine-list {
+  max-height: min(36dvh, 300px) !important;
+}
+
+@media (max-width: 1023px) {
+  body:not(.landing-page) .home-rebuild-layout,
+  body:not(.landing-page) .cellar-rebuild-workspace,
+  body:not(.landing-page) .consumo-rebuild-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-control-panel {
+    position: static;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-control-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  body:not(.landing-page) :is(.home-rebuild-rail, .cellar-rebuild-rail, .consumo-rebuild-rail) {
+    gap: 10px;
+    padding: 10px 0 20px;
+  }
+
+  body:not(.landing-page) :is(.home-rebuild-header, .cellar-rebuild-header, .consumo-rebuild-header) {
+    align-items: start;
+    gap: 10px;
+  }
+
+  body:not(.landing-page) :is(.home-rebuild-title, .cellar-rebuild-title, .consumo-rebuild-title) {
+    font-size: 30px;
+  }
+
+  body:not(.landing-page) .home-rebuild-mobile-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body:not(.landing-page) .home-rebuild-side .home-rebuild-actions-card {
+    display: none;
+  }
+
+  body:not(.landing-page) .home-rebuild-layout,
+  body:not(.landing-page) .home-rebuild-main,
+  body:not(.landing-page) .home-rebuild-side {
+    gap: 9px;
+  }
+
+  body:not(.landing-page) .home-rebuild-highlight {
+    grid-template-columns: 76px minmax(0, 1fr);
+    min-height: 132px;
+    border-radius: 24px;
+    padding: 10px;
+  }
+
+  body:not(.landing-page) .home-rebuild-bottle-stage {
+    min-height: 112px;
+    border-radius: 18px;
+  }
+
+  body:not(.landing-page) .home-rebuild-bottle,
+  body:not(.landing-page) .home-rebuild-bottle-placeholder {
+    width: 56px;
+    height: 94px;
+  }
+
+  body:not(.landing-page) .home-rebuild-wine {
+    font-size: clamp(20px, 5.7vw, 25px);
+  }
+
+  body:not(.landing-page) .home-rebuild-meta {
+    display: none;
+  }
+
+  body:not(.landing-page) .home-rebuild-highlight-foot {
+    align-items: start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  body:not(.landing-page) .home-rebuild-summary,
+  body:not(.landing-page) .home-rebuild-panel,
+  body:not(.landing-page) .cellar-rebuild-summary,
+  body:not(.landing-page) .cellar-rebuild-controls,
+  body:not(.landing-page) .consumo-rebuild-chart,
+  body:not(.landing-page) .consumo-rebuild-timeline {
+    padding: 11px;
+    border-radius: 22px;
+  }
+
+  body:not(.landing-page) .home-rebuild-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:not(.landing-page) .home-rebuild-metrics span {
+    min-height: 56px;
+    padding: 8px;
+  }
+
+  body:not(.landing-page) .home-rebuild-wine-row,
+  body:not(.landing-page) .home-rebuild-consumption-row {
+    min-height: 54px;
+    padding: 7px 8px;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card {
+    grid-template-rows: 106px minmax(0, 1fr);
+    border-radius: 20px;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card-image,
+  body:not(.landing-page) .cellar-rebuild-card-image-placeholder {
+    width: 54px;
+    height: 88px;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card-name {
+    font-size: 14px;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card-price {
+    display: none;
+  }
+
+  body:not(.landing-page) .consumo-rebuild-entry {
+    grid-template-columns: 34px 38px 3px minmax(0, 1fr);
+  }
+
+  body:not(.landing-page) .consumo-rebuild-entry-side {
+    display: none;
+  }
+
+  body:not(.landing-page) [data-action-dialog-root] {
+    align-items: flex-end !important;
+    padding: 0 10px 10px !important;
+  }
+
+  body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-modal, [data-radix-dialog-content].sx-action-modal) {
+    width: min(94vw, 430px) !important;
+    max-width: min(94vw, 430px) !important;
+    max-height: min(88dvh, 760px) !important;
+    border-radius: 30px 30px 24px 24px !important;
+  }
+
+  body:not(.landing-page) .add-wine-rebuild-choice {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  body:not(.landing-page) .add-wine-rebuild-option {
+    min-height: 52px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    align-content: center;
+    justify-items: start;
+    text-align: left;
+  }
+
+  body:not(.landing-page) .add-wine-rebuild-manual .add-wine-field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  body:not(.landing-page) .add-wine-rebuild-section {
+    padding: 9px;
+    border-radius: 18px;
+  }
+}
+
 /* V3 final overrides kept after legacy authority blocks. */
 body:not(.landing-page) .cellar-v3-add-button,
 body:not(.landing-page) .cellar-v3-add-button :is(span, svg) {

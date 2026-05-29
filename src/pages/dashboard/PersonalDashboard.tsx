@@ -158,14 +158,6 @@ export default function PersonalDashboard() {
       : `${insightWindow.from}-${insightWindow.until}`
     : "";
 
-  const insightSentence = insightWine
-    ? insightReason === "Abra este rótulo hoje"
-      ? "Boa escolha para acompanhar sua próxima refeição."
-      : insightReason === "Vale acompanhar a janela de consumo"
-        ? "Acompanhe a janela de consumo."
-        : "Rótulo em destaque da sua adega."
-    : insightReason;
-
   return (
     <>
       {showOnboarding && (
@@ -178,32 +170,32 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="dashboard-root editorial-page home-v3-page sx-v2-page-shell !px-0">
-        <section className="sx-v2-content-rail home-v3-rail">
-          <div className="home-v3-header">
-            <div className="home-v3-greeting">
-              <p className="home-v3-date sx-v2-kicker">
+      <div className="dashboard-root editorial-page home-rebuild-page sx-v2-page-shell !px-0">
+        <section className="sx-v2-content-rail home-rebuild-rail">
+          <div className="home-rebuild-header">
+            <div className="home-rebuild-greeting">
+              <p className="home-rebuild-date sx-v2-kicker">
                 {new Date().toLocaleDateString("pt-BR", {
                   weekday: "long",
                   day: "numeric",
                   month: "long",
                 })}
               </p>
-              <h1 className="home-v3-title sx-v2-display">
+              <h1 className="home-rebuild-title sx-v2-display">
                 Olá,{" "}
-                <span className="home-v3-name">{firstName}</span>
+                <span className="home-rebuild-name">{firstName}</span>
               </h1>
             </div>
           </div>
 
-          <div className="home-v3-actions" aria-label="Ações rápidas">
-            <button type="button" className="home-v3-action home-v3-action-primary" onClick={() => setAddOpen(true)}>
+          <div className="home-rebuild-mobile-actions" aria-label="Ações principais">
+            <button type="button" className="home-rebuild-action home-rebuild-action-primary" onClick={() => setAddOpen(true)}>
               <Plus className="h-4 w-4" />
               <span>Adicionar vinho</span>
             </button>
             <button
               type="button"
-              className="home-v3-action"
+              className="home-rebuild-action"
               onClick={() => {
                 setPreSelectedWine(null);
                 setConsumptionOpen(true);
@@ -212,162 +204,179 @@ export default function PersonalDashboard() {
               <GlassWater className="h-4 w-4" />
               <span>Adicionar consumo</span>
             </button>
-            <button
-              type="button"
-              className="home-v3-action"
-              onClick={() => {
-                setPairingInitialWineId(null);
-                setDishToWineOpen(true);
-              }}
-            >
-              <Sparkles className="h-4 w-4" />
-              <span>Harmonizar</span>
-            </button>
-            <button type="button" className="home-v3-action" onClick={() => setWineListOpen(true)}>
-              <WineIcon className="h-4 w-4" />
-              <span>Analisar carta</span>
-            </button>
           </div>
 
-          <div className="home-v3-top-grid">
-            <article className="home-v3-recommendation sx-v2-ai-aura">
-              <div className="home-v3-bottle-stage">
-                {insightWine ? (
-                  <WineLabelPreview
-                    wine={insightWine}
-                    alt={insightWine.name}
-                    className="home-v3-bottle"
-                    imageClassName="h-full w-full object-contain"
-                    generated={false}
-                    compact
-                  />
-                ) : (
-                  <div className="home-v3-bottle-placeholder">
-                    <WineIcon className="h-7 w-7" />
-                  </div>
-                )}
-              </div>
-
-              <div className="home-v3-recommendation-copy">
-                <div className="home-v3-recommendation-head">
-                  <span className="home-v3-hero-sigil">
-                    <Sparkles className="h-4 w-4" />
-                  </span>
-                  <Kicker className="home-v3-hero-kicker">Insight do dia</Kicker>
+          <div className="home-rebuild-layout">
+            <main className="home-rebuild-main">
+              <article className="home-rebuild-highlight sx-v2-ai-aura">
+                <div className="home-rebuild-bottle-stage">
+                  {insightWine ? (
+                    <WineLabelPreview
+                      wine={insightWine}
+                      alt={insightWine.name}
+                      className="home-rebuild-bottle"
+                      imageClassName="h-full w-full object-contain"
+                      generated={false}
+                      compact
+                    />
+                  ) : (
+                    <div className="home-rebuild-bottle-placeholder">
+                      <WineIcon className="h-6 w-6" />
+                    </div>
+                  )}
                 </div>
 
-                {insightWine ? (
-                  <>
-                    <h2 className="home-v3-hero-wine sx-v2-wine-title">{insightWine.name}</h2>
-                    {insightMeta ? (
-                      <p className="home-v3-hero-meta sx-v2-wine-meta">{insightMeta}</p>
-                    ) : null}
-                    <div className="home-v3-window-row">
-                      <span>{insightReason}</span>
-                      {insightWindowLabel ? <span>{insightWindowLabel}</span> : null}
-                    </div>
-                    <p className="home-v3-hero-note sx-v2-body">{insightSentence}</p>
+                <div className="home-rebuild-highlight-copy">
+                  <div className="home-rebuild-highlight-top">
+                    <Kicker className="home-rebuild-kicker">Rótulo em destaque</Kicker>
+                    {insightWindowLabel ? <span className="home-rebuild-window">{insightWindowLabel}</span> : null}
+                  </div>
 
+                  {insightWine ? (
+                    <>
+                      <h2 className="home-rebuild-wine sx-v2-wine-title">{insightWine.name}</h2>
+                      {insightMeta ? <p className="home-rebuild-meta sx-v2-wine-meta">{insightMeta}</p> : null}
+                      <div className="home-rebuild-highlight-foot">
+                        <span className="home-rebuild-status">{insightReason}</span>
+                        <button
+                          type="button"
+                          className="home-rebuild-open"
+                          onClick={() => {
+                            setPreSelectedWine(insightWine);
+                            setConsumptionOpen(true);
+                          }}
+                        >
+                          Abrir agora
+                          <ArrowRight className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="home-rebuild-wine sx-v2-wine-title">Nenhum rótulo cadastrado</h2>
+                      <p className="home-rebuild-meta sx-v2-wine-meta">Cadastre garrafas para ver sugestões.</p>
+                      <button type="button" className="home-rebuild-open" onClick={() => setAddOpen(true)}>
+                        Adicionar vinho
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </article>
+
+              <section className="home-rebuild-panel home-rebuild-upcoming">
+                <div className="home-rebuild-section-head">
+                  <h2>Próximas garrafas</h2>
+                  <span>{readyWines.length}</span>
+                </div>
+
+                <div className="home-rebuild-upcoming-list">
+                  {readyWines.length > 0 ? readyWines.slice(0, 4).map(({ wine, classification, drinkWindow }) => (
                     <button
                       type="button"
-                      className="home-v3-hero-action"
+                      key={wine.id}
+                      className="home-rebuild-wine-row"
                       onClick={() => {
-                        setPreSelectedWine(insightWine);
+                        setPreSelectedWine(wine);
                         setConsumptionOpen(true);
                       }}
                     >
-                      <span>Abrir</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <WineLabelPreview
+                        wine={wine}
+                        alt={wine.name}
+                        className="home-rebuild-thumb"
+                        imageClassName="h-full w-full object-contain"
+                        generated={false}
+                        compact
+                      />
+                      <span className="home-rebuild-row-copy">
+                        <strong>{wine.name}</strong>
+                        <small>{[wine.country, wine.region].filter(Boolean).join(" · ") || wine.style || "Adega"}</small>
+                      </span>
+                      <span className={`home-rebuild-row-status ${classification.status}`}>
+                        {classification.status === "now" ? "Abrir" : `${drinkWindow.from}-${drinkWindow.until}`}
+                      </span>
                     </button>
-                  </>
-                ) : (
-                  <>
-                    <h2 className="home-v3-hero-wine sx-v2-wine-title">Adicione vinhos</h2>
-                    <p className="home-v3-hero-note sx-v2-body">Cadastre garrafas para ver sugestões.</p>
-                    <button type="button" className="home-v3-hero-action" onClick={() => setAddOpen(true)}>
-                      <span>Adicionar</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </button>
-                  </>
-                )}
-              </div>
-            </article>
+                  )) : (
+                    <div className="home-rebuild-empty">Cadastre garrafas para ver sugestões.</div>
+                  )}
+                </div>
+              </section>
 
-            <aside className="home-v3-snapshot">
-              <Kicker className="home-v3-snapshot-kicker">Coleção</Kicker>
-              <div className="home-v3-snapshot-grid">
-                <span><strong>{totalBottles.toLocaleString("pt-BR")}</strong> garrafas</span>
-                <span><strong>{wines.length.toLocaleString("pt-BR")}</strong> rótulos</span>
-                <span><strong>{drinkNow}</strong> beber agora</span>
-                <span><strong>{inGuard}</strong> em guarda</span>
-                <span className="home-v3-snapshot-value"><strong>{formattedTotalValue}</strong> valor estimado</span>
-              </div>
-            </aside>
-          </div>
+              <section className="home-rebuild-panel home-rebuild-recent">
+                <div className="home-rebuild-section-head">
+                  <h2>Últimos consumos</h2>
+                  {lowStock > 0 ? <span>{lowStock} baixo estoque</span> : null}
+                </div>
 
-          <section className="home-v3-rail-section">
-            <div className="home-v3-section-head">
-              <h2>Próximas</h2>
-              <span>{readyWines.length} rótulos</span>
-            </div>
+                <div className="home-rebuild-recent-list">
+                  {recentToasts.length > 0 ? recentToasts.slice(0, 3).map((entry) => (
+                    <div key={entry.id} className="home-rebuild-consumption-row">
+                      <span className="home-rebuild-consumption-date">
+                        <Clock className="h-3.5 w-3.5" />
+                        {formatDate(entry.consumed_at)}
+                      </span>
+                      <span className="home-rebuild-row-copy">
+                        <strong>{entry.wine_name}</strong>
+                        <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Externo" : "Adega")}</small>
+                      </span>
+                      <span className="home-rebuild-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
+                    </div>
+                  )) : (
+                    <div className="home-rebuild-empty">Nenhum consumo registrado.</div>
+                  )}
+                </div>
+              </section>
+            </main>
 
-            <div className="home-v3-upcoming-rail">
-              {readyWines.length > 0 ? readyWines.map(({ wine, classification, drinkWindow }) => (
+            <aside className="home-rebuild-side">
+              <section className="home-rebuild-actions-card" aria-label="Ações rápidas">
+                <button type="button" className="home-rebuild-action home-rebuild-action-primary" onClick={() => setAddOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  <span>Adicionar vinho</span>
+                </button>
                 <button
                   type="button"
-                  key={wine.id}
-                  className="home-v3-upcoming-card"
+                  className="home-rebuild-action"
                   onClick={() => {
-                    setPreSelectedWine(wine);
+                    setPreSelectedWine(null);
                     setConsumptionOpen(true);
                   }}
                 >
-                  <WineLabelPreview
-                    wine={wine}
-                    alt={wine.name}
-                    className="home-v3-upcoming-bottle"
-                    imageClassName="h-full w-full object-contain"
-                    generated={false}
-                    compact
-                  />
-                  <span className="home-v3-upcoming-copy">
-                    <strong>{wine.name}</strong>
-                    <small>{[wine.country, wine.region].filter(Boolean).join(" · ") || wine.style || "Adega"}</small>
-                  </span>
-                  <span className={`home-v3-status ${classification.status}`}>
-                    {classification.status === "now" ? "Beber agora" : `${drinkWindow.from}-${drinkWindow.until}`}
-                  </span>
+                  <GlassWater className="h-4 w-4" />
+                  <span>Adicionar consumo</span>
                 </button>
-              )) : (
-                <div className="home-v3-empty">Cadastre garrafas para acompanhar janelas.</div>
-              )}
-            </div>
-          </section>
+                <button
+                  type="button"
+                  className="home-rebuild-action"
+                  onClick={() => {
+                    setPairingInitialWineId(null);
+                    setDishToWineOpen(true);
+                  }}
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>Harmonizar</span>
+                </button>
+                <button type="button" className="home-rebuild-action" onClick={() => setWineListOpen(true)}>
+                  <WineIcon className="h-4 w-4" />
+                  <span>Analisar carta</span>
+                </button>
+              </section>
 
-          <section className="home-v3-recent">
-            <div className="home-v3-section-head">
-              <h2>Últimos consumos</h2>
-              {lowStock > 0 ? <span>{lowStock} com poucas unidades</span> : null}
-            </div>
-
-            <div className="home-v3-timeline">
-              {recentToasts.length > 0 ? recentToasts.map((entry) => (
-                <div key={entry.id} className="home-v3-timeline-row">
-                  <span className="home-v3-timeline-date">
-                    <Clock className="h-3.5 w-3.5" />
-                    {formatDate(entry.consumed_at)}
-                  </span>
-                  <span className="home-v3-timeline-copy">
-                    <strong>{entry.wine_name}</strong>
-                    <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Externo" : "Adega")}</small>
-                  </span>
-                  <span className="home-v3-timeline-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
+              <section className="home-rebuild-summary">
+                <div className="home-rebuild-section-head">
+                  <h2>Resumo</h2>
                 </div>
-              )) : (
-                <div className="home-v3-empty">Registre consumos para acompanhar o histórico.</div>
-              )}
-            </div>
-          </section>
+                <div className="home-rebuild-metrics">
+                  <span><strong>{totalBottles.toLocaleString("pt-BR")}</strong> garrafas</span>
+                  <span><strong>{wines.length.toLocaleString("pt-BR")}</strong> rótulos</span>
+                  <span><strong>{drinkNow}</strong> beber agora</span>
+                  <span><strong>{inGuard}</strong> em guarda</span>
+                  <span className="home-rebuild-metric-wide"><strong>{formattedTotalValue}</strong> valor estimado</span>
+                </div>
+              </section>
+            </aside>
+          </div>
         </section>
       </div>
 

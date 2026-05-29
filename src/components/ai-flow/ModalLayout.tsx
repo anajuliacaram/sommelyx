@@ -18,11 +18,11 @@ export const AI_MODAL_ACTION_TILE_CLASSNAME =
   "modal-action-card sx-v2-modal-action";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
-  "h-auto max-h-[86dvh] w-full max-w-[560px] gap-0 p-0";
+  "h-auto max-h-[86dvh] w-full max-w-[620px] gap-0 p-0";
 
 export const AI_MODAL_SHEET_CONTENT_STYLE: CSSProperties = {
-  width: "min(92vw, 560px)",
-  maxWidth: "560px",
+  width: "min(92vw, 620px)",
+  maxWidth: "620px",
   maxHeight: "min(86dvh, 760px)",
   height: "auto",
 };

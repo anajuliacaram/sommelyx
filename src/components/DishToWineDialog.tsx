@@ -1339,8 +1339,8 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <PremiumChoiceCard
                     index={2}
                     icon={Crown}
-                    title="Para um momento inesquecível"
-                    description="Os rótulos mais especiais que combinam com o prato"
+                    title="Rótulo especial"
+                    description="Rótulos especiais que combinam com o prato"
                     accent="gold"
                     onClick={() => { setIntent("special"); handleSearchCellar("special"); }}
                   />
