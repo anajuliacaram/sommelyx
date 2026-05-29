@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
-import { Star, Pencil } from "@/icons/lucide";
+import { Star, Pencil, Wine as WineIcon } from "@/icons/lucide";
 import type { ConsumptionEntry } from "@/hooks/useConsumption";
 import { useWines } from "@/hooks/useWines";
 import { getStyleColor } from "@/lib/sommelyx-data";
 import { EditConsumptionDialog } from "@/components/EditConsumptionDialog";
+import { WineLabelPreview } from "@/components/WineLabelPreview";
 
 function getMonthKey(date: Date) {
   if (Number.isNaN(date.getTime())) return "sem-data";
@@ -32,9 +33,15 @@ type ConsumptionTimelineProps = {
   title?: string;
 };
 
-export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: ConsumptionTimelineProps) {
+export function ConsumptionTimeline({ entries, title = "Histórico" }: ConsumptionTimelineProps) {
   const { data: wines = [] } = useWines();
   const [editing, setEditing] = useState<ConsumptionEntry | null>(null);
+
+  const wineById = useMemo(() => {
+    const map = new Map<string, (typeof wines)[number]>();
+    wines.forEach((w) => map.set(w.id, w));
+    return map;
+  }, [wines]);
 
   const wineStyleById = useMemo(() => {
     const map = new Map<string, string | null>();
@@ -55,40 +62,41 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
   }, [entries]);
 
   return (
-    <section className="consumption-journal consumo-v2-timeline sx-v2-floating-panel">
-      <div className="consumo-v2-timeline-head">
+    <section className="consumption-journal consumo-v3-timeline sx-v2-floating-panel">
+      <div className="consumo-v3-timeline-head">
         <div className="min-w-0">
-          <p className="consumo-v2-timeline-kicker">Journal</p>
-          <h2 className="consumo-v2-timeline-title">{title}</h2>
+          <p className="consumo-v3-timeline-kicker">Histórico</p>
+          <h2 className="consumo-v3-timeline-title">{title}</h2>
         </div>
-        <span className="consumo-v2-timeline-count">
+        <span className="consumo-v3-timeline-count">
           {entries.length} {entries.length === 1 ? "registro" : "registros"}
         </span>
       </div>
 
       {months.length === 0 ? (
-        <div className="consumo-v2-timeline-empty">
-          <p className="consumo-v2-empty-title">
+        <div className="consumo-v3-timeline-empty">
+          <p className="consumo-v3-empty-title">
             Nenhum consumo encontrado neste período
           </p>
-          <p className="consumo-v2-empty-copy">
-            Ajuste os filtros acima para ver mais brindes
+          <p className="consumo-v3-empty-copy">
+            Ajuste os filtros para ver outros consumos
           </p>
         </div>
       ) : (
-        <div className="consumo-v2-months">
+        <div className="consumo-v3-months">
           {months.map((month) => (
-            <div key={month.key} className="consumo-v2-month">
-              <div className="consumo-v2-month-head">
-                <span className="consumo-v2-month-label">{month.label}</span>
-                <span className="consumo-v2-month-count">
+            <div key={month.key} className="consumo-v3-month">
+              <div className="consumo-v3-month-head">
+                <span className="consumo-v3-month-label">{month.label}</span>
+                <span className="consumo-v3-month-count">
                   {month.events.length} {month.events.length === 1 ? "ABERTURA" : "ABERTURAS"}
                 </span>
               </div>
 
-              <div className="consumo-v2-entry-list">
+              <div className="consumo-v3-entry-list">
                 {month.events.map((entry) => {
                   const date = new Date(entry.consumed_at);
+                  const wine = entry.wine_id ? wineById.get(entry.wine_id) ?? null : null;
                   const styleSource =
                     entry.style ?? (entry.wine_id ? wineStyleById.get(entry.wine_id) ?? null : null);
                   const color = styleSource ? getStyleColor(styleSource) : "rgba(95,111,82,0.25)";
@@ -101,36 +109,51 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                       key={entry.id}
                       onClick={() => !isDemo && setEditing(entry)}
                       disabled={isDemo}
-                      className="consumo-v2-entry group text-left disabled:cursor-default"
+                      className="consumo-v3-entry group text-left disabled:cursor-default"
                     >
-                      <div className="consumo-v2-entry-date">
-                        <span className="consumo-v2-entry-day">{date.getDate()}</span>
-                        <span className="consumo-v2-entry-weekday">{getWeekdayLabel(date)}</span>
+                      <div className="consumo-v3-entry-date">
+                        <span className="consumo-v3-entry-day">{date.getDate()}</span>
+                        <span className="consumo-v3-entry-weekday">{getWeekdayLabel(date)}</span>
                       </div>
 
-                      <div className="consumo-v2-entry-line-wrap">
+                      <div className="consumo-v3-entry-bottle">
+                        {wine ? (
+                          <WineLabelPreview
+                            wine={wine}
+                            alt={entry.wine_name}
+                            className="consumo-v3-entry-label"
+                            imageClassName="h-full w-full object-contain"
+                            generated={false}
+                            compact
+                          />
+                        ) : (
+                          <WineIcon className="h-5 w-5" />
+                        )}
+                      </div>
+
+                      <div className="consumo-v3-entry-line-wrap">
                         <span
                           aria-hidden
-                          className="consumo-v2-entry-line"
+                          className="consumo-v3-entry-line"
                           style={{ background: color }}
                         />
                       </div>
 
-                      <div className="consumo-v2-entry-copy">
-                        <div className="consumo-v2-entry-title-row">
-                          <span className="consumo-v2-entry-title">{entry.wine_name}</span>
+                      <div className="consumo-v3-entry-copy">
+                        <div className="consumo-v3-entry-title-row">
+                          <span className="consumo-v3-entry-title">{entry.wine_name}</span>
                         </div>
                         {meta ? (
-                          <div className="consumo-v2-entry-meta">{meta}</div>
+                          <div className="consumo-v3-entry-meta">{meta}</div>
                         ) : null}
                         {note ? (
-                          <div className="consumo-v2-entry-note">{note}</div>
+                          <div className="consumo-v3-entry-note">{note}</div>
                         ) : null}
                       </div>
 
-                      <div className="consumo-v2-entry-side">
-                        <div className="consumo-v2-entry-rating">
-                          <span className="consumo-v2-entry-rating-icon">
+                      <div className="consumo-v3-entry-side">
+                        <div className="consumo-v3-entry-rating">
+                          <span className="consumo-v3-entry-rating-icon">
                             <Star className="h-2.5 w-2.5 fill-current" />
                           </span>
                           <span className="tabular-nums">
@@ -139,7 +162,7 @@ export function ConsumptionTimeline({ entries, title = "Brindes recentes" }: Con
                         </div>
                         {!isDemo && (
                           <Pencil
-                            className="consumo-v2-entry-edit"
+                            className="consumo-v3-entry-edit"
                             aria-hidden
                           />
                         )}

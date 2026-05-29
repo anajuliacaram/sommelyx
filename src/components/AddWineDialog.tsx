@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, Plus, Check, Camera, FileSpreadsheet, Sparkles, Wine } from "@/icons/lucide";
+import { Plus, Check, Camera, FileSpreadsheet, Sparkles, Wine, ArrowLeft, ArrowRight, Search } from "@/icons/lucide";
 import { useAddWine } from "@/hooks/useWines";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +17,7 @@ import { invokeEdgeFunction } from "@/lib/edge-invoke";
 import { normalizeWineData, normalizeWineSearchText, normalizeWineText } from "@/lib/wine-normalization";
 import { resolveStorageImageUrl } from "@/lib/storage-urls";
 import { getErrorReason } from "@/lib/feedback";
-import { getMeaningfulScanFields, isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
+import { isMeaningfulScanValue, normalizeScanResult } from "@/lib/scan-normalizer";
 import { normalizeStyleFamily } from "@/lib/sommelyx-data";
 import { cn } from "@/lib/utils";
 import {
@@ -64,25 +62,6 @@ type AddWinePrefillValues = {
   confidence?: Record<string, number | null | undefined> | null;
 };
 
-const ADD_WINE_FORM_FIELDS = [
-  "name",
-  "producer",
-  "vintage",
-  "style",
-  "country",
-  "region",
-  "grape",
-  "drinkFrom",
-  "drinkUntil",
-  "purchasePrice",
-  "estimatedPrice",
-  "foodPairing",
-  "cellarLocation",
-  "labelImagePreview",
-  "labelImageFile",
-  "labelImageBase64",
-] as const;
-
 const SCAN_PREFILL_FORM_FIELDS = [
   "name",
   "producer",
@@ -108,6 +87,18 @@ const styles = [
   { value: "fortificado", label: "Fortificado" },
 ];
 
+type AddWineStep = "choice" | "identity" | "storage" | "purchase" | "aging" | "review";
+
+const addWineStepOrder: AddWineStep[] = ["identity", "storage", "purchase", "aging", "review"];
+
+const addWineStepLabels: Record<Exclude<AddWineStep, "choice">, string> = {
+  identity: "Identificar",
+  storage: "Adega",
+  purchase: "Compra",
+  aging: "Guarda",
+  review: "Revisar",
+};
+
 type ScanResultEnvelope = {
   raw?: Record<string, unknown> | null;
   normalized?: Record<string, unknown> | null;
@@ -115,27 +106,6 @@ type ScanResultEnvelope = {
   labelImageFile?: File | null;
   labelImageBase64?: string | null;
 };
-
-type ScanFieldMapping = {
-  target: keyof AddWinePrefillValues;
-  sources: string[];
-};
-
-const SCAN_FIELD_MAPPINGS: ScanFieldMapping[] = [
-  { target: "name", sources: ["name", "wine_name", "wineName", "label_text", "full_text"] },
-  { target: "producer", sources: ["producer", "producer_name", "winery", "winemaker"] },
-  { target: "vintage", sources: ["vintage", "year", "vintage_year"] },
-  { target: "style", sources: ["style", "wine_style", "type"] },
-  { target: "country", sources: ["country", "pais", "país"] },
-  { target: "region", sources: ["region", "regiao", "região"] },
-  { target: "grape", sources: ["grape", "grapes", "varietal", "varieties"] },
-  { target: "drinkFrom", sources: ["drink_from"] },
-  { target: "drinkUntil", sources: ["drink_until"] },
-  { target: "purchasePrice", sources: ["purchase_price"] },
-  { target: "estimatedPrice", sources: ["estimated_price"] },
-  { target: "foodPairing", sources: ["food_pairing"] },
-  { target: "cellarLocation", sources: ["cellar_location"] },
-];
 
 function normalizeLabelText(value: unknown) {
   if (typeof value !== "string") return "";
@@ -389,14 +359,6 @@ function mapScanResultToInitialValues(rawResult: unknown, normalizedResult?: unk
           : null),
   };
 
-  console.info("[SCAN AI RESPONSE]", source);
-  console.info("[SCAN NORMALIZED DATA]", {
-    before: normalizedSource,
-    after: normalized,
-    meaningfulFields: getMeaningfulScanFields(normalized),
-  });
-  console.info("[SCAN FINAL FORM DATA]", mappedData);
-
   return mappedData;
 }
 
@@ -428,14 +390,11 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [labelImageBase64, setLabelImageBase64] = useState<string | null>(null);
   const [aiPrefilledFields, setAiPrefilledFields] = useState<Record<string, boolean>>({});
   const [missingFields, setMissingFields] = useState<string[]>([]);
-  const [originOpen, setOriginOpen] = useState(false);
-  const [cellarOpen, setCellarOpen] = useState(false);
-  const [valueOpen, setValueOpen] = useState(false);
-  const [notesOpen, setNotesOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
   const [manualFormVisible, setManualFormVisible] = useState(false);
+  const [addWineStep, setAddWineStep] = useState<AddWineStep>("choice");
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
   const [estimateRange, setEstimateRange] = useState<{ min: number; max: number } | null>(null);
@@ -463,10 +422,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
       setScanOpen(true);
     }
   }, [open, initialScan]);
-
-  useEffect(() => {
-    if (open && isCommercial) setValueOpen(true);
-  }, [open, isCommercial]);
 
   // Debounced AI price estimation
   const fetchEstimate = useCallback(async (n: string, p: string, v: string, s: string, c: string, r: string, g: string) => {
@@ -525,8 +480,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setScanHydrated(false);
     setAiPrefilledFields({});
     setMissingFields([]);
-    setOriginOpen(false); setCellarOpen(false); setValueOpen(false); setNotesOpen(false); setSuccess(false);
+    setSuccess(false);
     setManualFormVisible(false);
+    setAddWineStep("choice");
   }, []);
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
@@ -596,129 +552,18 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
     setAiPrefilledFields(nextPrefilled);
 
-    if (nextPrefilled.country || nextPrefilled.region || nextPrefilled.grape) setOriginOpen(true);
-    if (nextPrefilled.cellar_location) setCellarOpen(true);
-    if (nextPrefilled.purchase_price || nextPrefilled.current_value || nextPrefilled.drink_from || nextPrefilled.drink_until) setValueOpen(true);
-    if (nextPrefilled.food_pairing) setNotesOpen(true);
     return nextPrefilled;
   }, []);
 
-  const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues", scanMeta?: ScanResultEnvelope) => {
+  const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues", _scanMeta?: ScanResultEnvelope) => {
     pendingHydrationTraceRef.current = { source, payload: prefill };
     finalFormStateLoggedRef.current = false;
     setManualFormVisible(true);
-    console.info("[AddWineDialog] hydrate_input", {
-      source,
-      payload: prefill,
-      rawKeys: Object.keys(scanMeta?.raw ?? {}).filter((key) => key.trim().length > 0),
-      normalizedKeys: Object.keys(scanMeta?.normalized ?? {}).filter((key) => key.trim().length > 0),
-      payloadKeys: Object.entries(prefill)
-        .filter(([, value]) => value != null && value !== "")
-        .map(([key]) => key),
-    });
-    const mappingTable = SCAN_FIELD_MAPPINGS.map((mapping) => ({
-      target: mapping.target,
-      sources: mapping.sources,
-      value: prefill[mapping.target],
-      applied: isMeaningfulScanValue(prefill[mapping.target]),
-      skipped: !isMeaningfulScanValue(prefill[mapping.target]),
-    }));
-    console.info("[AddWineDialog] field_mapping_table", {
-      source,
-      mappingTable,
-      skippedFields: mappingTable.filter((row) => row.skipped).map((row) => row.target),
-    });
+    setAddWineStep("identity");
     const appliedFields = applyScanPrefill(prefill);
-    const mappedFields = Object.keys(appliedFields);
-
-    console.info("[AddWineDialog] mapped_fields", {
-      source,
-      mappedFields,
-      populatedCount: mappedFields.length,
-      mappedValues: {
-        name: prefill.name ?? null,
-        producer: prefill.producer ?? null,
-        vintage: prefill.vintage ?? null,
-        country: prefill.country ?? null,
-        region: prefill.region ?? null,
-        grape: prefill.grape ?? null,
-      },
-    });
-
-    console.info("[AddWineDialog] final_mapped_fields", {
-      source,
-      rawKeys: Object.keys(scanMeta?.raw ?? {}).filter((key) => key.trim().length > 0),
-      normalizedKeys: Object.keys(scanMeta?.normalized ?? {}).filter((key) => key.trim().length > 0),
-      finalMappedFields: mappedFields,
-    });
-
-    if (mappedFields.length > 0) {
-      console.info("[AddWineDialog] form_opened_with_data", {
-        source,
-        populatedFields: mappedFields,
-        populatedCount: mappedFields.length,
-        open,
-        isCommercial,
-      });
-    }
-
-    console.info("[AddWineDialog] form_data_after_injection", {
-      source,
-      formData: {
-        name: prefill.name ?? null,
-        producer: prefill.producer ?? null,
-        vintage: prefill.vintage ?? null,
-        style: prefill.style ?? null,
-        country: prefill.country ?? null,
-        region: prefill.region ?? null,
-        grape: prefill.grape ?? null,
-        grapes: prefill.grapes ?? null,
-      },
-      appliedFields: mappedFields,
-    });
-
-    console.info("[AddWineDialog] hydrated_fields", {
-      source,
-      payloadKeys: Object.entries(prefill)
-        .filter(([, value]) => value != null && value !== "")
-        .map(([key]) => key),
-      appliedFields: mappedFields,
-      appliedValues: {
-        name: prefill.name ?? null,
-        producer: prefill.producer ?? null,
-        vintage: prefill.vintage ?? null,
-        style: prefill.style ?? null,
-        country: prefill.country ?? null,
-        region: prefill.region ?? null,
-        grape: prefill.grape ?? null,
-        grapes: prefill.grapes ?? null,
-        drinkFrom: prefill.drinkFrom ?? null,
-        drinkUntil: prefill.drinkUntil ?? null,
-        purchasePrice: prefill.purchasePrice ?? null,
-        estimatedPrice: prefill.estimatedPrice ?? null,
-        foodPairing: prefill.foodPairing ?? null,
-        cellarLocation: prefill.cellarLocation ?? null,
-      },
-      skippedFields: SCAN_FIELD_MAPPINGS
-        .map((mapping) => mapping.target)
-        .filter((field) => !mappedFields.includes(field)),
-    });
-    console.info("[SCAN APPLY STATE]", {
-      source,
-      appliedFields: mappedFields,
-      appliedValues: {
-        name: prefill.name ?? null,
-        producer: prefill.producer ?? null,
-        vintage: prefill.vintage ?? null,
-        style: prefill.style ?? null,
-        country: prefill.country ?? null,
-        region: prefill.region ?? null,
-        grape: prefill.grape ?? null,
-      },
-    });
 
     return appliedFields;
-  }, [applyScanPrefill, isCommercial, open]);
+  }, [applyScanPrefill]);
 
   const getRenderedFieldValue = useCallback(
     (_field: keyof AddWinePrefillValues, currentValue: string) => {
@@ -744,59 +589,9 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     const pending = pendingHydrationTraceRef.current;
     if (!open || !pending || finalFormStateLoggedRef.current === true) return;
 
-    const currentValues = {
-      name,
-      producer,
-      quantity,
-      vintage,
-      style,
-      country,
-      region,
-      grape,
-    };
-    const hasAnyPrefilledValue = Boolean(
-      name ||
-        producer ||
-        vintage ||
-        style ||
-        country ||
-        region ||
-        grape,
-    );
-    console.info("[AddWineDialog] final_form_state", {
-      source: pending.source,
-      payload: pending.payload,
-      formState: currentValues,
-      hasAnyPrefilledValue,
-      aiPrefilledFields,
-    });
     finalFormStateLoggedRef.current = true;
     pendingHydrationTraceRef.current = null;
-  }, [aiPrefilledFields, country, grape, name, open, pendingHydrationTraceRef.current, producer, quantity, region, style, vintage]);
-
-  if (import.meta.env.DEV) {
-    console.info("[AddWineDialog] render_snapshot", {
-      open,
-      success,
-      state: {
-        name,
-        producer,
-        quantity,
-        vintage,
-        style,
-        country,
-        region,
-        grape,
-        lastPaid,
-        currentValue,
-      },
-      pendingHydrationSource: pendingHydrationTraceRef.current?.source ?? null,
-      pendingHydrationKeys: pendingHydrationTraceRef.current ? Object.keys(pendingHydrationTraceRef.current.payload).filter((key) => {
-        const value = pendingHydrationTraceRef.current?.payload[key as keyof AddWinePrefillValues];
-        return value != null && value !== "";
-      }) : [],
-    });
-  }
+  }, [open, pendingHydrationTraceRef.current]);
 
   const handleScanComplete = (data: ScanResultEnvelope | Record<string, unknown>) => {
     const rawScan = data && typeof data === "object" && "raw" in data && data.raw && typeof data.raw === "object"
@@ -807,62 +602,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     const normalizedScan = data && typeof data === "object" && "normalized" in data && data.normalized && typeof data.normalized === "object"
       ? (data.normalized as Record<string, unknown>)
       : rawScan;
-    const responseKeys = Object.keys(rawScan);
-    const normalizedKeys = Object.keys(normalizedScan);
-    console.info("[AddWineDialog] scan_callback_payload", {
-      raw: rawScan,
-      normalized: normalizedScan,
-      rawKeys: responseKeys,
-      normalizedKeys,
-      expectedFields: ["name", "producer", "vintage", "style", "country", "region", "grape", "drink_from", "drink_until", "purchase_price", "estimated_price", "food_pairing", "cellar_location"],
-    });
-    console.info("[AddWineDialog] raw_scan_result", {
-      fullJsonResponse: rawScan,
-      responseKeys,
-    });
-    console.info("[AddWineDialog] normalized_scan_result", {
-      fullJsonResponse: normalizedScan,
-      normalizedKeys,
-    });
     const mappedData = mapScanResultToInitialValues(rawScan, normalizedScan);
-    const meaningfulMappedFields = Object.entries(mappedData)
-      .filter(([key, value]) => SCAN_PREFILL_FORM_FIELDS.includes(key as (typeof SCAN_PREFILL_FORM_FIELDS)[number]) && value != null && value !== "")
-      .map(([key]) => key);
-    console.info("[AddWineDialog] scan_normalized", {
-      source: "scan-wine-label",
-      normalized: mappedData,
-      normalizedKeys: Object.entries(mappedData)
-        .filter(([, value]) => value != null && value !== "")
-        .map(([key]) => key),
-      responseVsFormExpectedFields: {
-        expectedFields: ADD_WINE_FORM_FIELDS,
-        responseKeys,
-        normalizedKeys,
-        mappedFields: meaningfulMappedFields,
-        missingFromResponse: ADD_WINE_FORM_FIELDS.filter((field) => !responseKeys.includes(field)),
-      },
-    });
-    if (!mappedData.name && !mappedData.producer && !mappedData.vintage && !mappedData.style && !mappedData.country && !mappedData.region && !mappedData.grape) {
-      console.warn("[SCAN FAILURE REASON]", {
-        source: "scan-wine-label",
-        reason: "mapped_scan_payload_has_no_identifying_fields",
-        mappedData,
-      });
-    }
-
-    console.info("[AddWineDialog] mapped_fields", {
-      source: "scan-wine-label",
-      mappedFields: meaningfulMappedFields,
-      mappedValues: {
-        name: mappedData.name || null,
-        producer: mappedData.producer || null,
-        vintage: mappedData.vintage,
-        country: mappedData.country || null,
-        region: mappedData.region || null,
-        grape: mappedData.grape || mappedData.grapes || null,
-      },
-    });
-
     const prefill: AddWinePrefillValues = {
       name: mappedData.name || null,
       producer: mappedData.producer || null,
@@ -897,13 +637,6 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     const populatedCount = Object.keys(appliedFields).filter((field) => SCAN_PREFILL_FORM_FIELDS.includes(field as (typeof SCAN_PREFILL_FORM_FIELDS)[number])).length;
     if (populatedCount > 0) {
       toast({ title: isCommercial ? "Vinho interpretado" : "Rótulo interpretado" });
-    } else {
-      console.warn("[SCAN FAILURE REASON]", {
-        source: "scan-wine-label",
-        reason: "no_form_fields_applied",
-        raw: rawScan,
-        normalized: normalizedScan,
-      });
     }
   };
 
@@ -917,6 +650,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (addWineStep !== "review") return;
     if (!name.trim()) return;
 
     try {
@@ -972,7 +706,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
         tasting_notes: notes || null,
         rating: null,
         image_url: imageUrl,
-      }, { log: true });
+      }, { log: false });
       const inserted = await addWine.mutateAsync({
         name: normalizedPayload.name || name.trim(),
         producer: normalizedPayload.producer || null,
@@ -1046,6 +780,41 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     }
   };
 
+  const startManualFlow = (step: AddWineStep = "identity") => {
+    setManualFormVisible(true);
+    setAddWineStep(step);
+  };
+
+  const currentStepIndex = addWineStep === "choice" ? -1 : addWineStepOrder.indexOf(addWineStep);
+  const currentStepLabel = addWineStep !== "choice" ? addWineStepLabels[addWineStep] : "";
+  const canGoBack = manualFormVisible && currentStepIndex >= 0;
+  const canGoNext = manualFormVisible && addWineStep !== "review";
+  const goBackStep = () => {
+    if (!manualFormVisible || addWineStep === "choice") return;
+    if (currentStepIndex <= 0) {
+      setManualFormVisible(false);
+      setAddWineStep("choice");
+      return;
+    }
+    setAddWineStep(addWineStepOrder[currentStepIndex - 1]);
+  };
+  const goNextStep = () => {
+    if (!manualFormVisible || addWineStep === "review") return;
+    const nextStep = addWineStepOrder[Math.min(currentStepIndex + 1, addWineStepOrder.length - 1)];
+    setAddWineStep(nextStep);
+  };
+
+  const reviewRows = [
+    ["Vinho", name || "—"],
+    ["Produtor", producer || "—"],
+    ["Safra", vintage || "—"],
+    ["Estilo", styles.find((item) => item.value === style)?.label || style || "—"],
+    ["Quantidade", quantity || "1"],
+    ["Local", noLocationInfo ? "Depois" : formatLocationLabel(location) || "—"],
+    ["Valor", currentValue ? `R$ ${Number(currentValue).toLocaleString("pt-BR", { maximumFractionDigits: 0 })}` : "—"],
+    ["Janela", [drinkFrom, drinkUntil].filter(Boolean).join("–") || "—"],
+  ];
+
   return (
     <>
       <ActionDialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
@@ -1112,307 +881,310 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                   </div>
                 </motion.div>
               ) : (
-                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="add-wine-form">
-                  <div className="add-wine-quick-actions">
-                    <button
-                      type="button"
-                      className="add-wine-quick-action"
-                      onClick={() => setScanOpen(true)}
-                    >
-                      <span className="add-wine-quick-icon">
-                        <Camera className="h-4 w-4" />
-                      </span>
-                      Escanear rótulo
-                    </button>
+                <motion.form id="add-wine-form" key="form" onSubmit={handleSubmit} className="add-wine-form add-wine-v3-form">
+                  {!manualFormVisible ? (
+                    <div className="add-wine-v3-choice">
+                      <button
+                        type="button"
+                        className="add-wine-v3-option is-primary"
+                        onClick={() => setScanOpen(true)}
+                      >
+                        <span className="add-wine-v3-option-icon">
+                          <Camera className="h-4 w-4" />
+                        </span>
+                        <span>Escanear rótulo</span>
+                      </button>
 
-                    <button
-                      type="button"
-                      className="add-wine-quick-action"
-                      onClick={() => setImportCsvOpen(true)}
-                    >
-                      <span className="add-wine-quick-icon is-gold">
-                        <FileSpreadsheet className="h-4 w-4" />
-                      </span>
-                      Importar arquivo
-                    </button>
+                      <button
+                        type="button"
+                        className="add-wine-v3-option"
+                        onClick={() => setImportCsvOpen(true)}
+                      >
+                        <span className="add-wine-v3-option-icon is-gold">
+                          <FileSpreadsheet className="h-4 w-4" />
+                        </span>
+                        <span>Importar arquivo</span>
+                      </button>
 
-                    <button
-                      type="button"
-                      className={cn("add-wine-quick-action", manualFormVisible && "is-active")}
-                      onClick={() => setManualFormVisible(true)}
-                    >
-                      <span className="add-wine-quick-icon is-olive">
-                        <Sparkles className="h-4 w-4" />
-                      </span>
-                      Adicionar manualmente
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        className="add-wine-v3-option"
+                        onClick={() => startManualFlow("identity")}
+                      >
+                        <span className="add-wine-v3-option-icon is-olive">
+                          <Sparkles className="h-4 w-4" />
+                        </span>
+                        <span>Adicionar manualmente</span>
+                      </button>
 
-                  {manualFormVisible && labelImagePreview && (
-                    <div className="add-wine-label-preview">
-                      <div className="add-wine-label-image">
-                        <img
-                          src={labelImagePreview}
-                          alt="Foto do rótulo analisado"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-[12.5px] font-medium text-[rgba(26,23,19,0.9)]">Rótulo analisado</p>
-                        <p className="mt-0.5 text-[11px] leading-5 text-[rgba(72,60,46,0.66)]">Revise os dados antes de salvar.</p>
-                      </div>
+                      <button
+                        type="button"
+                        className="add-wine-v3-option"
+                        onClick={() => startManualFlow("identity")}
+                      >
+                        <span className="add-wine-v3-option-icon">
+                          <Search className="h-4 w-4" />
+                        </span>
+                        <span>Buscar</span>
+                      </button>
                     </div>
-                  )}
+                  ) : (
+                    <div className="add-wine-v3-flow">
+                      <div className="add-wine-v3-progress" aria-label={`Etapa ${currentStepLabel}`}>
+                        {addWineStepOrder.map((step, index) => (
+                          <span
+                            key={step}
+                            className={cn(
+                              "add-wine-v3-step-dot",
+                              index === currentStepIndex && "is-current",
+                              index < currentStepIndex && "is-done",
+                            )}
+                          >
+                            {addWineStepLabels[step]}
+                          </span>
+                        ))}
+                      </div>
 
-                  {manualFormVisible ? (
-                    <>
-                      <div className="add-wine-identity">
-                        <div className="add-wine-field">
-                          <label htmlFor="name">Vinho *</label>
-                          <input
-                            id="name"
-                            value={getRenderedFieldValue("name", name)}
-                            onChange={e => { setScanHydrated(false); setName(e.target.value); }}
-                            placeholder="Nome no rótulo"
-                            required
-                            className="input-premium"
-                            style={aiFieldStyle("name")}
-                          />
+                      {labelImagePreview && (
+                        <div className="add-wine-label-preview add-wine-v3-label-preview">
+                          <div className="add-wine-label-image">
+                            <img
+                              src={labelImagePreview}
+                              alt="Foto do rótulo analisado"
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-[12.5px] font-medium text-[rgba(26,23,19,0.9)]">Rótulo analisado</p>
+                          </div>
                         </div>
-                        <div className="add-wine-field">
-                          <label htmlFor="producer">Produtor</label>
-                          <input
-                            id="producer"
-                            value={getRenderedFieldValue("producer", producer)}
-                            onChange={e => { setScanHydrated(false); setProducer(e.target.value); }}
-                            placeholder="Produtor no rótulo"
-                            className="input-premium"
-                            style={aiFieldStyle("producer")}
-                          />
-                        </div>
-                        <div className="add-wine-field-grid">
+                      )}
+
+                      {addWineStep === "identity" && (
+                        <section className="add-wine-v3-step-panel">
                           <div className="add-wine-field">
-                            <label htmlFor="vintage">Safra</label>
+                            <label htmlFor="name">Vinho *</label>
                             <input
-                              id="vintage"
-                              type="number"
-                              value={getRenderedFieldValue("vintage", vintage)}
-                              onChange={e => setVintage(e.target.value)}
-                              placeholder="2020"
+                              id="name"
+                              value={getRenderedFieldValue("name", name)}
+                              onChange={e => { setScanHydrated(false); setName(e.target.value); }}
+                              placeholder="Nome no rótulo"
+                              required
                               className="input-premium"
-                              style={aiFieldStyle("vintage")}
+                              style={aiFieldStyle("name")}
                             />
                           </div>
                           <div className="add-wine-field">
-                            <label>Estilo</label>
-                            <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
-                              <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
-                                <SelectValue placeholder="Estilo" />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
-                                {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
-                              </SelectContent>
-                            </Select>
+                            <label htmlFor="producer">Produtor</label>
+                            <input
+                              id="producer"
+                              value={getRenderedFieldValue("producer", producer)}
+                              onChange={e => { setScanHydrated(false); setProducer(e.target.value); }}
+                              placeholder="Produtor"
+                              className="input-premium"
+                              style={aiFieldStyle("producer")}
+                            />
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="add-wine-accordions">
-                        <Collapsible open={originOpen} onOpenChange={setOriginOpen}>
-                      <CollapsibleTrigger asChild>
-                        <button type="button" className="add-wine-accordion-trigger">
-                          <span>
-                            <strong>Origem e uva</strong>
-                            <small>País, região e variedade</small>
-                          </span>
-                          <ChevronDown className={cn("h-4 w-4 transition-transform", originOpen && "rotate-180")} />
-                        </button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="add-wine-accordion-content">
-                        <div className="add-wine-field-grid">
-                          <div className="add-wine-field">
-                            <label>País</label>
-                            <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País no rótulo" className="input-premium" style={aiFieldStyle("country")} />
-                          </div>
-                          <div className="add-wine-field">
-                            <label>Região</label>
-                            <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região" className="input-premium" style={aiFieldStyle("region")} />
-                          </div>
-                        </div>
-                        <div className="add-wine-field">
-                          <label>Uva</label>
-                          <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva ou corte" className="input-premium" style={aiFieldStyle("grape")} />
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    <Collapsible open={cellarOpen} onOpenChange={setCellarOpen}>
-                      <CollapsibleTrigger asChild>
-                        <button type="button" className="add-wine-accordion-trigger">
-                          <span>
-                            <strong>Adega</strong>
-                            <small>Quantidade e localização</small>
-                          </span>
-                          <ChevronDown className={cn("h-4 w-4 transition-transform", cellarOpen && "rotate-180")} />
-                        </button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="add-wine-accordion-content">
-                        <div className="add-wine-field add-wine-quantity-field">
-                          <label htmlFor="qty">Quantidade</label>
-                          <input
-                            id="qty"
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={e => setQuantity(e.target.value)}
-                            className="input-premium"
-                          />
-                        </div>
-                        <label className="add-wine-check-row">
-                          <input
-                            id="no-location-info"
-                            type="checkbox"
-                            checked={noLocationInfo}
-                            onChange={(e) => {
-                              setNoLocationInfo(e.target.checked);
-                              if (e.target.checked) setLocation({});
-                            }}
-                          />
-                          <span>Definir localização depois</span>
-                        </label>
-                        <LocationFields
-                          value={location}
-                          onChange={setLocation}
-                          label="Localização"
-                          disabled={noLocationInfo}
-                          className="add-wine-location-fields"
-                        />
-                      </CollapsibleContent>
-                    </Collapsible>
-
-                    <Collapsible open={valueOpen} onOpenChange={setValueOpen}>
-                      <CollapsibleTrigger asChild>
-                        <button type="button" className="add-wine-accordion-trigger">
-                          <span>
-                            <strong>Valores e guarda</strong>
-                            <small>Preço, estimativa e janela</small>
-                          </span>
-                          <ChevronDown className={cn("h-4 w-4 transition-transform", valueOpen && "rotate-180")} />
-                        </button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="add-wine-accordion-content">
-                        {isCommercial ? (
-                          <>
-                            {commercialMarginPct != null && (
-                              <div className="add-wine-margin-pill">
-                                Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
-                              </div>
-                            )}
-                            <div className="add-wine-field-grid">
-                              <div className="add-wine-field">
-                                <label>Preço de custo</label>
-                                <Input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
-                              </div>
-                              <div className="add-wine-field">
-                                <label>Preço de venda</label>
-                                <Input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <label className="add-wine-check-row">
+                          <div className="add-wine-field-grid">
+                            <div className="add-wine-field">
+                              <label htmlFor="vintage">Safra</label>
                               <input
+                                id="vintage"
+                                type="number"
+                                value={getRenderedFieldValue("vintage", vintage)}
+                                onChange={e => setVintage(e.target.value)}
+                                placeholder="2020"
+                                className="input-premium"
+                                style={aiFieldStyle("vintage")}
+                              />
+                            </div>
+                            <div className="add-wine-field">
+                              <label>Estilo</label>
+                              <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
+                                <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
+                                  <SelectValue placeholder="Estilo" />
+                                </SelectTrigger>
+                                <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
+                                  {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="add-wine-field-grid">
+                            <div className="add-wine-field">
+                              <label>País</label>
+                              <input value={getRenderedFieldValue("country", country)} onChange={e => { setScanHydrated(false); setCountry(e.target.value); }} placeholder="País" className="input-premium" style={aiFieldStyle("country")} />
+                            </div>
+                            <div className="add-wine-field">
+                              <label>Região</label>
+                              <input value={getRenderedFieldValue("region", region)} onChange={e => { setScanHydrated(false); setRegion(e.target.value); }} placeholder="Região" className="input-premium" style={aiFieldStyle("region")} />
+                            </div>
+                          </div>
+                          <div className="add-wine-field">
+                            <label>Uva</label>
+                            <input value={getRenderedFieldValue("grape", grape)} onChange={e => { setScanHydrated(false); setGrape(e.target.value); }} placeholder="Uva ou corte" className="input-premium" style={aiFieldStyle("grape")} />
+                          </div>
+                        </section>
+                      )}
+
+                      {addWineStep === "storage" && (
+                        <section className="add-wine-v3-step-panel">
+                          <div className="add-wine-field-grid">
+                            <div className="add-wine-field">
+                              <label htmlFor="qty">Quantidade</label>
+                              <input
+                                id="qty"
+                                type="number"
+                                min="1"
+                                value={quantity}
+                                onChange={e => setQuantity(e.target.value)}
+                                className="input-premium"
+                              />
+                            </div>
+                            <label className="add-wine-check-row add-wine-v3-check">
+                              <input
+                                id="no-location-info"
                                 type="checkbox"
-                                checked={noPriceInfo}
-                                onChange={e => {
-                                  setNoPriceInfo(e.target.checked);
-                                  if (e.target.checked) {
-                                    setLastPaid("");
-                                    setLastPaidDate(new Date().toISOString().split("T")[0]);
-                                  }
+                                checked={noLocationInfo}
+                                onChange={(e) => {
+                                  setNoLocationInfo(e.target.checked);
+                                  if (e.target.checked) setLocation({});
                                 }}
                               />
-                              <span>Não sei o valor pago</span>
+                              <span>Definir localização depois</span>
                             </label>
-                            {!noPriceInfo && (
+                          </div>
+                          <LocationFields
+                            value={location}
+                            onChange={setLocation}
+                            label="Localização"
+                            disabled={noLocationInfo}
+                            className="add-wine-location-fields add-wine-v3-location"
+                          />
+                        </section>
+                      )}
+
+                      {addWineStep === "purchase" && (
+                        <section className="add-wine-v3-step-panel">
+                          {isCommercial ? (
+                            <>
+                              {commercialMarginPct != null && (
+                                <div className="add-wine-margin-pill">
+                                  Margem {commercialMargin >= 0 ? "+" : ""}{commercialMarginPct.toFixed(0)}%
+                                </div>
+                              )}
                               <div className="add-wine-field-grid">
                                 <div className="add-wine-field">
-                                  <label>Último valor pago</label>
+                                  <label>Preço de custo</label>
                                   <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
                                 </div>
                                 <div className="add-wine-field">
-                                  <label>Data</label>
-                                  <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
+                                  <label>Preço de venda</label>
+                                  <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1 }} />
                                 </div>
                               </div>
-                            )}
-                            <div className="add-wine-field">
-                              <label>Valor atual estimado</label>
-                              <div className="relative">
-                                <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
-                                {estimating && (
-                                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6F7F5B] border-t-transparent" />
+                            </>
+                          ) : (
+                            <>
+                              <label className="add-wine-check-row add-wine-v3-check">
+                                <input
+                                  type="checkbox"
+                                  checked={noPriceInfo}
+                                  onChange={e => {
+                                    setNoPriceInfo(e.target.checked);
+                                    if (e.target.checked) {
+                                      setLastPaid("");
+                                      setLastPaidDate(new Date().toISOString().split("T")[0]);
+                                    }
+                                  }}
+                                />
+                                <span>Não sei o valor pago</span>
+                              </label>
+                              {!noPriceInfo && (
+                                <div className="add-wine-field-grid">
+                                  <div className="add-wine-field">
+                                    <label>Último valor pago</label>
+                                    <input type="number" step="0.01" min="0" value={lastPaid} onChange={e => setLastPaid(e.target.value)} placeholder="0,00" className="input-premium" style={aiFieldStyle("purchase_price")} />
                                   </div>
+                                  <div className="add-wine-field">
+                                    <label>Data</label>
+                                    <input type="date" value={lastPaidDate} onChange={e => setLastPaidDate(e.target.value)} className="input-premium" />
+                                  </div>
+                                </div>
+                              )}
+                              <div className="add-wine-field">
+                                <label>Valor atual estimado</label>
+                                <div className="relative">
+                                  <input type="number" step="0.01" min="0" value={currentValue} onChange={e => { setCurrentValue(e.target.value); setCurrentValueTouched(true); }} placeholder={estimating ? "Calculando..." : "0,00"} className="input-premium" style={{ opacity: estimating ? 0.6 : 1, ...(aiPrefilledFields.current_value ? aiFieldStyle("current_value") : {}) }} />
+                                  {estimating && (
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#6F7F5B] border-t-transparent" />
+                                    </div>
+                                  )}
+                                </div>
+                                {estimateConfidence && (
+                                  <p className="add-wine-microcopy">
+                                    {estimateConfidence === "baixa" && estimateRange
+                                      ? `R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
+                                      : "Estimativa sugerida"}
+                                  </p>
                                 )}
                               </div>
-                              {estimateConfidence && (
-                                <p className="add-wine-microcopy">
-                                  {estimateConfidence === "baixa" && estimateRange
-                                    ? `R$ ${estimateRange.min.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} – ${estimateRange.max.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}`
-                                    : "Estimativa sugerida"}
-                                </p>
-                              )}
-                            </div>
-                            <div className="add-wine-field-grid">
-                              <div className="add-wine-field">
-                                <label>Abrir a partir de</label>
-                                <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
-                              </div>
-                              <div className="add-wine-field">
-                                <label>Guardar até</label>
-                                <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </CollapsibleContent>
-                    </Collapsible>
+                            </>
+                          )}
+                        </section>
+                      )}
 
-                    <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
-                      <CollapsibleTrigger asChild>
-                        <button type="button" className="add-wine-accordion-trigger">
-                          <span>
-                            <strong>Notas de serviço</strong>
-                            <small>Harmonização e observações</small>
-                          </span>
-                          <ChevronDown className={cn("h-4 w-4 transition-transform", notesOpen && "rotate-180")} />
-                        </button>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="add-wine-accordion-content">
-                        <div className="add-wine-field">
-                          <label>Harmonização</label>
-                          <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes vermelhas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
-                        </div>
-                        {!isCommercial && (
-                          <div className="add-wine-field">
-                            <label>Notas de degustação</label>
-                            <Textarea
-                              value={notes}
-                              onChange={e => setNotes(e.target.value)}
-                              placeholder="Aromas, sabores, impressões..."
-                              rows={3}
-                              className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none input-premium")}
-                              style={aiFieldStyle("tasting_notes")}
-                            />
+                      {addWineStep === "aging" && (
+                        <section className="add-wine-v3-step-panel">
+                          <div className="add-wine-field-grid">
+                            <div className="add-wine-field">
+                              <label>Abrir a partir de</label>
+                              <input type="number" value={drinkFrom} onChange={e => setDrinkFrom(e.target.value)} placeholder="2024" className="input-premium" style={aiFieldStyle("drink_from")} />
+                            </div>
+                            <div className="add-wine-field">
+                              <label>Guardar até</label>
+                              <input type="number" value={drinkUntil} onChange={e => setDrinkUntil(e.target.value)} placeholder="2030" className="input-premium" style={aiFieldStyle("drink_until")} />
+                            </div>
                           </div>
-                        )}
-                      </CollapsibleContent>
-                        </Collapsible>
-                      </div>
-                    </>
-                  ) : null}
+                          <div className="add-wine-field">
+                            <label>Harmonização</label>
+                            <input value={foodPairing} onChange={e => setFoodPairing(e.target.value)} placeholder="Carnes, massas, queijos" className="input-premium" style={aiFieldStyle("food_pairing")} />
+                          </div>
+                          {!isCommercial && (
+                            <div className="add-wine-field">
+                              <label>Notas</label>
+                              <Textarea
+                                value={notes}
+                                onChange={e => setNotes(e.target.value)}
+                                placeholder="Observações"
+                                rows={3}
+                                className={cn(AI_MODAL_TEXTAREA_CLASSNAME, "resize-none input-premium")}
+                                style={aiFieldStyle("tasting_notes")}
+                              />
+                            </div>
+                          )}
+                        </section>
+                      )}
+
+                      {addWineStep === "review" && (
+                        <section className="add-wine-v3-step-panel add-wine-v3-review">
+                          <div className="add-wine-v3-review-head">
+                            <Wine className="h-5 w-5" />
+                            <span>Resumo</span>
+                          </div>
+                          <dl className="add-wine-v3-review-list">
+                            {reviewRows.map(([label, value]) => (
+                              <div key={label}>
+                                <dt>{label}</dt>
+                                <dd>{value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </section>
+                      )}
+                    </div>
+                  )}
 
                   {manualFormVisible && missingFields.length > 0 && (
                     <AiModalCard className="space-y-1 rounded-[16px] px-3 py-2.5">
@@ -1430,19 +1202,42 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
           </AiModalSplitLayout>
           </AiModalBody>
           {!success && manualFormVisible && (
-            <AiModalFooterBar>
-              <AiModalActionButton
-                form="add-wine-form"
-                type="submit"
-                disabled={!name.trim()}
-                loading={addWine.isPending}
-                loadingText="Salvando…"
-                variant="primary"
-                className="w-full"
-              >
-                <Plus className="h-4 w-4" />
-                {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
-              </AiModalActionButton>
+            <AiModalFooterBar className="add-wine-v3-footer">
+              {canGoBack ? (
+                <button
+                  type="button"
+                  className="add-wine-v3-back"
+                  onClick={goBackStep}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Voltar
+                </button>
+              ) : null}
+
+              {canGoNext ? (
+                <button
+                  type="button"
+                  className="add-wine-v3-next"
+                  onClick={goNextStep}
+                  disabled={addWineStep === "identity" && !name.trim()}
+                >
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              ) : (
+                <AiModalActionButton
+                  form="add-wine-form"
+                  type="submit"
+                  disabled={!name.trim()}
+                  loading={addWine.isPending}
+                  loadingText="Salvando…"
+                  variant="primary"
+                  className="add-wine-v3-submit"
+                >
+                  <Plus className="h-4 w-4" />
+                  {isCommercial ? "Cadastrar vinho" : "Salvar vinho"}
+                </AiModalActionButton>
+              )}
             </AiModalFooterBar>
           )}
           </AiModalShell>

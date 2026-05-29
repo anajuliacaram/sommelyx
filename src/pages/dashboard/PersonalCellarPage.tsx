@@ -108,8 +108,7 @@ export default function PersonalCellarPage() {
     return (window.localStorage.getItem("cellar:sort") as "recent" | "value_low" | "value" | "vintage_old" | "vintage" | null) ?? "recent";
   });
   const [view, setView] = useState<"grid" | "list">(() => {
-    if (typeof window === "undefined") return "grid";
-    return (window.localStorage.getItem("cellar:view") as "grid" | "list" | null) ?? (window.innerWidth < MOBILE_BREAKPOINT ? "list" : "grid");
+    return "grid";
   });
   const [showLabels] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
@@ -245,50 +244,37 @@ export default function PersonalCellarPage() {
 
   const pageHeader = (filteredCount: number) => (
     <>
-      <section className="cellar-v2-header sx-v2-page-shell">
-        <div className="cellar-v2-header-copy">
-          <p className="cellar-v2-kicker sx-v2-kicker">Adega</p>
-          <h1 className="cellar-v2-title sx-v2-display">Minha Adega</h1>
-          <p className="cellar-v2-subtitle sx-v2-body">
-            {totalBottles} garrafas em {uniqueLabels} rótulos · {formattedEstimatedValue}
+      <section className="cellar-v3-header sx-v2-page-shell">
+        <div className="cellar-v3-header-copy">
+          <p className="cellar-v3-kicker sx-v2-kicker">Adega</p>
+          <h1 className="cellar-v3-title sx-v2-display">Minha Adega</h1>
+          <p className="cellar-v3-subtitle sx-v2-body">
+            {filteredCount} / {wines.length} vinhos
           </p>
         </div>
-        <div className="cellar-v2-header-actions">
-          <span className="cellar-v2-count">{filteredCount} / {wines.length} vinhos</span>
-          <button type="button" className="sx-v2-btn sx-v2-btn-primary cellar-v2-add-button" onClick={() => setAddOpen(true)} aria-label="Adicionar vinho">
+        <div className="cellar-v3-header-actions">
+          <button type="button" className="sx-v2-btn sx-v2-btn-primary cellar-v3-add-button" onClick={() => setAddOpen(true)} aria-label="Adicionar vinho">
             <Plus className="h-4 w-4" />
             <span>Adicionar vinho</span>
           </button>
         </div>
       </section>
 
-      <section className="cellar-v2-summary sx-v2-floating-panel">
-        <div className="cellar-v2-summary-head">
-          <p className="cellar-v2-summary-kicker sx-v2-kicker">Coleção em foco</p>
-          <p className="cellar-v2-summary-note sx-v2-muted">Um panorama calmo da sua adega privada.</p>
+      <section className="cellar-v3-summary">
+        <div className="cellar-v3-summary-main">
+          <strong>{totalBottles.toLocaleString("pt-BR")}</strong>
+          <span>garrafas</span>
         </div>
-        <div className="cellar-v2-summary-grid">
-          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
-            <span className="cellar-v2-summary-label">Garrafas</span>
-            <strong className="cellar-v2-summary-value">{totalBottles}</strong>
-          </article>
-          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
-            <span className="cellar-v2-summary-label">Rótulos</span>
-            <strong className="cellar-v2-summary-value">{uniqueLabels}</strong>
-          </article>
-          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
-            <span className="cellar-v2-summary-label">Beber agora</span>
-            <strong className="cellar-v2-summary-value">{drinkNowCount}</strong>
-          </article>
-          <article className="cellar-v2-summary-tile sx-v2-matte-panel">
-            <span className="cellar-v2-summary-label">Em guarda</span>
-            <strong className="cellar-v2-summary-value">{agingCount}</strong>
-          </article>
+        <div className="cellar-v3-summary-stats">
+          <span><strong>{uniqueLabels}</strong> rótulos</span>
+          <span><strong>{drinkNowCount}</strong> beber agora</span>
+          <span><strong>{agingCount}</strong> em guarda</span>
+          <span><strong>{formattedEstimatedValue}</strong> valor estimado</span>
         </div>
       </section>
 
-      <section className="cellar-v2-controls sx-v2-floating-panel">
-        <div className="cellar-v2-search overview-search adega-search-wrap">
+      <section className="cellar-v3-controls">
+        <div className="cellar-v3-search overview-search adega-search-wrap">
           <Search className="adega-search-icon h-4 w-4" />
           <input
             className="adega-search-input"
@@ -303,16 +289,16 @@ export default function PersonalCellarPage() {
           )}
         </div>
 
-        <div className="cellar-v2-control-row adega-controls">
+        <div className="cellar-v3-control-row adega-controls">
           <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-            <SelectTrigger aria-label="Ordenar vinhos" className="cellar-v2-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
+            <SelectTrigger aria-label="Ordenar vinhos" className="cellar-v3-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
               <ArrowUpDown className="h-3.5 w-3.5 shrink-0" />
               <span className="min-w-0 text-left">
                 <span className="filter-label">Ordenar</span>
                 <span className="block truncate">{sortLabel.replace("Ordenar: ", "")}</span>
               </span>
             </SelectTrigger>
-            <SelectContent className="cellar-v2-select-content">
+            <SelectContent className="cellar-v3-select-content">
               <SelectItem value="recent">Mais recentes</SelectItem>
               <SelectItem value="value_low">Mais baratos</SelectItem>
               <SelectItem value="value">Mais caros</SelectItem>
@@ -322,14 +308,14 @@ export default function PersonalCellarPage() {
           </Select>
 
           <Select value={countryFilter} onValueChange={(v) => setCountryFilter(v)}>
-            <SelectTrigger aria-label="Filtrar por país" className="cellar-v2-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
+            <SelectTrigger aria-label="Filtrar por país" className="cellar-v3-filter-btn adega-filter-btn h-auto min-w-0 shadow-none">
               <Globe className="h-3.5 w-3.5 shrink-0" />
               <span className="min-w-0 text-left">
                 <span className="filter-label">País</span>
                 <span className="block truncate">{countryLabel.replace("País: ", "")}</span>
               </span>
             </SelectTrigger>
-            <SelectContent className="cellar-v2-select-content">
+            <SelectContent className="cellar-v3-select-content">
               <SelectItem value="all">Todos os países</SelectItem>
               {countryOptions.filter((o) => o.key !== "all").map((option) => (
                 <SelectItem key={option.key} value={option.key}>{option.label}</SelectItem>
@@ -337,17 +323,17 @@ export default function PersonalCellarPage() {
             </SelectContent>
           </Select>
 
-          <div className="cellar-v2-view-toggle">
-            <button type="button" className={`cellar-v2-view-btn ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
+          <div className="cellar-v3-view-toggle">
+            <button type="button" className={`cellar-v3-view-btn ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")}>
               Grade
             </button>
-            <button type="button" className={`cellar-v2-view-btn ${view === "list" ? "active" : ""}`} onClick={() => setView("list")}>
+            <button type="button" className={`cellar-v3-view-btn ${view === "list" ? "active" : ""}`} onClick={() => setView("list")}>
               Lista
             </button>
           </div>
         </div>
 
-        <div className="cellar-v2-filters chips-row adega-filters-row">
+        <div className="cellar-v3-filters chips-row adega-filters-row">
         {visibleStyleOptions.map((s) => {
           const styleKey = s.key === "todos" ? "todos" : s.key === "rosé" ? "rose" : s.key;
           return (
@@ -355,7 +341,7 @@ export default function PersonalCellarPage() {
               key={s.key}
               type="button"
               data-style={styleKey}
-              className={`sx-v2-chip cellar-v2-filter-chip adega-filter-chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
+              className={`sx-v2-chip cellar-v3-filter-chip adega-filter-chip ${styleKey} ${styleFilter === s.key ? "active" : ""}`}
               onClick={() => setStyleFilter(s.key)}
             >
               {s.label}
@@ -364,12 +350,12 @@ export default function PersonalCellarPage() {
         })}
         </div>
 
-        <div className="cellar-v2-filters chips-row adega-filters-row adega-drink-window-row">
+        <div className="cellar-v3-filters chips-row adega-filters-row adega-drink-window-row">
           {drinkWindowOptions.map((option) => (
             <button
               key={option.key}
               type="button"
-              className={`sx-v2-chip cellar-v2-filter-chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
+              className={`sx-v2-chip cellar-v3-filter-chip adega-filter-chip ${option.key === "guard" ? "olive" : ""} ${drinkWindowFilter === option.key ? "active" : ""}`}
               onClick={() => setDrinkWindowFilter(option.key as typeof drinkWindowFilter)}
             >
               {option.label}
@@ -419,13 +405,13 @@ export default function PersonalCellarPage() {
 
   return (
     <>
-      <div className="editorial-page cellar-page cellar-v2-page sx-v2-page-shell !px-0">
-        <section className="sx-v2-content-rail cellar-v2-rail">
+      <div className="editorial-page cellar-page cellar-v3-page sx-v2-page-shell !px-0">
+        <section className="sx-v2-content-rail cellar-v3-rail">
           {pageHeader(filtered.length)}
 
           {/* Results */}
           {isLoading ? (
-            <EditorialCard className="cellar-v2-loading sx-v2-matte-panel">
+            <EditorialCard className="cellar-v3-loading sx-v2-matte-panel">
               <div className="sx-v2-state-loader">
                 <span className="sx-v2-kicker">Adega</span>
                 <p>Organizando seus rótulos</p>
@@ -470,56 +456,56 @@ export default function PersonalCellarPage() {
                   }
                 : undefined
             }
-              className="adega-empty cellar-v2-empty"
+              className="adega-empty cellar-v3-empty"
             />
           ) : view === "grid" ? (
-            <div className="adega-grid cellar-v2-grid">
+            <div className="adega-grid cellar-v3-grid">
             {filtered.map((w) => {
               const dw = resolveSuggestedDrinkWindow(w);
               const classification = classifyDrinkWindow({ current: currentYear, from: dw.from, until: dw.until });
               return (
                 <article
                   key={w.id}
-                  className="wine-card wine-card-grid cellar-v2-card sx-v2-collectible-surface"
+                  className="wine-card wine-card-grid cellar-v3-card sx-v2-collectible-surface"
                   onClick={() => setEditWine(w)}
                 >
-                  <div className="cellar-v2-card-stage sx-v2-bottle-stage">
+                  <div className="cellar-v3-card-stage sx-v2-bottle-stage">
                     {showLabels ? (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="wine-card-image cellar-v2-card-image"
+                        className="wine-card-image cellar-v3-card-image"
                         imageClassName="h-full w-full object-contain"
                         generated={false}
                         compact
                       />
                     ) : (
-                      <div className="wine-card-image-placeholder cellar-v2-card-image-placeholder">
+                      <div className="wine-card-image-placeholder cellar-v3-card-image-placeholder">
                         <WineIcon className="h-8 w-8" />
                       </div>
                     )}
                   </div>
 
-                  <div className="wine-card-body cellar-v2-card-body">
-                    <span className={`drink-badge cellar-v2-drink-badge ${getDrinkBadgeClass(classification.status)}`}>
+                  <div className="wine-card-body cellar-v3-card-body">
+                    <span className={`drink-badge cellar-v3-drink-badge ${getDrinkBadgeClass(classification.status)}`}>
                       {classification.label}
                     </span>
-                    <h3 className="wine-card-name cellar-v2-card-name sx-v2-wine-title">{w.name}</h3>
-                    <p className="wine-card-vintage cellar-v2-card-meta sx-v2-wine-meta">
+                    <h3 className="wine-card-name cellar-v3-card-name sx-v2-wine-title">{w.name}</h3>
+                    <p className="wine-card-vintage cellar-v3-card-meta sx-v2-wine-meta">
                       {[w.producer, w.vintage, w.region || w.country].filter(Boolean).join(" · ") || "Produtor e origem n/i"}
                     </p>
-                    <div className="cellar-v2-card-tags">
-                      <span className={`wine-type-chip cellar-v2-card-chip ${getWineTypeClass(w.style)}`}>
+                    <div className="cellar-v3-card-tags">
+                      <span className={`wine-type-chip cellar-v3-card-chip ${getWineTypeClass(w.style)}`}>
                         {getStyleFamily(w.style)}
                       </span>
-                      <span className="wine-qty-badge cellar-v2-card-chip neutral">{w.quantity} garrafas</span>
+                      <span className="wine-qty-badge cellar-v3-card-chip neutral">{w.quantity} garrafas</span>
                     </div>
 
-                    <div className="wine-card-footer cellar-v2-card-footer">
-                      <span className="wine-card-price cellar-v2-card-price">{formatWinePrice(w.current_value)}</span>
+                    <div className="wine-card-footer cellar-v3-card-footer">
+                      <span className="wine-card-price cellar-v3-card-price">{formatWinePrice(w.current_value)}</span>
                       <button
                         type="button"
-                        className="btn-abrir-card sx-v2-btn-capsule cellar-v2-open"
+                        className="btn-abrir-card sx-v2-btn-capsule cellar-v3-open"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleOpenBottle(w);
@@ -535,49 +521,49 @@ export default function PersonalCellarPage() {
             })}
             </div>
           ) : (
-            <div className="adega-list cellar-v2-list sx-v2-floating-panel">
+            <div className="adega-list cellar-v3-list sx-v2-floating-panel">
             {filtered.map((w) => {
               const family = getStyleFamily(w.style);
               const color = STYLE_COLORS[family];
               return (
-                <div key={w.id} className="wine-card cellar-v2-row sx-v2-collectible-surface" onClick={() => setEditWine(w)}>
-                  <div className="cellar-v2-row-stage sx-v2-object-stage">
+                <div key={w.id} className="wine-card cellar-v3-row sx-v2-collectible-surface" onClick={() => setEditWine(w)}>
+                  <div className="cellar-v3-row-stage sx-v2-object-stage">
                     {showLabels ? (
                       <WineLabelPreview
                         wine={w}
                         alt={w.name}
-                        className="wine-card-thumb cellar-v2-row-thumb"
+                        className="wine-card-thumb cellar-v3-row-thumb"
                         imageClassName="h-full w-full object-contain"
                         generated={false}
                         compact
                       />
                     ) : (
                       <div
-                        className="wine-card-thumb cellar-v2-row-thumb"
+                        className="wine-card-thumb cellar-v3-row-thumb"
                         style={{ background: `${color}14`, color }}
                       >
                         <WineIcon className="wine-card-thumb-placeholder h-5 w-5" />
                       </div>
                     )}
                   </div>
-                  <div className="wine-card-body cellar-v2-row-body">
-                    <h4 className="wine-card-name cellar-v2-row-name sx-v2-wine-title m-0">{w.name}</h4>
-                    <p className="wine-card-meta cellar-v2-row-meta sx-v2-wine-meta">
+                  <div className="wine-card-body cellar-v3-row-body">
+                    <h4 className="wine-card-name cellar-v3-row-name sx-v2-wine-title m-0">{w.name}</h4>
+                    <p className="wine-card-meta cellar-v3-row-meta sx-v2-wine-meta">
                       {[w.producer, [w.region, w.country].filter(Boolean).join(", "), w.cellar_location]
                         .filter(Boolean)
                         .join(" · ")}
                     </p>
-                    <div className="wine-card-tags cellar-v2-row-tags">
-                      <span className={`wine-card-tag cellar-v2-row-chip ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
-                      <span className="wine-card-tag cellar-v2-row-chip neutral">{w.quantity} garrafas</span>
+                    <div className="wine-card-tags cellar-v3-row-tags">
+                      <span className={`wine-card-tag cellar-v3-row-chip ${getWineTypeClass(w.style)}`}>{getStyleFamily(w.style)}</span>
+                      <span className="wine-card-tag cellar-v3-row-chip neutral">{w.quantity} garrafas</span>
                     </div>
                   </div>
-                  <div className="wine-card-right cellar-v2-row-right">
-                    {w.vintage && <span className="wine-card-year cellar-v2-row-year">{w.vintage}</span>}
-                    {w.current_value != null && <span className="wine-card-price cellar-v2-row-price">{formatWinePrice(w.current_value)}</span>}
+                  <div className="wine-card-right cellar-v3-row-right">
+                    {w.vintage && <span className="wine-card-year cellar-v3-row-year">{w.vintage}</span>}
+                    {w.current_value != null && <span className="wine-card-price cellar-v3-row-price">{formatWinePrice(w.current_value)}</span>}
                     <button
                       type="button"
-                      className="editorial-btn-open btn-abrir shrink-0 sx-v2-btn-capsule cellar-v2-open"
+                      className="editorial-btn-open btn-abrir shrink-0 sx-v2-btn-capsule cellar-v3-open"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenBottle(w);
@@ -586,7 +572,7 @@ export default function PersonalCellarPage() {
                     >
                       Abrir
                     </button>
-                    <ChevronRight className="wine-card-chevron cellar-v2-row-chevron h-3.5 w-3.5" />
+                    <ChevronRight className="wine-card-chevron cellar-v3-row-chevron h-3.5 w-3.5" />
                   </div>
                 </div>
               );

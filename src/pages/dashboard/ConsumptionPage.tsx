@@ -69,14 +69,14 @@ const FilterChoice = memo(function FilterChoice({
       className={cn(
         "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
         active
-          ? "bg-[rgba(95,127,82,0.12)] text-[#305231]"
+          ? "bg-[rgba(101,10,24,0.08)] text-[#650A18]"
           : "bg-white/0 text-[#2f2a22]",
       )}
     >
       <span className="flex min-w-0 items-center gap-2">
         <span className="min-w-0 truncate">{label}</span>
       </span>
-      {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#5F7F52]" /> : null}
+      {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#650A18]" /> : null}
     </button>
   );
 });
@@ -99,7 +99,7 @@ const CountryChoice = memo(function CountryChoice({
       className={cn(
         "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
         active
-          ? "bg-[rgba(95,127,82,0.12)] text-[#305231]"
+          ? "bg-[rgba(101,10,24,0.08)] text-[#650A18]"
           : "bg-white/0 text-[#2f2a22]",
       )}
     >
@@ -108,8 +108,8 @@ const CountryChoice = memo(function CountryChoice({
           className={cn(
             "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
             active
-              ? "border-[#5F7F52] bg-[#5F7F52] text-white"
-              : "border-[rgba(95,127,82,0.28)] bg-white text-transparent",
+              ? "border-[#650A18] bg-[#650A18] text-white"
+              : "border-[rgba(61,53,48,0.18)] bg-white text-transparent",
           )}
         >
           <Check className="h-2.5 w-2.5" />
@@ -467,7 +467,7 @@ export default function ConsumptionPage() {
     ? lastEntry.tasting_notes.trim()
     : lastEntry?.location?.trim()
       ? `Registrado em ${lastEntry.location.trim()}.`
-      : "Um registro recente da sua mesa para voltar com calma quando quiser.";
+      : "Sem observações.";
 
   useEffect(() => {
     if (!hasLoadedOnce) {
@@ -494,8 +494,8 @@ export default function ConsumptionPage() {
       <div className="editorial-page consumo-page consumo-v2-page sx-v2-page-shell">
         <EditorialCard className="sx-v2-matte-panel consumo-v2-loading">
           <div className="sx-v2-state-loader">
-            <span className="sx-v2-kicker">Journal</span>
-            <p>Reunindo seus brindes</p>
+            <span className="sx-v2-kicker">Meu Consumo</span>
+            <p>Carregando consumos</p>
             <div className="mt-4 grid gap-3 md:grid-cols-[1.2fr_0.8fr]">
               <Skeleton className="h-28 rounded-[24px]" />
               <div className="grid grid-cols-2 gap-3">
@@ -512,33 +512,93 @@ export default function ConsumptionPage() {
   }
 
   return (
-    <div className="editorial-page consumo-page consumo-v2-page sx-v2-page-shell">
-      <section className="sx-v2-content-rail consumo-v2-rail">
-        <header className="consumo-v2-header">
-          <div className="consumo-v2-header-copy">
-            <Kicker className="consumo-v2-kicker">Journal</Kicker>
-            <h1 className="consumo-v2-title sx-v2-display">Meu Consumo</h1>
-            <p className="consumo-v2-subtitle sx-v2-body">
-              Um registro calmo das garrafas abertas, do ritmo da adega e dos momentos que valem lembrar.
-            </p>
+    <div className="editorial-page consumo-page consumo-v3-page sx-v2-page-shell">
+      <section className="sx-v2-content-rail consumo-v3-rail">
+        <header className="consumo-v3-header">
+          <div className="consumo-v3-header-copy">
+            <Kicker className="consumo-v3-kicker">Meu Consumo</Kicker>
+            <h1 className="consumo-v3-title sx-v2-display">Meu Consumo</h1>
           </div>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(true)}
+            className={cn(
+              "consumo-v3-filter-button sx-v2-btn-capsule",
+              hasActiveFilters && "is-active",
+            )}
+          >
+            <span>Filtros</span>
+            <ChevronDown className={cn("h-4 w-4 shrink-0 transition-transform duration-150 ease-out", filtersOpen && "rotate-180")} />
+          </button>
         </header>
 
-        <div className="consumo-v2-top">
-          {lastEntry ? (
-            <section className="consumo-v2-hero sx-v2-dark-panel sx-v2-ai-aura">
-              <div className="consumo-v2-hero-copy">
-                <div className="consumo-v2-hero-head">
-                  <Kicker className="consumo-v2-hero-kicker">Ritual recente</Kicker>
-                  <span className="consumo-v2-hero-time">{lastLabel}</span>
+        <div className="consumo-v3-filter-summary">
+          <span>{hasActiveFilters ? activeFilterSummary : "Todos os consumos"}</span>
+          {activeFilterSummary ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="consumo-v3-clear-filter"
+            >
+              Limpar
+            </button>
+          ) : null}
+        </div>
+
+        <div className="consumo-v3-layout">
+          <main className={cn("consumo-v3-journal transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
+            {isFiltering ? (
+              <EditorialCard className="consumo-v3-skeleton">
+                <div className="space-y-3">
+                  <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
+                  <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
+                  <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
                 </div>
-                <h2 className="consumo-v2-hero-title sx-v2-wine-title">{lastEntry.wine_name}</h2>
+              </EditorialCard>
+            ) : displayEntries.length === 0 ? (
+              <EditorialCard className="consumo-v3-empty">
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <p className="font-serif text-[16px] text-[rgba(26,23,19,0.82)]">
+                    {entries.length === 0
+                      ? "Nenhum consumo registrado"
+                      : "Nenhum consumo nessa seleção"}
+                  </p>
+                  <p className="mt-1 text-[12px] text-[#7A746B]">
+                    {entries.length === 0
+                      ? "Registre uma garrafa aberta para acompanhar seu histórico."
+                      : "Limpe os filtros para ver outros consumos."}
+                  </p>
+                  {activeFilterSummary ? (
+                    <button
+                      type="button"
+                      onClick={clearFilters}
+                      className="consumo-v3-clear-filter mt-4"
+                    >
+                      Limpar filtros
+                    </button>
+                  ) : null}
+                </div>
+              </EditorialCard>
+            ) : (
+              <ConsumptionTimeline entries={displayEntries} title="Histórico" />
+            )}
+          </main>
+
+          <aside className="consumo-v3-side">
+          {lastEntry ? (
+            <section className="consumo-v3-last sx-v2-dark-panel sx-v2-ai-aura">
+              <div className="consumo-v3-last-copy">
+                <div className="consumo-v3-last-head">
+                  <Kicker className="consumo-v3-last-kicker">Último consumo</Kicker>
+                  <span className="consumo-v3-last-time">{lastLabel}</span>
+                </div>
+                <h2 className="consumo-v3-last-title sx-v2-wine-title">{lastEntry.wine_name}</h2>
                 {lastEntryMeta ? (
-                  <p className="consumo-v2-hero-meta sx-v2-wine-meta">{lastEntryMeta}</p>
+                  <p className="consumo-v3-last-meta sx-v2-wine-meta">{lastEntryMeta}</p>
                 ) : null}
-                <p className="consumo-v2-hero-note sx-v2-body">{lastEntryNote}</p>
-                <div className="consumo-v2-hero-foot">
-                  <span className="consumo-v2-hero-rating">
+                <p className="consumo-v3-last-note sx-v2-body">{lastEntryNote}</p>
+                <div className="consumo-v3-last-foot">
+                  <span className="consumo-v3-last-rating">
                     <Star className="h-3.5 w-3.5" />
                     {lastEntry.rating != null ? Number(lastEntry.rating).toFixed(1) : "Sem nota"}
                   </span>
@@ -546,46 +606,45 @@ export default function ConsumptionPage() {
               </div>
             </section>
           ) : (
-            <section className="consumo-v2-hero sx-v2-dark-panel">
-              <div className="consumo-v2-hero-copy">
-                <Kicker className="consumo-v2-hero-kicker">Journal</Kicker>
-                <h2 className="consumo-v2-hero-title sx-v2-wine-title">Seu diário de taças começa aqui</h2>
-                <p className="consumo-v2-hero-note sx-v2-body">
-                  Quando você registrar as primeiras aberturas, este espaço vai refletir o ritmo e a memória da sua adega.
+            <section className="consumo-v3-last sx-v2-dark-panel">
+              <div className="consumo-v3-last-copy">
+                <Kicker className="consumo-v3-last-kicker">Meu Consumo</Kicker>
+                <h2 className="consumo-v3-last-title sx-v2-wine-title">Nenhum consumo registrado</h2>
+                <p className="consumo-v3-last-note sx-v2-body">
+                  Registre uma garrafa aberta para acompanhar seu histórico.
                 </p>
               </div>
             </section>
           )}
 
-          <aside className="consumo-v2-side">
-            <section className="consumo-v2-stats sx-v2-floating-panel">
-              <div className="consumo-v2-stats-grid">
-                <article className="consumo-v2-stat sx-v2-matte-panel">
-                  <span className="consumo-v2-stat-label">Registros</span>
-                  <strong className="consumo-v2-stat-value">{total}</strong>
+            <section className="consumo-v3-stats">
+              <div className="consumo-v3-stats-grid">
+                <article className="consumo-v3-stat">
+                  <span className="consumo-v3-stat-label">Total</span>
+                  <strong className="consumo-v3-stat-value">{total}</strong>
                 </article>
-                <article className="consumo-v2-stat sx-v2-matte-panel">
-                  <span className="consumo-v2-stat-label">Ritmo mensal</span>
-                  <strong className="consumo-v2-stat-value">{avgPerMonth}</strong>
+                <article className="consumo-v3-stat">
+                  <span className="consumo-v3-stat-label">Este mês</span>
+                  <strong className="consumo-v3-stat-value">{avgPerMonth}</strong>
                 </article>
-                <article className="consumo-v2-stat sx-v2-matte-panel">
-                  <span className="consumo-v2-stat-label">Nota média</span>
-                  <strong className="consumo-v2-stat-value">{averageRating}</strong>
+                <article className="consumo-v3-stat">
+                  <span className="consumo-v3-stat-label">Nota média</span>
+                  <strong className="consumo-v3-stat-value">{averageRating}</strong>
                 </article>
-                <article className="consumo-v2-stat sx-v2-matte-panel">
-                  <span className="consumo-v2-stat-label">Estilo recorrente</span>
-                  <strong className="consumo-v2-stat-value consumo-v2-stat-value--text">{styleStats.name}</strong>
+                <article className="consumo-v3-stat">
+                  <span className="consumo-v3-stat-label">Estilo</span>
+                  <strong className="consumo-v3-stat-value consumo-v3-stat-value--text">{styleStats.name}</strong>
                 </article>
               </div>
             </section>
 
-            <EditorialCard className="consumo-v2-chart consumo-chart-card consumo-chart-wrap">
-              <div className="consumo-v2-chart-head">
+            <EditorialCard className="consumo-v3-chart consumo-chart-card consumo-chart-wrap">
+              <div className="consumo-v3-chart-head">
                 <div>
-                  <Kicker className="consumo-v2-chart-kicker">Ritmo</Kicker>
-                  <h2 className="consumo-v2-chart-title">{chart.title}</h2>
+                  <Kicker className="consumo-v3-chart-kicker">Ritmo</Kicker>
+                  <h2 className="consumo-v3-chart-title">{chart.title}</h2>
                 </div>
-                <span className="consumo-v2-chart-total">{total}</span>
+                <span className="consumo-v3-chart-total">{total}</span>
               </div>
               <Sparkbar
                 data={chartDisplayData}
@@ -603,39 +662,6 @@ export default function ConsumptionPage() {
             </EditorialCard>
           </aside>
         </div>
-
-        <section className="consumo-v2-filters-wrap">
-          <button
-            type="button"
-            onClick={() => setFiltersOpen(true)}
-            className={cn(
-              "consumo-v2-filter-trigger consumption-filter-trigger sx-v2-btn-capsule flex w-full items-center justify-between border text-left font-semibold tracking-[-0.01em] transition-all duration-150 ease-out hover:-translate-y-px active:scale-[0.98]",
-              hasActiveFilters
-                ? "border-[rgba(101,10,24,0.18)] bg-[rgba(101,10,24,0.08)] text-[#4A0712]"
-                : "border-[rgba(61,53,48,0.10)] bg-[rgba(255,255,255,0.82)] text-[#1E1E1E]",
-            )}
-          >
-            <span className="flex min-w-0 flex-col items-start">
-              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#6F0718]">Filtros</span>
-              <span className="min-w-0 truncate text-[12px] font-semibold text-[#1E1E1E]">
-                {hasActiveFilters ? activeFilterSummary || "Todos os filtros" : "Período, país e ordenação"}
-              </span>
-            </span>
-            <ChevronDown className={cn("h-4 w-4 shrink-0 text-[#6F0718] transition-transform duration-150 ease-out", filtersOpen && "rotate-180")} />
-          </button>
-
-          {activeFilterSummary ? (
-            <div className="consumo-v2-active-filters">
-              <p className="consumo-v2-active-summary">{activeFilterSummary}</p>
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="consumo-v2-filter-clear-inline"
-              >
-                Limpar
-              </button>
-            </div>
-          ) : null}
 
           <ActionDialog open={filtersOpen} onOpenChange={setFiltersOpen}>
             <ActionDialogContent className="consumption-filter-modal sx-action-modal" aria-label="Filtros de consumo">
@@ -721,45 +747,6 @@ export default function ConsumptionPage() {
               </AiModalShell>
             </ActionDialogContent>
           </ActionDialog>
-        </section>
-
-        <div className={cn("consumo-v2-journal transition-all duration-150 ease-out", isFiltering ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0")}>
-          {isFiltering ? (
-            <EditorialCard className="consumo-v2-skeleton">
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-36 rounded-full bg-black/5" />
-                <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
-                <Skeleton className="h-20 w-full rounded-[16px] bg-black/5" />
-              </div>
-            </EditorialCard>
-          ) : displayEntries.length === 0 ? (
-            <EditorialCard className="consumo-v2-empty">
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="font-serif text-[16px] text-[rgba(26,23,19,0.82)]">
-                  {entries.length === 0
-                    ? "Seu journal ainda não tem brindes"
-                    : "Nenhum brinde nessa seleção"}
-                </p>
-                <p className="mt-1 text-[12px] text-[#7A746B]">
-                  {entries.length === 0
-                    ? "Quando abrir uma garrafa, o momento aparece aqui com contexto e memória."
-                    : "Limpe os filtros para reencontrar outros momentos da sua adega."}
-                </p>
-                {activeFilterSummary ? (
-                  <button
-                    type="button"
-                    onClick={clearFilters}
-                    className="consumo-v2-filter-clear-inline mt-4"
-                  >
-                    Limpar filtros
-                  </button>
-                ) : null}
-              </div>
-            </EditorialCard>
-          ) : (
-            <ConsumptionTimeline entries={displayEntries} title="Diário de taças" />
-          )}
-        </div>
       </section>
     </div>
   );
