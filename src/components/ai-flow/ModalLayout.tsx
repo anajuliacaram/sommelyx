@@ -12,10 +12,10 @@ export const AI_MODAL_CARD_BORDER = "var(--sx-border-default)";
 export const AI_MODAL_SOFT_SURFACE = "var(--sx-bg-row)";
 
 export const AI_MODAL_CARD_CLASSNAME =
-  "premium-card-surface";
+  "premium-card-surface sx-v2-matte-panel";
 
 export const AI_MODAL_ACTION_TILE_CLASSNAME =
-  "modal-action-card";
+  "modal-action-card sx-v2-modal-action";
 
 export const AI_MODAL_SHEET_CONTENT_CLASSNAME =
   "h-auto max-h-[86dvh] w-full max-w-[560px] gap-0 p-0";
@@ -34,10 +34,10 @@ export const AI_MODAL_DIALOG_CONTENT_STYLE: CSSProperties = {
 };
 
 export const AI_MODAL_FIELD_CLASSNAME =
-  "form-input modal-input";
+  "form-input modal-input sx-v2-modal-field";
 
 export const AI_MODAL_TEXTAREA_CLASSNAME =
-  "form-input modal-input min-h-[84px] resize-none py-2.5";
+  "form-input modal-input sx-v2-modal-field min-h-[84px] resize-none py-2.5";
 
 export const AI_MODAL_COMPACT_STACK_CLASSNAME = "space-y-1";
 export const AI_MODAL_SECTION_STACK_CLASSNAME = "space-y-1.5";
@@ -54,15 +54,15 @@ export const AI_MODAL_TEXT_SECONDARY_CLASSNAME =
 export const AI_MODAL_PILL_TEXT_CLASSNAME =
   "sx-label";
 export const AI_MODAL_SELECTION_CARD_CLASSNAME =
-  "segment-card flex min-h-[48px] flex-col justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
+  "segment-card sx-v2-modal-action flex min-h-[48px] flex-col justify-between text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_SELECTION_CARD_ACTIVE_CLASSNAME =
   "active";
 export const AI_MODAL_SELECTION_CARD_IDLE_CLASSNAME =
   "";
 export const AI_MODAL_LIST_SURFACE_CLASSNAME =
-  "modal-wine-list overflow-y-auto";
+  "modal-wine-list sx-v2-floating-panel overflow-y-auto";
 export const AI_MODAL_LIST_ROW_CLASSNAME =
-  "modal-wine-row flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
+  "modal-wine-row sx-v2-wine-row flex w-full items-center gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]";
 export const AI_MODAL_LIST_ROW_SELECTED_CLASSNAME =
   "";
 export const AI_MODAL_INLINE_ACTION_CLASSNAME =
@@ -81,7 +81,7 @@ export function AiModalShell({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("flex min-h-0 max-h-full flex-col", className)}>{children}</div>;
+  return <div className={cn("sx-v2-modal-shell-inner flex min-h-0 max-h-full flex-col", className)}>{children}</div>;
 }
 
 export function AiModalHeaderBar({
@@ -94,7 +94,7 @@ export function AiModalHeaderBar({
   return (
     <div
       className={cn(
-        "modal-header-bar shrink-0",
+        "modal-header-bar sx-v2-modal-header shrink-0",
         className,
       )}
     >
@@ -115,7 +115,7 @@ export function AiModalBody({
   return (
     <div
       className={cn(
-        "modal-body min-h-0 flex-1 overflow-y-auto pb-[calc(32px+env(safe-area-inset-bottom))]",
+        "modal-body sx-v2-modal-body min-h-0 flex-1 overflow-y-auto pb-[calc(32px+env(safe-area-inset-bottom))]",
         className,
       )}
       style={style}
@@ -135,7 +135,7 @@ export function AiModalFooterBar({
   return (
     <div
       className={cn(
-        "modal-footer shrink-0 px-6 pb-[calc(20px+env(safe-area-inset-bottom))] pt-3",
+        "modal-footer sx-v2-modal-footer shrink-0 px-6 pb-[calc(20px+env(safe-area-inset-bottom))] pt-3",
         className,
       )}
     >
@@ -257,7 +257,7 @@ export function AiModalCard({
   return (
     <div
       className={cn(
-        "sx-card sx-card-compact premium-card-surface px-3 py-2.5 sm:px-3.5",
+        "sx-card sx-card-compact premium-card-surface sx-v2-matte-panel px-3 py-2.5 sm:px-3.5",
         className,
       )}
     >
@@ -334,7 +334,8 @@ export function AiModalActionButton({
     <Button
       {...props}
       className={cn(
-        "tracking-[-0.005em] transition-opacity duration-150 ease-out active:scale-[0.99]",
+        "sx-v2-btn tracking-[-0.005em] transition-opacity duration-150 ease-out active:scale-[0.99]",
+        variant === "ghost" ? "sx-v2-btn-ghost" : variant === "secondary" || variant === "outline" || variant === "success" ? "sx-v2-btn-secondary" : "sx-v2-btn-primary",
         modalButtonClassName,
         variantClassName,
         className,
@@ -380,7 +381,7 @@ export function AiUploadPanel({
         }
       }}
       className={cn(
-        "modal-action-card group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]",
+        "modal-action-card sx-v2-modal-action group text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-bordeaux-10)]",
         className,
       )}
     >
@@ -444,8 +445,8 @@ export function AiFilterChip({
       {...props}
       variant="ghost"
       className={cn(
-        "chip h-auto min-h-[32px] rounded-full px-3 text-[11.5px] font-medium transition-all duration-200 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(58,74,46,0.10)]",
-        selected && "active",
+        "chip sx-v2-chip h-auto min-h-[32px] rounded-full px-3 text-[11.5px] font-medium transition-all duration-200 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(58,74,46,0.10)]",
+        selected && "active sx-v2-chip-active",
         className,
       )}
     >

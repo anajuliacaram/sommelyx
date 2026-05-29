@@ -434,6 +434,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const [success, setSuccess] = useState(false);
   const [scanOpen, setScanOpen] = useState(false);
   const [importCsvOpen, setImportCsvOpen] = useState(false);
+  const [manualFormVisible, setManualFormVisible] = useState(false);
   const [estimating, setEstimating] = useState(false);
   const [estimateConfidence, setEstimateConfidence] = useState<string | null>(null);
   const [estimateRange, setEstimateRange] = useState<{ min: number; max: number } | null>(null);
@@ -524,6 +525,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
     setAiPrefilledFields({});
     setMissingFields([]);
     setOriginOpen(false); setCellarOpen(false); setValueOpen(false); setNotesOpen(false); setSuccess(false);
+    setManualFormVisible(false);
   }, []);
 
   const applyScanPrefill = useCallback((prefill: AddWinePrefillValues) => {
@@ -603,6 +605,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
   const hydrateScanPrefill = useCallback((prefill: AddWinePrefillValues, source: "scan" | "initialValues", scanMeta?: ScanResultEnvelope) => {
     pendingHydrationTraceRef.current = { source, payload: prefill };
     finalFormStateLoggedRef.current = false;
+    setManualFormVisible(true);
     console.info("[AddWineDialog] hydrate_input", {
       source,
       payload: prefill,
@@ -1127,9 +1130,20 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                       </span>
                       Importar arquivo
                     </button>
+
+                    <button
+                      type="button"
+                      className={cn("add-wine-quick-action", manualFormVisible && "is-active")}
+                      onClick={() => setManualFormVisible(true)}
+                    >
+                      <span className="add-wine-quick-icon is-olive">
+                        <Sparkles className="h-4 w-4" />
+                      </span>
+                      Adicionar manualmente
+                    </button>
                   </div>
 
-                  {labelImagePreview && (
+                  {manualFormVisible && labelImagePreview && (
                     <div className="add-wine-label-preview">
                       <div className="add-wine-label-image">
                         <img
@@ -1145,59 +1159,61 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                     </div>
                   )}
 
-                  <div className="add-wine-identity">
-                    <div className="add-wine-field">
-                      <label htmlFor="name">Vinho *</label>
-                      <input
-                        id="name"
-                        value={getRenderedFieldValue("name", name)}
-                        onChange={e => { setScanHydrated(false); setName(e.target.value); }}
-                        placeholder="Nome no rótulo"
-                        required
-                        className="input-premium"
-                        style={aiFieldStyle("name")}
-                      />
-                    </div>
-                    <div className="add-wine-field">
-                      <label htmlFor="producer">Produtor</label>
-                      <input
-                        id="producer"
-                        value={getRenderedFieldValue("producer", producer)}
-                        onChange={e => { setScanHydrated(false); setProducer(e.target.value); }}
-                        placeholder="Produtor no rótulo"
-                        className="input-premium"
-                        style={aiFieldStyle("producer")}
-                      />
-                    </div>
-                    <div className="add-wine-field-grid">
-                      <div className="add-wine-field">
-                        <label htmlFor="vintage">Safra</label>
-                        <input
-                          id="vintage"
-                          type="number"
-                          value={getRenderedFieldValue("vintage", vintage)}
-                          onChange={e => setVintage(e.target.value)}
-                          placeholder="2020"
-                        className="input-premium"
-                        style={aiFieldStyle("vintage")}
-                        />
+                  {manualFormVisible ? (
+                    <>
+                      <div className="add-wine-identity">
+                        <div className="add-wine-field">
+                          <label htmlFor="name">Vinho *</label>
+                          <input
+                            id="name"
+                            value={getRenderedFieldValue("name", name)}
+                            onChange={e => { setScanHydrated(false); setName(e.target.value); }}
+                            placeholder="Nome no rótulo"
+                            required
+                            className="input-premium"
+                            style={aiFieldStyle("name")}
+                          />
+                        </div>
+                        <div className="add-wine-field">
+                          <label htmlFor="producer">Produtor</label>
+                          <input
+                            id="producer"
+                            value={getRenderedFieldValue("producer", producer)}
+                            onChange={e => { setScanHydrated(false); setProducer(e.target.value); }}
+                            placeholder="Produtor no rótulo"
+                            className="input-premium"
+                            style={aiFieldStyle("producer")}
+                          />
+                        </div>
+                        <div className="add-wine-field-grid">
+                          <div className="add-wine-field">
+                            <label htmlFor="vintage">Safra</label>
+                            <input
+                              id="vintage"
+                              type="number"
+                              value={getRenderedFieldValue("vintage", vintage)}
+                              onChange={e => setVintage(e.target.value)}
+                              placeholder="2020"
+                              className="input-premium"
+                              style={aiFieldStyle("vintage")}
+                            />
+                          </div>
+                          <div className="add-wine-field">
+                            <label>Estilo</label>
+                            <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
+                              <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
+                                <SelectValue placeholder="Estilo" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
+                                {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </div>
-                      <div className="add-wine-field">
-                        <label>Estilo</label>
-                        <Select value={getRenderedFieldValue("style", style)} onValueChange={setStyle}>
-                          <SelectTrigger className="input-premium" style={{ color: getRenderedFieldValue("style", style) ? 'rgba(36,30,24,0.88)' : 'rgba(108,96,84,0.58)', ...(aiPrefilledFields.style ? aiFieldStyle("style") : {}) }}>
-                            <SelectValue placeholder="Estilo" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-[16px] border border-[rgba(95,111,82,0.10)] bg-[rgba(252,249,244,0.98)] shadow-[0_22px_40px_-32px_rgba(58,51,39,0.26)]">
-                            {styles.map(s => <SelectItem key={s.value} value={s.value} className="text-[14px]" style={{ color: 'rgba(36,30,24,0.88)' }}>{s.label}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="add-wine-accordions">
-                    <Collapsible open={originOpen} onOpenChange={setOriginOpen}>
+                      <div className="add-wine-accordions">
+                        <Collapsible open={originOpen} onOpenChange={setOriginOpen}>
                       <CollapsibleTrigger asChild>
                         <button type="button" className="add-wine-accordion-trigger">
                           <span>
@@ -1388,10 +1404,12 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
                           </div>
                         )}
                       </CollapsibleContent>
-                    </Collapsible>
-                  </div>
+                        </Collapsible>
+                      </div>
+                    </>
+                  ) : null}
 
-                  {missingFields.length > 0 && (
+                  {manualFormVisible && missingFields.length > 0 && (
                     <AiModalCard className="space-y-1 rounded-[16px] px-3 py-2.5">
                       <p className="text-[12px] font-medium text-[rgba(72,60,46,0.76)]">
                         Campos sugeridos para completar depois
@@ -1406,7 +1424,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
             </AnimatePresence>
           </AiModalSplitLayout>
           </AiModalBody>
-          {!success && (
+          {!success && manualFormVisible && (
             <AiModalFooterBar>
               <AiModalActionButton
                 form="add-wine-form"

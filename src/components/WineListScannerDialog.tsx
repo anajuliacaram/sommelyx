@@ -600,13 +600,13 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
     <>
       <TooltipProvider>
         <ActionDialog open={open} onOpenChange={handleClose}>
-          <ActionDialogContent className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "analyze-carta-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar Carta">
-            <ActionDialogTitle className="sr-only">Analisar Carta</ActionDialogTitle>
+          <ActionDialogContent className={cn(AI_MODAL_SHEET_CONTENT_CLASSNAME, "analyze-carta-modal")} style={AI_MODAL_SHEET_CONTENT_STYLE} aria-label="Analisar carta">
+            <ActionDialogTitle className="sr-only">Analisar carta</ActionDialogTitle>
             <AiModalShell>
               <AiModalHeaderBar>
                 <AiModalHeader
                   icon={<BookOpen className="h-5 w-5" />}
-                  title="Analisar Carta"
+                  title="Analisar carta"
                   tone="wine"
                 />
               </AiModalHeaderBar>

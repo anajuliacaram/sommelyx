@@ -42,7 +42,7 @@ export function ActionDialogContent({ children, className, style, "aria-label": 
           data-radix-dialog-content=""
           data-modal-variant="action"
           className={cn(
-            "modal-container premium-modal-shell sx-ai-modal sx-action-modal pointer-events-auto flex min-h-0 flex-col overflow-hidden",
+            "modal-container premium-modal-shell sx-ai-modal sx-action-modal sx-v2-modal-shell pointer-events-auto flex min-h-0 flex-col overflow-hidden",
             className,
           )}
           style={style}
