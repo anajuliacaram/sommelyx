@@ -18973,12 +18973,30 @@ body.landing-page {
 
 /* Landing mobile viewport continuity guard. */
 body.landing-page,
+body.landing-page .page-transition-surface,
 body.landing-page .landing-shell-premium {
   overflow-x: clip;
 }
 
+body.landing-page .landing-background {
+  width: 100%;
+  max-width: 100%;
+  contain: layout paint;
+}
+
+body.landing-page .landing-bg-glow.glow-wine {
+  left: 0;
+  transform: none;
+}
+
+body.landing-page .landing-bg-glow.glow-olive {
+  right: 0;
+  transform: none;
+}
+
 @supports not (overflow: clip) {
   body.landing-page,
+  body.landing-page .page-transition-surface,
   body.landing-page .landing-shell-premium {
     overflow-x: hidden;
   }
@@ -19048,9 +19066,9 @@ body.landing-page .landing-shell-premium {
 
   .landing-faq-tabs {
     max-width: 100%;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: flex-start;
-    overflow-x: auto;
+    overflow-x: clip;
     padding-bottom: 4px;
     scrollbar-width: none;
   }
