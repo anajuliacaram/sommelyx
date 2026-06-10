@@ -61,11 +61,11 @@ type WineLabelPreviewProps = {
 
 function getFallbackTone(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E3A]";
-  if (s.includes("branco")) return "bg-[#DDBD74]";
-  if (s.includes("rose")) return "bg-[#C97A93]";
-  if (s.includes("espum")) return "bg-[#B8A06A]";
-  return "bg-[#C5BAAA]";
+  if (s.includes("tinto")) return "from-[#3B0710] via-[#6F1024] to-[#241412]";
+  if (s.includes("branco")) return "from-[#D8C48A] via-[#EFE2BD] to-[#A7B184]";
+  if (s.includes("rose")) return "from-[#C6818E] via-[#E8B8B6] to-[#B87963]";
+  if (s.includes("espum")) return "from-[#A7B184] via-[#E8DCB8] to-[#8D9A73]";
+  return "from-[#DDD0BA] via-[#F5ECDD] to-[#AFA18E]";
 }
 
 export function WineLabelPreview({
@@ -246,14 +246,16 @@ export function WineLabelPreview({
           className={cn("h-full w-full object-cover", imageClassName)}
         />
       ) : (
-        <div className={cn("flex h-full items-center justify-center", tone)}>
-          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/65 px-4 py-3 text-center shadow-[0_10px_24px_-20px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#7B1E2B]">
-              <WineIcon className="h-4 w-4" />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#6F6A60]">Rótulo indisponível</p>
-              <p className="text-[10px] font-medium text-[#8A8276]">Prévia ilustrativa</p>
+        <div className={cn("relative flex h-full items-center justify-center bg-gradient-to-br", tone)}>
+          <div className="absolute inset-0 opacity-[0.22] [background-image:linear-gradient(120deg,rgba(255,253,248,0.28)_0_1px,transparent_1px_13px),radial-gradient(circle_at_50%_18%,rgba(255,253,248,0.42),transparent_34%)]" />
+          <div className="absolute bottom-[14%] h-4 w-20 rounded-full bg-black/20 blur-md" />
+          <div className="relative grid h-[72%] min-h-[86px] w-[48%] min-w-[46px] max-w-[82px] grid-rows-[1fr_auto] overflow-hidden rounded-t-[999px] rounded-b-[18px] border border-white/35 bg-[rgba(255,253,248,0.18)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_18px_34px_-28px_rgba(0,0,0,0.48)] backdrop-blur-sm">
+            <div className="mx-auto mt-[18%] h-[42%] w-[46%] rounded-t-[999px] rounded-b-[9px] bg-[rgba(255,253,248,0.24)]" />
+            <div className="m-2 rounded-[12px] bg-[rgba(255,248,239,0.88)] px-2 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
+              <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(101,10,24,0.12)] text-[#650A18]">
+                <WineIcon className="h-3 w-3" />
+              </div>
+              <p className="truncate text-[8px] font-semibold uppercase tracking-[0.16em] text-[#4D0814]">Sommelyx</p>
             </div>
           </div>
         </div>

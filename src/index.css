@@ -23985,3 +23985,344 @@ body:not(.landing-page) ::-webkit-scrollbar {
   display: none !important;
   background: transparent !important;
 }
+
+/* Final luxury refinement layer: scoped visual polish after legacy authority blocks. */
+body:not(.landing-page) {
+  --sx-lux-ink: #1F1713;
+  --sx-lux-ink-soft: #34251F;
+  --sx-lux-muted: rgba(31, 23, 19, 0.72);
+  --sx-lux-muted-strong: rgba(31, 23, 19, 0.82);
+  --sx-lux-wine: #650A18;
+  --sx-lux-wine-mid: #4D0814;
+  --sx-lux-wine-deep: #26050B;
+  --sx-lux-olive: #263A2B;
+  --sx-lux-gold: #B79247;
+  --sx-lux-border: rgba(61, 53, 48, 0.12);
+  --sx-lux-paper: rgba(255, 253, 248, 0.86);
+  --sx-lux-surface: linear-gradient(145deg, rgba(255, 253, 248, 0.90), rgba(245, 238, 226, 0.72));
+  --sx-lux-chip: linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(235, 226, 211, 0.74));
+  --sx-lux-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66), 0 18px 42px -34px rgba(35, 24, 18, 0.48);
+  color: var(--sx-lux-ink);
+  background:
+    radial-gradient(circle at 16% -8%, rgba(183, 146, 71, 0.10), transparent 28rem),
+    radial-gradient(circle at 92% 0%, rgba(38, 58, 43, 0.08), transparent 28rem),
+    linear-gradient(180deg, #F8F2E8 0%, #F1E8DA 100%) !important;
+}
+
+body:not(.landing-page) .dashboard-scroll {
+  background:
+    radial-gradient(circle at 72% 0%, rgba(183, 146, 71, 0.055), transparent 25rem),
+    linear-gradient(180deg, rgba(248, 242, 232, 0.98), rgba(241, 232, 218, 0.98)) !important;
+}
+
+body:not(.landing-page) :is(.premium-home-page.dashboard-root, .cellar-page, .consumo-page) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-page, .cellar-rebuild-page, .consumo-rebuild-page, .wishlist-page, .dashboard-shell, .sx-v2-main) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.overview-greeting, .adega-title, .consumo-title, .editorial-page-h1, .daily-insight-name, .overview-panel-head h2, .wine-card-title, .wishlist-title) {
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-title, .cellar-rebuild-title, .consumo-rebuild-title, .wishlist-title, .overview-greeting, .adega-title, .consumo-title, .editorial-page-h1, .wine-card-title, .cellar-rebuild-card-name, .cellar-rebuild-row-name, .consumo-rebuild-entry-title, .overview-panel-head h2, .home-rebuild-section-head h2) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-name, .cellar-rebuild-summary-main strong, .cellar-rebuild-kicker, .home-rebuild-date, .home-rebuild-kicker, .consumo-rebuild-kicker, .overview-date, .overview-panel-kicker, .adega-subtitle, .consumo-subtitle, .wishlist-sub, .home-summary-label) {
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-row-copy small, .home-rebuild-section-head span, .home-rebuild-metrics span, .cellar-rebuild-summary-main span, .cellar-rebuild-summary-stats span, .cellar-rebuild-card-meta, .cellar-rebuild-row-meta, .consumo-rebuild-entry-meta, .consumo-rebuild-entry-note, .consumo-rebuild-filter-summary, .consumo-rebuild-stat-label, .consumo-rebuild-timeline-kicker, .consumo-rebuild-chart-kicker, .wishlist-card p, .wishlist-card small, .wishlist-card .text-muted-foreground, .sx-v2-wine-meta, .overview-wine-row small, .overview-toast-row small) {
+  color: var(--sx-lux-muted) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-row-copy strong, .home-rebuild-metrics strong, .cellar-rebuild-summary-stats strong, .consumo-rebuild-stat-value, .wishlist-card strong, .wishlist-card h2, .wishlist-card h3, .wishlist-card h4) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.home-summary-item, .overview-panel, .overview-wine-row, .overview-toast-row, .cellar-page .wine-card, .cellar-page .adega-search-wrap, .cellar-page .adega-filter-btn, .cellar-page .chip, .consumo-page .consumo-stat-card, .consumo-page .consumo-chart-card, .consumo-page .consumo-filter-card, .consumo-page .consumo-list-card, .consumo-page .last-opened-card, .consumo-page .consumo-entry-card, .wishlist-card) {
+  border-color: var(--sx-lux-border) !important;
+  background: var(--sx-lux-surface) !important;
+  box-shadow: var(--sx-lux-shadow) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-actions-card, .home-rebuild-summary, .home-rebuild-panel, .cellar-rebuild-summary, .cellar-rebuild-controls, .cellar-rebuild-card, .cellar-rebuild-row, .consumo-rebuild-chart, .consumo-rebuild-timeline, .consumo-rebuild-stat, .consumo-rebuild-entry, .wishlist-card, .wishlist-empty, .home-rebuild-empty, .consumo-rebuild-empty) {
+  border-color: var(--sx-lux-border) !important;
+  background: var(--sx-lux-surface) !important;
+  color: var(--sx-lux-ink) !important;
+  box-shadow: var(--sx-lux-shadow) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-metrics span, .cellar-rebuild-summary-stats span, .home-rebuild-wine-row, .home-rebuild-consumption-row, .consumo-rebuild-entry, .cellar-rebuild-card-stage, .cellar-rebuild-row-stage, .consumo-rebuild-entry-bottle) {
+  background: linear-gradient(180deg, rgba(250, 245, 237, 0.94), rgba(235, 226, 211, 0.70)) !important;
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.daily-insight-card, .last-opened-card.featured, .consumo-v2-hero, .consumo-rebuild-last) {
+  border-color: rgba(255, 253, 248, 0.10) !important;
+  background:
+    radial-gradient(circle at 14% 4%, rgba(183, 146, 71, 0.23), transparent 15rem),
+    radial-gradient(circle at 92% 14%, rgba(255, 253, 248, 0.08), transparent 13rem),
+    linear-gradient(135deg, #210408 0%, #17231B 52%, #2D3D2E 100%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 253, 248, 0.10), 0 28px 68px -48px rgba(31, 23, 19, 0.70) !important;
+}
+
+body:not(.landing-page) :is(.daily-insight-card, .last-opened-card.featured, .consumo-v2-hero, .consumo-rebuild-last) :is(.daily-insight-name, .consumo-v2-hero-title, .consumo-rebuild-last-title) {
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) :is(.daily-insight-card, .last-opened-card.featured, .consumo-v2-hero, .consumo-rebuild-last, .home-rebuild-highlight) :is(.daily-insight-action, .daily-insight-copy, .daily-insight-empty, .home-rebuild-meta, .consumo-rebuild-last-meta, .consumo-rebuild-last-note, .consumo-v2-hero-meta, .consumo-v2-hero-note, .sx-v2-wine-meta) {
+  color: rgba(255, 248, 239, 0.84) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-window, .home-rebuild-status, .consumo-rebuild-last-rating, .consumo-v2-hero-rating) {
+  background: rgba(183, 146, 71, 0.20) !important;
+  color: #F9E3A4 !important;
+  border-color: rgba(255, 248, 239, 0.16) !important;
+}
+
+body:not(.landing-page) :is(.daily-insight-card, .last-opened-card.featured, .consumo-v2-hero, .consumo-rebuild-last, .home-rebuild-highlight) :is(.home-rebuild-highlight-top, .home-rebuild-kicker, .daily-insight-kicker, .consumo-v2-hero-kicker, .consumo-rebuild-kicker, .overview-panel-kicker) {
+  color: rgba(249, 227, 164, 0.92) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-open) {
+  background: rgba(255, 248, 239, 0.16) !important;
+  border-color: rgba(255, 248, 239, 0.24) !important;
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) :is(.btn-adicionar-wine-primary, .editorial-btn-primary, .btn-adicionar-adega, .modal-btn-primary, .modal-action-button-primary, .consumption-filter-apply, .cellar-rebuild-add-button, .home-rebuild-action-primary),
+body:not(.landing-page) :is(.cellar-rebuild-add-button, .home-rebuild-action-primary) :is(span, svg) {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(183, 146, 71, 0.20), transparent 34%),
+    linear-gradient(180deg, #6F1024 0%, #4D0814 62%, #26050B 100%) !important;
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) :is(.btn-adicionar-consumo-secondary, .editorial-btn-ghost, .modal-btn-secondary, .consumption-filter-clear, .header-search-pill, .header-quick-search-btn, .header-avatar, .mobile-header-menu) {
+  border-color: rgba(61, 53, 48, 0.12) !important;
+  background: var(--sx-lux-chip) !important;
+  color: var(--sx-lux-olive) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 10px 24px -24px rgba(31, 23, 19, 0.34) !important;
+}
+
+body:not(.landing-page) :is(.btn-adicionar-consumo-secondary, .editorial-btn-ghost, .modal-btn-secondary, .consumption-filter-clear, .header-search-pill, .header-quick-search-btn, .header-avatar, .mobile-header-menu) :is(span, svg, p) {
+  color: currentColor !important;
+}
+
+body:not(.landing-page) :is(.cellar-rebuild-filter-btn, .cellar-rebuild-view-toggle, .cellar-rebuild-search, .cellar-rebuild-filter-chip, .cellar-rebuild-view-btn, .consumo-rebuild-filter-button, .consumo-rebuild-clear-filter, .home-rebuild-action:not(.home-rebuild-action-primary), .home-rebuild-row-status, .home-rebuild-rating, .home-rebuild-consumption-date, .consumo-rebuild-entry-rating, .cellar-rebuild-open) {
+  border-color: rgba(61, 53, 48, 0.12) !important;
+  background: var(--sx-lux-chip) !important;
+  color: var(--sx-lux-olive) !important;
+}
+
+body:not(.landing-page) :is(.cellar-rebuild-filter-chip.active, .cellar-rebuild-view-btn.active, .home-rebuild-row-status.now) {
+  background: linear-gradient(180deg, rgba(101, 10, 24, 0.14), rgba(101, 10, 24, 0.08)) !important;
+  color: var(--sx-lux-wine) !important;
+  border-color: rgba(101, 10, 24, 0.18) !important;
+}
+
+body:not(.landing-page) :is(.cellar-rebuild-card-chip, .cellar-rebuild-row-chip, .cellar-rebuild-drink-badge, .wishlist-card .badge, .wishlist-card [class*="Badge"], .wishlist-card [class*="badge"]) {
+  background: rgba(38, 58, 43, 0.11) !important;
+  color: var(--sx-lux-olive) !important;
+  border-color: rgba(38, 58, 43, 0.14) !important;
+}
+
+body:not(.landing-page) :is(.cellar-rebuild-drink-badge, .wishlist-card [class*="target"], .wishlist-card [class*="price"]) {
+  background: rgba(183, 146, 71, 0.18) !important;
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.cellar-rebuild-search input, .header-search-pill, .wishlist-page input, .wishlist-page textarea, .wishlist-page [role="combobox"])::placeholder,
+body:not(.landing-page) .sx-action-modal :is(input, textarea)::placeholder {
+  color: rgba(31, 23, 19, 0.54) !important;
+  opacity: 1 !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-empty, .consumo-rebuild-empty, .adega-empty, .premium-empty-state, .empty-state, .wishlist-empty) {
+  position: relative !important;
+  overflow: hidden !important;
+  border: 1px solid var(--sx-lux-border) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(183, 146, 71, 0.14), transparent 34%),
+    radial-gradient(circle at 82% 22%, rgba(38, 58, 43, 0.08), transparent 34%),
+    linear-gradient(145deg, rgba(255, 253, 248, 0.78), rgba(239, 231, 217, 0.60)) !important;
+  color: var(--sx-lux-muted-strong) !important;
+  box-shadow: var(--sx-lux-shadow) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-empty, .consumo-rebuild-empty, .adega-empty, .premium-empty-state, .empty-state, .wishlist-empty) :is(h2, h3, strong) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-empty, .consumo-rebuild-empty, .adega-empty, .premium-empty-state, .empty-state, .wishlist-empty) :is(p, span, small) {
+  color: var(--sx-lux-muted) !important;
+}
+
+body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-modal, [data-radix-dialog-content].sx-action-modal, [data-radix-sheet-content].sx-action-modal, .consumption-filter-modal) {
+  border-color: rgba(61, 53, 48, 0.12) !important;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(183, 146, 71, 0.13), transparent 34%),
+    radial-gradient(circle at 100% 8%, rgba(38, 58, 43, 0.09), transparent 36%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(246, 239, 228, 0.96)) !important;
+  box-shadow:
+    0 34px 86px -44px rgba(31, 23, 19, 0.46),
+    0 16px 42px -32px rgba(38, 58, 43, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+}
+
+body:not(.landing-page) .premium-modal-overlay {
+  background:
+    radial-gradient(circle at 50% 20%, rgba(101, 10, 24, 0.12), transparent 34%),
+    rgba(31, 23, 19, 0.38) !important;
+  backdrop-filter: blur(18px) saturate(0.98) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title]) {
+  color: var(--sx-lux-ink) !important;
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: clamp(24px, 5vw, 31px) !important;
+  font-weight: 540 !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) {
+  background: rgba(101, 10, 24, 0.10) !important;
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-close-btn {
+  color: var(--sx-lux-ink-soft) !important;
+  background: rgba(255, 253, 248, 0.90) !important;
+  border-color: rgba(61, 53, 48, 0.12) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .sx-v2-modal-action, .segment-card, .consumption-source-card, .consumption-select-card, .consumption-selected-summary, .consumption-section, .consumption-details-card, .add-wine-rebuild-option, .add-wine-rebuild-section, .analyze-carta-button, .harmonizar-option, .consumption-wine-list) {
+  border-color: rgba(61, 53, 48, 0.11) !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.56), transparent 36%),
+    linear-gradient(145deg, rgba(255, 253, 248, 0.90), rgba(239, 231, 217, 0.64)) !important;
+  color: var(--sx-lux-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58), 0 14px 34px -32px rgba(31, 23, 19, 0.30) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.segment-card.is-selected, .consumption-source-card.is-selected, .consumption-wine-row.is-selected, .harmonizar-option[aria-pressed="true"], .harmonizar-option.is-selected, .add-wine-rebuild-option.is-primary) {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(183, 146, 71, 0.20), transparent 32%),
+    linear-gradient(180deg, rgba(101, 10, 24, 0.12), rgba(255, 253, 248, 0.60)) !important;
+  color: var(--sx-lux-wine) !important;
+  box-shadow: inset 0 0 0 1px rgba(101, 10, 24, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 16px 34px -32px rgba(31, 23, 19, 0.34) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .sx-v2-modal-action, .segment-card, .consumption-source-card, .consumption-select-card, .consumption-selected-summary, .consumption-section, .consumption-details-card, .add-wine-rebuild-option, .add-wine-rebuild-section, .analyze-carta-button, .harmonizar-option, .consumption-wine-row, .consumption-wine-list) :is(span, p, small, strong, label, div) {
+  color: inherit !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-action-card-sub, .modal-action-subtitle, .modal-action-sub, .harmonizar-option-subtitle, .consumption-source-sub, .consumption-source-meta, .consumption-wine-meta, .consumption-selected-meta, .consumption-selected-summary p, .consumption-section p) {
+  color: var(--sx-lux-muted) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .consumption-source-card.is-selected,
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-actions .analyze-carta-button:first-child {
+  border-color: rgba(255, 248, 239, 0.16) !important;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(183, 146, 71, 0.20), transparent 34%),
+    linear-gradient(180deg, #6F1024 0%, #4D0814 62%, #26050B 100%) !important;
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) .sx-action-modal .consumption-source-card.is-selected :is(svg, span, p, .consumption-source-title, .consumption-source-sub, .consumption-source-meta),
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-actions .analyze-carta-button:first-child :is(svg, span, p) {
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-actions .analyze-carta-button:not(:first-child) :is(svg, span, p) {
+  color: var(--sx-lux-olive) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(input:not([type="checkbox"]):not([type="radio"]), textarea, button[role="combobox"], .modal-input, .input-premium) {
+  border-color: rgba(61, 53, 48, 0.14) !important;
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.94), rgba(238, 229, 214, 0.70)) !important;
+  color: var(--sx-lux-ink) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 0 -1px 0 rgba(61, 53, 48, 0.035) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(button:disabled, [aria-disabled="true"]) {
+  color: rgba(31, 23, 19, 0.62) !important;
+  opacity: 1 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-field-label, .form-field-label, .modal-input-label, .add-wine-field > label, .add-wine-rebuild-section-head, .consumption-filter-section-label) {
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.add-wine-check-row, .consumption-rating-button, .consumption-filter-chip) {
+  border-color: rgba(61, 53, 48, 0.12) !important;
+  background: var(--sx-lux-chip) !important;
+  color: var(--sx-lux-ink-soft) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.add-wine-check-row, .consumption-rating-button, .consumption-filter-chip) :is(span, p, svg, label) {
+  color: currentColor !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.consumption-rating-button[aria-pressed="true"], .consumption-rating-button.active, .consumption-filter-chip.active, .consumption-filter-chip[data-state="on"], .consumption-filter-chip[aria-pressed="true"]) {
+  background: linear-gradient(180deg, var(--sx-lux-wine), var(--sx-lux-wine-deep)) !important;
+  color: #FFF8EF !important;
+  border-color: rgba(101, 10, 24, 0.30) !important;
+}
+
+body:not(.landing-page) :is([data-radix-popper-content-wrapper] [role="option"], [data-radix-popper-content-wrapper] [role="menuitem"], [data-radix-select-content], [data-radix-dropdown-menu-content], [cmdk-list], [cmdk-item]) {
+  color: var(--sx-lux-ink) !important;
+}
+
+body:not(.landing-page) :is([data-radix-select-content], [data-radix-dropdown-menu-content], [cmdk-list]) {
+  background: rgba(255, 253, 248, 0.98) !important;
+  border-color: rgba(61, 53, 48, 0.14) !important;
+}
+
+body:not(.landing-page) :is([data-radix-popper-content-wrapper] [role="option"]:hover, [data-radix-popper-content-wrapper] [role="menuitem"]:hover, [data-radix-popper-content-wrapper] [data-highlighted], [cmdk-item][data-selected="true"]) {
+  background: rgba(101, 10, 24, 0.09) !important;
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item, [data-sidebar="group-label"], .header-search-pill, .dashboard-command-dialog, .dashboard-command-dialog *, [cmdk-input], [cmdk-empty]) {
+  color: var(--sx-lux-muted-strong) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-primary *) {
+  color: #FFF8EF !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) {
+  background: linear-gradient(90deg, rgba(101, 10, 24, 0.12), rgba(255, 253, 248, 0.52)) !important;
+  border-color: rgba(101, 10, 24, 0.14) !important;
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) :is(span, div, svg) {
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover) {
+  color: var(--sx-lux-wine) !important;
+}
+
+body:not(.landing-page) :is(.harmonizar-modal, .analyze-carta-modal) {
+  overflow: hidden !important;
+}
+
+body:not(.landing-page) :is(.harmonizar-modal, .analyze-carta-modal)::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: auto -16% -18% 24% !important;
+  height: 128px !important;
+  pointer-events: none !important;
+  border-radius: 999px !important;
+  background: rgba(183, 146, 71, 0.10) !important;
+  filter: blur(24px) !important;
+}
