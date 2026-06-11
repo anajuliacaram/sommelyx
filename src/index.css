@@ -24326,3 +24326,515 @@ body:not(.landing-page) :is(.harmonizar-modal, .analyze-carta-modal)::before {
   background: rgba(183, 146, 71, 0.10) !important;
   filter: blur(24px) !important;
 }
+
+/* Modal design system unification: one family across authenticated action modals. */
+body:not(.landing-page) .sx-action-modal {
+  --sx-modal-primary-surface: #FFFDF8;
+  --sx-modal-secondary-surface: #F5EFE5;
+  --sx-modal-border: rgba(52, 37, 31, 0.14);
+  --sx-modal-ink: #1F1713;
+  --sx-modal-muted: rgba(31, 23, 19, 0.68);
+  --sx-modal-wine: #650A18;
+  --sx-modal-wine-deep: #26050B;
+  --sx-modal-olive: #263A2B;
+  --sx-modal-gold: #B79247;
+  --sx-modal-ivory: #FFF8EF;
+  color: var(--sx-modal-ink) !important;
+  background:
+    linear-gradient(180deg, var(--sx-modal-primary-surface) 0%, var(--sx-modal-primary-surface) 52%, var(--sx-modal-secondary-surface) 100%) !important;
+  border: 1px solid var(--sx-modal-border) !important;
+  border-radius: 32px !important;
+  box-shadow:
+    0 48px 96px -56px rgba(31, 23, 19, 0.58),
+    0 16px 48px -40px rgba(101, 10, 24, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-header {
+  padding: 32px 32px 24px !important;
+  padding-right: 80px !important;
+  border-bottom: 1px solid rgba(52, 37, 31, 0.10) !important;
+  background: var(--sx-modal-primary-surface) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-header-lockup,
+body:not(.landing-page) .sx-action-modal .modal-header > .flex {
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-icon-wrap,
+body:not(.landing-page) .sx-action-modal .modal-icon-circle,
+body:not(.landing-page) .sx-action-modal .modal-header-icon {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: var(--sx-modal-wine) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 239, 0.92), rgba(245, 239, 229, 0.88)) !important;
+  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 16px 32px -28px rgba(31, 23, 19, 0.34) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-icon-wrap svg,
+body:not(.landing-page) .sx-action-modal .modal-icon-circle svg,
+body:not(.landing-page) .sx-action-modal .modal-header-icon svg {
+  width: 24px !important;
+  height: 24px !important;
+  stroke-width: 1.75 !important;
+  color: currentColor !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-title,
+body:not(.landing-page) .sx-action-modal .modal-header-title,
+body:not(.landing-page) .sx-action-modal [data-radix-dialog-title],
+body:not(.landing-page) .sx-action-modal [data-radix-sheet-title] {
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: clamp(36px, 10vw, 42px) !important;
+  font-weight: 600 !important;
+  line-height: 0.96 !important;
+  letter-spacing: 0 !important;
+  color: var(--sx-modal-ink) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-close-btn {
+  top: 24px !important;
+  right: 24px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 999px !important;
+  color: var(--sx-modal-ink) !important;
+  background: var(--sx-modal-secondary-surface) !important;
+  border: 1px solid var(--sx-modal-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-body {
+  padding: 24px 32px !important;
+  background: var(--sx-modal-primary-surface) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-footer {
+  padding: 16px 32px 24px !important;
+  background: var(--sx-modal-primary-surface) !important;
+  border-top: 1px solid rgba(52, 37, 31, 0.10) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .sx-label,
+  .modal-section-label,
+  .modal-field-label,
+  .form-field-label,
+  .modal-input-label,
+  .section-label,
+  .add-wine-rebuild-section-head,
+  .add-wine-field > label,
+  .consumption-filter-section-label,
+  .harmonizar-eyebrow
+) {
+  font-family: var(--sx-font-sans, "Plus Jakarta Sans", system-ui, sans-serif) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: var(--sx-modal-wine) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card,
+  .sx-v2-modal-action,
+  .segment-card,
+  .consumption-source-card,
+  .consumption-select-card,
+  .add-wine-rebuild-option,
+  .analyze-carta-button,
+  .harmonizar-option
+) {
+  width: 100% !important;
+  min-height: 88px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  border-radius: 24px !important;
+  border: 1px solid var(--sx-modal-border) !important;
+  background: var(--sx-modal-secondary-surface) !important;
+  color: var(--sx-modal-ink) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 16px 32px -32px rgba(31, 23, 19, 0.36) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card,
+  .sx-v2-modal-action,
+  .segment-card,
+  .consumption-source-card,
+  .consumption-select-card,
+  .add-wine-rebuild-option,
+  .analyze-carta-button,
+  .harmonizar-option
+):hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(101, 10, 24, 0.24) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 24px 40px -34px rgba(31, 23, 19, 0.42) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .modal-action-card-icon,
+  .segment-card > div[class*="icon"],
+  .consumption-source-icon,
+  .consumption-select-icon,
+  .add-wine-rebuild-option-icon,
+  .harmonizar-option-icon
+) {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  color: var(--sx-modal-wine) !important;
+  background: rgba(255, 248, 239, 0.76) !important;
+  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .modal-action-card-icon,
+  .segment-card > div[class*="icon"],
+  .consumption-source-icon,
+  .consumption-select-icon,
+  .add-wine-rebuild-option-icon,
+  .harmonizar-option-icon
+) svg,
+body:not(.landing-page) .sx-action-modal .analyze-carta-button > svg {
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+  stroke-width: 1.75 !important;
+  color: currentColor !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-title,
+  .modal-action-card-title,
+  .segment-card-title,
+  .seg-title,
+  .consumption-source-title,
+  .consumption-select-title,
+  .add-wine-rebuild-option > span:last-child,
+  .harmonizar-option-title
+) {
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  color: currentColor !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card-sub,
+  .modal-action-subtitle,
+  .modal-action-sub,
+  .harmonizar-option-subtitle,
+  .consumption-source-sub,
+  .consumption-source-meta,
+  .consumption-wine-meta,
+  .consumption-selected-meta
+) {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: var(--sx-modal-muted) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .segment-card.active,
+  .segment-card.is-selected,
+  .consumption-source-card.active,
+  .consumption-source-card.is-selected,
+  .add-wine-rebuild-option.is-primary,
+  .harmonizar-option.active,
+  .harmonizar-option.is-selected,
+  .harmonizar-option[aria-pressed="true"]
+) {
+  border-color: rgba(255, 248, 239, 0.18) !important;
+  background:
+    linear-gradient(180deg, var(--sx-modal-wine) 0%, #4D0814 56%, var(--sx-modal-wine-deep) 100%) !important;
+  color: var(--sx-modal-ivory) !important;
+  box-shadow:
+    0 28px 56px -36px rgba(38, 5, 11, 0.72),
+    inset 0 1px 0 rgba(255, 248, 239, 0.20) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .segment-card.active,
+  .segment-card.is-selected,
+  .consumption-source-card.active,
+  .consumption-source-card.is-selected,
+  .add-wine-rebuild-option.is-primary,
+  .harmonizar-option.active,
+  .harmonizar-option.is-selected,
+  .harmonizar-option[aria-pressed="true"]
+) :is(span, p, svg, div) {
+  color: var(--sx-modal-ivory) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .segment-card.active,
+  .segment-card.is-selected,
+  .consumption-source-card.active,
+  .consumption-source-card.is-selected,
+  .add-wine-rebuild-option.is-primary,
+  .harmonizar-option.active,
+  .harmonizar-option.is-selected,
+  .harmonizar-option[aria-pressed="true"]
+) :is(.modal-action-card-sub, .modal-action-subtitle, .modal-action-sub, .harmonizar-option-subtitle, .consumption-source-sub, .consumption-source-meta) {
+  color: rgba(255, 248, 239, 0.78) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .segment-card.active,
+  .segment-card.is-selected,
+  .consumption-source-card.active,
+  .consumption-source-card.is-selected,
+  .add-wine-rebuild-option.is-primary,
+  .harmonizar-option.active,
+  .harmonizar-option.is-selected,
+  .harmonizar-option[aria-pressed="true"]
+) :is(
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .modal-action-card-icon,
+  .segment-card > div[class*="icon"],
+  .consumption-source-icon,
+  .add-wine-rebuild-option-icon,
+  .harmonizar-option-icon
+) {
+  color: var(--sx-modal-ivory) !important;
+  background: rgba(255, 248, 239, 0.12) !important;
+  border-color: rgba(255, 248, 239, 0.22) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-btn-secondary, .analyze-carta-button) {
+  min-height: 48px !important;
+  height: 48px !important;
+  border-radius: 999px !important;
+  padding: 0 24px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-btn-primary {
+  color: var(--sx-modal-ivory) !important;
+  background: linear-gradient(180deg, var(--sx-modal-wine), #4D0814 62%, var(--sx-modal-wine-deep)) !important;
+  border: 1px solid rgba(101, 10, 24, 0.28) !important;
+  box-shadow: 0 18px 36px -30px rgba(38, 5, 11, 0.74) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-btn-secondary {
+  color: var(--sx-modal-olive) !important;
+  background: var(--sx-modal-secondary-surface) !important;
+  border: 1px solid rgba(38, 58, 43, 0.24) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-button {
+  justify-content: center !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.consumption-source-grid, .segment-row) {
+  gap: 16px !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.add-wine-rebuild-choice, .analyze-carta-capture, .consumption-modal-flow) {
+  gap: 16px !important;
+}
+
+@media (min-width: 768px) {
+  body:not(.landing-page) .sx-action-modal .modal-title,
+  body:not(.landing-page) .sx-action-modal .modal-header-title,
+  body:not(.landing-page) .sx-action-modal [data-radix-dialog-title],
+  body:not(.landing-page) .sx-action-modal [data-radix-sheet-title] {
+    font-size: 52px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-icon-wrap,
+  body:not(.landing-page) .sx-action-modal .modal-icon-circle,
+  body:not(.landing-page) .sx-action-modal .modal-header-icon {
+    width: 72px !important;
+    height: 72px !important;
+    min-width: 72px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-icon-wrap svg,
+  body:not(.landing-page) .sx-action-modal .modal-icon-circle svg,
+  body:not(.landing-page) .sx-action-modal .modal-header-icon svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) .sx-action-modal {
+    border-radius: 24px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-header {
+    padding: 24px 24px 16px !important;
+    padding-right: 72px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-body {
+    padding: 16px 24px 24px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-footer {
+    padding: 16px 24px 24px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(
+    .modal-action-card,
+    .sx-v2-modal-action,
+    .segment-card,
+    .consumption-source-card,
+    .consumption-select-card,
+    .add-wine-rebuild-option,
+    .analyze-carta-button,
+    .harmonizar-option
+  ) {
+    min-height: 88px !important;
+    padding: 16px !important;
+  }
+}
+
+/* Modal system refinement after side-by-side QA. */
+body:not(.landing-page) .premium-modal-shell.modal-container.sx-action-modal,
+body:not(.landing-page) .sx-ai-modal.sx-action-modal,
+body:not(.landing-page) [data-modal-variant="action"].premium-modal-shell {
+  width: min(92vw, 680px) !important;
+  max-width: min(92vw, 680px) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-title,
+body:not(.landing-page) .sx-action-modal .modal-header-title,
+body:not(.landing-page) .sx-action-modal [data-radix-dialog-title],
+body:not(.landing-page) .sx-action-modal [data-radix-sheet-title] {
+  overflow: visible !important;
+  white-space: normal !important;
+  word-break: normal !important;
+}
+
+body:not(.landing-page) .sx-action-modal .add-wine-rebuild-choice {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+
+body:not(.landing-page) .sx-action-modal .add-wine-rebuild-option {
+  min-height: 88px !important;
+  justify-content: flex-start !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions .analyze-carta-button {
+  min-height: 88px !important;
+  height: 88px !important;
+  justify-content: flex-start !important;
+  gap: 16px !important;
+  padding: 16px !important;
+  border-radius: 24px !important;
+  border: 1px solid var(--sx-modal-border) !important;
+  background: var(--sx-modal-secondary-surface) !important;
+  color: var(--sx-modal-ink) !important;
+  font-family: var(--sx-font-serif, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 16px 32px -32px rgba(31, 23, 19, 0.36) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions .analyze-carta-button:first-child {
+  border-color: rgba(255, 248, 239, 0.18) !important;
+  background:
+    linear-gradient(180deg, var(--sx-modal-wine) 0%, #4D0814 56%, var(--sx-modal-wine-deep) 100%) !important;
+  color: var(--sx-modal-ivory) !important;
+  box-shadow:
+    0 28px 56px -36px rgba(38, 5, 11, 0.72),
+    inset 0 1px 0 rgba(255, 248, 239, 0.20) !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions .analyze-carta-button > svg {
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  border-radius: 999px !important;
+  color: currentColor !important;
+  background: rgba(255, 248, 239, 0.76) !important;
+  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  stroke-width: 1.75 !important;
+}
+
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions .analyze-carta-button:first-child > svg {
+  background: rgba(255, 248, 239, 0.12) !important;
+  border-color: rgba(255, 248, 239, 0.22) !important;
+}
+
+@media (min-width: 768px) {
+  body:not(.landing-page) .sx-action-modal .modal-title,
+  body:not(.landing-page) .sx-action-modal .modal-header-title,
+  body:not(.landing-page) .sx-action-modal [data-radix-dialog-title],
+  body:not(.landing-page) .sx-action-modal [data-radix-sheet-title] {
+    font-size: 48px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) .premium-modal-shell.modal-container.sx-action-modal,
+  body:not(.landing-page) .sx-ai-modal.sx-action-modal,
+  body:not(.landing-page) [data-modal-variant="action"].premium-modal-shell {
+    width: min(92vw, 680px) !important;
+    max-width: min(92vw, 680px) !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .analyze-carta-actions {
+    grid-template-columns: 1fr !important;
+  }
+}

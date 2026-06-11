@@ -159,7 +159,7 @@ export function AiModalHeader({
 }) {
   return (
     <div className={cn("modal-header mb-0 pr-11 sm:pr-12", className)}>
-      <div className="flex items-start gap-2.5">
+      <div className="modal-header-lockup flex items-center gap-4">
         {icon ? (
           <div className={cn("modal-header-icon modal-icon-wrap modal-icon-circle", tone === "neutral" && "olive", tone && `tone-${tone}`)}>
             {icon}
