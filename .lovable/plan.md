@@ -1,217 +1,120 @@
+## Fase 3 — Reimaginação Editorial
 
-
-# Sommelyx UX Refactor — Best-in-Class SaaS Workflows
-
-## Scope Analysis
-
-This is a comprehensive UX refactor touching database schema, routing, new pages/components, and dashboard redesign. The current app has: auth flow, profile selection, placeholder pages, and two dashboard variants (personal/commercial). No wine data tables exist yet.
-
-Given the scale, I recommend splitting into **3 phases** implemented across multiple messages. This plan covers **Phase 1** (the foundation) which is the largest and most critical.
+Os 3 mockups acima são a **direção mestre travada**. Eles não são "uma página" — são a **gramática visual** que vai ser aplicada em todo o produto. Antes de aprovar, olhe atentamente: é desse mundo que estamos falando.
 
 ---
 
-## Phase 1: Database + Onboarding + Dashboard Redesign
+### O que muda na alma do produto
 
-### 1. Database Migration — Wine Tables
+| Hoje | Fase 3 |
+|---|---|
+| Cards retangulares | Objetos flutuantes com luz própria |
+| KPIs em containers | Tipografia editorial gigante + metadados ínfimos |
+| Vinho como dado | Vinho como protagonista visual |
+| Bordeaux como tinta de UI | Bordeaux como joia (acento raro) |
+| Verde escuro como fundo neutro | Verde profundo + vinheta quente + grão de filme = atmosfera de adega |
+| Dourado como detalhe | Champagne gold como única cor de ação |
+| Alertas vermelho/verde | Recomendações editoriais (estilo Apple TV) |
 
-Create the `wines` table to power real dashboard data and the bottle management flow:
+---
 
-```sql
-CREATE TABLE public.wines (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL,
-  name TEXT NOT NULL,
-  producer TEXT,
-  country TEXT,
-  region TEXT,
-  grape TEXT,
-  vintage INT,
-  style TEXT, -- 'tinto', 'branco', 'rosé', 'espumante', 'sobremesa'
-  purchase_price NUMERIC(10,2),
-  current_value NUMERIC(10,2),
-  quantity INT NOT NULL DEFAULT 1,
-  rating NUMERIC(3,1),
-  drink_from INT, -- year
-  drink_until INT, -- year
-  cellar_location TEXT,
-  food_pairing TEXT,
-  tasting_notes TEXT,
-  image_url TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+### Pilares visuais (não-negociáveis)
 
--- RLS
-ALTER TABLE public.wines ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own wines" ON public.wines FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own wines" ON public.wines FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own wines" ON public.wines FOR UPDATE USING (auth.uid() = user_id);
-CREATE POLICY "Users can delete own wines" ON public.wines FOR DELETE USING (auth.uid() = user_id);
-```
+**1. Garrafa-objeto.** Toda garrafa renderizada com luz quente única vinda do canto superior direito, sombra de contato suave, base sobre linha ivory fina (prateleira de vitrine). Nunca em retângulo cinza. Nunca como ícone. 5 arquétipos por tipo de vinho (Tinto/Branco/Rosé/Espumante/Sobremesa) — asset já gerado.
 
-Create the `wine_events` table for bottle flow (opens, sales, exits):
+**2. Tipografia editorial.** Libre Baskerville em escalas dramáticas (display 48-72px) para nome do vinho. Metadados em uppercase tracked-out 10-11px ivory 60% (`BORDEAUX · 2015 · GRAND CRU`). Notas do sommelier em itálico serif. Zero negrito SaaS, zero badges coloridos.
 
-```sql
-CREATE TABLE public.wine_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  wine_id UUID NOT NULL REFERENCES public.wines(id) ON DELETE CASCADE,
-  user_id UUID NOT NULL,
-  event_type TEXT NOT NULL, -- 'open', 'sale', 'exit', 'add'
-  quantity INT NOT NULL DEFAULT 1,
-  notes TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+**3. Atmosfera.** Fundo `#1A2420` + vinheta radial quente + grão de filme sutil (SVG noise overlay 3% opacidade). Cada surface respira luz, não é uma cor chapada.
 
-ALTER TABLE public.wine_events ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Users can view own events" ON public.wine_events FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own events" ON public.wine_events FOR INSERT WITH CHECK (auth.uid() = user_id);
-```
+**4. Champagne gold como única ação.** `#C8A96A` em outline pill (não fill) para CTAs primários. Bordeaux `#7B1E2B` reservado para momentos preciosos — destaque do dia, sommelier signature. Nada mais vermelho.
 
-### 2. Onboarding — Redesign SelectProfile
+**5. Densidade radical reduzida.** Onde hoje cabem 6 cards, vai caber 1 objeto + 3 thumbnails. Espaço negativo é parte do luxo.
 
-Replace the current `SelectProfile.tsx` with a **2-step onboarding flow**:
+**6. Motion deliberado.** Fade-in 600ms `[0.16, 1, 0.3, 1]`, scale 0.98→1 em entrada de garrafa, parallax sutil em scroll do hero. Sem bounce, sem spring exagerado.
 
-**Step 1 — Welcome + Profile Choice**
-- Short headline: "Como você vai usar o Sommelyx?"
-- Two large cards side by side (keep existing pattern but with user-centered copy):
-  - **Adega Pessoal**: "Organize sua coleção, saiba o que beber e quando."
-  - **Operação Comercial**: "Controle estoque, registre vendas, sem planilhas."
-- Progress dots at bottom (1 of 2)
+---
 
-**Step 2 — Quick Setup (optional)**
-- "Quer importar vinhos?" with skip option
-- Or just a confirmation: "Pronto! Sua adega está configurada."
-- CTA: "Ir para o Dashboard"
-- Progress dots (2 of 2)
+### Aplicação por superfície
 
-The flow stays in the same page component with internal step state. No long forms.
+**Home (`DashboardIndex` / `PersonalDashboard` / `CommercialDashboard`)**
+Hero garrafa-protagonista do "vinho do momento" (próximo da janela ideal, ou recém-adicionado). Tipografia gigante à direita. Faixa inferior horizontal "próximos da janela ideal" com 3 thumbnails. KPIs comerciais migram para uma segunda dobra editorial, não cards — números em display serif com label tipográfico embaixo.
 
-### 3. Dashboard Redesign — PersonalDashboard
+**Adega (`PersonalCellarPage` / `CommercialCellarPage`)**
+Vira **prateleira**. Linhas horizontais de garrafas com baseline ivory hairline. Cada garrafa com spotlight próprio. Metadados em coluna sob a garrafa (ano grande, região pequena). Filtros migram para drawer lateral discreto. Ações (Adicionar, Importar) viram FAB champagne gold ou ação no header serif. Funcionalidade 100% preservada.
 
-Restructure the hierarchy:
+**Consumo (`ConsumptionPage`) — "Diário"**
+Vira **wine journal** cronológico. Cada entrada = momento editorial: garrafa miniatura à esquerda, data em tipografia serif, nota em itálico, contexto ("Jantar em casa · Quarta-feira"). Sem barras de progresso, sem gráficos no topo. Analytics descem para uma aba secundária "Análise" preservada.
+
+**Wishlist (`WishlistPage`) — "Dream Cellar"**
+Apresentação de aspiração: grid 2-col de garrafas em vitrine escura, cada uma com nome editorial, faixa de preço em ouro, e "por que está aqui" em itálico. Sem checkbox, sem ícone de lixeira visível — ações em hover/long-press elegantes.
+
+**Alertas (`AlertsPage`) — "Sommelier"**
+Replica direta do mockup 3. Cabeçalho "Recomendado para esta semana" em itálico serif. Hero recomendação principal com garrafa + raciocínio do sommelier ("Atinge a janela ideal nos próximos 60 dias…"). Lista secundária em 2 cards minimalistas. **Zero banners vermelhos/verdes.** Alertas comerciais (low stock) preservados mas reescritos em linguagem consultiva: *"Apenas 2 garrafas restantes na adega"* em vez de *"⚠ ESTOQUE BAIXO"*.
+
+**Relatórios (`ReportsPage` / `StatsPage`) — "Sua coleção em narrativa"**
+Vira ensaio editorial. Seções com headline serif: *"Você bebe principalmente Bordeaux"*, *"Sua adega favorece safras 2015-2018"*, *"Uma evolução em direção a brancos da Borgonha"*. Charts existentes preservados mas redesenhados — linhas finas, cores ivory/gold/bordeaux, sem grid pesado, sem tooltip box.
+
+**Modais (`ModalBase`, `AddWineDialog`, etc.)**
+Vira *Apple Wallet sheet*: corner radius 24px, blur 40px, background `#1A2420/95` + gradiente quente sutil no topo, sombra dramática. Headers de modal em serif display. Forms preservados, mas inputs com underline (não box), labels em uppercase tracked-out.
+
+---
+
+### O que NÃO faço nesta fase
+
+- Não removo nenhuma funcionalidade. Tudo permanece acessível.
+- Não toco em business logic, queries, hooks, edge functions.
+- Não mexo em onboarding, auth, settings, billing (já consistentes).
+- Não refatoro arquitetura por refatorar.
+
+---
+
+### Detalhes técnicos
 
 ```text
-┌─────────────────────────────────────────────┐
-│ Olá, {name}                                 │
-│ Resumo da sua adega                         │
-├──────────┬──────────┬──────────┬─────────────┤
-│ Garrafas │ Valor    │ Beber    │ Adicionados │
-│ 0        │ R$ 0     │ Agora: 0 │ Recente: 0  │
-├──────────┴──────────┴──────────┴─────────────┤
-│ Ações rápidas                                │
-│ [+ Adicionar Vinho] [🍷 Registrar Abertura]  │
-│ [📋 Ver Adega]                               │
-├──────────────────────────────────────────────┤
-│ Beber agora (wines in drink window)          │
-│ or Empty state                               │
-└──────────────────────────────────────────────┘
+Novos tokens (src/styles/tokens.css)
+├── --editorial-bg-vignette: radial-gradient(ellipse at 70% 20%, rgba(200,169,106,.08), transparent 60%)
+├── --editorial-grain: url('data:image/svg+xml,...') (noise SVG)
+├── --editorial-spotlight: drop-shadow + radial highlight para garrafas
+└── --editorial-baseline: hairline 1px champagne gold 30% para "prateleira"
+
+Novos componentes (src/components/editorial/)
+├── BottleObject.tsx          — Garrafa com spotlight, sombra, baseline. Fallback para os 5 arquétipos.
+├── EditorialHero.tsx         — Hero garrafa + tipografia (usado em Home + Alertas + ficha)
+├── CellarShelf.tsx           — Linha horizontal de garrafas com baseline e luz
+├── JournalEntry.tsx          — Item do diário de consumo
+├── SommelierRecommendation.tsx — Card recomendação estilo concierge
+├── EditorialMetric.tsx       — Número display serif + label uppercase (substitui KPI card)
+└── EditorialModal.tsx        — Sheet com blur + gradiente + sombra dramática
+
+Asset
+└── src/assets/bottles/       — 5 PNGs (tinto, branco, rosé, espumante, sobremesa)
+                                 já gerados com transparência, usados como fallback universal
+
+Motion
+└── Curva única: cubic-bezier(0.16, 1, 0.3, 1), durações 400-700ms
+    Variants: bottleEnter, fadeUp, parallaxSlow
 ```
-
-Key changes:
-- Metrics use **user-centered labels**: "Beber Agora" not "Vinhos no Auge", "Últimas Entradas" not "Últimas Adições"
-- **Quick Actions row** with 2-3 primary buttons below metrics
-- **"Beber Agora" section** showing wines in their drink window (or empty state)
-- Empty state CTA: "Adicionar seu primeiro vinho"
-
-### 4. Dashboard Redesign — CommercialDashboard
-
-Similar restructure:
-
-```text
-┌──────────────────────────────────────────────┐
-│ Olá, {name}                                  │
-│ Visão geral do seu negócio                   │
-├──────────┬──────────┬───────────┬─────────────┤
-│ Faturamento│ Estoque │ Baixo     │ Vendas      │
-│ R$ 0      │ 0       │ Estoque: 0│ Hoje: 0     │
-├──────────┴──────────┴───────────┴─────────────┤
-│ Ações rápidas                                 │
-│ [+ Cadastrar Produto] [📉 Registrar Venda]   │
-│ [📦 Checar Estoque]                           │
-├──────────────────────────────────────────────┤
-│ Alertas de estoque baixo                      │
-│ or Empty state                                │
-└──────────────────────────────────────────────┘
-```
-
-### 5. Sidebar — User-Centered Labels
-
-Update `AppSidebar.tsx` menu items:
-
-**Personal menu:**
-- Dashboard → Início
-- Minha Adega → Meus Vinhos
-- Wishlist → Quero Comprar
-- Estatísticas → Números
-
-**Commercial menu:**
-- Dashboard → Início
-- Estoque → Meus Produtos
-- Vendas → Registrar Venda
-- Cadastros → Cadastros (keep)
-- Relatórios → Números
-
-### 6. Add Wine Dialog
-
-Create `src/components/AddWineDialog.tsx` — a Sheet/Dialog for adding wines:
-
-- **Essential fields first** (visible): Nome, Produtor, Quantidade, Safra, Estilo (select)
-- **Collapsible "Mais detalhes"** section: País, Região, Uva, Preço, Localização, Notas, Harmonização, Janela de consumo
-- Success toast with micro animation: "1 garrafa adicionada!"
-- Auto-updates dashboard metrics
-
-### 7. Bottle Management Dialog
-
-Create `src/components/ManageBottleDialog.tsx`:
-
-- Triggered from wine list or dashboard quick action
-- Tabs or segmented control: "Adicionar" | "Abrir" | "Registrar Saída"
-- Each action updates quantity and creates a `wine_events` record
-- Strong success feedback with updated stock count shown inline
-
-### 8. Routes Update
-
-Add new route for wine detail (Phase 2 will build the full page):
-
-```tsx
-<Route path="cellar" element={<CellarPage />} />
-<Route path="wines/:id" element={<WineDetailPage />} /> // Phase 2
-```
-
-Replace `Placeholder` for cellar/inventory with a real `CellarPage` that shows a wine list with:
-- Search bar at top
-- Sort dropdown (default: drink window priority)
-- Filter chips (style, country, price range)
-- Wine cards in a responsive grid
 
 ---
 
-## Files to Create
-1. `src/components/AddWineDialog.tsx` — Add wine sheet with essential/advanced fields
-2. `src/components/ManageBottleDialog.tsx` — Unified bottle actions (add/open/exit)
-3. `src/pages/dashboard/CellarPage.tsx` — Wine list with search/filter/sort
-4. `src/components/QuickActions.tsx` — Reusable quick action buttons row
+### Sequência de implementação (após aprovação)
 
-## Files to Modify
-1. `src/pages/SelectProfile.tsx` — 2-step onboarding with progress indicator
-2. `src/pages/dashboard/PersonalDashboard.tsx` — New hierarchy, quick actions, drink-now section
-3. `src/pages/dashboard/CommercialDashboard.tsx` — New hierarchy, quick actions, low-stock alerts
-4. `src/components/AppSidebar.tsx` — User-centered menu labels
-5. `src/App.tsx` — New routes for cellar page
+1. Tokens editoriais + asset das 5 garrafas + `BottleObject` (base)
+2. `EditorialHero` + `EditorialMetric` + `SommelierRecommendation` (primitivos)
+3. **Home** reimaginada (validação visual ao vivo)
+4. **Alertas** → sommelier digital
+5. **Adega** → prateleira
+6. **Consumo** → diário
+7. **Wishlist** → dream cellar
+8. **Relatórios** → narrativa
+9. `EditorialModal` aplicado nos modais críticos
 
-## Database Changes
-1. Create `wines` table with RLS
-2. Create `wine_events` table with RLS
+Cada passo passa pela sua revisão visual antes do próximo.
 
 ---
 
-## Phase 2 (future message)
-- Wine Detail Page (decision-first layout with collapsible sections)
-- Global Search with saved filters
-- Settings page with backup/notification controls
+### Critério de sucesso
 
-## Phase 3 (future message)
-- Page transitions with AnimatePresence
-- Wine import flow
-- Advanced filtering and smart defaults
+Quando você abrir a Home pós-implementação, sua primeira reação não deve ser *"esse é o meu app"* — deve ser *"isso é outro produto"*. Se ainda parecer reconhecível como o dashboard de antes, eu falhei.
 
+**Aprovar este plano = aprovar a direção mestre dos 3 mockups acima.** Posso começar pelo passo 1.
