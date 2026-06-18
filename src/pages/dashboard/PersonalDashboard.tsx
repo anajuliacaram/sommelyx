@@ -1,6 +1,10 @@
-// Visão Geral — perfil Pessoal
-// Design "Editorial" fiel ao design-reference/Adega_Pessoal (variant-editorial.jsx)
-// Dados reais via Supabase (useWines).
+// Visão Geral — perfil Pessoal — FASE 3 EDITORIAL
+// Reimaginação Apple Wallet / Music / TV + Moët atmosphere.
+// Garrafa-protagonista. Sem cards. Sem KPIs em containers. Sem dashboard SaaS.
+//
+// Funcionalidades 100% preservadas:
+// AddWineDialog, AddConsumptionDialog (preSelectedWine), DishToWineDialog (Harmonizar),
+// WineListScannerDialog (Analisar carta), OnboardingWizard, todas as métricas.
 
 import { useMemo, useState } from "react";
 import {
@@ -17,12 +21,14 @@ import { AddConsumptionDialog } from "@/components/AddConsumptionDialog";
 import { OnboardingWizard } from "@/components/OnboardingWizard";
 import { DishToWineDialog } from "@/components/DishToWineDialog";
 import { WineListScannerDialog } from "@/components/WineListScannerDialog";
-import { WineLabelPreview } from "@/components/WineLabelPreview";
 import {
-  Kicker,
   classifyDrinkWindow,
   resolveSuggestedDrinkWindow,
 } from "@/components/editorial/EditorialPrimitives";
+import { EditorialHero, EditorialPill } from "@/components/editorial/EditorialHero";
+import { EditorialMetric, EditorialMetricDivider } from "@/components/editorial/EditorialMetric";
+import { SommelierRecommendation } from "@/components/editorial/SommelierRecommendation";
+import { BottleObject } from "@/components/editorial/BottleObject";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWineMetrics } from "@/hooks/useWines";
 import { useConsumption } from "@/hooks/useConsumption";
@@ -35,7 +41,9 @@ function getDayOfYear(date: Date) {
 
 export default function PersonalDashboard() {
   const { user } = useAuth();
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Sommelier";
+  const firstName =
+    (user?.user_metadata as { full_name?: string } | undefined)?.full_name?.split(" ")[0] ||
+    "Sommelier";
 
   const { totalBottles, totalValue, drinkNow, lowStock, wines } = useWineMetrics();
   const { data: consumptionEntries = [] } = useConsumption();
@@ -90,19 +98,32 @@ export default function PersonalDashboard() {
     return preferred[todayIndex % preferred.length] ?? null;
   }, [wines, currentYear]);
 
-  const insightReason = insightWine
-    ? (() => {
-        const drinkWindow = resolveSuggestedDrinkWindow(insightWine);
-        const classification = classifyDrinkWindow({
-          current: currentYear,
-          from: drinkWindow.from,
-          until: drinkWindow.until,
-        });
-        if (classification.status === "now") return "Abra este rótulo hoje";
-        if (classification.status === "soon") return "Vale acompanhar a janela de consumo";
-        return "Rótulo em destaque da sua adega";
-      })()
-    : "Cadastre algumas garrafas para receber sugestões diárias.";
+  const insightWindow = insightWine ? resolveSuggestedDrinkWindow(insightWine) : null;
+  const insightClassification = insightWindow
+    ? classifyDrinkWindow({
+        current: currentYear,
+        from: insightWindow.from,
+        until: insightWindow.until,
+      })
+    : null;
+
+  /** Frase consultiva no tom sommelier — substitui "Abrir agora" / "Beber agora". */
+  const insightWhisper = (() => {
+    if (!insightWine || !insightWindow || !insightClassification) {
+      return "Cadastre algumas garrafas para receber uma curadoria diária da sua adega.";
+    }
+    const region = insightWine.region || insightWine.country || "sua adega";
+    if (insightClassification.status === "now") {
+      return `No auge da sua janela ideal. Um momento raro para abrir este rótulo de ${region}.`;
+    }
+    if (insightClassification.status === "soon") {
+      return `Aproxima-se da janela ideal. Vale acompanhar nos próximos meses.`;
+    }
+    if (insightClassification.status === "past") {
+      return `Já passou do auge — mas pode revelar nuances inesperadas em uma ocasião especial.`;
+    }
+    return `Em guarda silenciosa. ${region}, ${insightWindow.from}–${insightWindow.until}.`;
+  })();
 
   const readyWines = useMemo(() => {
     return wines
@@ -123,8 +144,9 @@ export default function PersonalDashboard() {
         if (b.value !== a.value) return b.value - a.value;
         return a.wine.name.localeCompare(b.wine.name, "pt-BR");
       })
+      .filter((r) => insightWine ? r.wine.id !== insightWine.id : true)
       .slice(0, 3);
-  }, [wines, currentYear]);
+  }, [wines, currentYear, insightWine]);
 
   const recentToasts = useMemo(() => consumptionEntries.slice(0, 3), [consumptionEntries]);
 
@@ -134,29 +156,20 @@ export default function PersonalDashboard() {
         currency: "BRL",
         maximumFractionDigits: 0,
       })
-    : "R$ 0";
+    : "—";
 
-  const formatWineMeta = (wine: {
-    producer?: string | null;
-    region?: string | null;
-    country?: string | null;
-    vintage?: number | null;
-  }) => [wine.producer, wine.vintage, wine.region ?? wine.country].filter(Boolean).join(" · ");
-
-  const formatDate = (value: string) => {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "sem data";
-    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-  };
-
-  const insightMeta = insightWine ? formatWineMeta(insightWine) : "";
-
-  const insightWindow = insightWine ? resolveSuggestedDrinkWindow(insightWine) : null;
-  const insightWindowLabel = insightWindow
-    ? insightWindow.from === insightWindow.until
-      ? `${insightWindow.from}`
-      : `${insightWindow.from}-${insightWindow.until}`
+  const insightMeta = insightWine
+    ? [insightWine.region || insightWine.country, insightWine.vintage, insightWine.style]
+        .filter(Boolean)
+        .join(" · ")
+        .toUpperCase()
     : "";
+
+  const todayLabel = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <>
@@ -170,214 +183,251 @@ export default function PersonalDashboard() {
         />
       )}
 
-      <div className="dashboard-root editorial-page home-rebuild-page sx-v2-page-shell !px-0">
-        <section className="sx-v2-content-rail home-rebuild-rail">
-          <div className="home-rebuild-header">
-            <div className="home-rebuild-greeting">
-              <p className="home-rebuild-date sx-v2-kicker">
-                {new Date().toLocaleDateString("pt-BR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </p>
-              <h1 className="home-rebuild-title sx-v2-display">
-                Olá,{" "}
-                <span className="home-rebuild-name">{firstName}</span>
-              </h1>
-            </div>
-          </div>
+      {/* Fundo editorial — verde profundo + vinheta quente + grão de filme */}
+      <div className="ed-canvas min-h-screen w-full">
+        <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-10 md:py-14">
 
-          <div className="home-rebuild-mobile-actions" aria-label="Ações principais">
-            <button type="button" className="home-rebuild-action home-rebuild-action-primary" onClick={() => setAddOpen(true)}>
-              <Plus className="h-4 w-4" />
-              <span>Adicionar vinho</span>
-            </button>
-            <button
-              type="button"
-              className="home-rebuild-action"
-              onClick={() => {
-                setPreSelectedWine(null);
-                setConsumptionOpen(true);
-              }}
-            >
-              <GlassWater className="h-4 w-4" />
-              <span>Adicionar consumo</span>
-            </button>
-          </div>
+          {/* ── Saudação editorial ───────────────────────────────── */}
+          <header className="mb-10 md:mb-14 ed-anim-fade-up">
+            <p className="ed-kicker mb-3">{todayLabel}</p>
+            <h1 className="ed-display text-[clamp(2.25rem,4.5vw,3.5rem)]">
+              Olá, <em style={{ fontStyle: "italic", color: "var(--ed-gold)" }}>{firstName}</em>
+            </h1>
+          </header>
 
-          <div className="home-rebuild-layout">
-            <main className="home-rebuild-main">
-              <article className="home-rebuild-highlight sx-v2-ai-aura">
-                <div className="home-rebuild-bottle-stage">
-                  {insightWine ? (
-                    <WineLabelPreview
-                      wine={insightWine}
-                      alt={insightWine.name}
-                      className="home-rebuild-bottle"
-                      imageClassName="h-full w-full object-contain"
-                      generated={false}
-                      compact
-                    />
-                  ) : (
-                    <div className="home-rebuild-bottle-placeholder">
-                      <WineIcon className="h-6 w-6" />
-                    </div>
-                  )}
+          {/* ── Hero garrafa-protagonista ────────────────────────── */}
+          {insightWine ? (
+            <EditorialHero
+              kicker={
+                <>
+                  <span style={{ width: 24, height: 1, background: "var(--ed-gold-line)" }} />
+                  Rótulo do dia
+                </>
+              }
+              title={insightWine.name}
+              meta={insightMeta}
+              note={insightWhisper}
+              imageUrl={insightWine.image_url}
+              style={insightWine.style}
+              alt={insightWine.name}
+              cta={
+                <>
+                  <EditorialPill
+                    variant="primary"
+                    onClick={() => {
+                      setPreSelectedWine(insightWine);
+                      setConsumptionOpen(true);
+                    }}
+                  >
+                    Abrir esta garrafa
+                    <ArrowRight className="h-4 w-4" />
+                  </EditorialPill>
+                  <EditorialPill
+                    onClick={() => {
+                      setPairingInitialWineId(insightWine.id);
+                      setDishToWineOpen(true);
+                    }}
+                  >
+                    Harmonizar
+                  </EditorialPill>
+                </>
+              }
+              className="mb-16 md:mb-24"
+            />
+          ) : (
+            <section className="ed-canvas relative w-full overflow-hidden rounded-[28px] px-6 py-16 md:px-14 md:py-20 mb-16 text-center">
+              <div className="mx-auto flex max-w-md flex-col items-center gap-6 ed-anim-fade-up">
+                <BottleObject style="tinto" size="lg" withSpotlight />
+                <p className="ed-kicker">Sua adega aguarda</p>
+                <h2 className="ed-display text-[clamp(1.75rem,4vw,2.5rem)]">
+                  Sem rótulos ainda
+                </h2>
+                <p className="ed-note text-[16px] max-w-[36ch]">
+                  Comece registrando a primeira garrafa para que possamos curar uma seleção diária para você.
+                </p>
+                <EditorialPill variant="primary" onClick={() => setAddOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  Adicionar primeiro vinho
+                </EditorialPill>
+              </div>
+            </section>
+          )}
+
+          {/* ── Prateleira: próximas garrafas ─────────────────── */}
+          {readyWines.length > 0 && (
+            <section className="mb-16 md:mb-24">
+              <div className="mb-8 flex items-end justify-between gap-4">
+                <div>
+                  <p className="ed-kicker mb-2">Curadoria pessoal</p>
+                  <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+                    Próximas da sua janela
+                  </h2>
                 </div>
+                <div className="ed-shelf-line max-w-[200px] flex-1 mb-3 hidden md:block" aria-hidden />
+              </div>
 
-                <div className="home-rebuild-highlight-copy">
-                  <div className="home-rebuild-highlight-top">
-                    <Kicker className="home-rebuild-kicker">Rótulo em destaque</Kicker>
-                    {insightWindowLabel ? <span className="home-rebuild-window">{insightWindowLabel}</span> : null}
-                  </div>
-
-                  {insightWine ? (
-                    <>
-                      <h2 className="home-rebuild-wine sx-v2-wine-title">{insightWine.name}</h2>
-                      {insightMeta ? <p className="home-rebuild-meta sx-v2-wine-meta">{insightMeta}</p> : null}
-                      <div className="home-rebuild-highlight-foot">
-                        <span className="home-rebuild-status">{insightReason}</span>
-                        <button
-                          type="button"
-                          className="home-rebuild-open"
-                          onClick={() => {
-                            setPreSelectedWine(insightWine);
-                            setConsumptionOpen(true);
-                          }}
-                        >
-                          Abrir agora
-                          <ArrowRight className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="home-rebuild-wine sx-v2-wine-title">Nenhum rótulo cadastrado</h2>
-                      <p className="home-rebuild-meta sx-v2-wine-meta">Cadastre garrafas para ver sugestões.</p>
-                      <button type="button" className="home-rebuild-open" onClick={() => setAddOpen(true)}>
-                        Adicionar vinho
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </article>
-
-              <section className="home-rebuild-panel home-rebuild-upcoming">
-                <div className="home-rebuild-section-head">
-                  <h2>Próximas garrafas</h2>
-                  <span>{readyWines.length}</span>
-                </div>
-
-                <div className="home-rebuild-upcoming-list">
-                  {readyWines.length > 0 ? readyWines.slice(0, 4).map(({ wine, classification, drinkWindow }) => (
-                    <button
-                      type="button"
+              <div className="grid gap-10 md:gap-12 grid-cols-1 md:grid-cols-3">
+                {readyWines.map(({ wine, drinkWindow, classification }) => {
+                  const meta = [wine.region || wine.country, wine.vintage].filter(Boolean).join(" · ").toUpperCase();
+                  const status =
+                    classification.status === "now"
+                      ? "No auge agora"
+                      : `Janela ${drinkWindow.from}–${drinkWindow.until}`;
+                  return (
+                    <SommelierRecommendation
                       key={wine.id}
-                      className="home-rebuild-wine-row"
+                      imageUrl={wine.image_url}
+                      style={wine.style}
+                      title={wine.name}
+                      meta={meta}
+                      status={status}
                       onClick={() => {
                         setPreSelectedWine(wine);
                         setConsumptionOpen(true);
                       }}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* ── Diário: últimos consumos ─────────────────────── */}
+          {recentToasts.length > 0 && (
+            <section className="mb-16 md:mb-24">
+              <div className="mb-8">
+                <p className="ed-kicker mb-2">Diário</p>
+                <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+                  Memórias recentes
+                </h2>
+              </div>
+
+              <ol className="flex flex-col gap-6">
+                {recentToasts.map((entry, idx) => (
+                  <li
+                    key={entry.id}
+                    className="ed-anim-fade-up flex items-baseline gap-6 border-b border-[color:var(--ed-ivory-faint)] pb-6 last:border-0"
+                    style={{ animationDelay: `${idx * 80}ms` }}
+                  >
+                    <time
+                      className="ed-kicker shrink-0 inline-flex items-center gap-1.5"
+                      style={{ color: "var(--ed-gold)", minWidth: 78 }}
                     >
-                      <WineLabelPreview
-                        wine={wine}
-                        alt={wine.name}
-                        className="home-rebuild-thumb"
-                        imageClassName="h-full w-full object-contain"
-                        generated={false}
-                        compact
-                      />
-                      <span className="home-rebuild-row-copy">
-                        <strong>{wine.name}</strong>
-                        <small>{[wine.country, wine.region].filter(Boolean).join(" · ") || wine.style || "Adega"}</small>
-                      </span>
-                      <span className={`home-rebuild-row-status ${classification.status}`}>
-                        {classification.status === "now" ? "Abrir" : `${drinkWindow.from}-${drinkWindow.until}`}
-                      </span>
-                    </button>
-                  )) : (
-                    <div className="home-rebuild-empty">Cadastre garrafas para ver sugestões.</div>
-                  )}
-                </div>
-              </section>
-
-              <section className="home-rebuild-panel home-rebuild-recent">
-                <div className="home-rebuild-section-head">
-                  <h2>Últimos consumos</h2>
-                  {lowStock > 0 ? <span>{lowStock} baixo estoque</span> : null}
-                </div>
-
-                <div className="home-rebuild-recent-list">
-                  {recentToasts.length > 0 ? recentToasts.slice(0, 3).map((entry) => (
-                    <div key={entry.id} className="home-rebuild-consumption-row">
-                      <span className="home-rebuild-consumption-date">
-                        <Clock className="h-3.5 w-3.5" />
-                        {formatDate(entry.consumed_at)}
-                      </span>
-                      <span className="home-rebuild-row-copy">
-                        <strong>{entry.wine_name}</strong>
-                        <small>{[entry.producer, entry.vintage].filter(Boolean).join(" · ") || (entry.source === "external" ? "Externo" : "Adega")}</small>
-                      </span>
-                      <span className="home-rebuild-rating">{entry.rating ? `${entry.rating.toFixed(1)}` : "—"}</span>
+                      <Clock className="h-3 w-3" />
+                      {new Date(entry.consumed_at).toLocaleDateString("pt-BR", {
+                        day: "2-digit",
+                        month: "short",
+                      })}
+                    </time>
+                    <div className="flex-1 min-w-0">
+                      <p className="ed-display text-[18px] md:text-[20px]" style={{ lineHeight: 1.15 }}>
+                        {entry.wine_name}
+                      </p>
+                      <p className="ed-note text-[13px] mt-1">
+                        {[entry.producer, entry.vintage].filter(Boolean).join(" · ") ||
+                          (entry.source === "external" ? "Encontro fora da adega" : "Da sua adega")}
+                      </p>
                     </div>
-                  )) : (
-                    <div className="home-rebuild-empty">Nenhum consumo registrado.</div>
-                  )}
-                </div>
-              </section>
-            </main>
+                    {entry.rating ? (
+                      <span
+                        className="ed-display tabular-nums text-[20px] shrink-0"
+                        style={{ color: "var(--ed-gold)" }}
+                      >
+                        {entry.rating.toFixed(1)}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
 
-            <aside className="home-rebuild-side">
-              <section className="home-rebuild-actions-card" aria-label="Ações rápidas">
-                <button type="button" className="home-rebuild-action home-rebuild-action-primary" onClick={() => setAddOpen(true)}>
-                  <Plus className="h-4 w-4" />
-                  <span>Adicionar vinho</span>
-                </button>
-                <button
-                  type="button"
-                  className="home-rebuild-action"
-                  onClick={() => {
-                    setPreSelectedWine(null);
-                    setConsumptionOpen(true);
-                  }}
-                >
-                  <GlassWater className="h-4 w-4" />
-                  <span>Adicionar consumo</span>
-                </button>
-                <button
-                  type="button"
-                  className="home-rebuild-action"
-                  onClick={() => {
-                    setPairingInitialWineId(null);
-                    setDishToWineOpen(true);
-                  }}
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>Harmonizar</span>
-                </button>
-                <button type="button" className="home-rebuild-action" onClick={() => setWineListOpen(true)}>
-                  <WineIcon className="h-4 w-4" />
-                  <span>Analisar carta</span>
-                </button>
-              </section>
+          {/* ── Sua coleção em números (editorial, não KPI) ──── */}
+          <section className="mb-16">
+            <div className="mb-8">
+              <p className="ed-kicker mb-2">Sua coleção</p>
+              <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+                Em silêncio na adega
+              </h2>
+            </div>
 
-              <section className="home-rebuild-summary">
-                <div className="home-rebuild-section-head">
-                  <h2>Resumo</h2>
-                </div>
-                <div className="home-rebuild-metrics">
-                  <span><strong>{totalBottles.toLocaleString("pt-BR")}</strong> garrafas</span>
-                  <span><strong>{wines.length.toLocaleString("pt-BR")}</strong> rótulos</span>
-                  <span><strong>{drinkNow}</strong> beber agora</span>
-                  <span><strong>{inGuard}</strong> em guarda</span>
-                  <span className="home-rebuild-metric-wide"><strong>{formattedTotalValue}</strong> valor estimado</span>
-                </div>
-              </section>
-            </aside>
-          </div>
-        </section>
+            <div className="flex flex-wrap items-end gap-x-10 gap-y-8 md:gap-x-16">
+              <EditorialMetric
+                label="Garrafas"
+                value={totalBottles.toLocaleString("pt-BR")}
+                size="lg"
+              />
+              <EditorialMetricDivider className="hidden md:block" />
+              <EditorialMetric
+                label="Rótulos"
+                value={wines.length.toLocaleString("pt-BR")}
+                size="md"
+              />
+              <EditorialMetricDivider className="hidden md:block" />
+              <EditorialMetric
+                label="No auge"
+                value={drinkNow.toLocaleString("pt-BR")}
+                sub={drinkNow > 0 ? "Prontas para abrir" : undefined}
+                size="md"
+              />
+              <EditorialMetricDivider className="hidden md:block" />
+              <EditorialMetric
+                label="Em guarda"
+                value={inGuard.toLocaleString("pt-BR")}
+                sub={inGuard > 0 ? "Aguardando seu tempo" : undefined}
+                size="md"
+              />
+              <EditorialMetricDivider className="hidden md:block" />
+              <EditorialMetric
+                label="Valor estimado"
+                value={formattedTotalValue}
+                size="md"
+              />
+            </div>
+          </section>
+
+          {/* ── Ações editoriais (não-cards) ──────────────────── */}
+          <section
+            aria-label="Ações principais"
+            className="border-t border-[color:var(--ed-ivory-faint)] pt-10"
+          >
+            <p className="ed-kicker mb-6">Concierge</p>
+            <div className="flex flex-wrap gap-3 md:gap-4">
+              <EditorialPill variant="primary" onClick={() => setAddOpen(true)}>
+                <Plus className="h-4 w-4" />
+                Adicionar vinho
+              </EditorialPill>
+              <EditorialPill
+                onClick={() => {
+                  setPreSelectedWine(null);
+                  setConsumptionOpen(true);
+                }}
+              >
+                <GlassWater className="h-4 w-4" />
+                Registrar consumo
+              </EditorialPill>
+              <EditorialPill
+                onClick={() => {
+                  setPairingInitialWineId(null);
+                  setDishToWineOpen(true);
+                }}
+              >
+                <Sparkles className="h-4 w-4" />
+                Harmonizar
+              </EditorialPill>
+              <EditorialPill onClick={() => setWineListOpen(true)}>
+                <WineIcon className="h-4 w-4" />
+                Analisar carta
+              </EditorialPill>
+            </div>
+
+            {lowStock > 0 && (
+              <p className="ed-note text-[13px] mt-6" style={{ color: "var(--ed-ivory-muted)" }}>
+                Algumas garrafas estão chegando ao fim — vale uma visita à adega.
+              </p>
+            )}
+          </section>
+        </div>
       </div>
 
       <AddWineDialog open={addOpen} onOpenChange={setAddOpen} />
