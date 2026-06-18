@@ -333,7 +333,7 @@
 /* ────────────────────────────────────────────────────────────
    Phase 3 Editorial — reusable utility classes
    ──────────────────────────────────────────────────────────── */
-@layer components {
+.ed-utilities-root {}
   .ed-canvas {
     background-color: var(--ed-bg-canvas);
     background-image: var(--ed-vignette);
@@ -450,8 +450,7 @@
   .ed-anim-bottle { animation: ed-bottle-enter var(--ed-dur-hero) var(--ed-ease) both; }
   .ed-anim-fade-up { animation: ed-fade-up var(--ed-dur-reveal) var(--ed-ease) both; }
 
-  @media (prefers-reduced-motion: reduce) {
-    .ed-anim-bottle, .ed-anim-fade-up { animation: none; }
-  }
+@media (prefers-reduced-motion: reduce) {
+  .ed-anim-bottle, .ed-anim-fade-up { animation: none; }
 }
 
