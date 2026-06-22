@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sommelyx V4 - Complete Interactive Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sx-bordeaux: #6F0718; --sx-olive: #263A2B; --gold: #C7A85A; --page-bg: #F4EFE7; --card-bg: #FFFDF8;
+            --sx-t-head: #1B1411; --sx-t-body: #3B3029; --sx-t-sub: #756B63; --sx-t-muted: #A79D92;
+            --sx-b-default: rgba(61,53,48,0.12); --sx-r-md: 14px; --sx-r-lg: 20px; --sx-font-serif: "Cormorant Garamond", serif;
+        }
+        body { font-family: 'Inter', sans-serif; background: #F4EFE7; color: var(--sx-t-body); min-height: 100vh; margin: 0; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+        .serif { font-family: var(--sx-font-serif); }
+        .sx-v2-atmosphere { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 16% 4%, rgba(111, 7, 24, 0.08), transparent 40%), radial-gradient(circle at 86% 10%, rgba(38, 58, 43, 0.10), transparent 40%), linear-gradient(180deg, #F8F2E8 0%, #F3ECDF 100%); }
+        .sx-v2-sidebar { width: 220px; background: var(--card-bg); border-right: 1px solid var(--sx-b-default); height: 100vh; position: sticky; top: 0; display: flex; flex-direction: column; }
+        .sx-v2-nav-row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 14px; color: var(--sx-t-sub); font-size: 13.5px; font-weight: 520; transition: all 0.2s ease; cursor: pointer; }
+        .sx-v2-nav-row:hover { background: rgba(0,0,0,0.03); color: var(--sx-t-head); }
+        .sx-v2-nav-row-active { background: rgba(111, 7, 24, 0.06); color: var(--sx-bordeaux); font-weight: 700; }
+        .v4-rail { max-width: 1180px; margin: 0 auto; padding: 2rem; width: 100%; }
+        .sx-card { background: var(--card-bg); border: 1px solid var(--sx-b-default); border-radius: 24px; box-shadow: 0 4px 14px rgba(28,20,16,0.04); transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+        .sx-card:hover { transform: translateY(-2px); box-shadow: 0 16px 38px rgba(28,20,16,0.1); border-color: rgba(111, 7, 24, 0.12); }
+        .sx-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(12px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .sx-modal-overlay.active { display: flex; opacity: 1; }
+        .sx-modal-content { background: white; width: 100%; max-width: 560px; border-radius: 32px; padding: 0; overflow: hidden; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+        .sx-modal-overlay.active .sx-modal-content { transform: scale(1); }
+        .mode-toggle { padding: 3px; background: #ECE3D5; border-radius: 14px; display: flex; gap: 2px; }
+        .mode-btn { flex: 1; padding: 7px 0; font-size: 10px; font-weight: 800; text-transform: uppercase; border-radius: 11px; color: var(--sx-t-sub); transition: all 0.2s ease; }
+        .mode-btn.active { background: white; color: var(--sx-bordeaux); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .status-badge { padding: 4px 10px; border-radius: 999px; font-size: 10px; font-weight: 720; text-transform: uppercase; letter-spacing: 0.05em; }
+        .status-now { background: rgba(111, 7, 24, 0.08); color: var(--sx-bordeaux); }
+        .sx-btn-primary { background: linear-gradient(180deg, #8B1A3B 0%, var(--sx-bordeaux) 100%); color: white; border-radius: 14px; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 8px 20px -6px rgba(111, 7, 24, 0.4); }
+    </style>
+</head>
+<body class="mode-personal">
+    <div class="sx-v2-atmosphere"></div>
+    <div class="flex min-h-screen">
+        <aside class="sx-v2-sidebar p-5 shrink-0">
+            <div class="mb-10">
+                <div class="flex items-center gap-3 mb-8 px-2 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-10 h-10 bg-[var(--sx-bordeaux)] rounded-xl flex items-center justify-center shadow-lg"><span class="text-white font-bold text-xl serif">S</span></div>
+                    <div><div class="font-bold text-lg serif leading-none">Sommelyx</div><div id="mode-label" class="text-[9px] font-black opacity-50 mt-1 uppercase tracking-widest">Pessoal</div></div>
+                </div>
+                <div class="mode-toggle">
+                    <button onclick="switchMode('personal')" id="btn-personal" class="mode-btn active">Pessoal</button>
+                    <button onclick="switchMode('business')" id="btn-business" class="mode-btn">Business</button>
+                </div>
+            </div>
+            <nav class="flex-1 space-y-8 overflow-y-auto">
+                <div id="nav-personal" class="space-y-1">
+                    <div class="px-4 text-[10px] font-black text-[var(--sx-t-muted)] uppercase tracking-[0.2em] mb-3">Navegação</div>
+                    <div class="sx-v2-nav-row sx-v2-nav-row-active" onclick="navigateTo('home')">Visão geral</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('cellar')">Minha Adega</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('consumption')">Meu Consumo</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('wishlist')">Wishlist</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('alerts')">Alertas</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('stats')">Relatórios</div>
+                </div>
+                <div id="nav-business" class="space-y-1 hidden">
+                    <div class="px-4 text-[10px] font-black text-[var(--sx-t-muted)] uppercase tracking-[0.2em] mb-3">Operação</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-home')">Dashboard</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-inventory')">Estoque</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-sales')">Vendas</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-registers')">Cadastros</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-reports')">Análises</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('business-log')">Histórico</div>
+                </div>
+                <div class="space-y-1">
+                    <div class="px-4 text-[10px] font-black text-[var(--sx-t-muted)] uppercase tracking-[0.2em] mb-3">Sistema</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('settings')">Ajustes</div>
+                    <div class="sx-v2-nav-row" onclick="navigateTo('plans')">Meu Plano</div>
+                </div>
+            </nav>
+            <div class="mt-auto pt-6 border-t border-[var(--sx-b-default)]"><button class="w-full py-3.5 sx-btn-primary" onclick="openModal('modal-add-wine')">+ Cadastrar</button></div>
+        </aside>
+        <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+            <header class="flex h-[60px] items-center justify-between px-8 border-b border-[var(--sx-b-default)] bg-white/80 backdrop-blur-md sticky top-0 z-50">
+                <div class="flex-1 max-w-[600px]"><div class="bg-[var(--sx-bg-input)]/50 h-10 rounded-full flex items-center px-4 text-[var(--sx-t-muted)] text-sm cursor-pointer hover:bg-black/5" onclick="openModal('modal-search')"><svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>Pesquisar telas, ações e rótulos...</span></div></div>
+                <div class="flex items-center gap-6"><button onclick="openModal('modal-harmonizar')" class="text-xs font-bold uppercase tracking-widest text-[var(--sx-olive)] hover:opacity-70 transition-all">Harmonizar</button><button onclick="openModal('modal-analisar-carta')" class="text-xs font-bold uppercase tracking-widest text-[var(--sx-bordeaux)] hover:opacity-70 transition-all">Analisar Carta</button><div class="w-9 h-9 bg-[var(--sx-bordeaux)] rounded-xl flex items-center justify-center text-white font-black text-[10px] cursor-pointer" onclick="openModal('modal-account')">JD</div></div>
+            </header>
+            <div id="content-area" class="flex-1 overflow-y-auto">
+                <!-- 1. HOME -->
+                <section id="page-home" class="page-section active v4-rail py-10">
+                    <div class="mb-12"><p class="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--sx-bordeaux)] mb-2">Quinta-feira, 11 de Junho</p><h1 class="text-6xl serif">Olá, <span class="italic text-[var(--sx-bordeaux)]">João</span></h1></div>
+                    <div class="grid lg:grid-cols-3 gap-10">
+                        <div class="lg:col-span-2 space-y-12">
+                            <article class="p-8 bg-gradient-to-br from-[#22040a] via-[#263a2b] to-[#3b0710] rounded-[40px] text-white flex gap-10 shadow-2xl relative overflow-hidden group">
+                                <div class="w-32 h-56 bg-white/5 rounded-3xl flex items-center justify-center p-6 backdrop-blur-sm border border-white/10 relative"><div class="w-12 h-44 bg-[var(--sx-bordeaux)] rounded-t-full rounded-b-lg shadow-2xl transition-transform duration-700 group-hover:scale-110"></div><div class="absolute -bottom-4 -right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center text-[var(--gold)] font-black italic shadow-lg">98</div></div>
+                                <div class="flex-1 flex flex-col justify-center">
+                                    <div class="flex items-center gap-3 mb-4"><span class="status-badge status-now">Beber Agora</span><span class="text-[9px] font-black uppercase opacity-60">Seleção do Sommelier</span></div>
+                                    <h2 class="text-5xl serif mb-4 leading-tight">Vega Sicilia Único</h2><p class="text-sm opacity-70 mb-6 italic border-l-2 border-[var(--gold)] pl-4">"A lenda espanhola. Com mais de uma década de guarda, este 2011 está simplesmente sublime."</p>
+                                    <button class="sx-btn-primary w-fit px-10 py-4" onclick="openModal('modal-add-consumption')">Abrir Garrafa</button>
+                                </div>
+                            </article>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="sx-card p-8"><h4 class="text-[10px] font-black uppercase tracking-[0.25em] text-[var(--sx-t-muted)] mb-8">Estatísticas</h4><div class="grid grid-cols-2 gap-y-10"><div><span class="block text-4xl font-bold serif">148</span><span class="text-[10px] font-bold text-[var(--sx-t-sub)] uppercase">Garrafas</span></div><div><span class="block text-4xl font-bold serif">56</span><span class="text-[10px] font-bold text-[var(--sx-t-sub)] uppercase">Rótulos</span></div><div><span class="block text-4xl font-bold serif text-[var(--sx-bordeaux)]">12</span><span class="text-[10px] font-bold text-[var(--sx-t-sub)] uppercase">Prontas</span></div><div><span class="block text-4xl font-bold serif text-[var(--sx-olive)]">34</span><span class="text-[10px] font-bold text-[var(--sx-t-sub)] uppercase">Guarda</span></div></div></div>
+                        </div>
+                    </div>
+                </section>
+                <!-- 2. CELLAR -->
+                <section id="page-cellar" class="page-section v4-rail py-10">
+                    <div class="flex justify-between items-end mb-10"><h2 class="text-5xl serif">Minha Adega</h2><div class="flex gap-2"><button class="px-6 py-3 border border-black/5 bg-white/60 rounded-xl text-xs font-bold uppercase">Filtrar</button><button class="px-6 py-3 sx-btn-primary" onclick="openModal('modal-add-wine')">+ Adicionar</button></div></div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6"><script>for(let i=0; i<15; i++) document.write(`<div class="sx-card p-4 space-y-4 cursor-pointer"><div class="aspect-[3/4] bg-gray-50 rounded-2xl flex items-center justify-center"><div class="w-8 h-24 bg-red-900/10 rounded-t-full shadow-inner"></div></div><div><h4 class="font-bold text-sm truncate">Vinho Exemplo ${i+1}</h4><p class="text-[10px] text-[var(--sx-t-sub)] font-bold uppercase">Região · 2018</p></div><div class="flex justify-between items-center"><span class="status-badge status-now">Beber</span><span class="font-black text-[10px] opacity-40">${(i%3)+1} un.</span></div></div>`)</script></div>
+                </section>
+                <!-- 3. CONSUMPTION -->
+                <section id="page-consumption" class="page-section v4-rail py-10">
+                    <h2 class="text-5xl serif mb-10">Meu Consumo</h2>
+                    <div class="sx-card overflow-hidden"><table class="w-full text-left"><thead class="bg-black/[0.03] text-[10px] font-black uppercase tracking-widest text-[var(--sx-t-muted)]"><tr class="px-6 py-4"><th class="px-6 py-4">Data</th><th class="px-6 py-4">Vinho</th><th class="px-6 py-4 text-right">Nota</th></tr></thead><tbody class="divide-y divide-black/5"><script>for(let i=0; i<5; i++) document.write(`<tr class="hover:bg-black/[0.01]"><td class="px-6 py-4 text-xs font-medium">${11-i} Jun</td><td class="px-6 py-4 font-bold text-sm">Vinho Degustado ${i+1}</td><td class="px-6 py-4 text-right font-black serif text-[var(--sx-bordeaux)]">4.8</td></tr>`)</script></tbody></table></div>
+                </section>
+                <!-- 4. WISHLIST -->
+                <section id="page-wishlist" class="page-section v4-rail py-10">
+                    <h2 class="text-5xl serif mb-10">Wishlist</h2>
+                    <div class="grid grid-cols-4 gap-6"><script>for(let i=0; i<4; i++) document.write(`<div class="sx-card p-6 text-center space-y-4"><div class="w-16 h-16 bg-red-50 rounded-full mx-auto flex items-center justify-center text-red-600">❤</div><h4 class="font-bold">Vinho Desejado ${i+1}</h4><button class="w-full py-2 bg-[var(--sx-bordeaux)]/5 text-[var(--sx-bordeaux)] text-[10px] font-black uppercase tracking-widest rounded-lg">Ver Lojas</button></div>`)</script></div>
+                </section>
+                <!-- 5. ALERTS -->
+                <section id="page-alerts" class="page-section v4-rail py-10">
+                    <h2 class="text-5xl serif mb-10">Alertas</h2>
+                    <div class="space-y-4"><div class="p-6 bg-red-50 border border-red-100 rounded-3xl flex items-center gap-6"><div class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center font-bold">!</div><p class="font-bold text-red-900">12 vinhos entraram na janela de consumo ideal hoje.</p></div></div>
+                </section>
+                <!-- 9. BUSINESS HOME -->
+                <section id="page-business-home" class="page-section v4-rail py-10">
+                    <div class="flex justify-between items-end mb-10"><h2 class="text-5xl serif">Business Dashboard</h2><button class="px-6 py-3 sx-btn-primary">Registrar Venda</button></div>
+                    <div class="grid grid-cols-4 gap-6"><div class="sx-card p-8"><div><span class="text-[10px] font-black opacity-40 uppercase">Faturamento</span><span class="block text-3xl font-bold serif">R$ 14.250</span></div></div><div class="sx-card p-8"><div><span class="text-[10px] font-black opacity-40 uppercase">Giro</span><span class="block text-3xl font-bold serif">1.4x</span></div></div><div class="sx-card p-8"><div><span class="text-[10px] font-black opacity-40 uppercase">Ticket</span><span class="block text-3xl font-bold serif">R$ 285</span></div></div><div class="sx-card p-8 border-l-4 border-red-500"><div><span class="text-[10px] font-black opacity-40 uppercase">Rupturas</span><span class="block text-3xl font-bold serif text-red-600">8 Itens</span></div></div></div>
+                </section>
+                <!-- 10. BUSINESS INVENTORY -->
+                <section id="page-business-inventory" class="page-section v4-rail py-10">
+                    <h2 class="text-5xl serif mb-10">Gestão de Estoque</h2>
+                    <div class="sx-card overflow-hidden"><table class="w-full text-left"><thead class="bg-black/[0.03] text-[10px] font-black uppercase tracking-widest text-[var(--sx-t-muted)]"><tr class="px-6 py-4"><th class="px-6 py-4">Item</th><th class="px-6 py-4">Estoque</th><th class="px-6 py-4 text-right">Venda</th></tr></thead><tbody class="divide-y divide-black/5"><script>for(let i=0; i<10; i++) document.write(`<tr><td class="px-6 py-4 font-bold">Vinho Comercial ${i+1}</td><td class="px-6 py-4 font-black">${i+5} un.</td><td class="px-6 py-4 text-right font-bold">R$ 145</td></tr>`)</script></tbody></table></div>
+                </section>
+                <section id="page-placeholder" class="page-section v4-rail py-20 text-center"><div class="max-w-md mx-auto sx-card p-12"><h2 class="serif text-4xl mb-6">Em breve</h2><p class="text-[var(--sx-t-sub)]">Esta tela está sendo fielmente replicada.</p><button class="mt-8 px-8 py-3 sx-btn-primary" onclick="navigateTo('home')">Voltar</button></div></section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal-search" class="sx-modal-overlay" onclick="closeModal('modal-search')"><div class="sx-modal-content !max-w-2xl" onclick="event.stopPropagation()"><div class="p-6 border-b border-black/5 flex items-center gap-4"><svg class="w-5 h-5 text-[var(--sx-bordeaux)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><input type="text" class="flex-1 bg-transparent border-none text-lg font-medium outline-none" placeholder="O que você procura?"></div><div class="p-6"><div class="text-[10px] font-black uppercase opacity-40 mb-4">Ações Rápidas</div><div class="p-4 hover:bg-[var(--sx-bg-input)] rounded-2xl font-bold text-sm cursor-pointer" onclick="navigateTo('cellar')">Ir para Adega</div></div></div></div>
+    <div id="modal-add-wine" class="sx-modal-overlay" onclick="closeModal('modal-add-wine')"><div class="sx-modal-content" onclick="event.stopPropagation()"><div class="p-10 space-y-10"><h3 class="serif text-3xl font-bold">Novo Vinho</h3><div class="grid grid-cols-3 gap-4"><div class="p-8 border-2 border-dashed border-[var(--sx-b-default)] rounded-[32px] flex flex-col items-center gap-4 hover:bg-black/5 cursor-pointer text-center"><div class="w-14 h-14 bg-[var(--sx-bordeaux)] text-white rounded-2xl flex items-center justify-center shadow-lg"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path></svg></div><span class="text-[10px] font-black uppercase tracking-widest">IA Scan</span></div><div class="p-8 border-2 border-dashed border-[var(--sx-b-default)] rounded-[32px] flex flex-col items-center gap-4 hover:bg-black/5 cursor-pointer text-center"><div class="w-14 h-14 bg-[var(--sx-olive)] text-white rounded-2xl flex items-center justify-center shadow-lg"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg></div><span class="text-[10px] font-black uppercase tracking-widest">Manual</span></div><div class="p-8 border-2 border-dashed border-[var(--sx-b-default)] rounded-[32px] flex flex-col items-center gap-4 hover:bg-black/5 cursor-pointer text-center"><div class="w-14 h-14 bg-[var(--gold)] text-white rounded-2xl flex items-center justify-center shadow-lg"><svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></div><span class="text-[10px] font-black uppercase tracking-widest">CSV</span></div></div></div></div></div>
+    <div id="modal-harmonizar" class="sx-modal-overlay" onclick="closeModal('modal-harmonizar')"><div class="sx-modal-content !max-w-3xl" onclick="event.stopPropagation()"><div class="flex"><div class="w-1/3 bg-[var(--sx-olive)] p-10 text-white"><h4 class="serif text-3xl mb-6">Harmonizar</h4><p class="text-sm opacity-60">Nossa IA encontra o vinho perfeito.</p></div><div class="w-2/3 p-10 space-y-8"><textarea class="w-full bg-[var(--sx-bg-input)] border-none rounded-2xl p-6 text-sm" rows="4" placeholder="O que você vai comer?"></textarea><button class="w-full py-4 bg-[var(--sx-olive)] text-white rounded-2xl font-bold uppercase tracking-widest">Harmonizar</button></div></div></div></div>
+    <div id="modal-account" class="sx-modal-overlay" onclick="closeModal('modal-account')"><div class="sx-modal-content !max-w-xs" onclick="event.stopPropagation()"><div class="p-6 space-y-6"><div class="flex items-center gap-4"><div class="w-14 h-14 bg-[var(--sx-bordeaux)] rounded-2xl flex items-center justify-center text-white font-black text-xl">JD</div><div><div class="font-bold">João do Sommelyx</div><div class="text-[10px] opacity-40 uppercase font-black">Premium</div></div></div><div class="space-y-2 pt-4 border-t border-black/5"><button class="w-full text-left p-3 hover:bg-black/5 rounded-xl text-sm font-bold" onclick="navigateTo('settings')">Ajustes</button><button class="w-full text-left p-3 hover:bg-red-50 text-red-600 rounded-xl text-sm font-bold">Sair</button></div></div></div></div>
+
+    <script>
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('page-' + pageId) || document.getElementById('page-placeholder');
+            target.classList.add('active');
+            document.querySelectorAll('.sx-v2-nav-row').forEach(nav => {
+                const navText = nav.textContent.toLowerCase().replace(/ /g, '-');
+                if(pageId.includes(navText) || navText.includes(pageId.replace('business-', ''))) nav.classList.add('sx-v2-nav-row-active');
+                else nav.classList.remove('sx-v2-nav-row-active');
+            });
+            document.querySelectorAll('.sx-modal-overlay').forEach(m => closeModal(m.id));
+            document.getElementById('content-area').scrollTo(0, 0);
+        }
+        function switchMode(mode) {
+            const label = document.getElementById('mode-label'), navP = document.getElementById('nav-personal'), navB = document.getElementById('nav-business');
+            const btnP = document.getElementById('btn-personal'), btnB = document.getElementById('btn-business');
+            if(mode === 'business') { label.textContent = 'Business'; navP.classList.add('hidden'); navB.classList.remove('hidden'); btnB.classList.add('active'); btnP.classList.remove('active'); navigateTo('business-home'); }
+            else { label.textContent = 'Pessoal'; navP.classList.remove('hidden'); navB.classList.add('hidden'); btnP.classList.add('active'); btnB.classList.remove('active'); navigateTo('home'); }
+        }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.sx-modal-overlay').forEach(m => closeModal(m.id)); });
+    </script>
+</body>
+</html>

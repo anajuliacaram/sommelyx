@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sommelyx — Landing V6 · Refined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Geist:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+/* ─────────────────────────────────────────
+   TOKENS
+   ───────────────────────────────────────── */
+:root {
+  --bg:         #FDFBF7;
+  --bg-warm:    #FCF8F1;
+  --bg-deep:    #F7F2EA;
+
+  /* Refined glass — translucent cream, not flat white */
+  --glass:      rgba(255,252,246,0.68);
+  --glass-hi:   rgba(255,254,251,0.86);
+  --glass-lo:   rgba(255,252,246,0.46);
+  --g-border:   rgba(255,255,255,0.78);
+  --g-ring:     rgba(26,19,14,0.05);
+  --g-blur:     blur(22px) saturate(1.12);
+  --g-shadow:   0 1px 2px rgba(26,19,14,0.04), 0 6px 18px rgba(26,19,14,0.06), 0 22px 40px -28px rgba(26,19,14,0.18);
+  --g-shadow-md:0 1px 2px rgba(26,19,14,0.05), 0 10px 30px rgba(26,19,14,0.09), 0 30px 56px -30px rgba(26,19,14,0.24);
+  --g-shadow-lg:0 2px 4px rgba(26,19,14,0.05), 0 18px 50px rgba(26,19,14,0.11), 0 44px 80px -36px rgba(26,19,14,0.3);
+  --g-inset:    inset 0 1px 0 rgba(255,255,255,0.85), inset 0 0 0 1px rgba(255,255,255,0.18);
+
+  --wine:       #7a1224;
+  --wine-mid:   #93182f;
+  --wine-deep:  #5e0d1a;
+  --wine-pale:  rgba(122,18,36,0.08);
+  --wine-tint:  rgba(122,18,36,0.055);
+  --olive:      #3d4f35;
+  --olive-mid:  #4a5d40;
+  --olive-pale: rgba(61,79,53,0.09);
+  --gold:       #b8943c;
+  --gold-pale:  rgba(184,148,60,0.12);
+
+  --ink:   #1d150f;
+  --ink-8: rgba(29,21,15,0.82);
+  --ink-6: rgba(29,21,15,0.6);
+  --ink-5: rgba(29,21,15,0.5);
+  --ink-4: rgba(29,21,15,0.4);
+  --ink-3: rgba(29,21,15,0.28);
+  --ink-2: rgba(29,21,15,0.18);
+  --ink-1: rgba(29,21,15,0.1);
+  --ink-05:rgba(29,21,15,0.05);
+
+  --f-d: 'Fraunces', Georgia, serif;
+  --f-u: 'Geist', 'Inter', system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: var(--f-u);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  font-feature-settings: "ss01", "cv01";
+}
+
+/* Ambient warm light wash + grain across whole page */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 82% 0%, rgba(184,148,60,0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 0% 28%, rgba(61,79,53,0.035) 0%, transparent 55%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px;
+  pointer-events: none;
+  z-index: 1;
+}
+main, nav, footer { position: relative; z-index: 2; }
+
+/* Shared glass shimmer sweep */
+@keyframes shimmer {
+  0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  18%  { opacity: 0.5; }
+  40%  { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+  100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+}
+
+/* Scroll reveal */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.8s var(--ease-out), transform 0.8s var(--ease-out);
+  will-change: opacity, transform;
+}
+[data-reveal].in-view { opacity: 1; transform: none; }
+[data-reveal-delay="1"] { transition-delay: 0.06s; }
+[data-reveal-delay="2"] { transition-delay: 0.12s; }
+[data-reveal-delay="3"] { transition-delay: 0.18s; }
+[data-reveal-delay="4"] { transition-delay: 0.24s; }
+
+/* ─────────────────────────────────────────
+   NAV
+   ───────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: min(1080px, calc(100vw - 28px));
+  background: rgba(255,250,242,0.45);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 999px;
+  backdrop-filter: blur(32px) saturate(1.3);
+  -webkit-backdrop-filter: blur(32px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.85),
+    inset 0 0 0 1px rgba(255,255,255,0.12),
+    inset 0 -10px 26px rgba(255,255,255,0.18),
+    0 24px 60px rgba(50,30,20,0.08);
+  transition: box-shadow 0.45s var(--ease), background 0.45s var(--ease), backdrop-filter 0.45s var(--ease);
+}
+.nav.scrolled {
+  background: rgba(255,250,242,0.62);
+  backdrop-filter: blur(38px) saturate(1.4);
+  -webkit-backdrop-filter: blur(38px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    inset 0 -10px 26px rgba(255,255,255,0.22),
+    0 28px 66px rgba(50,30,20,0.12);
+}
+/* slow luxury light sweep — clipped to pill, logo overflows freely */
+.nav-sweep {
+  position: absolute; inset: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.nav-sweep::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 38%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.5), transparent);
+  transform: translateX(-180%) skewX(-18deg);
+  animation: navSweep 13s ease-in-out infinite;
+}
+@keyframes navSweep {
+  0%, 7%  { transform: translateX(-180%) skewX(-18deg); opacity: 0; }
+  9%      { opacity: 0.55; }
+  17%     { transform: translateX(430%) skewX(-18deg); opacity: 0; }
+  100%    { transform: translateX(430%) skewX(-18deg); opacity: 0; }
+}
+.nav-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  min-height: 66px;
+  padding: 0 9px 0 16px;
+  gap: 16px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 11px;
+  text-decoration: none;
+}
+.nav-logo-img {
+  height: 62px; width: auto;
+  display: block;
+  margin: -6px 0;
+  filter: drop-shadow(0 3px 8px rgba(26,19,14,0.18));
+  transition: transform 0.4s var(--ease);
+}
+.nav-logo:hover .nav-logo-img { transform: scale(1.05) rotate(-1.5deg); }
+.nav-logo-word {
+  font-family: var(--f-d);
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  color: var(--wine);
+}
+.nav-links { display: flex; justify-content: center; gap: 4px; }
+.nav-links a {
+  position: relative;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--ink-4);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: color 0.28s var(--ease), background 0.28s var(--ease),
+              transform 0.28s var(--ease), box-shadow 0.28s var(--ease),
+              border-color 0.28s var(--ease), font-weight 0.28s var(--ease);
+}
+.nav-links a:hover {
+  color: var(--wine);
+  background: rgba(255,253,249,0.7);
+  border-color: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  transform: translateY(-1.5px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 4px 12px -4px rgba(50,30,20,0.18);
+}
+.nav-links a:active { transform: translateY(0); }
+.nav-links a.active {
+  color: var(--wine);
+  font-weight: 500;
+  background: rgba(255,253,249,0.85);
+  border-color: rgba(255,255,255,0.8);
+  padding-left: 24px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 3px 10px -4px rgba(50,30,20,0.16);
+}
+.nav-links a.active::before {
+  content: '';
+  position: absolute; left: 12px; top: 50%;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--wine);
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 3px rgba(122,18,36,0.12);
+}
+.nav-actions { display: flex; align-items: center; gap: 6px; }
+.nav-login {
+  padding: 9px 15px;
+  background: none; border: none;
+  font: 13.5px/1 var(--f-u);
+  color: var(--ink-5);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+  border-radius: 999px;
+}
+.nav-login:hover { color: var(--ink); background: rgba(29,21,15,0.045); }
+
+/* Premium burgundy CTA */
+.btn-cta {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 11px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8d1d36 0%, #7B1730 48%, #5B1023 100%);
+  color: #fdf3ee;
+  font: 13.5px/1 var(--f-u);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow:
+    0 1px 1px rgba(255,255,255,0.2) inset,
+    0 -1px 2px rgba(0,0,0,0.18) inset,
+    0 2px 6px rgba(122,18,36,0.32),
+    0 8px 22px -8px rgba(122,18,36,0.5);
+  transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), filter 0.28s var(--ease);
+}
+.btn-cta:hover {
+  transform: translateY(-1.5px);
+  filter: saturate(1.06) brightness(1.04);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,0.25) inset,
+    0 -1px 2px rgba(0,0,0,0.2) inset,
+    0 4px 10px rgba(122,18,36,0.36),
+    0 14px 30px -8px rgba(122,18,36,0.55);
+}
+.btn-cta:active { transform: translateY(0); }
+.btn-cta .arrow { transition: transform 0.3s var(--ease); }
+.btn-cta:hover .arrow { transform: translateX(4px); }
+.btn-cta::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: translateX(-120%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn-cta:hover::after { animation: shimmer 0.9s var(--ease) forwards; }
+
+/* ─────────────────────────────────────────
+   BUTTONS (hero / sections)
+   ───────────────────────────────────────── */
+.btn-wine {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 15px 30px;
+  border: none; border-radius: 14px;
+  background: linear-gradient(180deg, #8d1d36 0%, #7B1730 48%, #5B1023 100%);
+  color: #fdf3ee;
+  font: 14.5px/1 var(--f-u);
+  font-weight: 500;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow:
+    0 1px 1px rgba(255,255,255,0.22) inset,
+    0 -1px 2px rgba(0,0,0,0.2) inset,
+    0 3px 8px rgba(122,18,36,0.3),
+    0 12px 30px -10px rgba(122,18,36,0.5);
+  transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), filter 0.28s var(--ease);
+}
+.btn-wine:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04) saturate(1.05);
+  box-shadow:
+    0 1px 1px rgba(255,255,255,0.26) inset,
+    0 -1px 2px rgba(0,0,0,0.22) inset,
+    0 6px 14px rgba(122,18,36,0.34),
+    0 20px 40px -12px rgba(122,18,36,0.56);
+}
+.btn-wine:active { transform: translateY(0); }
+.btn-wine .arrow { transition: transform 0.3s var(--ease); }
+.btn-wine:hover .arrow { transform: translateX(4px); }
+.btn-wine::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: 0; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-130%) skewX(-18deg);
+  pointer-events: none;
+}
+.btn-wine:hover::after { animation: shimmer 1s var(--ease) forwards; }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 15px 26px;
+  background: rgba(255,252,246,0.55);
+  border: 1px solid rgba(122,18,36,0.16);
+  border-radius: 14px;
+  color: var(--olive);
+  font: 14.5px/1 var(--f-u);
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
+  transition: color 0.26s var(--ease), background 0.26s var(--ease), border-color 0.26s var(--ease), transform 0.26s var(--ease);
+}
+.btn-outline:hover {
+  border-color: rgba(122,18,36,0.3);
+  color: var(--wine);
+  background: rgba(122,18,36,0.06);
+  transform: translateY(-1px);
+}
+.btn-outline:active { transform: translateY(0); }
+
+/* ─────────────────────────────────────────
+   HERO
+   ───────────────────────────────────────── */
+.hero {
+  min-height: 90dvh;
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  align-items: center;
+  padding: 70px clamp(28px, 5vw, 84px) 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 58% at 74% 44%, rgba(184,148,60,0.1) 0%, transparent 56%),
+    radial-gradient(ellipse 46% 50% at 16% 76%, rgba(61,79,53,0.07) 0%, transparent 52%),
+    radial-gradient(circle at 64% 30%, rgba(122,18,36,0.05) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.hero-left { max-width: 540px; padding-right: 12px; position: relative; }
+
+/* Trust badge — "100% brasileiro" proof point */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+  padding: 7px 16px 7px 7px;
+  background: rgba(255,252,246,0.62);
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.75);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    0 2px 12px -4px rgba(26,19,14,0.16),
+    0 0 0 4px rgba(184,148,60,0.05);
+}
+.hero-badge-medal {
+  width: 25px; height: 25px; border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; line-height: 1;
+  background: radial-gradient(circle at 50% 40%, #fffdf9, #f6efe2);
+  border: 1.5px solid rgba(184,148,60,0.55);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.9),
+    0 1px 3px rgba(141,103,58,0.28),
+    0 0 0 2px rgba(184,148,60,0.1);
+}
+.hero-badge-text {
+  font-size: 12.5px; font-weight: 400; color: var(--ink-6); line-height: 1.2;
+  letter-spacing: 0;
+}
+.hero-badge-text b { font-weight: 600; color: var(--wine); }
+.hero-h1 {
+  font-family: var(--f-d);
+  font-size: clamp(46px, 5.6vw, 74px);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-bottom: 22px;
+  font-optical-sizing: auto;
+}
+.hero-h1 em { font-style: italic; font-weight: 500; color: var(--wine); }
+.hero-sub {
+  font-size: 16.5px;
+  font-weight: 400;
+  line-height: 1.66;
+  color: var(--ink-6);
+  margin-bottom: 24px;
+  max-width: 432px;
+}
+/* Quick benefits — the product in four words */
+.hero-benefits {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-bottom: 30px;
+}
+.hero-benefit {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 500; color: var(--ink-8);
+  letter-spacing: -0.005em;
+  padding: 4px 8px; margin: -4px -2px; border-radius: 9px;
+  cursor: default;
+  transition: color 0.26s var(--ease), background 0.26s var(--ease), transform 0.26s var(--ease);
+}
+.hero-benefit:hover {
+  color: var(--wine);
+  background: rgba(122,18,36,0.06);
+  transform: translateY(-1px);
+}
+.hero-benefit svg { width: 14px; height: 14px; color: var(--wine); opacity: 0.85; transition: transform 0.26s var(--ease); }
+.hero-benefit:hover svg { transform: scale(1.1); }
+.hero-benefit-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-2); }
+.hero-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+
+.hero-proof { display: flex; align-items: center; gap: 13px; flex-wrap: wrap; }
+.hero-proof-avatars { display: flex; }
+.proof-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  margin-right: -9px;
+  font-size: 12px;
+  font-family: var(--f-d);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 500;
+  color: #fdf3ee;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(26,19,14,0.14);
+}
+.av-1 { background: linear-gradient(140deg, #8a3a44, #6e242e); }
+.av-2 { background: linear-gradient(140deg, #455a44, #33452f); }
+.av-3 { background: linear-gradient(140deg, #a07434, #7c5520); }
+.av-4 { background: linear-gradient(140deg, #6a3346, #4a2030); }
+.hero-proof-text { margin-left: 16px; font-size: 13px; font-weight: 400; color: var(--ink-5); line-height: 1.42; }
+.hero-proof-text strong { font-weight: 500; color: var(--ink-8); }
+
+/* HERO RIGHT — product composition */
+.hero-right {
+  position: relative;
+  height: 600px;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1400px;
+}
+.hero-stage { position: absolute; inset: 0; }
+
+/* Soft ambient glows behind cards — burgundy, olive, champagne */
+.hero-halo {
+  position: absolute;
+  width: 540px; height: 540px;
+  top: 50%; left: 52%;
+  transform: translate(-50%,-50%);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.66) 0%, rgba(255,255,255,0) 58%),
+    radial-gradient(circle at 30% 32%, rgba(122,18,36,0.1) 0%, transparent 46%),
+    radial-gradient(circle at 74% 70%, rgba(61,79,53,0.1) 0%, transparent 48%),
+    radial-gradient(circle at 68% 24%, rgba(184,148,60,0.12) 0%, transparent 44%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* GLASS CARD base — translucent, layered, elegant separation */
+.gcard {
+  position: absolute;
+  background: rgba(255,252,246,0.72);
+  border: 1px solid rgba(255,255,255,0.62);
+  border-radius: 22px;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    0 2px 6px rgba(26,19,14,0.06),
+    0 18px 44px -22px rgba(26,19,14,0.34),
+    0 40px 70px -44px rgba(26,19,14,0.3);
+  overflow: hidden;
+  transform: rotate(var(--rot, 0deg)) translate(var(--px, 0px), var(--py, 0px));
+  transition: box-shadow 0.4s var(--ease);
+}
+/* top hairline highlight */
+.gcard > .gcard-sheen {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 42%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.45), transparent);
+  pointer-events: none; z-index: 0;
+}
+.gcard > * { position: relative; z-index: 1; }
+
+/* float wrappers */
+.float-a { animation: floatA 9s ease-in-out infinite; }
+.float-b { animation: floatB 11s ease-in-out infinite; animation-delay: 1.2s; }
+.float-c { animation: floatC 10s ease-in-out infinite; animation-delay: 0.6s; }
+@keyframes floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes floatB { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes floatC { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+/* MAIN card */
+.card-main { width: 322px; top: 78px; left: 8px; --rot: -2deg; z-index: 2; }
+.card-header {
+  display: flex; align-items: center; gap: 11px;
+  padding: 15px 18px 13px;
+  border-bottom: 1px solid var(--ink-1);
+}
+.card-app-icon {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(150deg, #fbf6ef, #efe4d4);
+  border: 1px solid var(--ink-1);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: var(--g-inset), 0 2px 5px rgba(26,19,14,0.08);
+  overflow: hidden;
+}
+.card-app-icon img { width: 22px; height: 22px; object-fit: contain; }
+.card-header-titles { flex: 1; min-width: 0; }
+.card-header-label { font-size: 12.5px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.card-header-sub { font-size: 10.5px; font-weight: 400; color: var(--ink-4); }
+.card-header-count {
+  font-size: 10.5px; font-weight: 500; color: var(--ink-5);
+  padding: 4px 9px; background: rgba(29,21,15,0.05); border-radius: 999px;
+  border: 1px solid var(--ink-1);
+}
+.wine-row {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(29,21,15,0.045);
+}
+.wine-row:last-of-type { border-bottom: none; }
+.wine-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+.dot-red    { background: #9c2030; }
+.dot-white  { background: #c79f48; }
+.dot-rose   { background: #d47884; }
+.dot-spark  { background: #4a6840; }
+.wine-name-col { flex: 1; min-width: 0; }
+.wine-n { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+.wine-m { font-size: 10.5px; font-weight: 400; color: var(--ink-4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wine-badge { font-size: 9.5px; font-weight: 600; padding: 3px 8px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.01em; }
+.badge-now  { background: rgba(61,79,53,0.13); color: #2e3d26; border: 1px solid rgba(61,79,53,0.22); }
+.badge-soon { background: rgba(184,148,60,0.15); color: #715616; border: 1px solid rgba(184,148,60,0.26); }
+.badge-wait { background: rgba(29,21,15,0.055); color: var(--ink-4); border: 1px solid var(--ink-1); }
+.card-footer-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, rgba(122,18,36,0.06), rgba(122,18,36,0.03));
+  border-top: 1px solid var(--ink-1);
+}
+.card-footer-icon {
+  width: 22px; height: 22px; background: rgba(122,18,36,0.1);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.card-footer-text { font-size: 11.5px; font-weight: 400; color: var(--wine); flex: 1; line-height: 1.3; }
+.card-footer-action { font-size: 11px; font-weight: 600; color: var(--wine); cursor: pointer; opacity: 0.75; white-space: nowrap; }
+
+/* SCANNER float card */
+.card-scan { width: 214px; top: 24px; right: 6px; --rot: 4deg; z-index: 3; padding: 17px; }
+.sf-label, .hf-label {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-4); margin-bottom: 11px;
+}
+.sf-label::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--olive); }
+.hf-label::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+.sf-wine { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 2px; line-height: 1.22; }
+.sf-meta { font-size: 11px; font-weight: 400; color: var(--ink-4); margin-bottom: 12px; line-height: 1.4; }
+.sf-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 500; color: var(--olive);
+  padding: 5px 10px; background: var(--olive-pale); border-radius: 999px;
+  border: 1px solid rgba(61,79,53,0.2);
+}
+
+/* HARMONIZAÇÃO float card */
+.card-harm { width: 226px; bottom: 44px; left: 4px; --rot: -1.5deg; z-index: 3; padding: 17px; }
+.hf-query {
+  font-size: 12px; font-weight: 400; color: var(--ink-6); font-style: italic;
+  margin-bottom: 11px; padding: 9px 11px; background: rgba(29,21,15,0.045);
+  border-radius: 9px; line-height: 1.4; border: 1px solid var(--ink-1);
+}
+.hf-result { display: flex; align-items: center; gap: 8px; }
+.hf-result-dot { width: 8px; height: 8px; border-radius: 50%; background: #9c2030; flex-shrink: 0; }
+.hf-result-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.hf-result-match {
+  margin-left: auto; font-size: 9.5px; font-weight: 600; color: #2e4a28;
+  background: rgba(61,79,53,0.12); padding: 3px 8px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid rgba(61,79,53,0.2);
+}
+
+/* ─────────────────────────────────────────
+   SECTION SHARED
+   ───────────────────────────────────────── */
+.section-inner { max-width: 1080px; margin: 0 auto; }
+.section-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.13em;
+  color: var(--wine); text-transform: uppercase; margin-bottom: 13px;
+}
+.section-h2 {
+  font-family: var(--f-d);
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 13px;
+}
+.section-sub { font-size: 16px; font-weight: 400; line-height: 1.6; color: var(--ink-5); max-width: 500px; }
+
+/* ─────────────────────────────────────────
+   BENTO
+   ───────────────────────────────────────── */
+.bento-section {
+  position: relative;
+  overflow: hidden;
+  padding: 72px clamp(28px, 5vw, 84px);
+  background: var(--bg-warm);
+  border-top: 1px solid rgba(29,21,15,0.06);
+  border-bottom: 1px solid rgba(29,21,15,0.06);
+}
+/* atmospheric depth behind cards */
+.bento-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 40% 50% at 12% 8%, rgba(122,18,36,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 44% 55% at 88% 92%, rgba(61,79,53,0.055) 0%, transparent 55%),
+    radial-gradient(ellipse 36% 40% at 70% 4%, rgba(184,148,60,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.bento-header { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto 36px; }
+.bento-grid {
+  position: relative; z-index: 1;
+  max-width: 1080px; margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.9fr 1.05fr 1.05fr;
+  align-items: start;           /* cards hug their content — no stretch, no holes */
+  gap: 14px;
+}
+/* middle column holds Harmonização + Scanner, content-driven heights */
+.bc-mid { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.bc {
+  position: relative;
+  background: rgba(255,253,248,0.64);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 22px;
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    0 2px 6px rgba(50,30,20,0.05),
+    0 12px 28px -18px rgba(50,30,20,0.2),
+    0 28px 56px -34px rgba(50,30,20,0.28);
+  overflow: hidden;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.bc::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 38%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.36), transparent);
+  pointer-events: none; z-index: 0;
+}
+/* hover shimmer */
+.bc::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: 0; width: 50%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.28), transparent);
+  transform: translateX(-160%) skewX(-18deg);
+  pointer-events: none; z-index: 2;
+}
+.bc:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    0 2px 6px rgba(26,19,14,0.05),
+    0 28px 60px -28px rgba(26,19,14,0.34);
+}
+.bc:hover::after { animation: shimmer 1.1s var(--ease) forwards; }
+.bc > .bc-inner { position: relative; z-index: 1; }
+
+.bc-inner { padding: 18px; display: flex; flex-direction: column; }
+
+/* Unified card header — identical hierarchy across ALL four cards */
+.bc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bc-head-icon {
+  width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, #fdf8f1, #efe4d4);
+  border: 1px solid var(--ink-1);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 2px 5px rgba(26,19,14,0.06);
+  overflow: hidden;
+}
+.bc-head-icon img { width: 20px; height: 20px; object-fit: contain; }
+.bc-head-icon svg { width: 15px; height: 15px; }
+.bc-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; flex: 1; line-height: 1.1; }
+.bc-count {
+  font-size: 10.5px; font-weight: 500; color: var(--ink-5);
+  padding: 3px 9px; background: rgba(29,21,15,0.05); border-radius: 999px; border: 1px solid var(--ink-1);
+  white-space: nowrap;
+}
+.bc-desc { font-size: 11.5px; font-weight: 400; color: var(--ink-5); line-height: 1.5; margin-bottom: 15px; }
+
+/* shared section label */
+.bc-section-label { font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 9px; }
+
+/* ── ADEGA ── */
+.adega-filterbar { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 13px; }
+.adega-filter {
+  font-size: 10px; font-weight: 500; color: var(--ink-5);
+  padding: 4px 9px; border-radius: 8px; background: rgba(29,21,15,0.04);
+  border: 1px solid var(--ink-1); display: inline-flex; align-items: center; gap: 4px;
+}
+.adega-filter svg { width: 7px; height: 7px; opacity: 0.5; }
+.adega-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+.chip { font-size: 10px; font-weight: 500; padding: 4px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.chip-country { background: rgba(122,18,36,0.07); color: var(--wine); border-color: rgba(122,18,36,0.16); }
+.chip-grape   { background: rgba(61,79,53,0.1); color: #2e3d26; border-color: rgba(61,79,53,0.2); }
+.chip-status  { background: rgba(184,148,60,0.13); color: #6f5212; border-color: rgba(184,148,60,0.26); }
+.adega-groups { margin-bottom: 15px; }
+.group-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; border-bottom: 1px solid rgba(29,21,15,0.05); }
+.group-row:last-child { border-bottom: none; }
+.group-flag { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; box-shadow: 0 0 0 2.5px rgba(255,255,255,0.4); }
+.group-name { font-size: 12.5px; font-weight: 500; color: var(--ink); flex: 1; }
+.group-bar { width: 56px; height: 5px; border-radius: 999px; background: rgba(29,21,15,0.07); overflow: hidden; }
+.group-bar span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #7a1224, #ab3048); }
+.group-count { font-size: 11px; font-weight: 600; color: var(--ink-5); min-width: 20px; text-align: right; }
+
+/* consumption window — Sommelyx differentiator, fills mid-card */
+.adega-cw { margin-bottom: 15px; }
+.cw-bar { display: flex; height: 9px; border-radius: 999px; overflow: hidden; margin-bottom: 10px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 1px 2px rgba(26,19,14,0.06); }
+.cw-seg { height: 100%; }
+.cw-seg.now   { background: linear-gradient(90deg, #4a6840, #3d4f35); }
+.cw-seg.soon  { background: linear-gradient(90deg, #cda64e, #b8943c); }
+.cw-seg.guard { background: linear-gradient(90deg, #9c2030, #7a1224); }
+.cw-legend { display: flex; gap: 14px; flex-wrap: wrap; }
+.cw-item { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 500; color: var(--ink-5); }
+.cw-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.cw-dot.d-now { background: #3d4f35; } .cw-dot.d-soon { background: #b8943c; } .cw-dot.d-guard { background: #7a1224; }
+.cw-item b { font-weight: 600; color: var(--ink); }
+
+.adega-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding-top: 14px; border-top: 1px solid rgba(29,21,15,0.06); }
+.stat-cell { background: rgba(255,255,255,0.55); border: 1px solid var(--ink-1); border-radius: 12px; padding: 9px 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); }
+.stat-num { font-family: var(--f-d); font-size: 21px; font-weight: 600; color: var(--ink); line-height: 1; margin-bottom: 2px; }
+.stat-num.accent { color: var(--wine); }
+.stat-lbl { font-size: 9.5px; font-weight: 500; color: var(--ink-4); letter-spacing: 0.01em; }
+
+/* ── HARMONIZAÇÃO ── */
+.harm-modes { display: flex; gap: 5px; margin-bottom: 12px; }
+.mode-tab { font-size: 10.5px; font-weight: 500; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--ink-1); color: var(--ink-5); background: rgba(29,21,15,0.03); }
+.mode-tab.active { background: rgba(122,18,36,0.08); color: var(--wine); border-color: rgba(122,18,36,0.2); }
+.harm-query-box {
+  font-size: 12.5px; font-weight: 400; color: var(--ink-6); font-style: italic;
+  padding: 11px 13px; background: rgba(29,21,15,0.045); border-radius: 11px;
+  border: 1px solid var(--ink-1); line-height: 1.45; margin-bottom: 11px;
+}
+.harm-result-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px; background: var(--olive-pale);
+  border: 1px solid rgba(61,79,53,0.16); border-radius: 13px; margin-bottom: 10px;
+}
+.harm-result-dot { width: 9px; height: 9px; border-radius: 50%; background: #8a1a28; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(255,255,255,0.4); }
+.harm-result-name { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; min-width: 0; }
+.harm-match { font-size: 9.5px; font-weight: 600; color: #2a4022; white-space: nowrap; background: rgba(61,79,53,0.13); padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(61,79,53,0.22); }
+.harm-explain {
+  font-size: 11px; font-weight: 400; color: var(--ink-5); line-height: 1.55;
+  padding: 10px 12px; background: rgba(61,79,53,0.06);
+  border: 1px solid rgba(61,79,53,0.13); border-radius: 11px;
+}
+.harm-explain-label { display: block; font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--olive); margin-bottom: 4px; }
+.harm-source { margin-top: 13px; padding-top: 13px; border-top: 1px solid rgba(29,21,15,0.06); display: flex; gap: 14px; }
+.harm-src { font-size: 10px; font-weight: 500; color: var(--ink-5); display: inline-flex; align-items: center; gap: 5px; }
+.harm-src svg { width: 11px; height: 11px; }
+.harm-src.s-adega svg { color: var(--olive); }
+.harm-src.s-ext svg   { color: var(--gold); }
+
+/* ── SCANNER ── */
+.scan-input-area {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; background: rgba(29,21,15,0.045); border-radius: 11px;
+  border: 1px solid var(--ink-1); margin-bottom: 13px;
+}
+.scan-icon { width: 30px; height: 30px; background: rgba(122,18,36,0.09); border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.scan-input-text { font-size: 12px; font-weight: 400; color: var(--ink-4); font-style: italic; }
+.scan-fields { display: flex; flex-direction: column; gap: 7px; }
+.scan-field {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px; background: rgba(61,79,53,0.06);
+  border: 1px solid rgba(61,79,53,0.15); border-radius: 10px;
+}
+.scan-field-check {
+  width: 15px; height: 15px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(61,79,53,0.16); border: 1px solid rgba(61,79,53,0.32);
+  display: flex; align-items: center; justify-content: center;
+}
+.scan-field-check svg { width: 8px; height: 8px; }
+.scan-field-key { font-size: 9px; font-weight: 600; color: var(--ink-4); width: 52px; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+.scan-field-val { font-size: 12px; font-weight: 600; color: var(--ink); flex: 1; text-align: right; }
+.scan-foot { margin-top: 13px; display: flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 500; color: var(--olive); }
+.scan-foot .chk { width: 15px; height: 15px; border-radius: 50%; background: rgba(61,79,53,0.16); border: 1px solid rgba(61,79,53,0.32); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.scan-foot .chk svg { width: 8px; height: 8px; }
+
+/* ── ANALISAR CARTA ── */
+.carta-use { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
+.carta-use-chip { font-size: 10px; font-weight: 500; color: var(--ink-5); padding: 4px 9px; border-radius: 999px; background: rgba(29,21,15,0.04); border: 1px solid var(--ink-1); }
+.carta-results { display: flex; flex-direction: column; gap: 7px; }
+.carta-res { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border-radius: 12px; background: rgba(255,255,255,0.5); border: 1px solid var(--ink-1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); }
+.carta-res-cat { font-size: 8.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 7px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+.cat-best    { background: rgba(61,79,53,0.13); color: #283820; border: 1px solid rgba(61,79,53,0.22); }
+.cat-value   { background: rgba(184,148,60,0.14); color: #6f5212; border: 1px solid rgba(184,148,60,0.26); }
+.cat-premium { background: rgba(122,18,36,0.08); color: var(--wine); border: 1px solid rgba(122,18,36,0.18); }
+.cat-similar { background: rgba(29,21,15,0.05); color: var(--ink-5); border: 1px solid var(--ink-1); }
+.carta-res-name { font-size: 12px; font-weight: 500; color: var(--ink); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.carta-foot { margin-top: 13px; padding-top: 13px; border-top: 1px solid rgba(29,21,15,0.06); font-size: 11px; font-weight: 400; color: var(--ink-4); line-height: 1.45; }
+.carta-foot b { font-weight: 600; color: var(--olive); }
+
+/* ─────────────────────────────────────────
+   PRICING — compact glass
+   ───────────────────────────────────────── */
+.pricing-section { padding: 72px clamp(28px, 5vw, 84px); background: var(--bg); }
+.pricing-header { max-width: 1080px; margin: 0 auto 38px; text-align: center; }
+.pricing-header .section-sub { margin: 0 auto; }
+.plan-grid { max-width: 560px; margin: 0 auto; }
+.plan {
+  position: relative;
+  background: rgba(255,252,246,0.7);
+  border: 1px solid rgba(255,255,255,0.7);
+  border-radius: 24px;
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.9),
+    inset 0 0 0 1px rgba(255,255,255,0.16),
+    0 2px 6px rgba(26,19,14,0.05),
+    0 24px 56px -28px rgba(26,19,14,0.3);
+  padding: 36px 38px 34px;
+  overflow: hidden;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+/* burgundy accent line at top */
+.plan::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(to right, transparent, var(--wine), transparent);
+  opacity: 0.6; pointer-events: none;
+}
+.plan:hover { transform: translateY(-4px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.16), 0 2px 6px rgba(26,19,14,0.06), 0 34px 70px -30px rgba(26,19,14,0.36); }
+
+.plan-head { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
+.plan-medal {
+  width: 44px; height: 44px; border-radius: 13px; flex-shrink: 0;
+  background: linear-gradient(150deg, #fbf6ef, #efe4d4);
+  border: 1px solid rgba(122,18,36,0.14);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 4px 12px -6px rgba(122,18,36,0.3);
+  overflow: hidden;
+}
+.plan-medal img { width: 30px; height: 30px; object-fit: contain; }
+.plan-headtext { display: flex; flex-direction: column; gap: 3px; }
+.plan-chip { display: inline-block; align-self: flex-start; font-size: 9.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: rgba(122,18,36,0.08); color: var(--wine); border: 1px solid rgba(122,18,36,0.18); }
+.plan-name { font-family: var(--f-d); font-size: 28px; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); line-height: 1; }
+.plan-desc { font-size: 13.5px; font-weight: 400; color: var(--ink-5); margin-bottom: 24px; line-height: 1.55; }
+.plan-price-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 4px; }
+.plan-price { font-family: var(--f-d); font-size: 46px; font-weight: 600; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+.plan-period { font-size: 15px; font-weight: 400; color: var(--ink-4); }
+.plan-annual { font-size: 12.5px; font-weight: 400; color: var(--ink-4); margin-bottom: 24px; }
+.plan-cta {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 15px; border-radius: 13px;
+  font: 14.5px/1 var(--f-u); font-weight: 500; cursor: pointer;
+  transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), filter 0.28s var(--ease);
+  margin-bottom: 14px; position: relative; overflow: hidden;
+  background: linear-gradient(180deg, #8d1d36, #7B1730 50%, #5B1023);
+  border: none; color: #fdf3ee;
+  box-shadow: 0 1px 1px rgba(255,255,255,0.2) inset, 0 -1px 2px rgba(0,0,0,0.18) inset, 0 3px 8px rgba(122,18,36,0.28), 0 14px 32px -12px rgba(122,18,36,0.5);
+}
+.plan-cta:hover { transform: translateY(-2px); filter: brightness(1.04) saturate(1.05); box-shadow: 0 1px 1px rgba(255,255,255,0.24) inset, 0 -1px 2px rgba(0,0,0,0.2) inset, 0 6px 14px rgba(122,18,36,0.32), 0 22px 42px -12px rgba(122,18,36,0.56); }
+.plan-cta:active { transform: translateY(0); }
+.plan-cta .arrow { transition: transform 0.3s var(--ease); }
+.plan-cta:hover .arrow { transform: translateX(4px); }
+.plan-cta::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: translateX(-130%) skewX(-18deg); pointer-events: none;
+}
+.plan-cta:hover::after { animation: shimmer 1s var(--ease) forwards; }
+.plan-cancel { text-align: center; font-size: 12px; font-weight: 400; color: var(--ink-4); margin-bottom: 26px; }
+.plan-divider { height: 1px; background: rgba(29,21,15,0.08); margin: 0 0 22px; }
+.plan-features { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 11px 18px; }
+.plan-features li { display: flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 400; color: var(--ink-6); line-height: 1.35; }
+.plan-features li .check {
+  width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(61,79,53,0.12); border: 1px solid rgba(61,79,53,0.24);
+  display: flex; align-items: center; justify-content: center;
+}
+.plan-features li .check svg { width: 9px; height: 9px; }
+
+/* ─────────────────────────────────────────
+   FAQ — accordion in glass container
+   ───────────────────────────────────────── */
+.faq-section { padding: 64px clamp(28px, 5vw, 84px) 76px; background: var(--bg-warm); border-top: 1px solid rgba(29,21,15,0.06); }
+.faq-inner { max-width: 740px; margin: 0 auto; }
+.faq-header { text-align: center; margin-bottom: 34px; }
+.faq-header .section-sub { margin: 0 auto; }
+.faq-container {
+  background: var(--glass);
+  border: 1px solid var(--g-border);
+  border-radius: 20px;
+  backdrop-filter: var(--g-blur);
+  -webkit-backdrop-filter: var(--g-blur);
+  box-shadow: var(--g-shadow), var(--g-inset);
+  overflow: hidden;
+}
+.faq-item { border-bottom: 1px solid rgba(29,21,15,0.07); }
+.faq-item:last-child { border-bottom: none; }
+.faq-item summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 24px;
+  font-size: 15px; font-weight: 500; color: var(--ink); line-height: 1.4;
+  transition: background 0.2s, color 0.2s;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary:hover { background: rgba(29,21,15,0.02); }
+.faq-chevron { width: 18px; height: 18px; flex-shrink: 0; color: var(--ink-3); transition: transform 0.32s var(--ease), color 0.2s; }
+.faq-item[open] summary { color: var(--wine); }
+.faq-item[open] .faq-chevron { transform: rotate(180deg); color: var(--wine); }
+.faq-answer { overflow: hidden; }
+.faq-answer-inner {
+  padding: 0 24px 20px;
+  font-size: 14px; font-weight: 400; line-height: 1.72; color: var(--ink-5);
+}
+/* open animation */
+.faq-item[open] .faq-answer { animation: faqOpen 0.34s var(--ease-out); }
+@keyframes faqOpen { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
+/* ─────────────────────────────────────────
+   CLOSE CTA
+   ───────────────────────────────────────── */
+.close-section { padding: 78px clamp(28px, 5vw, 84px); background: var(--bg); text-align: center; border-top: 1px solid rgba(29,21,15,0.06); position: relative; overflow: hidden; }
+.close-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 50% 60% at 50% 30%, rgba(184,148,60,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+.close-mark { height: 56px; width: auto; margin: 0 auto 22px; display: block; filter: drop-shadow(0 6px 16px rgba(26,19,14,0.16)); position: relative; }
+.close-h2 { font-family: var(--f-d); font-size: clamp(34px, 4.4vw, 54px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.06; color: var(--ink); margin-bottom: 15px; position: relative; }
+.close-h2 em { font-style: italic; color: var(--wine); }
+.close-sub { font-size: 16px; font-weight: 400; color: var(--ink-5); max-width: 400px; margin: 0 auto 32px; line-height: 1.6; position: relative; }
+.close-proof { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 22px; font-size: 12px; font-weight: 400; color: var(--ink-3); position: relative; }
+.close-proof-sep { width: 3px; height: 3px; border-radius: 50%; background: var(--ink-2); }
+
+/* ─────────────────────────────────────────
+   FOOTER
+   ───────────────────────────────────────── */
+.footer { padding: 34px clamp(28px, 5vw, 84px); background: var(--bg-deep); border-top: 1px solid rgba(29,21,15,0.08); }
+.footer-inner { max-width: 1080px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.footer-brand { display: flex; align-items: center; gap: 9px; font-family: var(--f-d); font-size: 18px; font-weight: 500; color: var(--ink-6); letter-spacing: -0.01em; }
+.footer-logo-img { height: 24px; width: auto; opacity: 0.85; }
+.footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.footer-links a { font-size: 12px; font-weight: 400; color: var(--ink-3); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--ink-5); }
+.footer-legal { font-size: 11px; font-weight: 400; color: var(--ink-2); }
+
+/* Proto tag */
+.proto-tag { position: fixed; bottom: 14px; right: 14px; z-index: 999; background: var(--glass); border: 1px solid var(--g-border); color: var(--ink-4); font: 11px/1 var(--f-u); padding: 8px 14px; border-radius: 999px; backdrop-filter: blur(16px); box-shadow: var(--g-shadow); pointer-events: none; }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-logo-img { height: 56px; margin: -6px 0; }
+  .nav-logo-word { font-size: 22px; }
+  .hero { grid-template-columns: 1fr; padding-top: 84px; min-height: auto; gap: 8px; }
+  .hero-left { max-width: 100%; padding-right: 0; margin-bottom: 28px; }
+  .hero-right { height: 420px; width: 100%; }
+  .card-main { left: 50%; --rot: -1.5deg; transform: translateX(-50%) rotate(-1.5deg); }
+  .card-scan { right: 0; top: 6px; }
+  .card-harm { left: 0; bottom: 18px; }
+  .bento-grid { grid-template-columns: 1fr; }
+  .plan-grid { max-width: 480px; }
+}
+@media (max-width: 520px) {
+  .hero-right { height: 380px; }
+  .card-main { width: 290px; }
+  .card-scan { width: 188px; --rot: 3deg; }
+  .card-harm { width: 196px; }
+  .plan { padding: 28px 22px; }
+  .plan-features { grid-template-columns: 1fr; }
+  .hero-badge { white-space: normal; }
+  .hero-badge-text { font-size: 12px; }
+  .nav-logo-word { font-size: 20px; }
+}
+
+/* ─────────────────────────────────────────
+   REDUCED MOTION
+   ───────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .float-a, .float-b, .float-c { animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="nav" id="nav">
+  <span class="nav-sweep" aria-hidden="true"></span>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <img class="nav-logo-img" src="/logo-sommelyx-mark.png" alt="Sommelyx" />
+      <span class="nav-logo-word">Sommelyx</span>
+    </a>
+    <div class="nav-links">
+      <a href="#produto" data-spy="produto">Recursos</a>
+      <a href="#pricing" data-spy="pricing">Planos</a>
+      <a href="#faq" data-spy="faq">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-login">Entrar</button>
+      <button class="btn-cta">
+        Começar grátis
+        <svg class="arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 5h8M5.5 1.5L9 5l-4.5 3.5"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-badge" data-reveal>
+      <span class="hero-badge-medal" aria-hidden="true">🇧🇷</span>
+      <span class="hero-badge-text">O primeiro app <b>100% brasileiro</b> para gestão de adegas</span>
+    </div>
+    <h1 class="hero-h1" data-reveal data-reveal-delay="1">
+      Sua adega,<br><em>inteligente.</em>
+    </h1>
+    <p class="hero-sub" data-reveal data-reveal-delay="2">
+      Sommelyx organiza seus vinhos, acompanha janelas de consumo e ajuda a decidir o que abrir, harmonizar ou guardar.
+    </p>
+    <div class="hero-benefits" data-reveal data-reveal-delay="2">
+      <span class="hero-benefit">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M2.5 6.5h11M6 6.5v7" stroke-linecap="round"/></svg>
+        Organize
+      </span>
+      <span class="hero-benefit-sep"></span>
+      <span class="hero-benefit">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14" stroke-linecap="round"/></svg>
+        Descubra
+      </span>
+      <span class="hero-benefit-sep"></span>
+      <span class="hero-benefit">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 2.5h6M6 2.5v4a2 2 0 01-2 2 2 2 0 00-2 2v3h12v-3a2 2 0 00-2-2 2 2 0 01-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Harmonize
+      </span>
+      <span class="hero-benefit-sep"></span>
+      <span class="hero-benefit">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8.5l3.2 3.2L13 4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Decida
+      </span>
+    </div>
+    <div class="hero-actions" data-reveal data-reveal-delay="3">
+      <button class="btn-wine">
+        Iniciar minha adega
+        <svg class="arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 6h10M6.5 2L11 6l-4.5 4"/></svg>
+      </button>
+      <button class="btn-outline">Ver como funciona</button>
+    </div>
+    <div class="hero-proof" data-reveal data-reveal-delay="4">
+      <div class="hero-proof-avatars">
+        <div class="proof-avatar av-1">A</div>
+        <div class="proof-avatar av-2">R</div>
+        <div class="proof-avatar av-3">M</div>
+        <div class="proof-avatar av-4">C</div>
+      </div>
+      <div class="hero-proof-text"><strong>+400 colecionadores</strong> já organizam<br>sua adega com Sommelyx</div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-stage" id="heroStage">
+      <div class="hero-halo"></div>
+
+      <!-- MAIN: Minha Adega -->
+      <div class="gcard card-main" data-depth="14">
+        <div class="float-a">
+          <div class="gcard-sheen"></div>
+          <div class="card-header">
+            <div class="card-app-icon"><img src="/logo-sommelyx-mark.png" alt="" /></div>
+            <div class="card-header-titles">
+              <div class="card-header-label">Minha Adega</div>
+              <div class="card-header-sub">organizada por janela de consumo</div>
+            </div>
+            <div class="card-header-count">15</div>
+          </div>
+          <div class="wine-row">
+            <div class="wine-dot dot-red"></div>
+            <div class="wine-name-col"><div class="wine-n">Sassicaia</div><div class="wine-m">Tenuta San Guido · 2019</div></div>
+            <div class="wine-badge badge-now">beber agora</div>
+          </div>
+          <div class="wine-row">
+            <div class="wine-dot dot-red"></div>
+            <div class="wine-name-col"><div class="wine-n">Brunello di Montalcino</div><div class="wine-m">Biondi Santi · 2018</div></div>
+            <div class="wine-badge badge-wait">guardar</div>
+          </div>
+          <div class="wine-row">
+            <div class="wine-dot dot-red"></div>
+            <div class="wine-name-col"><div class="wine-n">Château Margaux</div><div class="wine-m">Bordeaux · 2018</div></div>
+            <div class="wine-badge badge-soon">pico em breve</div>
+          </div>
+          <div class="wine-row">
+            <div class="wine-dot dot-white"></div>
+            <div class="wine-name-col"><div class="wine-n">Puligny-Montrachet</div><div class="wine-m">Louis Latour · 2020</div></div>
+            <div class="wine-badge badge-now">beber agora</div>
+          </div>
+          <div class="card-footer-bar">
+            <div class="card-footer-icon">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#7a1224" stroke-width="1.5"><circle cx="5.5" cy="5.5" r="4.2"/><path d="M5.5 3.2v2.5l1.6 1"/></svg>
+            </div>
+            <span class="card-footer-text">Abertura recomendada: Sassicaia · esta semana</span>
+            <span class="card-footer-action">Ver →</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANNER -->
+      <div class="gcard card-scan" data-depth="26">
+        <div class="float-b">
+          <div class="gcard-sheen"></div>
+          <div class="sf-label">Scanner de rótulos</div>
+          <div class="sf-wine">Brunello di Montalcino</div>
+          <div class="sf-meta">Biondi Santi · Toscana · 2018</div>
+          <div class="sf-tag">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1 4h6M4 1v6"/></svg>
+            Adicionar à adega
+          </div>
+        </div>
+      </div>
+
+      <!-- HARMONIZAÇÃO -->
+      <div class="gcard card-harm" data-depth="22">
+        <div class="float-c">
+          <div class="gcard-sheen"></div>
+          <div class="hf-label">Harmonização</div>
+          <div class="hf-query">"Risoto de funghi porcini, jantar de negócios."</div>
+          <div class="hf-result">
+            <div class="hf-result-dot"></div>
+            <span class="hf-result-name">Brunello 2018</span>
+            <span class="hf-result-match">perfeito</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ BENTO ══ -->
+<section class="bento-section" id="produto">
+  <div class="bento-header">
+    <p class="section-eyebrow" data-reveal>o produto</p>
+    <h2 class="section-h2" data-reveal data-reveal-delay="1">Tudo que sua adega precisa.</h2>
+    <p class="section-sub" data-reveal data-reveal-delay="2">Quatro ferramentas, todas para melhorar sua experiência com o seu vinho.</p>
+  </div>
+
+  <div class="bento-grid">
+    <!-- MINHA ADEGA -->
+    <div class="bc bc-adega" data-reveal>
+      <div class="bc-inner">
+        <div class="bc-head">
+          <span class="bc-head-icon"><img src="/logo-sommelyx-mark.png" alt="" /></span>
+          <span class="bc-name">Minha Adega</span>
+          <span class="bc-count">25 garrafas</span>
+        </div>
+        <p class="bc-desc">Organize sua coleção com filtros inteligentes, janelas de consumo e organização personalizada.</p>
+
+        <div class="adega-filterbar">
+          <span class="adega-filter"><svg viewBox="0 0 8 8" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 1.5h6M2 4h4M3 6.5h2"/></svg>País</span>
+          <span class="adega-filter">Região</span>
+          <span class="adega-filter">Uva</span>
+          <span class="adega-filter">Produtor</span>
+          <span class="adega-filter">Safra</span>
+          <span class="adega-filter">Status</span>
+        </div>
+
+        <div class="adega-chips">
+          <span class="chip chip-country">França</span>
+          <span class="chip chip-country">Itália</span>
+          <span class="chip chip-grape">Pinot Noir</span>
+          <span class="chip chip-grape">Cabernet Sauvignon</span>
+          <span class="chip chip-status">Beber agora</span>
+          <span class="chip chip-status">Em guarda</span>
+        </div>
+
+        <div class="adega-groups">
+          <p class="bc-section-label">Coleção por país</p>
+          <div class="group-row"><span class="group-flag" style="background:#3556a4"></span><span class="group-name">França</span><span class="group-bar"><span style="width:100%"></span></span><span class="group-count">12</span></div>
+          <div class="group-row"><span class="group-flag" style="background:#2e7d4f"></span><span class="group-name">Itália</span><span class="group-bar"><span style="width:67%"></span></span><span class="group-count">8</span></div>
+          <div class="group-row"><span class="group-flag" style="background:#6aa0d8"></span><span class="group-name">Argentina</span><span class="group-bar"><span style="width:42%"></span></span><span class="group-count">5</span></div>
+        </div>
+
+        <div class="adega-cw">
+          <p class="bc-section-label">Janela de consumo</p>
+          <div class="cw-bar">
+            <span class="cw-seg now" style="width:28%"></span>
+            <span class="cw-seg soon" style="width:20%"></span>
+            <span class="cw-seg guard" style="width:52%"></span>
+          </div>
+          <div class="cw-legend">
+            <span class="cw-item"><span class="cw-dot d-now"></span>Beber agora <b>7</b></span>
+            <span class="cw-item"><span class="cw-dot d-soon"></span>Pico em breve <b>5</b></span>
+            <span class="cw-item"><span class="cw-dot d-guard"></span>Em guarda <b>13</b></span>
+          </div>
+        </div>
+
+        <div class="adega-stats">
+          <div class="stat-cell"><div class="stat-num">25</div><div class="stat-lbl">Total de garrafas</div></div>
+          <div class="stat-cell"><div class="stat-num accent">7</div><div class="stat-lbl">Para beber agora</div></div>
+          <div class="stat-cell"><div class="stat-num">13</div><div class="stat-lbl">Em guarda</div></div>
+          <div class="stat-cell"><div class="stat-num">5</div><div class="stat-lbl">Na wishlist</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MIDDLE COLUMN: Harmonização + Scanner -->
+    <div class="bc-mid">
+    <!-- HARMONIZAÇÃO -->
+    <div class="bc bc-harm" data-reveal data-reveal-delay="1">
+      <div class="bc-inner">
+        <div class="bc-head">
+          <span class="bc-head-icon"><svg viewBox="0 0 16 16" fill="none" stroke="#7a1224" stroke-width="1.4"><path d="M5 2.5h6M6 2.5v3.5a2 2 0 01-2 2 2 2 0 00-2 2v3h12v-3a2 2 0 00-2-2 2 2 0 01-2-2v-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="bc-name">Harmonização</span>
+        </div>
+        <p class="bc-desc">Descubra harmonizações usando vinhos da sua adega ou qualquer rótulo externo.</p>
+
+        <div class="harm-modes">
+          <span class="mode-tab active">Por prato</span>
+          <span class="mode-tab">Por ingrediente</span>
+        </div>
+        <div class="harm-query-box">"Risoto de funghi porcini"</div>
+        <div class="harm-result-row">
+          <div class="harm-result-dot"></div>
+          <span class="harm-result-name">Brunello di Montalcino 2018</span>
+          <span class="harm-match">perfeito</span>
+        </div>
+        <p class="harm-explain"><span class="harm-explain-label">Por que esta harmonização funciona</span>Taninos firmes e notas terrosas equilibram a untuosidade do funghi, enquanto a acidez limpa o paladar.</p>
+        <div class="harm-source">
+          <span class="harm-src s-adega"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6.2l2.4 2.4L10 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Da Adega</span>
+          <span class="harm-src s-ext"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 6.2l2.4 2.4L10 3" stroke-linecap="round" stroke-linejoin="round"/></svg>Rótulos Externos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCANNER -->
+    <div class="bc bc-scan" data-reveal data-reveal-delay="2">
+      <div class="bc-inner">
+        <div class="bc-head">
+          <span class="bc-head-icon"><svg viewBox="0 0 16 16" fill="none" stroke="#7a1224" stroke-width="1.3"><path d="M2 5V3.5A1.5 1.5 0 013.5 2H5M11 2h1.5A1.5 1.5 0 0114 3.5V5M14 11v1.5a1.5 1.5 0 01-1.5 1.5H11M5 14H3.5A1.5 1.5 0 012 12.5V11" stroke-linecap="round"/><path d="M4.5 8h7" stroke-linecap="round"/></svg></span>
+          <span class="bc-name">Scanner</span>
+        </div>
+        <p class="bc-desc">Fotografe um rótulo e adicione vinhos em segundos.</p>
+
+        <div class="scan-input-area">
+          <div class="scan-icon">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="#7a1224" stroke-width="1.3"><rect x="1.5" y="1.5" width="4.3" height="4.3" rx="0.9"/><rect x="9.2" y="1.5" width="4.3" height="4.3" rx="0.9"/><rect x="1.5" y="9.2" width="4.3" height="4.3" rx="0.9"/><rect x="9.6" y="9.6" width="3.2" height="3.2" rx="0.7" fill="#7a1224" stroke="none"/></svg>
+          </div>
+          <span class="scan-input-text">Extraindo do rótulo...</span>
+        </div>
+        <div class="scan-fields">
+          <div class="scan-field"><span class="scan-field-check"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="scan-field-key">Produtor</span><span class="scan-field-val">Biondi Santi</span></div>
+          <div class="scan-field"><span class="scan-field-check"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="scan-field-key">Safra</span><span class="scan-field-val">2018</span></div>
+          <div class="scan-field"><span class="scan-field-check"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="scan-field-key">Região</span><span class="scan-field-val">Toscana</span></div>
+          <div class="scan-field"><span class="scan-field-check"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="scan-field-key">Uva</span><span class="scan-field-val">Sangiovese</span></div>
+          <div class="scan-field"><span class="scan-field-check"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.6"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="scan-field-key">Janela</span><span class="scan-field-val">2024–2035</span></div>
+        </div>
+        <div class="scan-foot"><span class="chk"><svg viewBox="0 0 8 8" fill="none" stroke="#3d4f35" stroke-width="1.7"><path d="M1.5 4l1.6 1.6L6.5 2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Pronto para adicionar à adega</div>
+      </div>
+    </div>
+    </div><!-- /bc-mid -->
+
+    <!-- ANALISAR CARTA -->
+    <div class="bc bc-carta" data-reveal data-reveal-delay="3">
+      <div class="bc-inner">
+        <div class="bc-head">
+          <span class="bc-head-icon"><svg viewBox="0 0 16 16" fill="none" stroke="#7a1224" stroke-width="1.3"><rect x="3" y="1.5" width="10" height="13" rx="1.5"/><path d="M5.5 5h5M5.5 8h5M5.5 11h3" stroke-linecap="round"/></svg></span>
+          <span class="bc-name">Analisar Carta</span>
+          <span class="bc-count">18 vinhos</span>
+        </div>
+        <p class="bc-desc">Envie uma carta de vinhos e receba recomendações instantâneas.</p>
+
+        <p class="bc-section-label">Ideal para</p>
+        <div class="carta-use">
+          <span class="carta-use-chip">Restaurantes</span>
+          <span class="carta-use-chip">Wine Bars</span>
+          <span class="carta-use-chip">Eventos</span>
+          <span class="carta-use-chip">Viagens</span>
+        </div>
+
+        <p class="bc-section-label" style="margin-top:2px">Recomendações</p>
+        <div class="carta-results">
+          <div class="carta-res"><span class="carta-res-cat cat-best">Melhor escolha</span><span class="carta-res-name">Barolo Riserva 2016</span></div>
+          <div class="carta-res"><span class="carta-res-cat cat-value">Custo-benefício</span><span class="carta-res-name">Chianti Classico 2020</span></div>
+          <div class="carta-res"><span class="carta-res-cat cat-premium">Premium</span><span class="carta-res-name">Sassicaia 2019</span></div>
+          <div class="carta-res"><span class="carta-res-cat cat-similar">Parecido c/ adega</span><span class="carta-res-name">Brunello di Montalcino 2018</span></div>
+          <div class="carta-res"><span class="carta-res-cat cat-best">Boa escolha</span><span class="carta-res-name">Vermentino di Gallura 2022</span></div>
+          <div class="carta-res"><span class="carta-res-cat cat-value">Custo-benefício</span><span class="carta-res-name">Nebbiolo Langhe 2020</span></div>
+        </div>
+
+        <p class="carta-foot"><b>Inclui harmonizações recomendadas</b> para o seu prato — escolha o vinho ideal em segundos, mesmo fora de casa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PRICING ══ -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-header section-inner">
+    <p class="section-eyebrow" data-reveal>planos</p>
+    <h2 class="section-h2" data-reveal data-reveal-delay="1">Simples. Sem surpresas.</h2>
+    <p class="section-sub" data-reveal data-reveal-delay="2">14 dias grátis para experimentar tudo. Sem cartão de crédito.</p>
+  </div>
+  <div class="plan-grid">
+    <div class="plan" data-reveal>
+      <div class="plan-head">
+        <div class="plan-medal"><img src="/logo-sommelyx-mark.png" alt="" /></div>
+        <div class="plan-headtext">
+          <span class="plan-chip">Colecionador pessoal</span>
+          <div class="plan-name">Pro</div>
+        </div>
+      </div>
+      <p class="plan-desc">Para quem leva vinho a sério e quer cuidar de cada garrafa da sua adega.</p>
+      <div class="plan-price-row"><span class="plan-price">R$ 29</span><span class="plan-period">/mês</span></div>
+      <p class="plan-annual">ou R$ 280/ano — 2 meses grátis</p>
+      <button class="plan-cta">
+        Iniciar minha adega
+        <svg class="arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 6h10M6.5 2L11 6l-4.5 4"/></svg>
+      </button>
+      <p class="plan-cancel">Cancele quando quiser.</p>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Adega com janelas de consumo</li>
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Scanner de rótulos por câmera</li>
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Harmonizações personalizadas</li>
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Análise de cartas de restaurante</li>
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Wishlist e alertas de preço</li>
+        <li><span class="check"><svg viewBox="0 0 10 10" fill="none" stroke="#3d4f35" stroke-width="1.5"><path d="M2 5l2 2 4-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Importação de planilhas</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="faq-section" id="faq">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <p class="section-eyebrow" data-reveal>dúvidas</p>
+      <h2 class="section-h2" data-reveal data-reveal-delay="1">Perguntas frequentes.</h2>
+      <p class="section-sub" data-reveal data-reveal-delay="2">Tudo o que você precisa saber antes de começar.</p>
+    </div>
+    <div class="faq-container" data-reveal data-reveal-delay="2">
+      <details class="faq-item" open>
+        <summary>Como funciona o período de teste?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">São 14 dias com acesso completo a todas as funcionalidades, sem necessidade de cartão de crédito. Cancele antes do fim do período e não haverá nenhuma cobrança.</div></div>
+      </details>
+      <details class="faq-item">
+        <summary>O que está incluído no plano Pro?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">Tudo o que você precisa para cuidar da adega: organização por janela de consumo, scanner de rótulos por câmera, harmonizações personalizadas, análise de cartas de restaurante, wishlist com alertas de preço e importação de planilhas. Um único plano, sem módulos escondidos.</div></div>
+      </details>
+      <details class="faq-item">
+        <summary>Consigo importar minha adega atual?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">Sim. Aceitamos CSV, Excel, PDF e imagens. Você revisa tudo antes de confirmar — nenhuma garrafa é adicionada à sua adega sem a sua aprovação.</div></div>
+      </details>
+      <details class="faq-item">
+        <summary>O scanner reconhece qualquer rótulo?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">O scanner identifica produtor, safra, região e estilo a partir de uma foto do rótulo. Quando há dúvida, ele sugere as opções mais prováveis para você confirmar — sempre com você no controle.</div></div>
+      </details>
+      <details class="faq-item">
+        <summary>Minha adega fica privada?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">Completamente. Cada conta é isolada e protegida por controle de acesso rigoroso. Nenhum dado da sua adega é compartilhado ou utilizado para outros fins.</div></div>
+      </details>
+      <details class="faq-item">
+        <summary>Posso cancelar quando quiser?
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="faq-answer"><div class="faq-answer-inner">Sim, a qualquer momento, direto pelo painel — sem ligações, sem burocracia. Você mantém o acesso até o fim do período já pago.</div></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CLOSE ══ -->
+<section class="close-section">
+  <img class="close-mark" src="/logo-sommelyx-mark.png" alt="Sommelyx" data-reveal />
+  <h2 class="close-h2" data-reveal data-reveal-delay="1">A sua próxima garrafa<br>merece ser <em>lembrada.</em></h2>
+  <p class="close-sub" data-reveal data-reveal-delay="2">Organize sua adega em minutos. O Sommelyx cuida do resto.</p>
+  <div data-reveal data-reveal-delay="3">
+    <button class="btn-wine" style="margin: 0 auto;">
+      Iniciar minha adega grátis
+      <svg class="arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M1 6h10M6.5 2L11 6l-4.5 4"/></svg>
+    </button>
+    <div class="close-proof">
+      <span>14 dias grátis</span><div class="close-proof-sep"></div>
+      <span>Sem cartão</span><div class="close-proof-sep"></div>
+      <span>Cancele quando quiser</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-brand">
+      <img class="footer-logo-img" src="/logo-sommelyx-mark.png" alt="" />
+      Sommelyx
+    </span>
+    <nav class="footer-links">
+      <a href="#">Produto</a><a href="#">Planos</a><a href="#">Blog</a>
+      <a href="#">Termos</a><a href="#">Privacidade</a><a href="#">Assinatura</a>
+    </nav>
+    <span class="footer-legal">© 2026 Sommelyx Tecnologia Ltda.</span>
+  </div>
+</footer>
+
+<div class="proto-tag">Landing V6 · Refined</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Scroll reveal */
+  var revealEls = document.querySelectorAll('[data-reveal]');
+  if (reduce || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('in-view'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('in-view'); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* Nav scrolled state + scroll-spy active link */
+  var nav = document.getElementById('nav');
+  var spyLinks = Array.prototype.slice.call(document.querySelectorAll('.nav-links a[data-spy]'));
+  var sections = spyLinks
+    .map(function (a) { return document.getElementById(a.getAttribute('data-spy')); })
+    .filter(Boolean);
+
+  var onScroll = function () {
+    nav.classList.toggle('scrolled', window.scrollY > 12);
+    // active section = last one whose top has crossed 38% of the viewport
+    var line = window.innerHeight * 0.38;
+    var current = null;
+    sections.forEach(function (sec) {
+      if (sec.getBoundingClientRect().top <= line) current = sec.id;
+    });
+    spyLinks.forEach(function (a) {
+      a.classList.toggle('active', a.getAttribute('data-spy') === current);
+    });
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+
+  /* FAQ accordion — single-open + smooth */
+  var items = document.querySelectorAll('.faq-item');
+  items.forEach(function (item) {
+    item.addEventListener('toggle', function () {
+      if (item.open) {
+        items.forEach(function (other) { if (other !== item) other.open = false; });
+      }
+    });
+  });
+
+  /* Hero parallax (pointer) */
+  if (!reduce) {
+    var stage = document.getElementById('heroStage');
+    var cards = stage ? stage.querySelectorAll('.gcard') : [];
+    var raf = null, tx = 0, ty = 0;
+    var apply = function () {
+      cards.forEach(function (c) {
+        var depth = parseFloat(c.getAttribute('data-depth')) || 12;
+        c.style.setProperty('--px', (tx * depth) + 'px');
+        c.style.setProperty('--py', (ty * depth) + 'px');
+      });
+      raf = null;
+    };
+    window.addEventListener('pointermove', function (e) {
+      var w = window.innerWidth, h = window.innerHeight;
+      tx = (e.clientX / w - 0.5) * -0.6;
+      ty = (e.clientY / h - 0.5) * -0.6;
+      if (!raf) raf = requestAnimationFrame(apply);
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>

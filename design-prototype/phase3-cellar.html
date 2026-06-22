@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 3 — Adega Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ivory: #fff8ef;
+  --ivory-dim: #f2e8d8;
+  --ivory-deep: #ede0cc;
+  --wine: #650a18;
+  --gold: #c8a85a;
+  --gold-dim: #8d673a;
+  --olive: #44523a;
+  --forest: #162019;
+  --ink: #1a100c;
+  --ink-mid: rgba(26,16,12,0.55);
+  --ink-dim: rgba(26,16,12,0.3);
+  --f-display: 'Cormorant Garamond', Georgia, serif;
+  --f-ui: 'Inter', system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  font-family: var(--f-ui);
+  background: var(--ivory);
+  color: var(--ink);
+  min-height: 100dvh;
+}
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 52px 40px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.page-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.page-kicker {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  color: var(--ink-dim);
+}
+
+.page-title {
+  font-family: var(--f-display);
+  font-size: 52px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+}
+
+/* ONE elegant summary line — not 4 KPI cards */
+.page-summary {
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--ink-mid);
+  letter-spacing: 0.02em;
+}
+.page-summary span {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: var(--wine);
+  color: var(--ivory);
+  border: none;
+  border-radius: 100px;
+  font-family: var(--f-ui);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+}
+.btn-add:hover {
+  background: #7a0d1e;
+  transform: translateY(-1px);
+}
+
+/* ── CONTROLS ── */
+.controls {
+  padding: 28px 40px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-field {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--ivory-dim);
+  border: 1px solid rgba(26,16,12,0.08);
+  border-radius: 100px;
+  font-family: var(--f-ui);
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+.search-field svg {
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid rgba(26,16,12,0.1);
+  border-radius: 100px;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: rgba(26,16,12,0.2); color: var(--ink); }
+.filter-btn.active {
+  background: var(--ink);
+  color: var(--ivory);
+  border-color: var(--ink);
+}
+
+.controls-spacer { flex: 1; }
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--ivory-dim);
+  padding: 4px;
+  border-radius: 100px;
+}
+.view-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 100px;
+  background: transparent;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-btn.active {
+  background: var(--ivory);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgba(26,16,12,0.12);
+}
+
+/* ── BOTTLE GRID ── */
+/* CRITICAL: cards are collectible objects, not inventory containers */
+.wine-grid {
+  padding: 32px 40px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.wine-card {
+  background: var(--ivory);
+  border-radius: 28px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  border: none;
+  text-align: left;
+  position: relative;
+
+  /* Default: soft, flat */
+  box-shadow:
+    0 1px 3px rgba(26,16,12,0.06),
+    0 4px 12px rgba(26,16,12,0.04),
+    inset 0 0 0 1px rgba(26,16,12,0.06);
+}
+
+.wine-card:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 2px 4px rgba(26,16,12,0.06),
+    0 16px 48px rgba(26,16,12,0.14),
+    0 32px 64px rgba(26,16,12,0.08),
+    inset 0 0 0 1px rgba(26,16,12,0.07);
+}
+
+/* Hover: action overlay fades in */
+.wine-card:hover .card-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── CARD STAGE (bottle image area) ── */
+/* Bottle takes 65% of card height */
+.card-stage {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  /* Atmospheric gradient behind bottle — unique to each style */
+  background: linear-gradient(160deg, #f5eddf 0%, #ede0cc 60%, #e4d3bd 100%);
+}
+
+.card-stage.tinto {
+  background: linear-gradient(160deg, #faf0ef 0%, #f0e2e0 60%, #e8d0cc 100%);
+}
+.card-stage.branco {
+  background: linear-gradient(160deg, #f5f0e8 0%, #eee8d8 60%, #e8dfcc 100%);
+}
+.card-stage.espumante {
+  background: linear-gradient(160deg, #f4f0e2 0%, #ede8d4 60%, #e6dfca 100%);
+}
+
+/* Ambient glow at base of bottle (subtle) */
+.card-stage::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 40px;
+  background: radial-gradient(ellipse, rgba(26,16,12,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Bottle SVG wrapper */
+.card-bottle {
+  width: 64px;
+  height: 188px;
+  position: relative;
+  filter: drop-shadow(0 12px 24px rgba(26,16,12,0.2)) drop-shadow(0 4px 8px rgba(26,16,12,0.12));
+  transition: transform 0.4s var(--ease), filter 0.4s var(--ease);
+}
+.wine-card:hover .card-bottle {
+  transform: scale(1.03) translateY(-4px);
+  filter: drop-shadow(0 20px 40px rgba(26,16,12,0.25)) drop-shadow(0 6px 12px rgba(26,16,12,0.15));
+}
+
+.card-bottle svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Quantity badge */
+.qty-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(26,16,12,0.07);
+  border: 1px solid rgba(26,16,12,0.1);
+  color: var(--ink-mid);
+  font-size: 11px;
+  font-weight: 400;
+  padding: 4px 10px;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+}
+
+/* Status badge — drink window */
+.status-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 4px 10px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+.status-badge.now {
+  background: rgba(101,10,24,0.08);
+  color: var(--wine);
+  border: 1px solid rgba(101,10,24,0.15);
+}
+.status-badge.soon {
+  background: rgba(141,103,58,0.1);
+  color: var(--gold-dim);
+  border: 1px solid rgba(141,103,58,0.2);
+}
+.status-badge.guard {
+  background: rgba(68,82,58,0.08);
+  color: var(--olive);
+  border: 1px solid rgba(68,82,58,0.15);
+}
+
+/* Hover: action overlay */
+.card-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  padding: 16px;
+  background: linear-gradient(to top, rgba(26,16,12,0.55) 0%, transparent 100%);
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.3s var(--ease);
+}
+.card-action-btn {
+  flex: 1;
+  padding: 9px 0;
+  background: rgba(255,248,239,0.92);
+  border: none;
+  border-radius: 100px;
+  font-family: var(--f-ui);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.card-action-btn:hover { background: #fff8ef; }
+.card-action-btn.primary {
+  background: var(--wine);
+  color: var(--ivory);
+}
+.card-action-btn.primary:hover { background: #7a0d1e; }
+
+/* ── CARD BODY ── */
+.card-body {
+  padding: 18px 20px 20px;
+}
+
+.card-name {
+  font-family: var(--f-display);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-meta {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ink-mid);
+  margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-vintage {
+  font-family: var(--f-display);
+  font-size: 22px;
+  font-weight: 400;
+  color: rgba(26,16,12,0.2);
+  line-height: 1;
+}
+
+.card-value {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--ink-dim);
+}
+.card-value strong {
+  font-weight: 400;
+  color: var(--ink-mid);
+}
+
+/* ── WINE CARDS DATA ── */
+/* Using CSS for demo bottles of different colors */
+.bottle-tinto path.body { fill: url(#grad-tinto); }
+.bottle-branco path.body { fill: url(#grad-branco); }
+.bottle-espumante path.body { fill: url(#grad-espum); }
+
+/* ── ANNOTATIONS ── */
+.proto-note {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(26,16,12,0.85);
+  color: var(--ivory);
+  font-family: var(--f-ui);
+  font-size: 11px;
+  padding: 8px 14px;
+  border-radius: 100px;
+  z-index: 999;
+}
+
+.annotation {
+  background: rgba(200,168,90,0.12);
+  border: 1px solid rgba(200,168,90,0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 40px 24px;
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--gold-dim);
+}
+.annotation strong { color: var(--gold-dim); font-weight: 500; }
+
+@media (max-width: 768px) {
+  .page-header { padding: 40px 20px 0; flex-direction: column; align-items: flex-start; }
+  .page-title { font-size: 38px; }
+  .controls { padding: 20px 20px 0; }
+  .wine-grid { padding: 24px 20px 60px; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card-stage { height: 170px; }
+  .card-bottle { width: 50px; height: 145px; }
+  .annotation { margin: 0 20px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Prototype annotation -->
+<div class="annotation" style="margin-top: 20px; margin-bottom: 0;">
+  <strong>Phase 3 — Adega Direction:</strong>
+  KPI block removido. Garrafa ocupa 65% do card. Hover revela ações. Uma linha de resumo, não 4 widgets. Cards são objetos colecionáveis, não containers de dados.
+</div>
+
+<!-- PAGE HEADER — minimal, editorial -->
+<header class="page-header">
+  <div class="page-title-block">
+    <p class="page-kicker">adega pessoal</p>
+    <h1 class="page-title">Minha Adega</h1>
+    <!-- ONE summary line — not 4 KPI cards -->
+    <p class="page-summary">
+      <span>15</span> garrafas · <span>4</span> rótulos · <span>R$ 21.590</span> valor estimado
+    </p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-add">+ Adicionar vinho</button>
+  </div>
+</header>
+
+<!-- CONTROLS — clean, minimal -->
+<div class="controls">
+  <div class="search-field">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="6" cy="6" r="4.5"/><path d="M10.5 10.5l2 2"/>
+    </svg>
+    Buscar por nome, região...
+  </div>
+  <button class="filter-btn">País</button>
+  <button class="filter-btn">Estilo</button>
+  <button class="filter-btn">Janela</button>
+  <div class="controls-spacer"></div>
+  <div class="view-toggle">
+    <button class="view-btn active">Grade</button>
+    <button class="view-btn">Lista</button>
+  </div>
+</div>
+
+<!-- BOTTLE GRID — collectible objects -->
+<main class="wine-grid">
+
+  <!-- Tinto card -->
+  <article class="wine-card">
+    <div class="card-stage tinto">
+      <div class="card-bottle">
+        <svg viewBox="0 0 64 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g-tinto" x1="0" y1="0" x2="64" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2a1520"/>
+              <stop offset="40%" stop-color="#1e0f16"/>
+              <stop offset="100%" stop-color="#160a10"/>
+            </linearGradient>
+            <linearGradient id="g-tinto-capsule" x1="0" y1="0" x2="64" y2="20" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#8d1f2e"/>
+              <stop offset="100%" stop-color="#650a18"/>
+            </linearGradient>
+          </defs>
+          <!-- Capsule -->
+          <rect x="22" y="0" width="20" height="14" rx="3" fill="url(#g-tinto-capsule)"/>
+          <!-- Neck -->
+          <rect x="24" y="12" width="16" height="30" rx="2" fill="url(#g-tinto)"/>
+          <!-- Shoulder + body -->
+          <path d="M14 42 Q14 38 24 38 L40 38 Q50 38 50 42 L50 162 Q50 168 44 170 L20 170 Q14 168 14 162 Z" fill="url(#g-tinto)"/>
+          <!-- Label -->
+          <rect x="17" y="60" width="30" height="72" rx="5" fill="rgba(255,248,239,0.09)"/>
+          <!-- Label text lines -->
+          <rect x="20" y="68" width="24" height="2" rx="1" fill="rgba(255,248,239,0.22)"/>
+          <rect x="19" y="75" width="26" height="10" rx="3" fill="rgba(255,248,239,0.06)"/>
+          <rect x="21" y="90" width="22" height="1.5" rx="0.75" fill="rgba(255,248,239,0.14)"/>
+          <rect x="22" y="96" width="20" height="1.5" rx="0.75" fill="rgba(255,248,239,0.09)"/>
+          <!-- Light reflection -->
+          <rect x="18" y="44" width="5" height="60" rx="2.5" fill="rgba(255,255,255,0.06)"/>
+          <!-- Base -->
+          <ellipse cx="32" cy="168" rx="18" ry="5" fill="rgba(0,0,0,0.25)"/>
+        </svg>
+      </div>
+      <span class="qty-badge">3 garrafas</span>
+      <span class="status-badge now">beber agora</span>
+      <div class="card-actions">
+        <button class="card-action-btn primary">Abrir</button>
+        <button class="card-action-btn">Detalhes</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-name">Château Margaux</div>
+      <div class="card-meta">Bordeaux · Margaux</div>
+      <div class="card-footer">
+        <span class="card-vintage">2018</span>
+        <span class="card-value">~<strong>R$ 4.800</strong></span>
+      </div>
+    </div>
+  </article>
+
+  <!-- Espumante card -->
+  <article class="wine-card">
+    <div class="card-stage espumante">
+      <div class="card-bottle">
+        <svg viewBox="0 0 64 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g-espum" x1="0" y1="0" x2="64" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#1e2218"/>
+              <stop offset="50%" stop-color="#161a13"/>
+              <stop offset="100%" stop-color="#0e110b"/>
+            </linearGradient>
+            <linearGradient id="g-espum-cap" x1="0" y1="0" x2="64" y2="20" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#c8a85a"/>
+              <stop offset="100%" stop-color="#8d673a"/>
+            </linearGradient>
+          </defs>
+          <rect x="20" y="0" width="24" height="16" rx="3" fill="url(#g-espum-cap)"/>
+          <rect x="23" y="14" width="18" height="28" rx="2" fill="url(#g-espum)"/>
+          <path d="M11 42 Q11 36 23 36 L41 36 Q53 36 53 42 L53 162 Q53 169 46 171 L18 171 Q11 169 11 162 Z" fill="url(#g-espum)"/>
+          <rect x="14" y="60" width="36" height="76" rx="5" fill="rgba(255,248,239,0.08)"/>
+          <rect x="18" y="70" width="28" height="2" rx="1" fill="rgba(200,168,90,0.4)"/>
+          <rect x="18" y="78" width="28" height="1.5" rx="0.75" fill="rgba(200,168,90,0.2)"/>
+          <rect x="20" y="88" width="24" height="18" rx="3" fill="rgba(200,168,90,0.07)"/>
+          <rect x="18" y="110" width="28" height="1.5" rx="0.75" fill="rgba(255,248,239,0.1)"/>
+          <rect x="14" y="44" width="5" height="70" rx="2.5" fill="rgba(255,255,255,0.05)"/>
+          <ellipse cx="32" cy="169" rx="21" ry="6" fill="rgba(0,0,0,0.3)"/>
+        </svg>
+      </div>
+      <span class="qty-badge">2 garrafas</span>
+      <span class="status-badge now">beber agora</span>
+      <div class="card-actions">
+        <button class="card-action-btn primary">Abrir</button>
+        <button class="card-action-btn">Detalhes</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-name">Dom Pérignon</div>
+      <div class="card-meta">Champagne · Moët & Chandon</div>
+      <div class="card-footer">
+        <span class="card-vintage">2015</span>
+        <span class="card-value">~<strong>R$ 2.100</strong></span>
+      </div>
+    </div>
+  </article>
+
+  <!-- Branco card -->
+  <article class="wine-card">
+    <div class="card-stage branco">
+      <div class="card-bottle">
+        <svg viewBox="0 0 64 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g-branco" x1="0" y1="0" x2="64" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#3a4228"/>
+              <stop offset="50%" stop-color="#2e3620"/>
+              <stop offset="100%" stop-color="#1e2416"/>
+            </linearGradient>
+            <linearGradient id="g-branco-cap" x1="0" y1="0" x2="64" y2="20" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#5a7a3a"/>
+              <stop offset="100%" stop-color="#44523a"/>
+            </linearGradient>
+          </defs>
+          <rect x="23" y="0" width="18" height="14" rx="3" fill="url(#g-branco-cap)"/>
+          <rect x="25" y="12" width="14" height="30" rx="2" fill="url(#g-branco)"/>
+          <path d="M15 42 Q15 38 25 38 L39 38 Q49 38 49 42 L49 162 Q49 168 43 170 L21 170 Q15 168 15 162 Z" fill="url(#g-branco)"/>
+          <rect x="18" y="62" width="28" height="68" rx="4" fill="rgba(255,255,255,0.08)"/>
+          <rect x="21" y="70" width="22" height="1.5" rx="0.75" fill="rgba(255,255,255,0.25)"/>
+          <rect x="20" y="77" width="24" height="14" rx="3" fill="rgba(255,255,255,0.05)"/>
+          <rect x="21" y="97" width="22" height="1.5" rx="0.75" fill="rgba(255,255,255,0.12)"/>
+          <rect x="16" y="44" width="4" height="56" rx="2" fill="rgba(255,255,255,0.06)"/>
+          <ellipse cx="32" cy="168" rx="17" ry="4.5" fill="rgba(0,0,0,0.25)"/>
+        </svg>
+      </div>
+      <span class="qty-badge">5 garrafas</span>
+      <span class="status-badge guard">em guarda</span>
+      <div class="card-actions">
+        <button class="card-action-btn">Detalhes</button>
+        <button class="card-action-btn">Harmonizar</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-name">Cloudy Bay</div>
+      <div class="card-meta">Sauvignon Blanc · Nova Zelândia</div>
+      <div class="card-footer">
+        <span class="card-vintage">2023</span>
+        <span class="card-value">~<strong>R$ 280</strong></span>
+      </div>
+    </div>
+  </article>
+
+  <!-- Tinto 2 card -->
+  <article class="wine-card">
+    <div class="card-stage tinto">
+      <div class="card-bottle">
+        <svg viewBox="0 0 64 188" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g-tinto2" x1="0" y1="0" x2="64" y2="188" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#261218"/>
+              <stop offset="40%" stop-color="#1c0d14"/>
+              <stop offset="100%" stop-color="#14080e"/>
+            </linearGradient>
+          </defs>
+          <rect x="22" y="0" width="20" height="14" rx="3" fill="#8d673a"/>
+          <rect x="24" y="12" width="16" height="30" rx="2" fill="url(#g-tinto2)"/>
+          <path d="M14 42 Q14 38 24 38 L40 38 Q50 38 50 42 L50 162 Q50 168 44 170 L20 170 Q14 168 14 162 Z" fill="url(#g-tinto2)"/>
+          <rect x="17" y="58" width="30" height="76" rx="5" fill="rgba(255,248,239,0.08)"/>
+          <rect x="20" y="67" width="24" height="2" rx="1" fill="rgba(255,248,239,0.2)"/>
+          <rect x="19" y="75" width="26" height="24" rx="3" fill="rgba(255,248,239,0.05)"/>
+          <rect x="20" y="105" width="24" height="1.5" rx="0.75" fill="rgba(255,248,239,0.12)"/>
+          <rect x="21" y="111" width="22" height="1.5" rx="0.75" fill="rgba(255,248,239,0.07)"/>
+          <rect x="16" y="44" width="5" height="66" rx="2.5" fill="rgba(255,255,255,0.05)"/>
+          <ellipse cx="32" cy="168" rx="18" ry="5" fill="rgba(0,0,0,0.25)"/>
+        </svg>
+      </div>
+      <span class="qty-badge">1 garrafa</span>
+      <span class="status-badge soon">2025–2035</span>
+      <div class="card-actions">
+        <button class="card-action-btn primary">Abrir</button>
+        <button class="card-action-btn">Detalhes</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-name">Sassicaia</div>
+      <div class="card-meta">Bolgheri · Toscana · Itália</div>
+      <div class="card-footer">
+        <span class="card-vintage">2019</span>
+        <span class="card-value">~<strong>R$ 1.420</strong></span>
+      </div>
+    </div>
+  </article>
+
+</main>
+
+<div class="proto-note">Proposta Phase 3 — Adega</div>
+</body>
+</html>
