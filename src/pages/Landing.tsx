@@ -1,13 +1,9 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { analytics } from "@/lib/analytics";
-import { designSystem } from "@/styles/designSystem";
-import { LandingBackground } from "@/components/landing/LandingBackground";
-import { LandingHeader } from "@/components/landing/LandingHeader";
-import { LandingHero } from "@/components/landing/LandingHero";
-import { LandingShowcase } from "@/components/landing/LandingShowcase";
-import { LandingPricing, landingFaqs } from "@/components/landing/LandingPricing";
-import { LandingFooter } from "@/components/landing/LandingFooter";
+import { LandingV6 } from "@/components/landing/v6/LandingV6";
+import { landingV6Faqs } from "@/components/landing/v6/faqs";
+import "@/styles/landing-v6.css";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -70,7 +66,7 @@ export default function Landing() {
       {
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        mainEntity: landingFaqs.map((faq) => ({
+        mainEntity: landingV6Faqs.map((faq) => ({
           "@type": "Question",
           name: faq.q,
           acceptedAnswer: {
@@ -102,16 +98,5 @@ export default function Landing() {
     navigate("/login");
   };
 
-  return (
-      <div className={`${designSystem.pageShell} ${designSystem.pageBackground} landing-shell-premium`}>
-      <LandingBackground />
-      <LandingHeader onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
-      <main>
-        <LandingHero onSignup={handleStartFreeClick} />
-        <LandingShowcase />
-        <LandingPricing onSignup={handleStartFreeClick} />
-      </main>
-      <LandingFooter onLogin={handleLoginClick} onSignup={handleStartFreeClick} />
-    </div>
-  );
+  return <LandingV6 onLogin={handleLoginClick} onSignup={handleStartFreeClick} />;
 }

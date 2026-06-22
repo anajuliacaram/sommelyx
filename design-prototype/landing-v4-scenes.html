@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sommelyx — Landing V4 · Scenes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ─────────────────────────────────────────────
+   RESET + BASE
+   ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+:root {
+  --ivory:     #fff8ef;
+  --ivory-mid: #f2e8d8;
+  --ivory-dim: #e0ccb0;
+  --wine:      #6e0f1e;
+  --wine-deep: #3d0610;
+  --gold:      #c8a85a;
+  --gold-pale: #e8d4a0;
+  --gold-dim:  #8d673a;
+  --olive:     #44523a;
+  --forest:    #0d1810;
+  --deep:      #09100c;
+  --ink:       #1a0f0c;
+  --cork-lt:   #d4a96a;
+  --cork-mid:  #b8874e;
+  --cork-dk:   #8d6434;
+  --f-d: 'Cormorant Garamond', Georgia, serif;
+  --f-u: 'Inter', system-ui, sans-serif;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body {
+  font-family: var(--f-u);
+  background: var(--deep);
+  color: var(--ivory);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   NAV — minimal glass pill, always present
+   ───────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 18px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  width: min(1060px, calc(100vw - 36px));
+  background: rgba(9,16,12,0.72);
+  border: 1px solid rgba(255,248,239,0.08);
+  border-radius: 999px;
+  backdrop-filter: blur(32px) saturate(1.1);
+  box-shadow: 0 2px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,248,239,0.05);
+}
+.nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 22px;
+  min-height: 58px;
+}
+.nav-brand {
+  font-family: var(--f-d);
+  font-size: 19px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.82);
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-brand-mark {
+  width: 22px; height: 58px;
+  opacity: 0.8;
+}
+.nav-links {
+  display: flex;
+  gap: 2px;
+}
+.nav-links a {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,248,239,0.38);
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+}
+.nav-links a:hover { color: rgba(255,248,239,0.78); background: rgba(255,248,239,0.05); }
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.nav-login {
+  padding: 8px 14px;
+  background: transparent; border: none;
+  color: rgba(255,248,239,0.35);
+  font: 13px/1 var(--f-u);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.nav-login:hover { color: rgba(255,248,239,0.72); }
+.nav-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 22px;
+  background: rgba(200,168,90,0.12);
+  border: 1px solid rgba(200,168,90,0.28);
+  border-radius: 999px;
+  color: var(--gold-pale);
+  font: 13px/1 var(--f-u);
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+}
+.nav-cta:hover { background: rgba(200,168,90,0.22); border-color: rgba(200,168,90,0.48); }
+
+
+/* ─────────────────────────────────────────────
+   SCENE 1 — BRAND OPENING
+   Almost empty. The brand mark and one feeling.
+   The website opens like a wine cellar door.
+   ───────────────────────────────────────────── */
+.scene-opening {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 48%, rgba(110,15,30,0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 40% at 22% 70%, rgba(68,82,58,0.15) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 45% at 80% 25%, rgba(200,168,90,0.07) 0%, transparent 55%),
+    linear-gradient(168deg, #09100c 0%, #120810 45%, #0a1208 100%);
+}
+.opening-grain {
+  position: absolute; inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  pointer-events: none;
+}
+.opening-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  text-align: center;
+}
+.brand-mark-large {
+  width: 70px;
+  margin-bottom: 32px;
+  animation: brand-breathe 6s ease-in-out infinite;
+  filter: drop-shadow(0 12px 32px rgba(110,15,30,0.45));
+}
+@keyframes brand-breathe {
+  0%,100% { transform: translateY(0px); opacity: 1; }
+  50% { transform: translateY(-7px); opacity: 0.92; }
+}
+.opening-brand {
+  font-family: var(--f-d);
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  color: rgba(255,248,239,0.86);
+  margin-bottom: 22px;
+  text-transform: uppercase;
+}
+.opening-line {
+  font-family: var(--f-d);
+  font-size: clamp(17px, 1.8vw, 22px);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(255,248,239,0.38);
+  letter-spacing: 0.02em;
+  margin-bottom: 52px;
+  max-width: 480px;
+  line-height: 1.5;
+}
+.opening-actions {
+  display: flex; align-items: center; gap: 14px;
+}
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 16px 36px;
+  background: linear-gradient(135deg, #8a1224 0%, #600d1a 100%);
+  border: none;
+  border-radius: 999px;
+  color: rgba(255,248,239,0.92);
+  font: 14px/1 var(--f-u);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 36px rgba(110,15,30,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  transition: all 0.3s var(--ease);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(110,15,30,0.5), inset 0 1px 0 rgba(255,255,255,0.12); }
+.btn-ghost {
+  padding: 16px 28px;
+  background: transparent;
+  border: 1px solid rgba(255,248,239,0.1);
+  border-radius: 999px;
+  color: rgba(255,248,239,0.38);
+  font: 14px/1 var(--f-u);
+  cursor: pointer;
+  transition: all 0.25s var(--ease);
+}
+.btn-ghost:hover { border-color: rgba(255,248,239,0.24); color: rgba(255,248,239,0.72); }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute;
+  bottom: 36px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(255,248,239,0.2);
+  text-transform: uppercase;
+}
+.scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(255,248,239,0.2), transparent);
+  animation: scroll-pulse 2.5s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%,100% { transform: scaleY(1); opacity: 0.4; }
+  50% { transform: scaleY(0.4); opacity: 0.15; }
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 2 — THE HERO
+   The bottle is the protagonist.
+   Text is positioned cinematically, not in a grid.
+   RIGHT side: atmospheric wine photography, not UI.
+   ───────────────────────────────────────────── */
+.scene-hero {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 55% 65% at 72% 45%, rgba(68,82,58,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 50% at 18% 60%, rgba(200,168,90,0.1) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 75% 85%, rgba(110,15,30,0.22) 0%, transparent 50%),
+    linear-gradient(152deg, #0a100d 0%, #150e10 40%, #0c1509 80%, #09100c 100%);
+}
+.hero-grain {
+  position: absolute; inset: 0;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  pointer-events: none;
+}
+
+/* LEFT: Story */
+.hero-left {
+  position: relative;
+  z-index: 2;
+  padding: 100px 48px 80px clamp(36px, 5vw, 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 12px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  color: rgba(200,168,90,0.55);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.hero-eyebrow::before {
+  content: '';
+  display: block;
+  width: 28px; height: 1px;
+  background: rgba(200,168,90,0.4);
+}
+.hero-h1 {
+  font-family: var(--f-d);
+  font-size: clamp(50px, 5.8vw, 84px);
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  color: var(--ivory);
+  margin-bottom: 30px;
+}
+.hero-h1 em {
+  font-style: italic;
+  color: rgba(200,168,90,0.68);
+}
+.hero-pull {
+  font-family: var(--f-d);
+  font-size: clamp(17px, 1.8vw, 22px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.7;
+  color: rgba(255,248,239,0.42);
+  margin-bottom: 48px;
+  max-width: 380px;
+  border-left: 1px solid rgba(200,168,90,0.22);
+  padding-left: 20px;
+}
+.hero-ctas {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  margin-bottom: 44px;
+}
+.hero-proof {
+  display: flex; align-items: center; gap: 16px;
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.25);
+  letter-spacing: 0.03em;
+}
+.proof-dot {
+  width: 2px; height: 2px;
+  border-radius: 50%;
+  background: rgba(255,248,239,0.2);
+}
+
+/* RIGHT: Atmospheric wine composition — NOT a UI card */
+.hero-right {
+  position: relative;
+  z-index: 2;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Atmosphere layers — this replaces "background" */
+.atmo-layer {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+}
+.atmo-1 {
+  width: 500px; height: 500px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(110,15,30,0.3) 0%, rgba(68,82,58,0.18) 40%, transparent 70%);
+  filter: blur(48px);
+}
+.atmo-2 {
+  width: 350px; height: 350px;
+  top: 20%; left: 55%;
+  background: radial-gradient(circle, rgba(200,168,90,0.18) 0%, transparent 65%);
+  filter: blur(56px);
+  animation: atmo-shift 12s ease-in-out infinite;
+}
+.atmo-3 {
+  width: 280px; height: 280px;
+  bottom: 15%; left: 20%;
+  background: radial-gradient(circle, rgba(68,82,58,0.22) 0%, transparent 65%);
+  filter: blur(42px);
+  animation: atmo-shift 16s ease-in-out infinite reverse;
+}
+@keyframes atmo-shift {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(15px,-12px) scale(1.06); }
+  66% { transform: translate(-10px,18px) scale(0.97); }
+}
+
+/* The bottle — premium, large, protagonist */
+.hero-bottle-wrap {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-bottle-svg {
+  width: 110px;
+  height: 298px;
+  filter:
+    drop-shadow(0 40px 80px rgba(0,0,0,0.7))
+    drop-shadow(0 16px 32px rgba(0,0,0,0.5))
+    drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  animation: hero-float 9s ease-in-out infinite;
+}
+@keyframes hero-float {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Atmospheric glass reflections around bottle — NOT UI, purely visual */
+.bottle-reflection {
+  position: absolute;
+  pointer-events: none;
+}
+.refl-left {
+  width: 2px; height: 180px;
+  left: -38px; top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(200,168,90,0.18), transparent);
+  filter: blur(2px);
+}
+.refl-right {
+  width: 1px; height: 120px;
+  right: -26px; top: 45%;
+  transform: translateY(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(255,248,239,0.1), transparent);
+  filter: blur(1px);
+}
+.refl-ground {
+  width: 140px; height: 28px;
+  bottom: -22px; left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(110,15,30,0.38) 0%, transparent 70%);
+  filter: blur(14px);
+  border-radius: 50%;
+}
+
+/* Floating vintage detail — purely visual, not a data pill */
+.vintage-float {
+  position: absolute;
+  font-family: var(--f-d);
+  animation: vin-float 8s ease-in-out infinite;
+}
+.vin-1 {
+  top: 18%; right: 8%;
+  font-size: 13px;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(200,168,90,0.45);
+  letter-spacing: 0.08em;
+  animation-delay: 0.5s;
+}
+.vin-2 {
+  bottom: 24%; left: 6%;
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.2);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation-delay: 2.5s;
+}
+.vin-3 {
+  top: 52%; right: 3%;
+  font-size: 32px;
+  font-weight: 300;
+  color: rgba(200,168,90,0.1);
+  letter-spacing: -0.02em;
+  animation-delay: 1.8s;
+}
+@keyframes vin-float {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Glass panel — subtle, atmospheric, not a UI card */
+.glass-whisper {
+  position: absolute;
+  background: rgba(255,248,239,0.03);
+  border: 1px solid rgba(255,248,239,0.07);
+  border-radius: 28px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,248,239,0.06);
+}
+.whisper-1 {
+  width: 180px; height: 220px;
+  bottom: 14%; left: -2%;
+  border-radius: 22px;
+  transform: rotate(-4deg);
+  animation: whisper-float 11s ease-in-out infinite;
+  padding: 22px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+}
+@keyframes whisper-float {
+  0%,100% { transform: rotate(-4deg) translateY(0); }
+  50% { transform: rotate(-3.5deg) translateY(-7px); }
+}
+.whisper-label {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(200,168,90,0.5);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.whisper-name {
+  font-family: var(--f-d);
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.72);
+  line-height: 1.15;
+  margin-bottom: 5px;
+}
+.whisper-sub {
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.32);
+  line-height: 1.5;
+}
+.whisper-2 {
+  width: 140px; height: 100px;
+  top: 12%; left: 5%;
+  border-radius: 18px;
+  transform: rotate(3deg);
+  animation: whisper-float-2 13s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+@keyframes whisper-float-2 {
+  0%,100% { transform: rotate(3deg) translateY(0); }
+  50% { transform: rotate(2.5deg) translateY(-5px); }
+}
+.whisper-year {
+  font-family: var(--f-d);
+  font-size: 44px;
+  font-weight: 300;
+  color: rgba(200,168,90,0.22);
+  letter-spacing: -0.02em;
+}
+
+/* Fade transition from scene 2 to 3 */
+.scene-fade-dark {
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, var(--deep));
+  pointer-events: none;
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 3 — THE PHILOSOPHY
+   One enormous Cormorant quote.
+   Nothing else. This is editorial, not a feature.
+   ───────────────────────────────────────────── */
+.scene-philosophy {
+  min-height: 80dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px clamp(36px, 8vw, 140px);
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(200,168,90,0.07) 0%, transparent 60%),
+    var(--deep);
+  position: relative;
+}
+.philosophy-inner {
+  max-width: 900px;
+  text-align: center;
+}
+.philosophy-mark {
+  font-family: var(--f-d);
+  font-size: 80px;
+  font-weight: 300;
+  color: rgba(200,168,90,0.18);
+  line-height: 0.7;
+  margin-bottom: 28px;
+  display: block;
+}
+.philosophy-quote {
+  font-family: var(--f-d);
+  font-size: clamp(36px, 5.5vw, 72px);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: rgba(255,248,239,0.88);
+}
+.philosophy-quote em {
+  font-style: italic;
+  color: rgba(200,168,90,0.65);
+}
+.philosophy-attr {
+  display: block;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: rgba(255,248,239,0.2);
+  margin-top: 40px;
+  text-transform: uppercase;
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 4 — ADEGA WORLD
+   Full-height. Deep forest. The cellar.
+   No cards. No feature copy. A world.
+   ───────────────────────────────────────────── */
+.scene-adega {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 30%, rgba(68,82,58,0.32) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 15% 80%, rgba(68,82,58,0.2) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 85% 70%, rgba(200,168,90,0.1) 0%, transparent 55%),
+    linear-gradient(162deg, #0a1008 0%, #0e1810 40%, #091408 80%, #0a1008 100%);
+}
+.adega-bottles-bg {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  padding: 0 48px;
+  opacity: 0.14;
+  pointer-events: none;
+}
+.bg-btl {
+  background: rgba(68,82,58,0.8);
+  border-radius: 3px 3px 8px 8px;
+  flex-shrink: 0;
+}
+
+.adega-content {
+  position: relative;
+  z-index: 2;
+  padding: 120px clamp(36px, 6vw, 100px);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.world-giant-label {
+  font-family: var(--f-d);
+  font-size: clamp(80px, 14vw, 180px);
+  font-weight: 300;
+  color: rgba(255,248,239,0.04);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+  position: absolute;
+  top: 50%;
+  left: clamp(20px, 4vw, 60px);
+  transform: translateY(-50%);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Bottle arrangement — visual composition */
+.adega-bottles-viz {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  height: 320px;
+  justify-content: center;
+}
+.adega-btl {
+  border-radius: 3px 3px 9px 9px;
+  flex-shrink: 0;
+  transition: transform 0.5s var(--ease);
+  filter: drop-shadow(0 16px 32px rgba(0,0,0,0.55));
+}
+.scene-adega:hover .adega-btl { transform: translateY(-6px); }
+.adega-btl:nth-child(1) { width:26px; height:240px; background: linear-gradient(to bottom, #2a3d24, #1e2e19); }
+.adega-btl:nth-child(2) { width:26px; height:288px; background: linear-gradient(to bottom, #3d1828, #280f1a); }
+.adega-btl:nth-child(3) { width:26px; height:260px; background: linear-gradient(to bottom, #2d3a25, #1e2818); animation-delay: 0.1s; }
+.adega-btl:nth-child(4) { width:26px; height:316px; background: linear-gradient(to bottom, #4a3218, #2e1e0c); }
+.adega-btl:nth-child(5) { width:26px; height:272px; background: linear-gradient(to bottom, #2a3a22, #1a2814); }
+.adega-btl:nth-child(6) { width:26px; height:248px; background: linear-gradient(to bottom, #3a2818, #241a0c); }
+.adega-btl:nth-child(7) { width:26px; height:295px; background: linear-gradient(to bottom, #301826, #200f1a); }
+
+.world-copy { position: relative; z-index: 2; }
+.world-eyebrow {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  color: rgba(255,248,239,0.28);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.world-h2 {
+  font-family: var(--f-d);
+  font-size: clamp(40px, 4.5vw, 60px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: rgba(255,248,239,0.92);
+  margin-bottom: 20px;
+}
+.world-h2 em { font-style: italic; color: rgba(200,168,90,0.65); }
+.world-body {
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.82;
+  color: rgba(255,248,239,0.4);
+  max-width: 340px;
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 5 — CARTA WORLD
+   Warm parchment atmosphere. The sommelier's ritual.
+   ───────────────────────────────────────────── */
+.scene-carta {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse 70% 60% at 60% 35%, rgba(200,168,90,0.2) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 50% at 20% 75%, rgba(141,103,58,0.16) 0%, transparent 55%),
+    linear-gradient(158deg, #1a1208 0%, #201608 45%, #160e06 100%);
+}
+.carta-content {
+  position: relative;
+  z-index: 2;
+  padding: 120px clamp(36px,6vw,100px);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  direction: rtl; /* Flip columns: visual left, text right */
+}
+.carta-content > * { direction: ltr; }
+
+/* The menu object — more editorial, less UI */
+.carta-menu-obj {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  justify-self: end;
+}
+.carta-card-outer {
+  background: rgba(255,248,239,0.04);
+  border: 1px solid rgba(200,168,90,0.1);
+  border-radius: 28px;
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(200,168,90,0.08);
+  padding: 36px;
+  position: relative;
+}
+.carta-card-outer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(to right, transparent, rgba(200,168,90,0.3), transparent);
+  border-radius: 28px 28px 0 0;
+}
+.carta-header {
+  font-family: var(--f-d);
+  font-size: 24px;
+  font-weight: 500;
+  font-style: italic;
+  color: rgba(255,248,239,0.65);
+  margin-bottom: 6px;
+}
+.carta-sub-header {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  color: rgba(200,168,90,0.45);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(200,168,90,0.1);
+}
+.carta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,248,239,0.04);
+  gap: 12px;
+}
+.carta-item:last-child { border-bottom: none; }
+.carta-wine-n {
+  font-family: var(--f-d);
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.72);
+  flex: 1;
+  min-width: 0;
+}
+.carta-meta {
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.3);
+  white-space: nowrap;
+}
+.carta-highlight {
+  font-size: 10px;
+  color: rgba(200,168,90,0.72);
+  background: rgba(200,168,90,0.1);
+  border: 1px solid rgba(200,168,90,0.2);
+  padding: 3px 9px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+/* Floating "insight" piece — offset, atmospheric */
+.carta-float-insight {
+  position: absolute;
+  right: -32px;
+  bottom: -24px;
+  width: 160px;
+  background: rgba(110,15,30,0.45);
+  border: 1px solid rgba(200,100,80,0.18);
+  border-radius: 18px;
+  padding: 16px 18px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.45);
+  animation: insight-float 9s ease-in-out infinite;
+}
+@keyframes insight-float {
+  0%,100% { transform: rotate(3deg) translateY(0); }
+  50% { transform: rotate(2.5deg) translateY(-5px); }
+}
+.fi-label {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: rgba(255,200,180,0.5);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.fi-text {
+  font-family: var(--f-d);
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.8);
+  line-height: 1.2;
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 6 — MESA WORLD
+   Wine evening. The pairing ritual. Warmth.
+   ───────────────────────────────────────────── */
+.scene-mesa {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  background:
+    radial-gradient(ellipse 70% 65% at 35% 40%, rgba(110,15,30,0.28) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 50% at 80% 75%, rgba(141,103,58,0.18) 0%, transparent 55%),
+    linear-gradient(155deg, #160a0c 0%, #1a0c10 40%, #130a0c 100%);
+}
+.mesa-content {
+  position: relative;
+  z-index: 2;
+  padding: 120px clamp(36px,6vw,100px);
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+/* Mesa visual — glass + pairing composition */
+.mesa-visual {
+  position: relative;
+  height: 360px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mesa-glow {
+  position: absolute;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(110,15,30,0.3) 0%, rgba(200,168,90,0.08) 40%, transparent 70%);
+  filter: blur(48px);
+}
+.mesa-glass-svg {
+  width: 80px;
+  filter: drop-shadow(0 16px 40px rgba(0,0,0,0.6)) drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+  animation: glass-float 10s ease-in-out infinite;
+}
+@keyframes glass-float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Pairing suggestion — floats off the glass as a whisper */
+.pairing-whisper {
+  position: absolute;
+  right: 0; top: 30%;
+  width: 200px;
+  background: rgba(255,248,239,0.04);
+  border: 1px solid rgba(255,248,239,0.08);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.45);
+  animation: pair-float 12s ease-in-out infinite;
+  animation-delay: 1s;
+}
+@keyframes pair-float {
+  0%,100% { transform: translateY(0) rotate(2deg); }
+  50% { transform: translateY(-7px) rotate(1.5deg); }
+}
+.pw-dish { font-size: 28px; margin-bottom: 10px; }
+.pw-label {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(200,168,90,0.5);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pw-rec {
+  font-family: var(--f-d);
+  font-size: 17px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.75);
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+.pw-match {
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(110,180,90,0.65);
+}
+
+
+/* ─────────────────────────────────────────────
+   SCENE 7 — THE PRODUCT
+   The app as a precious artifact.
+   Three glass panels, layered, floating.
+   NEVER a feature list. NEVER a screenshot.
+   ───────────────────────────────────────────── */
+.scene-product {
+  min-height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px clamp(36px,5vw,80px);
+  background:
+    radial-gradient(ellipse 60% 55% at 25% 35%, rgba(68,82,58,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 60% at 80% 72%, rgba(110,15,30,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 45% 45% at 60% 20%, rgba(200,168,90,0.07) 0%, transparent 55%),
+    linear-gradient(150deg, #09100c 0%, #150d10 50%, #0c1309 100%);
+}
+.product-header {
+  text-align: center;
+  margin-bottom: 80px;
+  position: relative;
+  z-index: 2;
+}
+.product-eyebrow {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  color: rgba(200,168,90,0.5);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.product-h2 {
+  font-family: var(--f-d);
+  font-size: clamp(42px, 5.5vw, 72px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  color: rgba(255,248,239,0.9);
+}
+.product-h2 em { font-style: italic; color: rgba(200,168,90,0.65); }
+
+/* Layered product panels — like precious objects on a table */
+.product-stage {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  height: 480px;
+  z-index: 2;
+}
+
+/* Each panel = a moment in the product experience */
+/* Positioned to create depth: foreground, mid, background */
+.prod-panel {
+  position: absolute;
+  background: rgba(255,248,239,0.04);
+  border: 1px solid rgba(255,248,239,0.08);
+  backdrop-filter: blur(28px) saturate(1.05);
+  box-shadow:
+    0 28px 72px rgba(0,0,0,0.55),
+    0 8px 24px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,248,239,0.07);
+  border-radius: 24px;
+  overflow: hidden;
+  padding: 28px;
+}
+.prod-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,248,239,0.1), transparent);
+}
+
+/* Background panel — large, slightly back, angled */
+.pp-bg {
+  width: 520px; height: 340px;
+  top: 50%; left: 50%;
+  transform: translate(-58%, -50%) rotate(-4deg) scale(0.92);
+  opacity: 0.65;
+  z-index: 1;
+}
+
+/* Mid panel — centered, prominent */
+.pp-mid {
+  width: 420px; height: 320px;
+  top: 50%; left: 50%;
+  transform: translate(-44%, -48%) rotate(2deg);
+  z-index: 2;
+}
+
+/* Foreground panel — small, hangs off corner, like Advertda reference */
+.pp-fg {
+  width: 220px; height: 160px;
+  bottom: 2%; right: 8%;
+  transform: rotate(-2deg);
+  z-index: 3;
+  animation: fg-float 8s ease-in-out infinite;
+}
+@keyframes fg-float {
+  0%,100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(-1.5deg) translateY(-8px); }
+}
+
+/* Panel content: the app moments */
+.pp-label {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(200,168,90,0.55);
+  margin-bottom: 16px;
+}
+.pp-wine-display {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.pp-bottle {
+  width: 36px; height: 98px;
+  background: linear-gradient(to bottom, rgba(110,15,30,0.5), rgba(110,15,30,0.85));
+  border-radius: 3px 3px 7px 7px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+}
+.pp-wine-name {
+  font-family: var(--f-d);
+  font-size: 22px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.85);
+  margin-bottom: 5px;
+  line-height: 1.1;
+}
+.pp-meta {
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.38);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.pp-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: rgba(200,168,90,0.75);
+  padding: 5px 12px;
+  border: 1px solid rgba(200,168,90,0.2);
+  border-radius: 100px;
+  background: rgba(200,168,90,0.07);
+}
+.pp-tag::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(200,168,90,0.65);
+}
+.pp-divider {
+  height: 1px;
+  background: rgba(255,248,239,0.05);
+  margin: 16px 0;
+}
+.pp-insights {
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.35);
+  line-height: 1.65;
+}
+
+/* Mid panel: harmony */
+.pp-harm-query {
+  font-family: var(--f-d);
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255,248,239,0.5);
+  padding: 16px 20px;
+  background: rgba(255,248,239,0.04);
+  border: 1px solid rgba(255,248,239,0.06);
+  border-radius: 14px;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+.pp-harm-result {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(68,82,58,0.14);
+  border: 1px solid rgba(68,82,58,0.22);
+  border-radius: 14px;
+}
+.pp-harm-btl {
+  width: 28px; height: 72px;
+  background: linear-gradient(to bottom, rgba(68,82,58,0.55), rgba(68,82,58,0.85));
+  border-radius: 2px 2px 5px 5px;
+  flex-shrink: 0;
+}
+.pp-harm-name {
+  font-family: var(--f-d);
+  font-size: 19px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.82);
+  margin-bottom: 3px;
+}
+.pp-harm-sub { font-size: 11px; font-weight: 300; color: rgba(255,248,239,0.38); }
+.pp-harm-match {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(130,175,100,0.75);
+  white-space: nowrap;
+}
+
+/* Foreground panel: mini cellar insight */
+.pp-mini-label {
+  font-size: 9px; letter-spacing: 0.18em;
+  color: rgba(200,168,90,0.5);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.pp-mini-val {
+  font-family: var(--f-d);
+  font-size: 28px;
+  font-weight: 500;
+  color: rgba(255,248,239,0.82);
+  margin-bottom: 3px;
+}
+.pp-mini-sub { font-size: 11px; font-weight: 300; color: rgba(255,248,239,0.35); }
+
+
+/* ─────────────────────────────────────────────
+   SCENE 8 — MEMBERSHIP
+   Not a pricing table. Private access.
+   A collectors' club invitation.
+   ───────────────────────────────────────────── */
+.scene-membership {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px clamp(36px,5vw,80px);
+  background:
+    radial-gradient(ellipse 65% 55% at 50% 40%, rgba(200,168,90,0.1) 0%, transparent 58%),
+    var(--ivory);
+  color: var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+.membership-grain {
+  position: absolute; inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  pointer-events: none;
+}
+.membership-header {
+  text-align: center;
+  margin-bottom: 72px;
+  position: relative;
+  z-index: 1;
+}
+.memb-eyebrow {
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.26em;
+  color: rgba(26,15,12,0.3);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.memb-h2 {
+  font-family: var(--f-d);
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.06;
+  color: var(--ink);
+  margin-bottom: 14px;
+}
+.memb-h2 em { font-style: italic; color: var(--gold-dim); }
+.memb-sub {
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(26,15,12,0.45);
+}
+
+/* Membership cards — club presentation, not SaaS tiers */
+.memb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  max-width: 860px;
+  position: relative;
+  z-index: 1;
+}
+.memb-card {
+  border-radius: 28px;
+  padding: 44px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  cursor: default;
+}
+.memb-card:hover { transform: translateY(-4px); }
+.memb-light {
+  background: var(--ivory-mid);
+  border: 1px solid rgba(26,15,12,0.06);
+  box-shadow: 0 4px 24px rgba(26,15,12,0.05);
+}
+.memb-light:hover { box-shadow: 0 20px 60px rgba(26,15,12,0.1); }
+.memb-dark {
+  background: linear-gradient(145deg, #1a0c10 0%, #111a0e 55%, #0e1a0c 100%);
+  border: 1px solid rgba(255,248,239,0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  color: var(--ivory);
+}
+.memb-dark:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.memb-dark::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,168,90,0.1) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.memb-access-label {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  padding: 5px 12px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+}
+.memb-light .memb-access-label {
+  background: rgba(26,15,12,0.05);
+  color: rgba(26,15,12,0.4);
+  border: 1px solid rgba(26,15,12,0.08);
+}
+.memb-dark .memb-access-label {
+  background: rgba(200,168,90,0.1);
+  color: rgba(200,168,90,0.7);
+  border: 1px solid rgba(200,168,90,0.2);
+}
+.memb-name {
+  font-family: var(--f-d);
+  font-size: 42px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+.memb-light .memb-name { color: var(--ink); }
+.memb-dark .memb-name { color: var(--ivory); }
+.memb-tagline {
+  font-family: var(--f-d);
+  font-size: 16px;
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 28px;
+}
+.memb-light .memb-tagline { color: rgba(26,15,12,0.42); }
+.memb-dark .memb-tagline { color: rgba(255,248,239,0.38); }
+
+.memb-price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.memb-price {
+  font-family: var(--f-d);
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+.memb-light .memb-price { color: var(--ink); }
+.memb-dark .memb-price { color: var(--ivory); }
+.memb-period {
+  font-size: 14px;
+  font-weight: 300;
+}
+.memb-light .memb-period { color: rgba(26,15,12,0.38); }
+.memb-dark .memb-period { color: rgba(255,248,239,0.35); }
+.memb-annual {
+  font-size: 12px;
+  font-weight: 300;
+  margin-bottom: 36px;
+  letter-spacing: 0.01em;
+}
+.memb-light .memb-annual { color: rgba(26,15,12,0.3); }
+.memb-dark .memb-annual { color: rgba(200,168,90,0.4); }
+
+.memb-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: 999px;
+  font: 14px/1 var(--f-u);
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  margin-bottom: 32px;
+}
+.memb-light .memb-cta {
+  background: var(--ink);
+  border: none;
+  color: var(--ivory);
+  box-shadow: 0 4px 20px rgba(26,15,12,0.18);
+}
+.memb-light .memb-cta:hover { box-shadow: 0 10px 32px rgba(26,15,12,0.28); transform: translateY(-1px); }
+.memb-dark .memb-cta {
+  background: rgba(200,168,90,0.14);
+  border: 1px solid rgba(200,168,90,0.3);
+  color: var(--gold-pale);
+}
+.memb-dark .memb-cta:hover { background: rgba(200,168,90,0.24); border-color: rgba(200,168,90,0.5); transform: translateY(-1px); }
+
+.memb-includes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.memb-includes li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.4;
+}
+.memb-light .memb-includes li { color: rgba(26,15,12,0.52); }
+.memb-dark .memb-includes li { color: rgba(255,248,239,0.48); }
+.memb-includes li::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.memb-light .memb-includes li::before { background: rgba(26,15,12,0.2); }
+.memb-dark .memb-includes li::before { background: rgba(200,168,90,0.55); }
+
+/* FAQ strip */
+.faq-strip {
+  width: 100%;
+  max-width: 860px;
+  margin-top: 60px;
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(26,15,12,0.06);
+  padding-top: 48px;
+}
+.faq-strip-head {
+  font-family: var(--f-d);
+  font-size: 28px;
+  font-weight: 400;
+  color: rgba(26,15,12,0.65);
+  margin-bottom: 28px;
+}
+.faq-row {
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(26,15,12,0.06);
+}
+.faq-q { font-family: var(--f-d); font-size: 18px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+.faq-a { font-size: 14px; font-weight: 300; line-height: 1.72; color: rgba(26,15,12,0.52); }
+
+
+/* ─────────────────────────────────────────────
+   SCENE 9 — THE CLOSE
+   One bottle. One line. One invitation.
+   The website closes like a cellar door.
+   ───────────────────────────────────────────── */
+.scene-close {
+  min-height: 90dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px clamp(36px,5vw,80px);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 40%, rgba(200,168,90,0.1) 0%, transparent 58%),
+    radial-gradient(ellipse 55% 55% at 20% 75%, rgba(110,15,30,0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 82% 25%, rgba(68,82,58,0.14) 0%, transparent 55%),
+    linear-gradient(152deg, #0a100d 0%, #190c0f 42%, #0e1a0a 78%, #09100c 100%);
+}
+/* silhouette bottles background */
+.close-bottles-bg {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 32px;
+  opacity: 0.045;
+  pointer-events: none;
+}
+.close-btl-bg {
+  background: var(--ivory);
+  border-radius: 4px 4px 10px 10px;
+}
+.close-brand-mark {
+  width: 52px;
+  margin-bottom: 36px;
+  opacity: 0.75;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 8px 24px rgba(110,15,30,0.4));
+}
+.close-h2 {
+  font-family: var(--f-d);
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+  color: rgba(255,248,239,0.9);
+  max-width: 660px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+.close-h2 em { font-style: italic; color: rgba(200,168,90,0.65); }
+.close-sub {
+  font-size: 15px;
+  font-weight: 300;
+  color: rgba(255,248,239,0.32);
+  margin-bottom: 52px;
+  max-width: 360px;
+  line-height: 1.7;
+  position: relative;
+  z-index: 1;
+}
+.close-cta { position: relative; z-index: 1; }
+
+/* ─────────────────────────────────────────────
+   FOOTER
+   ───────────────────────────────────────────── */
+.footer {
+  background: var(--deep);
+  border-top: 1px solid rgba(255,248,239,0.04);
+  padding: 44px clamp(36px,5vw,80px);
+}
+.footer-inner {
+  max-width: 1080px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-brand {
+  font-family: var(--f-d);
+  font-size: 17px; font-weight: 500;
+  color: rgba(255,248,239,0.3);
+  letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 8px;
+}
+.footer-mark { width: 16px; opacity: 0.6; }
+.footer-links { display: flex; gap: 18px; flex-wrap: wrap; }
+.footer-links a { font-size: 11px; font-weight: 300; color: rgba(255,248,239,0.22); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: rgba(255,248,239,0.55); }
+.footer-legal { font-size: 11px; font-weight: 300; color: rgba(255,248,239,0.15); }
+
+/* Prototype tag */
+.proto-tag {
+  position: fixed;
+  bottom: 16px; right: 16px;
+  z-index: 9999;
+  background: rgba(200,168,90,0.12);
+  border: 1px solid rgba(200,168,90,0.28);
+  color: var(--gold-pale);
+  font: 11px/1 var(--f-u);
+  padding: 8px 14px;
+  border-radius: 100px;
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .nav-links { display: none; }
+  .scene-hero { grid-template-columns: 1fr; min-height: auto; padding-top: 80px; }
+  .hero-right { height: 400px; }
+  .adega-content, .carta-content, .mesa-content { grid-template-columns: 1fr; gap: 48px; }
+  .carta-content { direction: ltr; }
+  .carta-menu-obj { justify-self: start; }
+  .carta-float-insight { display: none; }
+  .product-stage { height: auto; position: relative; }
+  .pp-bg, .pp-mid, .pp-fg { position: relative; top: auto; left: auto; right: auto; bottom: auto; transform: none; width: 100%; height: auto; margin-bottom: 12px; }
+  .product-stage { display: flex; flex-direction: column; gap: 0; }
+  .memb-grid { grid-template-columns: 1fr; }
+  .adega-bottles-viz { height: 220px; }
+  .adega-btl:nth-child(1),
+  .adega-btl:nth-child(2),
+  .adega-btl:nth-child(5),
+  .adega-btl:nth-child(6),
+  .adega-btl:nth-child(7) { display: none; }
+  .hero-bottle-svg { width: 86px; height: 232px; }
+  .whisper-2 { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <svg class="nav-brand-mark" viewBox="0 0 36 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="nc" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+            <rect width="3" height="3" fill="#c49a4a"/>
+            <circle cx="0.8" cy="0.8" r="0.55" fill="#a88038" opacity="0.65"/>
+            <circle cx="2.2" cy="2.2" r="0.45" fill="#d4aa5a" opacity="0.5"/>
+          </pattern>
+        </defs>
+        <path d="M13 0 Q13 0 14 8 L14 20 Q8 25 7 32 L7 85 Q7 93 12 95 L24 95 Q29 93 29 85 L29 32 Q28 25 22 20 L22 8 Q23 0 23 0 Z" fill="url(#nc)"/>
+        <text x="18" y="62" font-family="Georgia,serif" font-size="20" font-weight="400" fill="#7a1224" text-anchor="middle" dominant-baseline="middle">S</text>
+      </svg>
+      Sommelyx
+    </a>
+    <div class="nav-links">
+      <a href="#adega">Adega</a>
+      <a href="#carta">Carta</a>
+      <a href="#mesa">Mesa</a>
+      <a href="#membership">Planos</a>
+    </div>
+    <div class="nav-actions">
+      <button class="nav-login">Entrar</button>
+      <button class="nav-cta">
+        Começar
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 5h8M5.5 1.5L9 5l-3.5 3.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ══ SCENE 1: BRAND OPENING ══ -->
+<section class="scene-opening">
+  <div class="opening-grain"></div>
+  <div class="opening-center">
+    <!-- Cork bottle brand mark -->
+    <svg class="brand-mark-large" viewBox="0 0 80 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="cork-lg" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+          <rect width="4" height="4" fill="#c49a4a"/>
+          <circle cx="1" cy="1" r="0.7" fill="#a08038" opacity="0.6"/>
+          <circle cx="3" cy="3" r="0.5" fill="#d4aa5a" opacity="0.55"/>
+          <circle cx="0.5" cy="3" r="0.4" fill="#b08840" opacity="0.35"/>
+          <circle cx="3.5" cy="0.8" r="0.35" fill="#e0b460" opacity="0.3"/>
+        </pattern>
+        <radialGradient id="cork-sheen" cx="30%" cy="25%" r="60%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+      </defs>
+      <path d="M29 0 Q29 0 31 14 L31 36 Q18 44 16 56 L16 185 Q16 196 24 198 L56 198 Q64 196 64 185 L64 56 Q62 44 49 36 L49 14 Q51 0 51 0 Z" fill="url(#cork-lg)"/>
+      <path d="M29 0 Q29 0 31 14 L31 36 Q18 44 16 56 L16 185 Q16 196 24 198 L56 198 Q64 196 64 185 L64 56 Q62 44 49 36 L49 14 Q51 0 51 0 Z" fill="url(#cork-sheen)"/>
+      <text x="40" y="128" font-family="Georgia,serif" font-size="48" font-weight="400" fill="#7a1224" text-anchor="middle" dominant-baseline="middle">S</text>
+    </svg>
+
+    <h1 class="opening-brand">Sommelyx</h1>
+    <p class="opening-line">A sua adega, finalmente à altura<br>do que você guarda.</p>
+    <div class="opening-actions">
+      <button class="btn-primary">
+        Iniciar minha adega
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 6h10M6.5 2L11 6l-4.5 4"/>
+        </svg>
+      </button>
+      <button class="btn-ghost">Conhecer</button>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>descer</span>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 2: THE HERO ══ -->
+<section class="scene-hero">
+  <div class="hero-grain"></div>
+
+  <!-- LEFT: Story, emotion -->
+  <div class="hero-left">
+    <div class="hero-eyebrow">colecionar com propósito</div>
+    <h1 class="hero-h1">
+      O vinho que você<br>
+      guarda merece<br>
+      ser <em>lembrado.</em>
+    </h1>
+    <p class="hero-pull">
+      "Não é sobre organizar garrafas.<br>
+      É sobre não perder nenhum momento."
+    </p>
+    <div class="hero-ctas">
+      <button class="btn-primary">
+        Iniciar minha adega
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M1 6h10M6.5 2L11 6l-4.5 4"/>
+        </svg>
+      </button>
+      <button class="btn-ghost">Ver como funciona</button>
+    </div>
+    <div class="hero-proof">
+      <span>14 dias grátis</span>
+      <div class="proof-dot"></div>
+      <span>Sem cartão</span>
+      <div class="proof-dot"></div>
+      <span>Cancele quando quiser</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Atmospheric wine composition — NOT a UI card -->
+  <div class="hero-right">
+    <div class="atmo-layer atmo-1"></div>
+    <div class="atmo-layer atmo-2"></div>
+    <div class="atmo-layer atmo-3"></div>
+
+    <!-- Purely visual atmospheric elements — NOT labeled pills -->
+    <div class="vintage-float vin-3">2019</div>
+    <div class="vintage-float vin-1">Bolgheri · Toscana</div>
+    <div class="vintage-float vin-2">Cabernet Sauvignon</div>
+
+    <!-- Glass atmospheric whisper panels -->
+    <div class="glass-whisper whisper-1">
+      <div class="whisper-label">adega pessoal</div>
+      <div class="whisper-name">Sassicaia<br>2019</div>
+      <div class="whisper-sub">Tenuta San Guido<br>Bolgheri, Itália</div>
+    </div>
+    <div class="glass-whisper whisper-2">
+      <div class="whisper-year">2019</div>
+    </div>
+
+    <!-- The bottle — large, protagonist, no information overlays -->
+    <div class="hero-bottle-wrap">
+      <svg class="hero-bottle-svg" viewBox="0 0 110 298" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hb-body" x1="0" y1="0" x2="110" y2="298" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2a1520"/>
+            <stop offset="25%" stop-color="#1e0f18"/>
+            <stop offset="60%" stop-color="#170c14"/>
+            <stop offset="100%" stop-color="#0e0609"/>
+          </linearGradient>
+          <linearGradient id="hb-cap" x1="0" y1="0" x2="0" y2="22" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#b02535"/>
+            <stop offset="100%" stop-color="#7a1020"/>
+          </linearGradient>
+          <radialGradient id="hb-sheen" cx="26%" cy="22%" r="55%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.1)"/>
+            <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+          </radialGradient>
+          <linearGradient id="hb-edge" x1="0" y1="0" x2="110" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.06)"/>
+            <stop offset="18%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="82%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0.03)"/>
+          </linearGradient>
+        </defs>
+        <!-- Capsule -->
+        <rect x="38" y="0" width="34" height="22" rx="5" fill="url(#hb-cap)"/>
+        <rect x="36" y="20" width="38" height="4" rx="2" fill="rgba(90,12,22,0.9)"/>
+        <!-- Neck -->
+        <rect x="40" y="23" width="30" height="48" rx="5" fill="url(#hb-body)"/>
+        <!-- Body -->
+        <path d="M22 72 Q22 64 40 64 L70 64 Q88 64 88 72 L88 262 Q88 272 78 275 L32 275 Q22 272 22 262 Z" fill="url(#hb-body)"/>
+        <!-- Glass sheen -->
+        <path d="M22 72 Q22 64 40 64 L70 64 Q88 64 88 72 L88 262 Q88 272 78 275 L32 275 Q22 272 22 262 Z" fill="url(#hb-sheen)"/>
+        <!-- Label area -->
+        <rect x="27" y="92" width="56" height="130" rx="9" fill="rgba(255,248,239,0.07)"/>
+        <rect x="30" y="96" width="50" height="122" rx="7" fill="none" stroke="rgba(255,248,239,0.05)" stroke-width="0.6"/>
+        <!-- Label decoration -->
+        <rect x="35" y="104" width="40" height="2.5" rx="1.25" fill="rgba(255,248,239,0.25)"/>
+        <rect x="33" y="115" width="44" height="36" rx="6" fill="rgba(255,248,239,0.04)"/>
+        <rect x="34" y="160" width="42" height="2.5" rx="1.25" fill="rgba(200,168,90,0.38)"/>
+        <rect x="37" y="170" width="36" height="2" rx="1" fill="rgba(255,248,239,0.13)"/>
+        <rect x="38" y="177" width="34" height="2" rx="1" fill="rgba(255,248,239,0.08)"/>
+        <rect x="35" y="186" width="40" height="26" rx="5" fill="rgba(255,248,239,0.04)"/>
+        <!-- Left edge highlight -->
+        <rect x="23" y="74" width="7" height="130" rx="3.5" fill="rgba(255,255,255,0.05)"/>
+        <rect x="41" y="25" width="6" height="46" rx="3" fill="rgba(255,255,255,0.07)"/>
+        <!-- Base glow -->
+        <ellipse cx="55" cy="272" rx="36" ry="8" fill="rgba(0,0,0,0.5)"/>
+      </svg>
+      <!-- Atmospheric reflections — not data overlays -->
+      <div class="bottle-reflection refl-left"></div>
+      <div class="bottle-reflection refl-right"></div>
+      <div class="bottle-reflection refl-ground"></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 3: PHILOSOPHY ══ -->
+<section class="scene-philosophy">
+  <div class="philosophy-inner">
+    <span class="philosophy-mark">"</span>
+    <h2 class="philosophy-quote">
+      Cada garrafa guarda um momento.<br>
+      <em>Nenhuma merece ser esquecida.</em>
+    </h2>
+    <span class="philosophy-attr">Sommelyx · Adega pessoal</span>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 4: ADEGA WORLD ══ -->
+<section class="scene-adega" id="adega">
+  <div class="world-giant-label">ADEGA</div>
+  <div class="adega-content">
+    <div class="adega-bottles-viz">
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+      <div class="adega-btl"></div>
+    </div>
+    <div class="world-copy">
+      <p class="world-eyebrow">adega</p>
+      <h2 class="world-h2">A sua coleção,<br><em>finalmente viva.</em></h2>
+      <p class="world-body">
+        Cada garrafa com contexto, proveniência e janela de consumo. O Sommelyx lembra quando você deve abrir, antes que o momento passe.
+      </p>
+    </div>
+  </div>
+  <!-- Background silhouette bottles -->
+  <div class="adega-bottles-bg">
+    <div class="bg-btl" style="width:24px;height:210px"></div>
+    <div class="bg-btl" style="width:30px;height:268px"></div>
+    <div class="bg-btl" style="width:26px;height:240px"></div>
+    <div class="bg-btl" style="width:36px;height:310px"></div>
+    <div class="bg-btl" style="width:28px;height:255px"></div>
+    <div class="bg-btl" style="width:24px;height:228px"></div>
+    <div class="bg-btl" style="width:30px;height:285px"></div>
+    <div class="bg-btl" style="width:26px;height:245px"></div>
+    <div class="bg-btl" style="width:34px;height:295px"></div>
+    <div class="bg-btl" style="width:28px;height:260px"></div>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 5: CARTA WORLD ══ -->
+<section class="scene-carta" id="carta">
+  <div class="world-giant-label" style="color:rgba(200,168,90,0.04)">CARTA</div>
+  <div class="carta-content">
+    <div class="carta-menu-obj">
+      <div class="carta-card-outer">
+        <div class="carta-header">Carta de Inverno</div>
+        <div class="carta-sub-header">Harmonizações recomendadas</div>
+        <div class="carta-item">
+          <span class="carta-wine-n">Barolo Riserva 2016</span>
+          <span class="carta-highlight">excelente</span>
+        </div>
+        <div class="carta-item">
+          <span class="carta-wine-n">Borgonha Blanc</span>
+          <span class="carta-meta">Puligny-Montrachet</span>
+        </div>
+        <div class="carta-item">
+          <span class="carta-wine-n">Sassicaia 2019</span>
+          <span class="carta-highlight">na adega</span>
+        </div>
+        <div class="carta-item">
+          <span class="carta-wine-n">Chablis Premier Cru</span>
+          <span class="carta-meta">2021 · Borgonha</span>
+        </div>
+      </div>
+      <div class="carta-float-insight">
+        <div class="fi-label">da sua adega</div>
+        <div class="fi-text">Barolo 2018 é a escolha ideal</div>
+      </div>
+    </div>
+    <div class="world-copy">
+      <p class="world-eyebrow">carta</p>
+      <h2 class="world-h2">Qualquer carta,<br><em>decifrada.</em></h2>
+      <p class="world-body">
+        Fotografe qualquer menu de vinhos. O Sommelyx lê, analisa e sugere as melhores escolhas — priorizando o que você já tem na adega.
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 6: MESA WORLD ══ -->
+<section class="scene-mesa" id="mesa">
+  <div class="world-giant-label" style="color:rgba(110,15,30,0.08)">MESA</div>
+  <div class="mesa-content">
+    <div class="world-copy">
+      <p class="world-eyebrow">mesa</p>
+      <h2 class="world-h2">O vinho certo<br><em>para o momento.</em></h2>
+      <p class="world-body">
+        Descreva o prato, a ocasião ou o estilo. O Sommelyx harmoniza a partir da sua própria adega — sem precisar consultar ninguém.
+      </p>
+    </div>
+    <div class="mesa-visual">
+      <div class="mesa-glow"></div>
+      <!-- Wine glass SVG -->
+      <svg class="mesa-glass-svg" viewBox="0 0 80 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="glass-body" x1="0" y1="0" x2="80" y2="200" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(255,248,239,0.12)"/>
+            <stop offset="100%" stop-color="rgba(255,248,239,0.04)"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 8 Q10 5 40 5 Q70 5 70 8 L67 68 Q67 88 40 92 Q13 88 13 68 Z" fill="url(#glass-body)" stroke="rgba(255,248,239,0.18)" stroke-width="0.8"/>
+        <!-- Wine fill -->
+        <path d="M14 58 Q14 88 40 92 Q66 88 66 58 Z" fill="rgba(110,15,30,0.55)"/>
+        <!-- Stem -->
+        <line x1="40" y1="92" x2="40" y2="170" stroke="rgba(255,248,239,0.22)" stroke-width="2"/>
+        <!-- Base -->
+        <ellipse cx="40" cy="172" rx="26" ry="6" fill="rgba(255,248,239,0.1)" stroke="rgba(255,248,239,0.18)" stroke-width="0.8"/>
+        <!-- Highlight -->
+        <path d="M14 18 Q17 15 22 16 Q17 46 15 60" stroke="rgba(255,255,255,0.12)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      <!-- Pairing suggestion -->
+      <div class="pairing-whisper">
+        <div class="pw-dish">🍝</div>
+        <div class="pw-label">harmonização</div>
+        <div class="pw-rec">Brunello di Montalcino</div>
+        <div class="pw-match">combinação excepcional</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 7: THE PRODUCT ══ -->
+<section class="scene-product">
+  <div class="product-header">
+    <p class="product-eyebrow">a experiência</p>
+    <h2 class="product-h2">O Sommelyx<br><em>em detalhe.</em></h2>
+  </div>
+
+  <!-- App as layered precious objects — not a feature list -->
+  <div class="product-stage">
+
+    <!-- Background panel — scanner moment -->
+    <div class="prod-panel pp-bg">
+      <p class="pp-label">scanner de rótulos</p>
+      <div class="pp-wine-display">
+        <div class="pp-bottle"></div>
+        <div>
+          <div class="pp-wine-name">Brunello di Montalcino</div>
+          <div class="pp-meta">Biondi Santi · Toscana · 2018<br>Sangiovese Grosso</div>
+          <div class="pp-tag">janela 2024–2035</div>
+        </div>
+      </div>
+      <div class="pp-divider"></div>
+      <div class="pp-insights">2 garrafas adicionadas · Recomendação: guardar até 2026</div>
+    </div>
+
+    <!-- Mid panel — harmonização -->
+    <div class="prod-panel pp-mid">
+      <p class="pp-label">harmonização</p>
+      <div class="pp-harm-query">"Risoto de funghi porcini, jantar especial."</div>
+      <div class="pp-harm-result">
+        <div class="pp-harm-btl"></div>
+        <div>
+          <div class="pp-harm-name">Brunello di Montalcino</div>
+          <div class="pp-harm-sub">Biondi Santi · da sua adega</div>
+        </div>
+        <span class="pp-harm-match">excepcional</span>
+      </div>
+    </div>
+
+    <!-- Foreground panel — floating cellar insight (Advertda-style) -->
+    <div class="prod-panel pp-fg">
+      <div class="pp-mini-label">adega · insight</div>
+      <div class="pp-mini-val">Abra hoje</div>
+      <div class="pp-mini-sub">Château Margaux 2018 · pico</div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ══ SCENE 8: MEMBERSHIP ══ -->
+<section class="scene-membership" id="membership">
+  <div class="membership-grain"></div>
+  <div class="membership-header">
+    <p class="memb-eyebrow">acesso</p>
+    <h2 class="memb-h2">Para quem leva<br>vinho <em>a sério.</em></h2>
+    <p class="memb-sub">14 dias grátis · sem cartão · cancele quando quiser</p>
+  </div>
+  <div class="memb-grid">
+    <!-- Personal collector -->
+    <div class="memb-card memb-light">
+      <span class="memb-access-label">Colecionador pessoal</span>
+      <div class="memb-name">Pro</div>
+      <p class="memb-tagline">Para quem cuida da adega como cuida de cada momento de abrir.</p>
+      <div class="memb-price-block">
+        <span class="memb-price">R$ 29</span>
+        <span class="memb-period">/mês</span>
+      </div>
+      <p class="memb-annual">ou R$ 280/ano · dois meses de graça</p>
+      <button class="memb-cta">Iniciar minha adega</button>
+      <ul class="memb-includes">
+        <li>Adega pessoal com janelas de consumo</li>
+        <li>Leitura de rótulos por câmera</li>
+        <li>Harmonizações da sua adega</li>
+        <li>Análise de cartas de restaurante</li>
+        <li>Wishlist e alertas de preço</li>
+      </ul>
+    </div>
+    <!-- Commercial operator -->
+    <div class="memb-card memb-dark">
+      <span class="memb-access-label">Operação comercial</span>
+      <div class="memb-name">Business</div>
+      <p class="memb-tagline">Para restaurantes, bares e lojas que levam o vinho a outro nível.</p>
+      <div class="memb-price-block">
+        <span class="memb-price">R$ 59</span>
+        <span class="memb-period">/mês</span>
+      </div>
+      <p class="memb-annual">ou R$ 600/ano · dois meses de graça</p>
+      <button class="memb-cta">Iniciar operação</button>
+      <ul class="memb-includes">
+        <li>Tudo do plano Pro</li>
+        <li>Controle de estoque e vendas</li>
+        <li>Análise de carta de vinhos</li>
+        <li>Relatórios de giro e margem</li>
+        <li>Histórico operacional completo</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FAQ inline -->
+  <div class="faq-strip">
+    <div class="faq-strip-head">Dúvidas frequentes.</div>
+    <div class="faq-row">
+      <div class="faq-q">Como funciona o teste grátis?</div>
+      <div class="faq-a">Você usa todos os recursos por 14 dias sem nenhum custo. Cancele a qualquer momento antes da cobrança.</div>
+    </div>
+    <div class="faq-row">
+      <div class="faq-q">Qual a diferença entre Pro e Business?</div>
+      <div class="faq-a">Pro é para adega pessoal. Business inclui operação comercial — estoque, vendas, giro e relatórios para restaurantes, bares e lojas.</div>
+    </div>
+    <div class="faq-row">
+      <div class="faq-q">Consigo importar minha planilha atual?</div>
+      <div class="faq-a">Sim. CSV, Excel, PDF e imagens são aceitos. Você revisa tudo antes de confirmar.</div>
+    </div>
+    <div class="faq-row">
+      <div class="faq-q">Minha adega fica privada?</div>
+      <div class="faq-a">Completamente. Cada conta tem dados isolados. Nenhuma informação é compartilhada.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ SCENE 9: THE CLOSE ══ -->
+<section class="scene-close">
+  <!-- Background bottles silhouette -->
+  <div class="close-bottles-bg">
+    <div class="close-btl-bg" style="width:28px;height:180px"></div>
+    <div class="close-btl-bg" style="width:36px;height:230px"></div>
+    <div class="close-btl-bg" style="width:32px;height:205px"></div>
+    <div class="close-btl-bg" style="width:44px;height:270px"></div>
+    <div class="close-btl-bg" style="width:34px;height:215px"></div>
+    <div class="close-btl-bg" style="width:28px;height:188px"></div>
+  </div>
+
+  <!-- Cork bottle mark — closing the loop -->
+  <svg class="close-brand-mark" viewBox="0 0 80 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="cork-close" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
+        <rect width="4" height="4" fill="#c49a4a"/>
+        <circle cx="1" cy="1" r="0.7" fill="#a08038" opacity="0.6"/>
+        <circle cx="3" cy="3" r="0.5" fill="#d4aa5a" opacity="0.55"/>
+      </pattern>
+    </defs>
+    <path d="M29 0 Q29 0 31 14 L31 36 Q18 44 16 56 L16 185 Q16 196 24 198 L56 198 Q64 196 64 185 L64 56 Q62 44 49 36 L49 14 Q51 0 51 0 Z" fill="url(#cork-close)" opacity="0.7"/>
+    <text x="40" y="128" font-family="Georgia,serif" font-size="48" font-weight="400" fill="#7a1224" text-anchor="middle" dominant-baseline="middle" opacity="0.75">S</text>
+  </svg>
+
+  <h2 class="close-h2">
+    A sua próxima garrafa<br>
+    merece ser <em>lembrada.</em>
+  </h2>
+  <p class="close-sub">
+    Cadastre sua adega em minutos. O Sommelyx cuida do resto.
+  </p>
+  <div class="close-cta">
+    <button class="btn-primary">
+      Iniciar minha adega grátis
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M1 6h10M6.5 2L11 6l-4.5 4"/>
+      </svg>
+    </button>
+  </div>
+</section>
+
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-brand">
+      <svg class="footer-mark" viewBox="0 0 36 100" fill="none">
+        <defs>
+          <pattern id="cork-ft" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+            <rect width="3" height="3" fill="#c49a4a"/>
+            <circle cx="0.8" cy="0.8" r="0.55" fill="#a08038" opacity="0.6"/>
+          </pattern>
+        </defs>
+        <path d="M13 0 Q13 0 14 8 L14 20 Q8 25 7 32 L7 85 Q7 93 12 95 L24 95 Q29 93 29 85 L29 32 Q28 25 22 20 L22 8 Q23 0 23 0 Z" fill="url(#cork-ft)"/>
+        <text x="18" y="62" font-family="Georgia,serif" font-size="20" fill="#7a1224" text-anchor="middle" dominant-baseline="middle">S</text>
+      </svg>
+      Sommelyx
+    </span>
+    <nav class="footer-links">
+      <a href="#">Experiência</a>
+      <a href="#">Produto</a>
+      <a href="#">Planos</a>
+      <a href="#">Termos</a>
+      <a href="#">Privacidade</a>
+      <a href="#">Assinatura</a>
+    </nav>
+    <span class="footer-legal">Sommelyx Tecnologia Ltda.</span>
+  </div>
+</footer>
+
+<div class="proto-tag">Landing V4 · Scenes</div>
+
+</body>
+</html>
