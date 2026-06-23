@@ -340,11 +340,11 @@ export function PairingErrorState({
       <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-[11px]"
         style={{
           background: "linear-gradient(180deg, rgba(255,253,248,0.88) 0%, rgba(241,234,223,0.82) 100%)",
-          border: "1px solid rgba(101,10,24,0.14)",
+          border: "1px solid rgba(122, 18, 36,0.14)",
           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.72), 0 12px 24px -24px rgba(59,7,16,0.28)",
         }}
       >
-        <X className="h-4 w-4 text-[#650A18]/70" />
+        <X className="h-4 w-4 text-[#7a1224]/70" />
       </div>
       <div className="mt-2.5 space-y-1">
         <p className="text-[13.5px] font-medium text-[#1A1713]">{title}</p>

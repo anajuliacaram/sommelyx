@@ -20,7 +20,8 @@ function getMonthLabel(date: Date) {
 
 function getWeekdayLabel(date: Date) {
   if (Number.isNaN(date.getTime())) return "—";
-  return format(date, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3).toUpperCase();
+  const raw = format(date, "EEE", { locale: ptBR }).replace(".", "").slice(0, 3);
+  return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
 }
 
 function formatRating(value: unknown) {
@@ -89,7 +90,7 @@ export function ConsumptionTimeline({ entries, title = "Histórico" }: Consumpti
               <div className="consumo-rebuild-month-head">
                 <span className="consumo-rebuild-month-label">{month.label}</span>
                 <span className="consumo-rebuild-month-count">
-                  {month.events.length} {month.events.length === 1 ? "ABERTURA" : "ABERTURAS"}
+                  {month.events.length} {month.events.length === 1 ? "abertura" : "aberturas"}
                 </span>
               </div>
 

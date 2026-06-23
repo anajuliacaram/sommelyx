@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./styles/authenticated-system.css";
 import "../design-reference/data.js";
 
 const root = document.getElementById("root");

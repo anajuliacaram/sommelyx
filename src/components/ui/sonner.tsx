@@ -24,9 +24,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
           cancelButton:
             "group-[.toast]:rounded-full group-[.toast]:bg-muted/60 group-[.toast]:px-3 group-[.toast]:text-sm group-[.toast]:text-foreground/80 hover:group-[.toast]:bg-muted/75",
           success:
-            "group-[.toast]:border-[rgba(101,10,24,0.14)] group-[.toast]:bg-[rgba(255,253,248,0.96)] group-[.toast]:text-[#201714]",
+            "group-[.toast]:border-[rgba(122, 18, 36,0.14)] group-[.toast]:bg-[rgba(255,253,248,0.96)] group-[.toast]:text-[#201714]",
           error:
-            "group-[.toast]:border-[rgba(101,10,24,0.22)] group-[.toast]:bg-[rgba(255,253,248,0.98)] group-[.toast]:text-[#650A18]",
+            "group-[.toast]:border-[rgba(122, 18, 36,0.22)] group-[.toast]:bg-[rgba(255,253,248,0.98)] group-[.toast]:text-[#7a1224]",
           warning:
             "group-[.toast]:border-[rgba(200,168,90,0.28)] group-[.toast]:bg-[rgba(255,251,240,0.98)] group-[.toast]:text-[#5B4616]",
           loading:

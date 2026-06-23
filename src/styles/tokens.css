@@ -1,51 +1,51 @@
 @layer base {
   :root {
-    --font-display: "Cormorant Garamond", "Libre Baskerville", Georgia, serif;
-    --font-ui: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+    --font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --font-ui: "Geist", "Inter", "Plus Jakarta Sans", system-ui, sans-serif;
 
     --transition-fast: 150ms;
     --transition-base: 250ms;
     --transition-slow: 420ms;
     --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
 
-    --sx-bordeaux: #6F0718;
-    --brand-primary: #6F0718;
-    --wine: 347 88% 23%;
-    --wine-hover: #4A0714;
-    --wine-vivid: #8A132A;
-    --wine-mid: #5E0B1F;
+    --sx-bordeaux: #7a1224;
+    --brand-primary: #7a1224;
+    --wine: 350 74% 27%;
+    --wine-hover: #5e0d1a;
+    --wine-vivid: #93182f;
+    --wine-mid: #7a1224;
     --wine-light: #F3E8E5;
-    --sx-bordeaux-10: rgba(111,7,24,0.10);
-    --sx-bordeaux-06: rgba(111,7,24,0.06);
+    --sx-bordeaux-10: rgba(122,18,36,0.10);
+    --sx-bordeaux-06: rgba(122,18,36,0.06);
     --sx-bordeaux-light: var(--wine-light);
     --sx-bordeaux-mid: var(--wine-mid);
-    --sx-olive: #263A2B;
-    --olive-mid: #4A5E38;
+    --sx-olive: #3d4f35;
+    --olive-mid: #4a5d40;
     --olive-light: #6B7D55;
     --olive-surface: #E9EFE4;
     --cellar-forest: #1A2420;
-    --sx-olive-10: rgba(58,74,46,0.10);
-    --sx-olive-06: rgba(58,74,46,0.06);
+    --sx-olive-10: rgba(61,79,53,0.10);
+    --sx-olive-06: rgba(61,79,53,0.06);
     --sx-olive-light: var(--olive-surface);
 
-    --gold: #C7A85A;
+    --gold: #b8943c;
     --champagne: #E7D6B8;
     --copper: #C67A36;
 
-    --page-bg: #F4EFE7;
+    --page-bg: #FCF8F1;
     --card-bg: #FFFDF8;
     --card-alt: #FBF7EF;
-    --row-bg: #F8F1E8;
-    --input-bg: #ECE3D5;
-    --parchment: #F4EFE7;
-    --cream: #F4EFE7;
+    --row-bg: #F9F3EA;
+    --input-bg: #F4ECDF;
+    --parchment: #FCF8F1;
+    --cream: #FDFBF7;
     --sx-bg-base: var(--page-bg);
     --sx-bg-page: var(--page-bg);
     --sx-bg-card: var(--card-bg);
     --sx-bg-input: var(--input-bg);
     --sx-bg-row: var(--row-bg);
     --sx-bg-chip-off: transparent;
-    --sx-bg-chip-on: #6F0718;
+    --sx-bg-chip-on: #7a1224;
 
     /* Wine type colors — used for chips, badges, dots, filter buttons, type labels */
     --sx-wine-tinto: #7B1424;
@@ -61,8 +61,8 @@
     --sx-wine-fortificado: #8B6914;
     --sx-wine-fortificado-bg: rgba(139, 105, 20, 0.12);
 
-    --text-headline: #1B1411;
-    --text-body: #3B3029;
+    --text-headline: #1d150f;
+    --text-body: #3a2a22;
     --text-sub: #756B63;
     --text-muted: #A79D92;
     --sx-t-head: var(--text-headline);
@@ -78,7 +78,7 @@
 
     --sx-b-default: rgba(61,53,48,0.12);
     --sx-b-medium: rgba(61,53,48,0.22);
-    --sx-b-focus: #6F0718;
+    --sx-b-focus: #7a1224;
     --sx-border-default: var(--sx-b-default);
     --sx-border-strong: var(--sx-b-medium);
     --sx-border-focus: var(--sx-b-focus);
@@ -130,7 +130,7 @@
     --color-text-secondary: var(--sx-text-secondary);
     --color-text-muted: var(--sx-text-muted);
 
-    --wine-rgb: 123 30 43;
+    --wine-rgb: 122 18 36;
     --wine-soft-rgb: 143 45 86;
     --olive-rgb: 95 111 82;
     --gold-rgb: 200 169 106;
@@ -139,15 +139,15 @@
     --surface-border-dark-hover: rgba(255, 255, 255, 0.12);
     --surface-highlight-dark: rgba(255, 255, 255, 0.08);
     --surface-shadow-dark: 0 34px 92px -56px rgba(0, 0, 0, 0.92);
-    --surface-shadow-wine: 0 20px 58px -42px rgba(123, 30, 43, 0.55);
+    --surface-shadow-wine: 0 20px 58px -42px rgba(122, 18, 36, 0.55);
     --surface-shadow-olive: 0 20px 52px -42px rgba(95, 111, 82, 0.44);
 
     --surface-noise:
       radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.08) 1px, transparent 0);
 
     /* === Sommelyx V2 — Visual foundation namespace === */
-    --sx-v2-font-serif: "Cormorant Garamond", "Instrument Serif", "Libre Baskerville", Georgia, serif;
-    --sx-v2-font-ui: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+    --sx-v2-font-serif: "Fraunces", "Cormorant Garamond", Georgia, serif;
+    --sx-v2-font-ui: "Geist", "Inter", system-ui, sans-serif;
 
     --sx-v2-bg-app: #f7f2ea;
     --sx-v2-bg-page: #f4ede2;
@@ -161,23 +161,23 @@
     --sx-v2-bg-glass: rgba(255, 250, 242, 0.72);
     --sx-v2-bg-glass-strong: rgba(255, 250, 242, 0.82);
 
-    --sx-v2-wine: #650a18;
-    --sx-v2-wine-deep: #3b0710;
-    --sx-v2-wine-dark: #22040a;
-    --sx-v2-wine-soft: rgba(101, 10, 24, 0.08);
-    --sx-v2-wine-border: rgba(101, 10, 24, 0.14);
+    --sx-v2-wine: #7a1224;
+    --sx-v2-wine-deep: #5e0d1a;
+    --sx-v2-wine-dark: #3d0610;
+    --sx-v2-wine-soft: rgba(122, 18, 36, 0.08);
+    --sx-v2-wine-border: rgba(122, 18, 36, 0.14);
 
-    --sx-v2-olive: #263a2b;
+    --sx-v2-olive: #3d4f35;
     --sx-v2-olive-deep: #18251d;
     --sx-v2-olive-moss: #435547;
     --sx-v2-olive-soft: #e9efe5;
     --sx-v2-olive-haze: rgba(38, 58, 43, 0.10);
 
-    --sx-v2-gold: #c8a85a;
-    --sx-v2-gold-soft: rgba(200, 168, 90, 0.16);
+    --sx-v2-gold: #b8943c;
+    --sx-v2-gold-soft: rgba(184, 148, 60, 0.16);
     --sx-v2-gold-ember: rgba(184, 120, 62, 0.18);
 
-    --sx-v2-text: #201714;
+    --sx-v2-text: #1d150f;
     --sx-v2-text-soft: #4d433c;
     --sx-v2-text-muted: #746b63;
     --sx-v2-text-subtle: #9a9188;
@@ -187,9 +187,9 @@
     --sx-v2-border-strong: rgba(61, 53, 48, 0.16);
     --sx-v2-border-dark: rgba(255, 248, 239, 0.12);
     --sx-v2-border-glass: rgba(255, 255, 255, 0.30);
-    --sx-v2-ring: rgba(101, 10, 24, 0.26);
+    --sx-v2-ring: rgba(122, 18, 36, 0.26);
     --sx-v2-ring-olive: rgba(38, 58, 43, 0.22);
-    --sx-v2-ring-gold: rgba(200, 168, 90, 0.26);
+    --sx-v2-ring-gold: rgba(184, 148, 60, 0.26);
 
     --sx-v2-shadow-ambient: 0 24px 72px -56px rgba(32, 23, 20, 0.34);
     --sx-v2-shadow-panel: 0 20px 52px -34px rgba(32, 23, 20, 0.20), 0 2px 6px rgba(32, 23, 20, 0.04);
@@ -200,20 +200,20 @@
 
     --sx-v2-gradient-bg:
       radial-gradient(circle at 0% 0%, rgba(233, 239, 229, 0.92), transparent 34%),
-      radial-gradient(circle at 86% -8%, rgba(200, 168, 90, 0.14), transparent 26%),
+      radial-gradient(circle at 86% -8%, rgba(184, 148, 60, 0.14), transparent 26%),
       linear-gradient(180deg, #f7f2ea 0%, #f1eadf 100%);
     --sx-v2-gradient-wine-glow:
-      radial-gradient(circle at 12% 0%, rgba(200, 168, 90, 0.18), transparent 30%),
-      linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+      radial-gradient(circle at 12% 0%, rgba(184, 148, 60, 0.18), transparent 30%),
+      linear-gradient(135deg, #7a1224 0%, #5e0d1a 100%);
     --sx-v2-gradient-olive-haze:
       radial-gradient(circle at 0% 0%, rgba(233, 239, 229, 0.54), transparent 38%),
       linear-gradient(135deg, rgba(38, 58, 43, 0.12), rgba(38, 58, 43, 0.04));
     --sx-v2-gradient-gold-ember:
-      radial-gradient(circle at center, rgba(200, 168, 90, 0.16), rgba(184, 120, 62, 0.04) 48%, transparent 72%);
+      radial-gradient(circle at center, rgba(184, 148, 60, 0.16), rgba(184, 120, 62, 0.04) 48%, transparent 72%);
     --sx-v2-gradient-ivory-wash:
       linear-gradient(145deg, rgba(255, 250, 242, 0.96), rgba(241, 234, 223, 0.78));
     --sx-v2-gradient-ai-dark:
-      radial-gradient(circle at 84% 10%, rgba(200, 168, 90, 0.16), transparent 22%),
+      radial-gradient(circle at 84% 10%, rgba(184, 148, 60, 0.16), transparent 22%),
       radial-gradient(circle at 0% 0%, rgba(255, 250, 242, 0.08), transparent 24%),
       linear-gradient(135deg, #22040a 0%, #18251d 48%, #263a2b 100%);
 

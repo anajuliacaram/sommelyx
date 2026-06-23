@@ -69,14 +69,14 @@ const FilterChoice = memo(function FilterChoice({
       className={cn(
         "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
         active
-          ? "bg-[rgba(101,10,24,0.08)] text-[#650A18]"
+          ? "bg-[rgba(122, 18, 36,0.08)] text-[#7a1224]"
           : "bg-white/0 text-[#2f2a22]",
       )}
     >
       <span className="flex min-w-0 items-center gap-2">
         <span className="min-w-0 truncate">{label}</span>
       </span>
-      {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#650A18]" /> : null}
+      {active ? <Check className="h-3.5 w-3.5 shrink-0 text-[#7a1224]" /> : null}
     </button>
   );
 });
@@ -99,7 +99,7 @@ const CountryChoice = memo(function CountryChoice({
       className={cn(
         "flex w-full items-center justify-between rounded-[14px] px-3 py-2.5 text-left text-[12.5px] font-medium leading-[1.18] transition-all duration-150 ease-out hover:bg-black/5 active:scale-[0.98]",
         active
-          ? "bg-[rgba(101,10,24,0.08)] text-[#650A18]"
+          ? "bg-[rgba(122, 18, 36,0.08)] text-[#7a1224]"
           : "bg-white/0 text-[#2f2a22]",
       )}
     >
@@ -108,7 +108,7 @@ const CountryChoice = memo(function CountryChoice({
           className={cn(
             "flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
             active
-              ? "border-[#650A18] bg-[#650A18] text-white"
+              ? "border-[#7a1224] bg-[#7a1224] text-white"
               : "border-[rgba(61,53,48,0.18)] bg-white text-transparent",
           )}
         >
@@ -516,7 +516,7 @@ export default function ConsumptionPage() {
       <section className="sx-v2-content-rail consumo-rebuild-rail">
         <header className="consumo-rebuild-header">
           <div className="consumo-rebuild-header-copy">
-            <Kicker className="consumo-rebuild-kicker">Meu Consumo</Kicker>
+            <Kicker className="consumo-rebuild-kicker">Diário de degustação</Kicker>
             <h1 className="consumo-rebuild-title sx-v2-display">Meu Consumo</h1>
           </div>
           <button
@@ -648,7 +648,7 @@ export default function ConsumptionPage() {
               </div>
               <Sparkbar
                 data={chartDisplayData}
-                accent="#6F0718"
+                accent="#7a1224"
                 height={isMobile ? 56 : 76}
                 showValues={!isMobile}
                 activeIndex={activeChartIndex}

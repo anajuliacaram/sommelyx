@@ -1,0 +1,1741 @@
+/*
+ * Sommelyx authenticated design system — luxury material foundation (Phase 1).
+ *
+ * One layer that owns the authenticated surface. It loads after the legacy
+ * stylesheet (main.tsx import order) and overrides it by matching specificity
+ * plus later source order; `!important` is used only to defeat legacy
+ * `!important`. Scoped to `body:not(.landing-page)` — Landing.tsx toggles
+ * that class, so public pages are untouched.
+ *
+ * Direction: premium wine product, not admin software. Warm ivory ground,
+ * soft glass surfaces, layered depth, Cormorant for hero moments only,
+ * burgundy as a scarce accent, olive + champagne gold as secondary voices,
+ * one easing vocabulary for every transition.
+ *
+ * Typographic scale (unchanged from the audit spec):
+ *   page title    42px / 33px mobile · 500 · Cormorant (hero voice)
+ *   section title 18px · 500 · Inter
+ *   card title    16px · 500 · Inter
+ *   body          15px · 400 · Inter
+ *   meta          13px · 400 · Inter
+ * Weights: 400 / 500 / 600 — nothing heavier, anywhere.
+ */
+
+body:not(.landing-page) {
+  --sx-auth-font-ui: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sx-auth-font-display: "Fraunces", "Cormorant Garamond", Georgia, serif;
+
+  /* Ink — V6 warm ink */
+  --sx-auth-ink: #1d150f;
+  --sx-auth-ink-soft: #3a2a22;
+  --sx-auth-muted: rgba(29, 21, 15, 0.6);
+  --sx-auth-muted-soft: rgba(29, 21, 15, 0.42);
+
+  /* Accents — V6 burgundy is scarce, olive and gold are supporting voices */
+  --sx-auth-wine: #7a1224;
+  --sx-auth-wine-bright: #93182f;
+  --sx-auth-wine-deep: #5e0d1a;
+  --sx-auth-olive: #3d4f35;
+  --sx-auth-olive-deep: #2a3a26;
+  --sx-auth-gold: #b8943c;
+  --sx-auth-gold-deep: #8d673a;
+  --sx-auth-champagne: #d6bb8a;
+
+  /* Ground + surfaces — V6 warm cream */
+  --sx-auth-ivory: #fdfbf7;
+  --sx-auth-paper: #fffdf8;
+  --sx-auth-ground: #fcf8f1;
+  --sx-auth-glass: linear-gradient(165deg, rgba(255, 252, 246, 0.92), rgba(250, 244, 234, 0.84));
+  --sx-auth-glass-solid: linear-gradient(165deg, rgba(255, 253, 248, 0.985), rgba(251, 245, 236, 0.96));
+  --sx-auth-border: rgba(63, 42, 32, 0.1);
+  --sx-auth-border-strong: rgba(63, 42, 32, 0.16);
+  --sx-auth-border-glass: rgba(255, 255, 255, 0.72);
+  --sx-auth-border-gold: rgba(176, 141, 63, 0.42);
+
+  /* Layered depth — a tight key shadow plus a wide warm ambient */
+  --sx-auth-shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 1px 2px rgba(45, 27, 18, 0.05),
+    0 12px 32px -20px rgba(45, 27, 18, 0.2);
+  --sx-auth-shadow-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 4px rgba(45, 27, 18, 0.06),
+    0 22px 48px -24px rgba(45, 27, 18, 0.3),
+    0 36px 80px -48px rgba(122, 18, 36, 0.18);
+  --sx-auth-shadow-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 4px rgba(45, 27, 18, 0.06),
+    0 24px 56px -28px rgba(45, 27, 18, 0.34);
+  --sx-auth-shadow-modal:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 12px 32px -18px rgba(45, 27, 18, 0.3),
+    0 40px 110px -42px rgba(45, 27, 18, 0.5);
+  --sx-auth-shadow-primary:
+    0 1px 2px rgba(45, 27, 18, 0.22),
+    0 12px 28px -14px rgba(122, 18, 36, 0.5);
+
+  /* Radii — V6 scale */
+  --sx-auth-radius-card: 22px;
+  --sx-auth-radius-modal: 24px;
+  --sx-auth-radius-option: 16px;
+  --sx-auth-radius-input: 13px;
+  --sx-auth-radius-pill: 999px;
+
+  /* Type scale */
+  --sx-auth-page-title: 42px;
+  --sx-auth-section-title: 18px;
+  --sx-auth-card-title: 16px;
+  --sx-auth-body: 15px;
+  --sx-auth-caption: 13px;
+  --sx-auth-label: 12px;
+
+  /* Motion — one easing vocabulary for the whole product */
+  --sx-auth-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --sx-auth-dur-fast: 180ms;
+  --sx-auth-dur: 320ms;
+  --sx-auth-dur-slow: 460ms;
+
+  font-family: var(--sx-auth-font-ui) !important;
+  color: var(--sx-auth-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) {
+    --sx-auth-page-title: 33px;
+    --sx-auth-section-title: 17px;
+    --sx-auth-radius-modal: 24px;
+  }
+}
+
+/* ── Ground: warm ivory atmosphere with gold, olive and wine undertones ── */
+body:not(.landing-page) #root,
+body:not(.landing-page) .app-shell,
+body:not(.landing-page) .dashboard-shell {
+  background:
+    radial-gradient(1100px 520px at 82% -12%, rgba(184, 148, 60, 0.16), transparent 60%),
+    radial-gradient(900px 480px at -6% 6%, rgba(61, 79, 53, 0.08), transparent 55%),
+    radial-gradient(1200px 700px at 50% 112%, rgba(122, 18, 36, 0.06), transparent 62%),
+    var(--sx-auth-ground) !important;
+}
+
+/* ── Weight ceiling: nothing in the authenticated UI exceeds 600 ── */
+body:not(.landing-page) :is([class*="font-black"], [class*="font-extrabold"], [class*="font-bold"]) {
+  font-weight: 600 !important;
+}
+
+body:not(.landing-page) strong,
+body:not(.landing-page) b {
+  font-weight: 600;
+}
+
+/* Restore color utilities that legacy `color: inherit` rules defeat by
+   source order (e.g. text-white on a filled primary button). */
+body:not(.landing-page) .text-white,
+body:not(.landing-page) [class*="text-white"] {
+  color: #fffdf8;
+}
+
+/* ── Hero voice: page titles speak Cormorant, and only they do ── */
+body:not(.landing-page) .dashboard-shell h1,
+body:not(.landing-page) :is(
+  .t-title,
+  .home-rebuild-title,
+  .cellar-rebuild-title,
+  .consumo-rebuild-title,
+  .alerts-header-title,
+  .wishlist-title,
+  .editorial-page-h1,
+  .adega-title,
+  .consumo-title,
+  .overview-greeting
+) {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: var(--sx-auth-page-title) !important;
+  font-weight: 500 !important;
+  font-style: normal !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.005em !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+/* ── Section titles: quiet Inter, strong through hierarchy not weight ── */
+body:not(.landing-page) :is(
+  .home-rebuild-section-head h2,
+  .consumo-rebuild-timeline-title,
+  .consumo-rebuild-chart-title,
+  .overview-panel-head h2,
+  .alerts-page h2,
+  .settings-page h2,
+  .ready-section-title
+) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-section-title) !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+body:not(.landing-page) :is(
+  .wine-card-title,
+  .sx-v2-wine-title,
+  .home-rebuild-wine,
+  .cellar-rebuild-card-name,
+  .cellar-rebuild-row-name,
+  .consumo-rebuild-entry-title,
+  .alert-card-title,
+  .wishlist-card h3,
+  .wishlist-card h4
+) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-card-title) !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0 !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+body:not(.landing-page) :is(.t-subtitle, .t-body, .sx-body) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-body) !important;
+  font-weight: 400 !important;
+  line-height: 1.55 !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) :is(
+  .t-meta,
+  .sx-caption,
+  .sx-sub,
+  small,
+  .consumo-rebuild-entry-meta,
+  .consumo-rebuild-entry-note,
+  .alert-card-meta,
+  .cellar-rebuild-card-meta,
+  .cellar-rebuild-row-meta,
+  .home-rebuild-row-copy small
+) {
+  font-size: var(--sx-auth-caption) !important;
+  font-weight: 400 !important;
+  line-height: 1.45 !important;
+  color: var(--sx-auth-muted) !important;
+}
+
+/* ── Editorial kickers: tracked small caps in deep gold — the magazine
+   voice. Reserved for true kickers; form labels stay sentence case. ── */
+body:not(.landing-page) :is(
+  .editorial-kicker,
+  .sx-v2-kicker,
+  .t-eyebrow,
+  .home-rebuild-kicker,
+  .home-rebuild-date,
+  .consumo-rebuild-kicker,
+  .consumo-rebuild-timeline-kicker,
+  .consumo-rebuild-chart-kicker,
+  .harmonizar-eyebrow,
+  .alerts-smart-heading h2
+) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: var(--sx-auth-gold-deep) !important;
+}
+
+/* Field and section labels: quiet, sentence case, never shouting. */
+body:not(.landing-page) :is(
+  .sx-label,
+  .modal-section-label,
+  .modal-field-label,
+  .modal-input-label,
+  .form-field-label,
+  .section-label,
+  [cmdk-group-heading]
+) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-caption) !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--sx-auth-muted) !important;
+}
+
+/* Sidebar group labels: legacy rules reach (0,3,1) specificity with odd
+   values (font-weight 480, 0.62rem); match it and normalize as a kicker. */
+body:not(.landing-page) [data-sidebar="group-label"][data-sidebar="group-label"][data-sidebar="group-label"] {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: var(--sx-auth-muted-soft) !important;
+}
+
+/* ── Surfaces: one glass family — warm translucency, hairline light edge,
+   layered shadow. Depth you feel before you notice. ── */
+body:not(.landing-page) :is(
+  .glass-card,
+  .card-depth,
+  .sx-card,
+  .premium-card-surface,
+  .sx-v2-floating-panel,
+  .sx-v2-matte-panel,
+  .home-rebuild-actions-card,
+  .home-rebuild-summary,
+  .home-rebuild-panel,
+  .cellar-rebuild-summary,
+  .cellar-rebuild-controls,
+  .consumo-rebuild-chart,
+  .consumo-rebuild-timeline,
+  .consumo-rebuild-stat,
+  .settings-page section,
+  .reports-page section
+) {
+  border-radius: var(--sx-auth-radius-card) !important;
+  border: 1px solid var(--sx-auth-border) !important;
+  background: var(--sx-auth-glass) !important;
+  backdrop-filter: blur(16px) saturate(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow: var(--sx-auth-shadow-card) !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+/* Interactive cards: the same material, plus life on hover — a refined
+   lift, a deeper shadow, a border that warms toward gold. */
+body:not(.landing-page) :is(
+  .cellar-rebuild-card,
+  .cellar-rebuild-row,
+  .consumo-rebuild-entry,
+  .wishlist-card,
+  .wishlist-empty,
+  .alert-card
+) {
+  border-radius: var(--sx-auth-radius-card) !important;
+  border: 1px solid var(--sx-auth-border) !important;
+  background: var(--sx-auth-glass) !important;
+  backdrop-filter: blur(16px) saturate(1.05);
+  -webkit-backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow: var(--sx-auth-shadow-card) !important;
+  color: var(--sx-auth-ink) !important;
+  transition:
+    transform var(--sx-auth-dur) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is(
+  .cellar-rebuild-card,
+  .cellar-rebuild-row,
+  .consumo-rebuild-entry,
+  .wishlist-card,
+  .alert-card
+):hover {
+  transform: translateY(-2px);
+  border-color: var(--sx-auth-border-gold) !important;
+  box-shadow: var(--sx-auth-shadow-hover) !important;
+}
+
+/* ── Dark collectible surfaces (feature bottle, insights): deeper shadow,
+   a whisper of light along the top edge, ivory text protected. ── */
+body:not(.landing-page) :is(
+  .home-rebuild-highlight,
+  .daily-insight-card,
+  .last-opened-card.featured,
+  .consumo-rebuild-last,
+  .consumo-v2-hero
+) {
+  border-radius: var(--sx-auth-radius-card) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 2px 4px rgba(45, 27, 18, 0.12),
+    0 28px 64px -28px rgba(20, 12, 8, 0.55) !important;
+}
+
+body:not(.landing-page) :is(
+  .home-rebuild-highlight,
+  .daily-insight-card,
+  .last-opened-card.featured,
+  .consumo-rebuild-last,
+  .consumo-v2-hero
+) :is(h2, h3, h4, p, span, small, strong) {
+  color: var(--sx-auth-ivory) !important;
+}
+
+body:not(.landing-page) :is(
+  .home-rebuild-highlight,
+  .daily-insight-card,
+  .last-opened-card.featured,
+  .consumo-rebuild-last,
+  .consumo-v2-hero
+) :is(.sx-label, .home-rebuild-kicker, .home-rebuild-meta, .consumo-rebuild-last-meta, .consumo-rebuild-last-note, .daily-insight-copy, .daily-insight-action) {
+  color: rgba(255, 248, 239, 0.76) !important;
+}
+
+/* Feature-bottle name inside a dark surface is a hero moment: serif. */
+body:not(.landing-page) :is(.home-rebuild-highlight, .last-opened-card.featured) :is(h2, h3) {
+  font-family: var(--sx-auth-font-display) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+/* ── Buttons: a primary with vinous depth, quiet companions ── */
+body:not(.landing-page) :is(
+  .sx-btn,
+  .sx-btn-primary,
+  .sx-btn-secondary,
+  .sx-btn-outline,
+  .sx-btn-ghost,
+  .modal-btn-primary,
+  .modal-btn-secondary,
+  .modal-btn-ghost,
+  .btn-primary-premium,
+  .home-rebuild-action,
+  .cellar-rebuild-add-button,
+  .consumo-rebuild-filter-button
+) {
+  min-height: 44px !important;
+  border-radius: var(--sx-auth-radius-pill) !important;
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  transition:
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    filter var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is(.sx-btn-primary, .btn-primary-premium, .modal-btn-primary, .home-rebuild-action-primary, .cellar-rebuild-add-button) {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: linear-gradient(140deg, var(--sx-auth-wine-bright), var(--sx-auth-wine) 55%, var(--sx-auth-wine-deep)) !important;
+  color: var(--sx-auth-ivory) !important;
+  box-shadow: var(--sx-auth-shadow-primary) !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-primary, .btn-primary-premium, .modal-btn-primary, .home-rebuild-action-primary, .cellar-rebuild-add-button):hover {
+  transform: translateY(-1px);
+  filter: brightness(1.07);
+  box-shadow:
+    0 2px 4px rgba(45, 27, 18, 0.24),
+    0 16px 36px -14px rgba(122, 18, 36, 0.6) !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-primary, .btn-primary-premium, .modal-btn-primary, .home-rebuild-action-primary, .cellar-rebuild-add-button):active {
+  transform: translateY(0) scale(0.99);
+  filter: brightness(0.97);
+}
+
+body:not(.landing-page) :is(.sx-btn-secondary, .sx-btn-outline, .modal-btn-secondary, .premium-control-surface, .home-rebuild-action:not(.home-rebuild-action-primary)) {
+  border: 1px solid var(--sx-auth-border-strong) !important;
+  background: var(--sx-auth-paper) !important;
+  color: var(--sx-auth-ink) !important;
+  box-shadow: 0 1px 2px rgba(45, 27, 18, 0.04) !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-secondary, .sx-btn-outline, .modal-btn-secondary, .premium-control-surface, .home-rebuild-action:not(.home-rebuild-action-primary)):hover {
+  transform: translateY(-1px);
+  border-color: var(--sx-auth-border-gold) !important;
+  background: #fffaf2 !important;
+  box-shadow: 0 1px 2px rgba(45, 27, 18, 0.05), 0 10px 24px -16px rgba(45, 27, 18, 0.28) !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-ghost, .modal-btn-ghost) {
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: var(--sx-auth-muted) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-ghost, .modal-btn-ghost):hover {
+  background: rgba(63, 42, 32, 0.05) !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+/* ── Focus: a champagne ring, visible without alarm ── */
+body:not(.landing-page) :is(button, a, [role="button"], [tabindex], input, select, textarea):focus-visible {
+  outline: 2px solid rgba(176, 141, 63, 0.8) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Chips: small, quiet, warm tint; selection is a wine tint ── */
+body:not(.landing-page) :is(.chip, .sx-v2-chip, .badge, .premium-chip-surface, .consumption-filter-chip, .cellar-rebuild-filter-chip) {
+  min-height: 28px !important;
+  border-radius: var(--sx-auth-radius-pill) !important;
+  border: 1px solid transparent !important;
+  background: rgba(63, 42, 32, 0.05) !important;
+  color: var(--sx-auth-ink-soft) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  transition:
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    color var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is(.chip, .sx-v2-chip, .consumption-filter-chip, .cellar-rebuild-filter-chip):hover {
+  border-color: var(--sx-auth-border-gold) !important;
+  background: rgba(176, 141, 63, 0.08) !important;
+}
+
+body:not(.landing-page) :is(.chip.active, .sx-v2-chip-active, .consumption-filter-chip.active, .consumption-filter-chip[aria-pressed="true"], .cellar-rebuild-filter-chip.active) {
+  border-color: rgba(122, 18, 36, 0.18) !important;
+  background: rgba(122, 18, 36, 0.07) !important;
+  color: var(--sx-auth-wine) !important;
+}
+
+/* ── Status badges and small labels: 500, sentence case ── */
+body:not(.landing-page) :is(
+  .business-mode-badge,
+  .drink-badge,
+  .wine-qty-badge,
+  .cellar-rebuild-card-chip,
+  .cellar-rebuild-drink-badge,
+  .consumo-rebuild-month-label,
+  .consumo-rebuild-stat-label
+) {
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* ── Inputs: paper field, champagne focus ── */
+body:not(.landing-page) :is(input, textarea, select, [cmdk-input], .modal-input, .form-input, .cellar-rebuild-search) {
+  border-radius: var(--sx-auth-radius-input) !important;
+  border: 1px solid var(--sx-auth-border-strong) !important;
+  background: var(--sx-auth-paper) !important;
+  color: var(--sx-auth-ink) !important;
+  box-shadow: none !important;
+  transition:
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is(input, textarea, select, [cmdk-input], .modal-input, .form-input, .cellar-rebuild-search):focus {
+  border-color: rgba(176, 141, 63, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(176, 141, 63, 0.14) !important;
+  outline: none !important;
+}
+
+/* ── Sidebar navigation: gentle hover, no admin-panel highlight bars ── */
+body:not(.landing-page) :is([data-sidebar="menu-button"], .sidebar-item, .sidebar-action-item) {
+  transition:
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    color var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is([data-sidebar="menu-button"], .sidebar-item, .sidebar-action-item):hover {
+  background-color: rgba(63, 42, 32, 0.05);
+}
+
+/* ── Command menu ── */
+body:not(.landing-page) [cmdk-item] {
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  transition: background-color var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+/* ── Modal system, baseline shell (the full pass is Phase 2):
+   glass scrim, raised glass shell, serif header, one close button ── */
+body:not(.landing-page) .premium-modal-overlay {
+  background: rgba(24, 14, 10, 0.45) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+}
+
+body:not(.landing-page) :is(.sx-action-modal, .modal-container, .dashboard-command-dialog) {
+  border-radius: var(--sx-auth-radius-modal) !important;
+  border: 1px solid var(--sx-auth-border-glass) !important;
+  background: var(--sx-auth-glass-solid) !important;
+  backdrop-filter: blur(24px) saturate(1.1);
+  -webkit-backdrop-filter: blur(24px) saturate(1.1);
+  color: var(--sx-auth-ink) !important;
+  box-shadow: var(--sx-auth-shadow-modal) !important;
+  animation: sx-modal-in var(--sx-auth-dur-slow) var(--sx-auth-ease) both;
+}
+
+@keyframes sx-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* No panels, no nested surfaces inside the header. */
+body:not(.landing-page) .sx-action-modal :is(.modal-header-bar, .sx-v2-modal-header) {
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-header {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 30px 30px 22px !important;
+  padding-right: 88px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--sx-auth-border) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-header-lockup {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  min-width: 0 !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) {
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  border-radius: var(--sx-auth-radius-pill) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 1px solid rgba(176, 141, 63, 0.3) !important;
+  background: linear-gradient(160deg, #fff8ec, #f6ecda) !important;
+  color: var(--sx-auth-wine) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 6px -2px rgba(45, 27, 18, 0.18) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) svg {
+  width: 21px !important;
+  height: 21px !important;
+  stroke-width: 1.6 !important;
+}
+
+/* The modal title is a hero moment: large, serif, unhurried. */
+body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title], [data-radix-sheet-title]) {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: 30px !important;
+  font-weight: 500 !important;
+  line-height: 1.1 !important;
+  letter-spacing: 0 !important;
+  color: var(--sx-auth-ink) !important;
+  overflow-wrap: anywhere;
+}
+
+body:not(.landing-page) .sx-action-modal .modal-close-btn {
+  top: 20px !important;
+  right: 20px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: var(--sx-auth-radius-pill) !important;
+  border: 1px solid var(--sx-auth-border) !important;
+  background: var(--sx-auth-paper) !important;
+  color: var(--sx-auth-muted) !important;
+  box-shadow: 0 1px 2px rgba(45, 27, 18, 0.05) !important;
+  transition:
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) .sx-action-modal .modal-close-btn:hover {
+  background: #fffaf2 !important;
+  border-color: var(--sx-auth-border-gold) !important;
+  color: var(--sx-auth-ink) !important;
+  transform: rotate(90deg);
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .sx-v2-modal-body, .consumption-modal-body, .analyze-carta-body) {
+  padding: 26px 30px 30px !important;
+  background: transparent !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-footer, .sx-v2-modal-footer) {
+  padding: 16px 30px 30px !important;
+  border-top: 1px solid var(--sx-auth-border) !important;
+  background: transparent !important;
+}
+
+/* One option-card style for every modal flow — paper at rest, lifting
+   toward gold on hover, wine tint when selected. */
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card,
+  .sx-v2-modal-action,
+  .segment-card,
+  .consumption-source-card,
+  .consumption-select-card,
+  .add-wine-rebuild-option,
+  .analyze-carta-button,
+  .harmonizar-option
+) {
+  width: 100% !important;
+  min-height: 68px !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 14px !important;
+  padding: 14px 18px !important;
+  border-radius: var(--sx-auth-radius-option) !important;
+  border: 1px solid var(--sx-auth-border) !important;
+  background: var(--sx-auth-paper) !important;
+  color: var(--sx-auth-ink) !important;
+  box-shadow: 0 1px 2px rgba(45, 27, 18, 0.04) !important;
+  transform: none !important;
+  transition:
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card,
+  .sx-v2-modal-action,
+  .segment-card,
+  .consumption-source-card,
+  .consumption-select-card,
+  .add-wine-rebuild-option,
+  .analyze-carta-button,
+  .harmonizar-option
+):hover {
+  transform: translateY(-1px) !important;
+  border-color: var(--sx-auth-border-gold) !important;
+  background: #fffaf2 !important;
+  box-shadow: 0 1px 2px rgba(45, 27, 18, 0.05), 0 12px 28px -18px rgba(45, 27, 18, 0.3) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .modal-action-card-icon,
+  .segment-card > div[class*="icon"],
+  .consumption-source-icon,
+  .consumption-select-icon,
+  .add-wine-rebuild-option-icon,
+  .harmonizar-option-icon
+),
+body:not(.landing-page) .sx-action-modal .analyze-carta-button > svg {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  padding: 0 !important;
+  border-radius: var(--sx-auth-radius-pill) !important;
+  border: 0 !important;
+  background: linear-gradient(160deg, #fff8ec, #f4e9d6) !important;
+  color: var(--sx-auth-wine) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-icon-wrap,
+  .modal-action-icon,
+  .modal-action-card-icon,
+  .segment-card > div[class*="icon"],
+  .consumption-source-icon,
+  .consumption-select-icon,
+  .add-wine-rebuild-option-icon,
+  .harmonizar-option-icon
+) svg,
+body:not(.landing-page) .sx-action-modal .analyze-carta-button > svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 1.6 !important;
+  /* Former primary options carried white icons on a burgundy fill; the
+     medallion is now ivory, so the icon must take the wine color even
+     when a text-white utility is still on the svg. */
+  color: var(--sx-auth-wine) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-title,
+  .modal-action-card-title,
+  .segment-card-title,
+  .seg-title,
+  .consumption-source-title,
+  .consumption-select-title,
+  .add-wine-rebuild-option > span:last-child,
+  .harmonizar-option-title
+),
+body:not(.landing-page) .sx-action-modal .analyze-carta-button {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: currentColor !important;
+}
+
+/* Selection is a tint, not a fill — burgundy stays an accent. */
+body:not(.landing-page) .sx-action-modal :is(
+  .segment-card.active,
+  .segment-card.is-selected,
+  .consumption-source-card.active,
+  .consumption-source-card.is-selected,
+  .harmonizar-option.active,
+  .harmonizar-option.is-selected,
+  .harmonizar-option[aria-pressed="true"]
+) {
+  border-color: rgba(122, 18, 36, 0.22) !important;
+  background: rgba(122, 18, 36, 0.06) !important;
+  color: var(--sx-auth-wine) !important;
+  box-shadow: none !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(
+  .add-wine-rebuild-option.is-primary,
+  .analyze-carta-actions .analyze-carta-button:first-child
+) {
+  border-color: var(--sx-auth-border) !important;
+  background: var(--sx-auth-paper) !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.add-wine-rebuild-choice, .analyze-carta-actions, .consumption-modal-flow) {
+  gap: 12px !important;
+}
+
+/* The legacy end-of-file "lux" band paints selected/primary option text
+   (and intermediate wrapper divs, which break currentColor inheritance)
+   ivory for a dark burgundy fill that no longer exists (index.css ~24235,
+   ~24600). Match its specificity with explicit colors. */
+body:not(.landing-page) .sx-action-modal .consumption-source-card.is-selected :is(svg, span, p, div, .consumption-source-title, .consumption-source-sub, .consumption-source-meta),
+body:not(.landing-page) .sx-action-modal .segment-card.active :is(svg, span, p, div) {
+  color: var(--sx-auth-wine) !important;
+}
+
+body:not(.landing-page) .analyze-carta-modal .analyze-carta-actions .analyze-carta-button:first-child :is(span, p, div) {
+  color: var(--sx-auth-ink) !important;
+}
+
+/* ── Legacy weight normalization: odd weights (620/650/700) still live in
+   the old stylesheet; the audited offenders are corrected here. ── */
+body:not(.landing-page) :is(
+  .home-rebuild-section-head span,
+  .home-rebuild-consumption-date,
+  .cellar-rebuild-summary-main strong,
+  .cellar-rebuild-summary-stats strong,
+  .consumo-rebuild-month-count
+) {
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-weekday {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important;
+}
+
+body:not(.landing-page) .chart-surface-title {
+  font-size: var(--sx-auth-card-title) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Modal field labels: a legacy (0,3,1) rule forces 650/10.5 uppercase. */
+body:not(.landing-page) .sx-action-modal :is(
+  .sx-label,
+  .sx-auth-label,
+  .modal-section-label,
+  .modal-field-label,
+  .form-field-label,
+  .modal-input-label,
+  .section-label,
+  .add-wine-rebuild-section-head,
+  .add-wine-field > label,
+  .consumption-filter-section-label
+) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-caption) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--sx-auth-muted) !important;
+}
+
+/* ── Mobile ── */
+@media (max-width: 639px) {
+  body:not(.landing-page) :is(.sx-btn, .sx-btn-primary, .sx-btn-secondary, .sx-btn-outline, .sx-btn-ghost, .modal-btn-primary, .modal-btn-secondary, .modal-btn-ghost) {
+    min-height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  body:not(.landing-page) :is(.cellar-rebuild-add-button, .home-rebuild-action, .alerts-smart-action, .sidebar-action-item, .sidebar-action-primary) {
+    min-height: 44px !important;
+    padding-inline: 14px !important;
+    font-size: 14px !important;
+    line-height: 1.12 !important;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-add-button {
+    min-width: 136px !important;
+    white-space: nowrap !important;
+  }
+
+  body:not(.landing-page) :is(.sx-action-modal, .modal-container, .dashboard-command-dialog) {
+    width: calc(100vw - 32px) !important;
+    max-width: 430px !important;
+    max-height: calc(100dvh - 72px) !important;
+    border-radius: var(--sx-auth-radius-modal) !important;
+  }
+
+  body:not(.landing-page) [data-action-dialog-root] {
+    align-items: flex-end !important;
+    padding: 0 16px max(16px, env(safe-area-inset-bottom)) !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-header {
+    padding: 22px 22px 18px !important;
+    padding-right: 70px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal .modal-close-btn {
+    top: 14px !important;
+    right: 14px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title], [data-radix-sheet-title]) {
+    font-size: 24px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-body, .sx-v2-modal-body, .consumption-modal-body, .analyze-carta-body) {
+    padding: 22px 22px 26px !important;
+  }
+
+  body:not(.landing-page) .sx-action-modal :is(.modal-footer, .sx-v2-modal-footer) {
+    padding: 14px 22px 22px !important;
+  }
+}
+
+/* ── Reduced motion: the product stays calm for those who ask it to ── */
+@media (prefers-reduced-motion: reduce) {
+  body:not(.landing-page) *,
+  body:not(.landing-page) *::before,
+  body:not(.landing-page) *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SOMMELYX V2 VISUAL REFOUNDATION
+   Object-driven · Bottle as hero · Editorial atmosphere
+   Personal · Warm · Collectible · Premium · Emotional
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────────
+   GLOBAL: Editorial breathing room
+   Expensive design is calm, not dense.
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) :is(.home-rebuild-rail, .cellar-rebuild-rail, .consumo-rebuild-rail) {
+  gap: 28px !important;
+  padding-top: 28px !important;
+  padding-bottom: 52px !important;
+}
+
+body:not(.landing-page) .home-rebuild-layout {
+  gap: 24px !important;
+}
+
+body:not(.landing-page) .home-rebuild-main,
+body:not(.landing-page) .home-rebuild-side {
+  gap: 20px !important;
+}
+
+/* Section panels: generous padding */
+body:not(.landing-page) :is(
+  .home-rebuild-summary,
+  .home-rebuild-panel
+) {
+  padding: 22px !important;
+  border-radius: 28px !important;
+}
+
+body:not(.landing-page) .home-rebuild-actions-card {
+  padding: 14px !important;
+  gap: 10px !important;
+  border-radius: 28px !important;
+}
+
+/* Section heads: calm Inter 500, no shouting */
+body:not(.landing-page) .home-rebuild-section-head {
+  margin-bottom: 16px !important;
+}
+
+body:not(.landing-page) .home-rebuild-section-head h2 {
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+body:not(.landing-page) .home-rebuild-section-head span {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   HOME: Featured bottle as the hero
+   The bottle must be the emotional center of the experience.
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) .home-rebuild-highlight {
+  grid-template-columns: 168px minmax(0, 1fr) !important;
+  min-height: 290px !important;
+  padding: 18px !important;
+  gap: 20px !important;
+  border-radius: 32px !important;
+  background:
+    radial-gradient(ellipse at 18% -4%, rgba(200, 168, 90, 0.32), transparent 42%),
+    radial-gradient(ellipse at 90% 90%, rgba(255, 253, 248, 0.06), transparent 38%),
+    linear-gradient(148deg, #1d040a 0%, #162019 46%, #1e2e1f 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 48px 96px -44px rgba(20, 12, 8, 0.68),
+    0 18px 44px -28px rgba(122, 18, 36, 0.30) !important;
+}
+
+body:not(.landing-page) .home-rebuild-bottle-stage {
+  min-height: 254px !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(ellipse at 50% 16%, rgba(255, 253, 248, 0.24), transparent 56%),
+    rgba(255, 253, 248, 0.09) !important;
+}
+
+body:not(.landing-page) .home-rebuild-bottle,
+body:not(.landing-page) .home-rebuild-bottle-placeholder {
+  width: 98px !important;
+  height: 164px !important;
+}
+
+body:not(.landing-page) .home-rebuild-highlight-copy {
+  gap: 10px !important;
+  align-content: space-between !important;
+  padding: 4px 0 !important;
+}
+
+/* Hero wine name: Cormorant, large, unhurried */
+body:not(.landing-page) .home-rebuild-wine {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: clamp(28px, 3.4vw, 42px) !important;
+  font-weight: 500 !important;
+  line-height: 1.01 !important;
+  letter-spacing: -0.01em !important;
+  -webkit-line-clamp: 3 !important;
+}
+
+body:not(.landing-page) .home-rebuild-meta {
+  font-size: 13px !important;
+  opacity: 0.82 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Abrir agora — refined ghost action inside the dark hero */
+body:not(.landing-page) .home-rebuild-open {
+  min-height: 38px !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  gap: 6px !important;
+}
+
+/* Quick action buttons */
+body:not(.landing-page) .home-rebuild-action {
+  min-height: 46px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border-radius: 14px !important;
+  justify-content: flex-start !important;
+  padding: 0 16px !important;
+  gap: 10px !important;
+}
+
+/* Summary metrics: remove uppercase labels, generous cells */
+body:not(.landing-page) .home-rebuild-metrics {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .home-rebuild-metrics span {
+  min-height: 74px !important;
+  border-radius: 20px !important;
+  padding: 14px !important;
+  text-transform: none !important;
+  font-size: 12px !important;
+  letter-spacing: 0 !important;
+  gap: 5px !important;
+}
+
+body:not(.landing-page) .home-rebuild-metrics strong {
+  font-size: 23px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* Wine and consumption rows: journal entries, not list items */
+body:not(.landing-page) .home-rebuild-upcoming-list,
+body:not(.landing-page) .home-rebuild-recent-list {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .home-rebuild-wine-row,
+body:not(.landing-page) .home-rebuild-consumption-row {
+  min-height: 68px !important;
+  border-radius: 20px !important;
+  padding: 10px 14px !important;
+  gap: 12px !important;
+  grid-template-columns: 48px minmax(0, 1fr) auto !important;
+  transition:
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    border-color var(--sx-auth-dur-fast) var(--sx-auth-ease) !important;
+}
+
+body:not(.landing-page) .home-rebuild-wine-row:hover,
+body:not(.landing-page) .home-rebuild-consumption-row:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--sx-auth-shadow-hover) !important;
+  border-color: var(--sx-auth-border-gold) !important;
+}
+
+body:not(.landing-page) .home-rebuild-thumb {
+  width: 46px !important;
+  height: 60px !important;
+}
+
+body:not(.landing-page) .home-rebuild-row-copy strong {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+body:not(.landing-page) .home-rebuild-row-copy small {
+  font-size: 12px !important;
+}
+
+body:not(.landing-page) .home-rebuild-row-status,
+body:not(.landing-page) .home-rebuild-rating,
+body:not(.landing-page) .home-rebuild-consumption-date {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 5px 10px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   CELLAR: Personal collection, not inventory
+   Each bottle is a collectible object.
+   Vertical emphasis · Large stage · Tactile cards
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) .cellar-rebuild-workspace {
+  gap: 20px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-grid {
+  grid-template-columns: repeat(auto-fill, minmax(204px, 1fr)) !important;
+  gap: 16px !important;
+}
+
+/* Grid cards: taller, more collectible vertical emphasis */
+body:not(.landing-page) .cellar-rebuild-card {
+  grid-template-rows: 208px minmax(0, 1fr) !important;
+  border-radius: 26px !important;
+  padding: 10px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-stage {
+  border-radius: 20px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-image,
+body:not(.landing-page) .cellar-rebuild-card-image-placeholder {
+  width: 80px !important;
+  height: 132px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-body {
+  padding: 12px 6px 6px !important;
+  gap: 6px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-name {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1.15 !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-card-meta {
+  font-size: 12px !important;
+}
+
+/* Type chips: sentence case, quieter */
+body:not(.landing-page) .cellar-rebuild-card-chip,
+body:not(.landing-page) .cellar-rebuild-row-chip {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-drink-badge {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  padding: 3px 9px !important;
+}
+
+/* List view: spacious rows */
+body:not(.landing-page) .cellar-rebuild-list {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-row {
+  min-height: 84px !important;
+  border-radius: 22px !important;
+  padding: 10px 14px !important;
+  gap: 12px !important;
+  grid-template-columns: 64px minmax(0, 1fr) auto !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-row-stage {
+  width: 56px !important;
+  height: 68px !important;
+  border-radius: 18px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-row-thumb {
+  width: 46px !important;
+  height: 62px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-row-name {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-row-meta {
+  font-size: 12px !important;
+}
+
+/* Cellar summary panel: remove uppercase labels */
+body:not(.landing-page) .cellar-rebuild-summary {
+  padding: 20px !important;
+  gap: 16px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-main strong {
+  font-size: 42px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.03em !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-main span,
+body:not(.landing-page) .cellar-rebuild-summary-stats span {
+  text-transform: none !important;
+  font-size: 12px !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats span {
+  border-radius: 18px !important;
+  padding: 12px !important;
+  min-height: 64px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats strong {
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015em !important;
+  display: block !important;
+  margin-bottom: 3px !important;
+}
+
+/* Controls panel */
+body:not(.landing-page) .cellar-rebuild-controls {
+  padding: 14px !important;
+  gap: 12px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   CONSUMPTION: Tasting journal, not history log
+   Each entry is a memory. Dates feel editorial. Notes matter.
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) .consumo-rebuild-layout {
+  gap: 20px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-history,
+body:not(.landing-page) .consumo-rebuild-side {
+  gap: 16px !important;
+}
+
+body:not(.landing-page) :is(.consumo-rebuild-chart, .consumo-rebuild-timeline) {
+  padding: 22px !important;
+  border-radius: 28px !important;
+}
+
+/* Stat cards */
+body:not(.landing-page) .consumo-rebuild-stats-grid {
+  gap: 10px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat {
+  min-height: 74px !important;
+  padding: 14px !important;
+  border-radius: 24px !important;
+}
+
+/* Calmer stat labels — no uppercase, no shouting */
+body:not(.landing-page) .consumo-rebuild-stat-label,
+body:not(.landing-page) .consumo-rebuild-timeline-kicker,
+body:not(.landing-page) .consumo-rebuild-chart-kicker {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat-value {
+  font-size: 26px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.025em !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-timeline-title,
+body:not(.landing-page) .consumo-rebuild-chart-title {
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Month labels: editorial, not operational */
+body:not(.landing-page) .consumo-rebuild-months {
+  margin-top: 16px !important;
+  gap: 12px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-month-label {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-list {
+  gap: 10px !important;
+}
+
+/* Journal entries: each one is a memory, not a row */
+body:not(.landing-page) .consumo-rebuild-entry {
+  min-height: 76px !important;
+  border-radius: 20px !important;
+  padding: 10px 14px !important;
+  gap: 10px !important;
+  grid-template-columns: 44px 50px 4px minmax(0, 1fr) auto !important;
+}
+
+/* The date: large numeral, quiet weekday below */
+body:not(.landing-page) .consumo-rebuild-entry-day {
+  font-size: 25px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.025em !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-weekday {
+  font-size: 10px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-bottle {
+  width: 48px !important;
+  height: 62px !important;
+  border-radius: 16px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-title {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-meta,
+body:not(.landing-page) .consumo-rebuild-entry-note {
+  font-size: 12px !important;
+}
+
+/* Last opened hero card */
+body:not(.landing-page) .consumo-rebuild-last {
+  padding: 20px !important;
+  border-radius: 30px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-title {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: 27px !important;
+  font-weight: 500 !important;
+  line-height: 1.05 !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-last-rating {
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   WISHLIST: Dream collection, not task list
+   Each bottle is a desired object. Aspiration · Discovery.
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) .wishlist-title {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: var(--sx-auth-page-title) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.05 !important;
+}
+
+body:not(.landing-page) .wishlist-sub {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  margin-bottom: 28px !important;
+}
+
+body:not(.landing-page) .wishlist-card {
+  border-radius: 22px !important;
+  padding: 18px 20px !important;
+  gap: 16px !important;
+  margin-bottom: 12px !important;
+  border: 1px solid var(--sx-auth-border) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   ALERTS: Sommelier guidance, not system warnings
+   Replace alarm energy with expertise and curation.
+   ────────────────────────────────────────────────────────────────── */
+
+body:not(.landing-page) .alerts-header-title {
+  font-family: var(--sx-auth-font-display) !important;
+  font-size: var(--sx-auth-page-title) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.05 !important;
+}
+
+body:not(.landing-page) .alert-card {
+  border-radius: 22px !important;
+  padding: 18px 20px !important;
+  border: 1px solid var(--sx-auth-border) !important;
+}
+
+body:not(.landing-page) .alert-card-title {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+}
+
+body:not(.landing-page) .alert-card-meta {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+}
+
+/* Tone down aggressive alert colors — sommelier, not alarm */
+body:not(.landing-page) .alert-card-icon-wrap.now {
+  background: rgba(38, 58, 43, 0.10) !important;
+  color: var(--sx-auth-olive) !important;
+}
+
+body:not(.landing-page) .alert-card-icon-wrap.soon {
+  background: rgba(184, 140, 60, 0.10) !important;
+  color: var(--sx-auth-gold-deep) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   MOTION: Calm · Confident · Expensive
+   Staggered reveals · Hover lifts · Ambient transitions
+   ────────────────────────────────────────────────────────────────── */
+
+@keyframes sx-v2-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sx-v2-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Surface panels enter softly */
+body:not(.landing-page) .home-rebuild-highlight {
+  animation: sx-v2-reveal 520ms var(--sx-auth-ease) both;
+  animation-delay: 0ms;
+}
+
+body:not(.landing-page) .home-rebuild-upcoming {
+  animation: sx-v2-reveal 480ms var(--sx-auth-ease) both;
+  animation-delay: 60ms;
+}
+
+body:not(.landing-page) .home-rebuild-recent {
+  animation: sx-v2-reveal 480ms var(--sx-auth-ease) both;
+  animation-delay: 120ms;
+}
+
+body:not(.landing-page) .home-rebuild-actions-card {
+  animation: sx-v2-reveal 460ms var(--sx-auth-ease) both;
+  animation-delay: 30ms;
+}
+
+body:not(.landing-page) .home-rebuild-summary {
+  animation: sx-v2-reveal 460ms var(--sx-auth-ease) both;
+  animation-delay: 90ms;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary {
+  animation: sx-v2-reveal 480ms var(--sx-auth-ease) both;
+  animation-delay: 0ms;
+}
+
+body:not(.landing-page) .cellar-rebuild-controls {
+  animation: sx-v2-reveal 460ms var(--sx-auth-ease) both;
+  animation-delay: 40ms;
+}
+
+body:not(.landing-page) .consumo-rebuild-last {
+  animation: sx-v2-reveal 500ms var(--sx-auth-ease) both;
+  animation-delay: 0ms;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat {
+  animation: sx-v2-reveal 440ms var(--sx-auth-ease) both;
+}
+
+/* Cellar grid: staggered card entry */
+body:not(.landing-page) .cellar-rebuild-card {
+  animation: sx-v2-card-in 440ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .cellar-rebuild-card:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(2) { animation-delay: 45ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(3) { animation-delay: 90ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(4) { animation-delay: 135ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(5) { animation-delay: 180ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(6) { animation-delay: 220ms; }
+body:not(.landing-page) .cellar-rebuild-card:nth-child(n+7) { animation-delay: 260ms; }
+
+/* Cellar list rows stagger */
+body:not(.landing-page) .cellar-rebuild-row {
+  animation: sx-v2-reveal 400ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .cellar-rebuild-row:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .cellar-rebuild-row:nth-child(2) { animation-delay: 40ms; }
+body:not(.landing-page) .cellar-rebuild-row:nth-child(3) { animation-delay: 80ms; }
+body:not(.landing-page) .cellar-rebuild-row:nth-child(4) { animation-delay: 120ms; }
+body:not(.landing-page) .cellar-rebuild-row:nth-child(5) { animation-delay: 160ms; }
+body:not(.landing-page) .cellar-rebuild-row:nth-child(n+6) { animation-delay: 200ms; }
+
+/* Consumption journal entries stagger */
+body:not(.landing-page) .consumo-rebuild-entry {
+  animation: sx-v2-reveal 400ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(2) { animation-delay: 35ms; }
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(3) { animation-delay: 70ms; }
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(4) { animation-delay: 105ms; }
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(5) { animation-delay: 140ms; }
+body:not(.landing-page) .consumo-rebuild-entry:nth-child(n+6) { animation-delay: 175ms; }
+
+/* Wishlist cards stagger */
+body:not(.landing-page) .wishlist-card {
+  animation: sx-v2-reveal 400ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .wishlist-card:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .wishlist-card:nth-child(2) { animation-delay: 45ms; }
+body:not(.landing-page) .wishlist-card:nth-child(3) { animation-delay: 90ms; }
+body:not(.landing-page) .wishlist-card:nth-child(n+4) { animation-delay: 135ms; }
+
+/* Alert cards stagger */
+body:not(.landing-page) .alert-card {
+  animation: sx-v2-reveal 400ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .alert-card:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .alert-card:nth-child(2) { animation-delay: 45ms; }
+body:not(.landing-page) .alert-card:nth-child(3) { animation-delay: 90ms; }
+body:not(.landing-page) .alert-card:nth-child(n+4) { animation-delay: 135ms; }
+
+/* Home wine rows: hover lift */
+body:not(.landing-page) .home-rebuild-wine-row,
+body:not(.landing-page) .home-rebuild-consumption-row {
+  animation: sx-v2-reveal 380ms var(--sx-auth-ease) both;
+}
+
+body:not(.landing-page) .home-rebuild-wine-row:nth-child(1),
+body:not(.landing-page) .home-rebuild-consumption-row:nth-child(1) { animation-delay: 0ms; }
+body:not(.landing-page) .home-rebuild-wine-row:nth-child(2),
+body:not(.landing-page) .home-rebuild-consumption-row:nth-child(2) { animation-delay: 40ms; }
+body:not(.landing-page) .home-rebuild-wine-row:nth-child(3),
+body:not(.landing-page) .home-rebuild-consumption-row:nth-child(3) { animation-delay: 80ms; }
+
+/* Abrir agora hover: directional micro-motion */
+body:not(.landing-page) .home-rebuild-open:hover {
+  background: rgba(255, 248, 239, 0.22) !important;
+  border-color: rgba(255, 248, 239, 0.36) !important;
+  transform: translateX(2px);
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   MOBILE RESPONSIVE: V2 Refoundation adaptations
+   ────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767px) {
+  body:not(.landing-page) :is(.home-rebuild-rail, .cellar-rebuild-rail, .consumo-rebuild-rail) {
+    gap: 16px !important;
+    padding-top: 16px !important;
+    padding-bottom: 36px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-main,
+  body:not(.landing-page) .home-rebuild-side {
+    gap: 14px !important;
+  }
+
+  /* Mobile hero: still impressive, proportional */
+  body:not(.landing-page) .home-rebuild-highlight {
+    grid-template-columns: 106px minmax(0, 1fr) !important;
+    min-height: 208px !important;
+    padding: 12px !important;
+    gap: 14px !important;
+    border-radius: 28px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-bottle-stage {
+    min-height: 184px !important;
+    border-radius: 22px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-bottle,
+  body:not(.landing-page) .home-rebuild-bottle-placeholder {
+    width: 72px !important;
+    height: 122px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-wine {
+    font-size: clamp(22px, 5.8vw, 28px) !important;
+  }
+
+  body:not(.landing-page) :is(.home-rebuild-summary, .home-rebuild-panel) {
+    padding: 16px !important;
+    border-radius: 22px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-actions-card {
+    padding: 10px !important;
+  }
+
+  /* Cellar mobile: 2 columns, still collectible */
+  body:not(.landing-page) .cellar-rebuild-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card {
+    grid-template-rows: 160px minmax(0, 1fr) !important;
+    border-radius: 22px !important;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-card-image,
+  body:not(.landing-page) .cellar-rebuild-card-image-placeholder {
+    width: 66px !important;
+    height: 108px !important;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-summary {
+    padding: 16px !important;
+  }
+
+  body:not(.landing-page) .cellar-rebuild-summary-main strong {
+    font-size: 34px !important;
+  }
+
+  body:not(.landing-page) :is(.consumo-rebuild-chart, .consumo-rebuild-timeline) {
+    padding: 16px !important;
+    border-radius: 22px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) .home-rebuild-metrics span {
+    min-height: 62px !important;
+    padding: 12px !important;
+  }
+
+  body:not(.landing-page) .home-rebuild-metrics strong {
+    font-size: 20px !important;
+  }
+
+  body:not(.landing-page) .wishlist-sub {
+    margin-bottom: 20px !important;
+  }
+}

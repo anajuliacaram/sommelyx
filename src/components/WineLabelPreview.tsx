@@ -252,7 +252,7 @@ export function WineLabelPreview({
           <div className="relative grid h-[72%] min-h-[86px] w-[48%] min-w-[46px] max-w-[82px] grid-rows-[1fr_auto] overflow-hidden rounded-t-[999px] rounded-b-[18px] border border-white/35 bg-[rgba(255,253,248,0.18)] shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_18px_34px_-28px_rgba(0,0,0,0.48)] backdrop-blur-sm">
             <div className="mx-auto mt-[18%] h-[42%] w-[46%] rounded-t-[999px] rounded-b-[9px] bg-[rgba(255,253,248,0.24)]" />
             <div className="m-2 rounded-[12px] bg-[rgba(255,248,239,0.88)] px-2 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
-              <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(101,10,24,0.12)] text-[#650A18]">
+              <div className="mx-auto mb-1 flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(122, 18, 36,0.12)] text-[#7a1224]">
                 <WineIcon className="h-3 w-3" />
               </div>
               <p className="truncate text-[8px] font-semibold uppercase tracking-[0.16em] text-[#4D0814]">Sommelyx</p>

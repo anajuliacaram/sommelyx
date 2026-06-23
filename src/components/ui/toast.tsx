@@ -28,7 +28,7 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "text-[#1B1A18]",
-        destructive: "border-[rgba(101,10,24,0.22)] bg-[rgba(255,253,248,0.98)] text-[#650A18]",
+        destructive: "border-[rgba(122, 18, 36,0.22)] bg-[rgba(255,253,248,0.98)] text-[#7a1224]",
       },
     },
     defaultVariants: {
@@ -52,7 +52,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "premium-chip-surface inline-flex h-8 shrink-0 items-center justify-center rounded-full px-3 text-sm font-medium text-[#1B1A18] ring-offset-background transition-colors hover:bg-white group-[.destructive]:border-[rgba(101,10,24,0.16)] group-[.destructive]:bg-[rgba(101,10,24,0.08)] group-[.destructive]:text-[#650A18] group-[.destructive]:hover:bg-[rgba(101,10,24,0.10)] focus:outline-none focus:ring-2 focus:ring-[#650A18]/20 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      "premium-chip-surface inline-flex h-8 shrink-0 items-center justify-center rounded-full px-3 text-sm font-medium text-[#1B1A18] ring-offset-background transition-colors hover:bg-white group-[.destructive]:border-[rgba(122, 18, 36,0.16)] group-[.destructive]:bg-[rgba(122, 18, 36,0.08)] group-[.destructive]:text-[#7a1224] group-[.destructive]:hover:bg-[rgba(122, 18, 36,0.10)] focus:outline-none focus:ring-2 focus:ring-[#7a1224]/20 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       className,
     )}
     {...props}
@@ -67,7 +67,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-full p-1.5 text-[#766B62] opacity-100 transition-opacity hover:text-[#1B1A18] group-[.destructive]:text-[#650A18] group-[.destructive]:hover:text-[#3B0710] focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#650A18]/15 group-[.destructive]:focus:ring-[#650A18]/18",
+      "absolute right-2 top-2 rounded-full p-1.5 text-[#766B62] opacity-100 transition-opacity hover:text-[#1B1A18] group-[.destructive]:text-[#7a1224] group-[.destructive]:hover:text-[#3B0710] focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#7a1224]/15 group-[.destructive]:focus:ring-[#7a1224]/18",
       className,
     )}
     toast-close=""

@@ -51,7 +51,7 @@
     --radius: 0.875rem;
 
     /* Brand — usado pelo componente <BrandName /> */
-    --brand-primary: #6F0718;
+    --brand-primary: #7a1224;
     --brand-accent: #C8A96A;
 
     /* Sidebar — Translucent Forest */
@@ -89,10 +89,10 @@
     --cream-warm: 33 18% 96%;
 
     /* === SOMMELYX DESIGN TOKENS — mobile app foundation === */
-    --sx-bordeaux: #6F0718;
-    --brand-primary: #6F0718;
+    --sx-bordeaux: #7a1224;
+    --brand-primary: #7a1224;
     --wine-hover: #4A0714;
-    --wine-vivid: #6F0718;
+    --wine-vivid: #7a1224;
     --wine-mid: #5E0B1F;
     --wine-light: #F3E8E5;
     --sx-bordeaux-10: rgba(122,16,40,0.10);
@@ -260,7 +260,7 @@ body:not(.landing-page) .home-v3-page,
 body:not(.landing-page) .cellar-v3-page,
 body:not(.landing-page) .consumo-v3-page {
   background:
-    radial-gradient(circle at 16% 4%, rgba(101, 10, 24, 0.08), transparent 31rem),
+    radial-gradient(circle at 16% 4%, rgba(122, 18, 36, 0.08), transparent 31rem),
     radial-gradient(circle at 86% 10%, rgba(38, 58, 43, 0.10), transparent 28rem),
     linear-gradient(180deg, #f8f2e8 0%, #f3ecdf 100%);
   color: #201714;
@@ -290,7 +290,7 @@ body:not(.landing-page) .home-v3-header {
 body:not(.landing-page) .home-v3-date,
 body:not(.landing-page) .home-v3-snapshot-kicker,
 body:not(.landing-page) .home-v3-hero-kicker {
-  color: rgba(101, 10, 24, 0.74);
+  color: rgba(122, 18, 36, 0.74);
 }
 
 body:not(.landing-page) .home-v3-title {
@@ -303,7 +303,7 @@ body:not(.landing-page) .home-v3-title {
 }
 
 body:not(.landing-page) .home-v3-name {
-  color: #650a18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .home-v3-actions {
@@ -330,13 +330,13 @@ body:not(.landing-page) .home-v3-action {
 
 body:not(.landing-page) .home-v3-action:hover {
   transform: translateY(-1px);
-  border-color: rgba(101, 10, 24, 0.18);
+  border-color: rgba(122, 18, 36, 0.18);
   background: rgba(255, 253, 248, 0.82);
 }
 
 body:not(.landing-page) .home-v3-action-primary {
-  border-color: rgba(101, 10, 24, 0.22);
-  background: linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+  border-color: rgba(122, 18, 36, 0.22);
+  background: linear-gradient(135deg, #7a1224 0%, #3b0710 100%);
   color: #fff8ed;
 }
 
@@ -604,8 +604,8 @@ body:not(.landing-page) .home-v3-status {
 }
 
 body:not(.landing-page) .home-v3-status.now {
-  background: rgba(101, 10, 24, 0.10);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.10);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .home-v3-timeline {
@@ -639,7 +639,7 @@ body:not(.landing-page) .home-v3-timeline-rating {
   border-radius: 999px;
   background: rgba(200, 168, 90, 0.14);
   padding: 5px 8px;
-  color: #650a18;
+  color: #7a1224;
   font-size: 11px;
   font-weight: 680;
 }
@@ -689,7 +689,7 @@ body:not(.landing-page) .cellar-v3-summary {
   border: 1px solid rgba(61, 53, 48, 0.10);
   border-radius: 28px;
   background:
-    radial-gradient(circle at 8% 0%, rgba(101, 10, 24, 0.08), transparent 16rem),
+    radial-gradient(circle at 8% 0%, rgba(122, 18, 36, 0.08), transparent 16rem),
     rgba(255, 253, 248, 0.68);
   padding: 16px 18px;
   box-shadow: 0 24px 64px -54px rgba(32, 23, 20, 0.45);
@@ -697,7 +697,7 @@ body:not(.landing-page) .cellar-v3-summary {
 
 body:not(.landing-page) .cellar-v3-summary-main strong {
   display: block;
-  color: #650a18;
+  color: #7a1224;
   font-family: var(--sx-font-serif, "Cormorant Garamond", serif);
   font-size: clamp(34px, 4vw, 52px);
   font-weight: 560;
@@ -773,7 +773,7 @@ body:not(.landing-page) .cellar-v3-view-btn {
 }
 
 body:not(.landing-page) .cellar-v3-view-btn.active {
-  background: #650a18;
+  background: #7a1224;
   color: #fff8ed;
 }
 
@@ -800,7 +800,7 @@ body:not(.landing-page) .cellar-v3-filter-chip {
 }
 
 body:not(.landing-page) .cellar-v3-filter-chip.active {
-  background: #650a18;
+  background: #7a1224;
   color: #fff8ed;
 }
 
@@ -817,7 +817,7 @@ body:not(.landing-page) .cellar-v3-card {
   border: 1px solid rgba(61, 53, 48, 0.10);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(101, 10, 24, 0.07), transparent 9rem),
+    radial-gradient(circle at 50% 0%, rgba(122, 18, 36, 0.07), transparent 9rem),
     rgba(255, 253, 248, 0.70);
   padding: 8px;
   box-shadow: 0 22px 62px -54px rgba(32, 23, 20, 0.48);
@@ -887,8 +887,8 @@ body:not(.landing-page) .cellar-v3-row-chip {
 
 body:not(.landing-page) .cellar-v3-card-chip.neutral,
 body:not(.landing-page) .cellar-v3-row-chip.neutral {
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .cellar-v3-drink-badge {
@@ -896,7 +896,7 @@ body:not(.landing-page) .cellar-v3-drink-badge {
   border-radius: 999px;
   background: rgba(200, 168, 90, 0.14);
   padding: 4px 7px;
-  color: #650a18;
+  color: #7a1224;
   font-size: 9.5px;
   font-weight: 720;
   letter-spacing: 0.05em;
@@ -919,9 +919,9 @@ body:not(.landing-page) .cellar-v3-row-price {
 
 body:not(.landing-page) .cellar-v3-open {
   min-height: 30px;
-  border: 1px solid rgba(101, 10, 24, 0.14);
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  border: 1px solid rgba(122, 18, 36, 0.14);
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
   padding: 0 10px;
   font-size: 11px;
 }
@@ -974,7 +974,7 @@ body:not(.landing-page) .cellar-v3-row-right {
 }
 
 body:not(.landing-page) .cellar-v3-row-year {
-  color: #650a18;
+  color: #7a1224;
   font-size: 12px;
   font-weight: 700;
 }
@@ -1017,9 +1017,9 @@ body:not(.landing-page) .consumo-v3-clear-filter {
 }
 
 body:not(.landing-page) .consumo-v3-filter-button.is-active {
-  border-color: rgba(101, 10, 24, 0.18);
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  border-color: rgba(122, 18, 36, 0.18);
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .consumo-v3-filter-summary {
@@ -1166,7 +1166,7 @@ body:not(.landing-page) .consumo-v3-months {
 }
 
 body:not(.landing-page) .consumo-v3-month-label {
-  color: #650a18;
+  color: #7a1224;
   font-size: 11px;
   font-weight: 740;
   letter-spacing: 0.08em;
@@ -1225,7 +1225,7 @@ body:not(.landing-page) .consumo-v3-entry-bottle {
   place-items: center;
   border-radius: 15px;
   background: rgba(241, 234, 223, 0.68);
-  color: #650a18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .consumo-v3-entry-label {
@@ -1274,7 +1274,7 @@ body:not(.landing-page) .consumo-v3-entry-rating {
   border-radius: 999px;
   background: rgba(200, 168, 90, 0.14);
   padding: 5px 7px;
-  color: #650a18;
+  color: #7a1224;
   font-size: 10.5px;
   font-weight: 720;
 }
@@ -1282,7 +1282,7 @@ body:not(.landing-page) .consumo-v3-entry-rating {
 body:not(.landing-page) .consumo-v3-entry-edit {
   width: 13px;
   height: 13px;
-  color: rgba(101, 10, 24, 0.48);
+  color: rgba(122, 18, 36, 0.48);
   opacity: 0;
 }
 
@@ -1315,7 +1315,7 @@ body:not(.landing-page) .add-wine-v3-option {
   border: 1px solid rgba(61, 53, 48, 0.10);
   border-radius: 24px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(101, 10, 24, 0.06), transparent 8rem),
+    radial-gradient(circle at 50% 0%, rgba(122, 18, 36, 0.06), transparent 8rem),
     rgba(255, 253, 248, 0.72);
   color: #201714;
   font-size: 13px;
@@ -1330,10 +1330,10 @@ body:not(.landing-page) .add-wine-v3-option:hover {
 }
 
 body:not(.landing-page) .add-wine-v3-option.is-primary {
-  border-color: rgba(101, 10, 24, 0.18);
+  border-color: rgba(122, 18, 36, 0.18);
   background:
     radial-gradient(circle at 50% 0%, rgba(200, 168, 90, 0.18), transparent 8rem),
-    linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+    linear-gradient(135deg, #7a1224 0%, #3b0710 100%);
   color: #fff8ed;
 }
 
@@ -1343,8 +1343,8 @@ body:not(.landing-page) .add-wine-v3-option-icon {
   height: 34px;
   place-items: center;
   border-radius: 14px;
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .add-wine-v3-option.is-primary .add-wine-v3-option-icon {
@@ -1391,8 +1391,8 @@ body:not(.landing-page) .add-wine-v3-step-dot {
 }
 
 body:not(.landing-page) .add-wine-v3-step-dot.is-current {
-  background: rgba(101, 10, 24, 0.10);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.10);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .add-wine-v3-step-dot.is-done {
@@ -1428,7 +1428,7 @@ body:not(.landing-page) .add-wine-v3-review-head {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #650a18;
+  color: #7a1224;
   font-size: 13px;
   font-weight: 680;
 }
@@ -1492,8 +1492,8 @@ body:not(.landing-page) .add-wine-v3-back {
 }
 
 body:not(.landing-page) .add-wine-v3-next {
-  border: 1px solid rgba(101, 10, 24, 0.18);
-  background: #650a18;
+  border: 1px solid rgba(122, 18, 36, 0.18);
+  background: #7a1224;
   color: #fff8ed;
 }
 
@@ -1767,7 +1767,7 @@ body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .side
 body:not(.landing-page) .sidebar-action-primary {
   background:
     radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.20), transparent 28%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
 }
 
 body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item) {
@@ -1778,8 +1778,8 @@ body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
 body:not(.landing-page) .dashboard-shell .sidebar-item--active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.070), rgba(255, 253, 248, 0.36)) !important;
-  border-color: rgba(101, 10, 24, 0.08) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.070), rgba(255, 253, 248, 0.36)) !important;
+  border-color: rgba(122, 18, 36, 0.08) !important;
 }
 
 body:not(.landing-page) .premium-home-page .overview-greeting-wrap {
@@ -1971,7 +1971,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, 
 body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-action-button-primary, .consumption-filter-apply) {
   background:
     radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.16), transparent 30%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 62%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 62%, #22040A 100%) !important;
 }
 
 @media (max-width: 767px) {
@@ -2018,7 +2018,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] {
 
 body:not(.landing-page) :is(.dashboard-shell [data-sidebar="sidebar"], [data-mobile="true"][data-sidebar="sidebar"]) {
   background:
-    radial-gradient(circle at 12% 0%, rgba(101, 10, 24, 0.030), transparent 30%),
+    radial-gradient(circle at 12% 0%, rgba(122, 18, 36, 0.030), transparent 30%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.97), rgba(247, 242, 234, 0.98)) !important;
 }
 
@@ -2060,7 +2060,7 @@ body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .side
 body:not(.landing-page) .sidebar-action-primary {
   background:
     radial-gradient(circle at 18% 0%, rgba(200, 168, 90, 0.15), transparent 32%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
 }
 
@@ -2077,8 +2077,8 @@ body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item) {
 
 body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover, .sidebar-action-item:focus-visible, .sidebar-item:focus-visible) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.040), rgba(255, 253, 248, 0.50)) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.040), rgba(255, 253, 248, 0.50)) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3B0710 !important;
   transform: translateX(1px) !important;
 }
@@ -2088,7 +2088,7 @@ body:not(.landing-page) :is(.sidebar-item-icon, .sidebar-action-item .action-ico
   height: 24px !important;
   min-width: 24px !important;
   border-radius: 8px !important;
-  background: rgba(101, 10, 24, 0.038) !important;
+  background: rgba(122, 18, 36, 0.038) !important;
   color: rgba(59, 7, 16, 0.72) !important;
 }
 
@@ -2099,8 +2099,8 @@ body:not(.landing-page) .sidebar-action-primary .action-icon {
 
 body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover) :is(.sidebar-item-icon, .action-icon),
 body:not(.landing-page) :is(.sidebar-action-item:focus-visible, .sidebar-item:focus-visible) :is(.sidebar-item-icon, .action-icon) {
-  background: rgba(101, 10, 24, 0.060) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.060) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) :is(.sidebar-item-icon svg, .sidebar-action-item .action-icon svg, .sidebar-action-primary .action-icon svg) {
@@ -2127,9 +2127,9 @@ body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
 body:not(.landing-page) .dashboard-shell .sidebar-item--active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.050), rgba(255, 253, 248, 0.42)) !important;
-  border-color: rgba(101, 10, 24, 0.080) !important;
-  color: #650A18 !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.050), rgba(255, 253, 248, 0.42)) !important;
+  border-color: rgba(122, 18, 36, 0.080) !important;
+  color: #7a1224 !important;
   font-weight: 500 !important;
   box-shadow: none !important;
   transform: none !important;
@@ -2142,14 +2142,14 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-it
   top: 11px !important;
   bottom: 11px !important;
   width: 1.5px !important;
-  background: rgba(101, 10, 24, 0.52) !important;
+  background: rgba(122, 18, 36, 0.52) !important;
 }
 
 body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) .sidebar-item-icon,
 body:not(.landing-page) .dashboard-shell .sidebar-item--active .sidebar-item-icon,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.065) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.065) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .sidebar-item[data-nav="sair"],
@@ -2161,7 +2161,7 @@ body:not(.landing-page) .sidebar-item[data-nav="sair"]:hover {
 
 body:not(.landing-page) .sidebar-item[data-nav="sair"] .sidebar-item-icon,
 body:not(.landing-page) .sidebar-item[data-nav="sair"]:hover .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.035) !important;
+  background: rgba(122, 18, 36, 0.035) !important;
   color: rgba(59, 7, 16, 0.62) !important;
 }
 
@@ -2201,7 +2201,7 @@ body:not(.landing-page) :is(.dashboard-scroll, .modal-body, .sx-action-modal-bod
 /* Phase 9 mobile navigation polish: quiet drawer overlay, native tap feel, no stuck backdrop. */
 body:not(.landing-page) .mobile-sidebar-overlay {
   background:
-    radial-gradient(circle at 0% 12%, rgba(101, 10, 24, 0.10), transparent 34%),
+    radial-gradient(circle at 0% 12%, rgba(122, 18, 36, 0.10), transparent 34%),
     rgba(32, 23, 20, 0.20) !important;
   backdrop-filter: blur(3px) saturate(0.95) !important;
 }
@@ -2239,8 +2239,8 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-side
 
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-item--active, .sidebar-nav-item.active) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.070), rgba(255, 253, 248, 0.48)) !important;
-  border-color: rgba(101, 10, 24, 0.10) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.070), rgba(255, 253, 248, 0.48)) !important;
+  border-color: rgba(122, 18, 36, 0.10) !important;
 }
 
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-item--active, .sidebar-nav-item.active)::before {
@@ -2264,7 +2264,7 @@ body:not(.landing-page) :is(.home-rebuild-page, .cellar-rebuild-page, .consumo-r
   width: 100%;
   color: #201714;
   background:
-    radial-gradient(circle at 8% 0%, rgba(101, 10, 24, 0.06), transparent 24rem),
+    radial-gradient(circle at 8% 0%, rgba(122, 18, 36, 0.06), transparent 24rem),
     radial-gradient(circle at 88% 2%, rgba(38, 58, 43, 0.09), transparent 22rem),
     linear-gradient(180deg, #f7f2ea 0%, #f1eadf 100%);
 }
@@ -2287,7 +2287,7 @@ body:not(.landing-page) :is(.home-rebuild-title, .cellar-rebuild-title, .consumo
 }
 
 body:not(.landing-page) :is(.home-rebuild-date, .cellar-rebuild-kicker, .consumo-rebuild-kicker, .home-rebuild-kicker) {
-  color: rgba(101, 10, 24, 0.72);
+  color: rgba(122, 18, 36, 0.72);
 }
 
 body:not(.landing-page) .home-rebuild-header,
@@ -2300,7 +2300,7 @@ body:not(.landing-page) .consumo-rebuild-header {
 }
 
 body:not(.landing-page) .home-rebuild-name {
-  color: #650a18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .home-rebuild-layout {
@@ -2441,8 +2441,8 @@ body:not(.landing-page) .home-rebuild-action {
 }
 
 body:not(.landing-page) .home-rebuild-action-primary {
-  border-color: rgba(101, 10, 24, 0.14);
-  background: linear-gradient(180deg, #7a1225 0%, #650a18 58%, #3b0710 100%);
+  border-color: rgba(122, 18, 36, 0.14);
+  background: linear-gradient(180deg, #7a1225 0%, #7a1224 58%, #3b0710 100%);
   color: #fff8ed;
 }
 
@@ -2583,8 +2583,8 @@ body:not(.landing-page) .home-rebuild-consumption-date {
 }
 
 body:not(.landing-page) .home-rebuild-row-status.now {
-  background: rgba(101, 10, 24, 0.10);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.10);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .home-rebuild-empty {
@@ -2618,7 +2618,7 @@ body:not(.landing-page) .cellar-rebuild-summary {
 
 body:not(.landing-page) .cellar-rebuild-summary-main strong {
   display: block;
-  color: #650a18;
+  color: #7a1224;
   font-size: 36px;
   font-weight: 620;
   line-height: 0.92;
@@ -2685,8 +2685,8 @@ body:not(.landing-page) .cellar-rebuild-view-btn {
 }
 
 body:not(.landing-page) .cellar-rebuild-view-btn.active {
-  background: rgba(101, 10, 24, 0.10);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.10);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .cellar-rebuild-filters {
@@ -2708,8 +2708,8 @@ body:not(.landing-page) .cellar-rebuild-filter-chip {
 }
 
 body:not(.landing-page) .cellar-rebuild-filter-chip.active {
-  background: rgba(101, 10, 24, 0.11);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.11);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .cellar-rebuild-grid {
@@ -2799,14 +2799,14 @@ body:not(.landing-page) .cellar-rebuild-drink-badge {
 body:not(.landing-page) .cellar-rebuild-drink-badge {
   justify-self: start;
   background: rgba(200, 168, 90, 0.15);
-  color: #650a18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .cellar-rebuild-open {
   min-height: 28px;
-  border: 1px solid rgba(101, 10, 24, 0.12);
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  border: 1px solid rgba(122, 18, 36, 0.12);
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
   padding: 0 10px;
   font-size: 11px;
 }
@@ -2987,7 +2987,7 @@ body:not(.landing-page) .consumo-rebuild-months {
 }
 
 body:not(.landing-page) .consumo-rebuild-month-label {
-  color: #650a18;
+  color: #7a1224;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
@@ -3030,7 +3030,7 @@ body:not(.landing-page) .consumo-rebuild-entry-bottle {
   place-items: center;
   border-radius: 14px;
   background: rgba(241, 234, 223, 0.72);
-  color: #650a18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .consumo-rebuild-entry-label {
@@ -3071,7 +3071,7 @@ body:not(.landing-page) .consumo-rebuild-entry-rating {
   border-radius: 999px;
   background: rgba(200, 168, 90, 0.14);
   padding: 5px 7px;
-  color: #650a18;
+  color: #7a1224;
   font-size: 10.5px;
   font-weight: 700;
 }
@@ -3113,8 +3113,8 @@ body:not(.landing-page) .add-wine-rebuild-option {
 }
 
 body:not(.landing-page) .add-wine-rebuild-option.is-primary {
-  border-color: rgba(101, 10, 24, 0.18);
-  background: linear-gradient(135deg, #650a18 0%, #3b0710 100%);
+  border-color: rgba(122, 18, 36, 0.18);
+  background: linear-gradient(135deg, #7a1224 0%, #3b0710 100%);
   color: #fff8ed;
 }
 
@@ -3124,8 +3124,8 @@ body:not(.landing-page) .add-wine-rebuild-option-icon {
   height: 34px;
   place-items: center;
   border-radius: 13px;
-  background: rgba(101, 10, 24, 0.08);
-  color: #650a18;
+  background: rgba(122, 18, 36, 0.08);
+  color: #7a1224;
 }
 
 body:not(.landing-page) .add-wine-rebuild-option.is-primary .add-wine-rebuild-option-icon {
@@ -3159,12 +3159,12 @@ body:not(.landing-page) .add-wine-rebuild-section {
 
 body:not(.landing-page) .add-wine-rebuild-section-primary {
   background:
-    radial-gradient(circle at 0% 0%, rgba(101, 10, 24, 0.045), transparent 11rem),
+    radial-gradient(circle at 0% 0%, rgba(122, 18, 36, 0.045), transparent 11rem),
     rgba(255, 253, 248, 0.68);
 }
 
 body:not(.landing-page) .add-wine-rebuild-section-head {
-  color: #650a18;
+  color: #7a1224;
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -3467,7 +3467,7 @@ body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-mod
 
 body:not(.landing-page) .premium-modal-overlay {
   background:
-    radial-gradient(circle at 50% 18%, rgba(101, 10, 24, 0.12), transparent 42%),
+    radial-gradient(circle at 50% 18%, rgba(122, 18, 36, 0.12), transparent 42%),
     rgba(31, 23, 19, 0.42) !important;
   backdrop-filter: blur(16px) saturate(1.04) !important;
   -webkit-backdrop-filter: blur(16px) saturate(1.04) !important;
@@ -3496,10 +3496,10 @@ body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circl
   height: 42px !important;
   min-width: 42px !important;
   border-radius: 16px !important;
-  color: #650A18 !important;
+  color: #7a1224 !important;
   background:
     radial-gradient(circle at 28% 16%, rgba(200, 168, 90, 0.16), transparent 40%),
-    rgba(101, 10, 24, 0.07) !important;
+    rgba(122, 18, 36, 0.07) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42) !important;
 }
 
@@ -3539,7 +3539,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-action-b
   border-radius: 18px !important;
   background:
     radial-gradient(circle at 18% 0%, rgba(200, 168, 90, 0.18), transparent 35%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
   font-size: 13px !important;
   font-weight: 580 !important;
@@ -3572,7 +3572,7 @@ body:not(.landing-page) .sx-action-modal :is(input, textarea, button[role="combo
   outline: none !important;
   box-shadow:
     0 0 0 2px rgba(255, 253, 248, 0.88),
-    0 0 0 4px rgba(101, 10, 24, 0.16) !important;
+    0 0 0 4px rgba(122, 18, 36, 0.16) !important;
 }
 
 body:not(.landing-page) .sx-action-modal :is(.modal-field-label, .form-field-label, .modal-input-label, .add-wine-field > label) {
@@ -3620,11 +3620,11 @@ body:not(.landing-page) .add-wine-modal .add-wine-quick-action {
 }
 
 body:not(.landing-page) .add-wine-modal .add-wine-quick-action.is-active {
-  border-color: rgba(101, 10, 24, 0.16) !important;
+  border-color: rgba(122, 18, 36, 0.16) !important;
   background:
-    radial-gradient(circle at 18% 0%, rgba(101, 10, 24, 0.08), transparent 34%),
+    radial-gradient(circle at 18% 0%, rgba(122, 18, 36, 0.08), transparent 34%),
     rgba(255, 253, 248, 0.78) !important;
-  color: #650A18 !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .add-wine-modal .add-wine-quick-icon {
@@ -3632,8 +3632,8 @@ body:not(.landing-page) .add-wine-modal .add-wine-quick-icon {
   height: 32px !important;
   min-width: 32px !important;
   border-radius: 12px !important;
-  background: rgba(101, 10, 24, 0.08) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.08) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .add-wine-modal .add-wine-quick-icon.is-gold {
@@ -3682,8 +3682,8 @@ body:not(.landing-page) .harmonizar-modal .harmonizar-back-inline {
   min-height: 30px !important;
   padding: 0 10px !important;
   border-radius: 999px !important;
-  color: #650A18 !important;
-  background: rgba(101, 10, 24, 0.055) !important;
+  color: #7a1224 !important;
+  background: rgba(122, 18, 36, 0.055) !important;
 }
 
 body:not(.landing-page) .harmonizar-modal .harmonizar-style-grid,
@@ -3716,8 +3716,8 @@ body:not(.landing-page) .sx-action-modal .consumption-filter-chip {
 body:not(.landing-page) .harmonizar-modal .consumption-filter-chip.active,
 body:not(.landing-page) .sx-action-modal .consumption-filter-chip.active {
   color: #FFFDF8 !important;
-  background: linear-gradient(180deg, #650A18, #3B0710) !important;
-  border-color: rgba(101, 10, 24, 0.28) !important;
+  background: linear-gradient(180deg, #7a1224, #3B0710) !important;
+  border-color: rgba(122, 18, 36, 0.28) !important;
 }
 
 body:not(.landing-page) .harmonizar-modal .consumption-wine-list,
@@ -4394,7 +4394,7 @@ body:not(.landing-page) .sx-v2-shell-header .mobile-header-menu {
   border: 1px solid rgba(61, 53, 48, 0.08) !important;
   background:
     radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.16), transparent 32%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 16px 30px -24px rgba(59, 7, 16, 0.48) !important;
 }
@@ -4403,7 +4403,7 @@ body:not(.landing-page) .sx-v2-shell-header .header-avatar {
   border: 1px solid rgba(61, 53, 48, 0.08) !important;
   background:
     radial-gradient(circle at 20% 0%, rgba(200, 168, 90, 0.12), transparent 34%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 16px 30px -24px rgba(59, 7, 16, 0.42) !important;
 }
@@ -4541,7 +4541,7 @@ body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-primary {
   border-color: rgba(61, 53, 48, 0.06) !important;
   background:
     radial-gradient(circle at 18% 0%, rgba(200, 168, 90, 0.16), transparent 32%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 18px 32px -28px rgba(59, 7, 16, 0.52) !important;
 }
@@ -4557,8 +4557,8 @@ body:not(.landing-page) .sx-v2-mobile-drawer .sx-v2-nav-row {
 body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-action-item:hover, .sx-v2-nav-row:hover, .sidebar-item:hover, .sidebar-action-item:focus-visible, .sidebar-item:focus-visible),
 body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-action-item:hover, .sx-v2-nav-row:hover, .sidebar-item:hover, .sidebar-action-item:focus-visible, .sidebar-item:focus-visible) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.045), rgba(255, 250, 242, 0.52)) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.045), rgba(255, 250, 242, 0.52)) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3B0710 !important;
   transform: translateX(1px) !important;
 }
@@ -4573,7 +4573,7 @@ body:not(.landing-page) .sx-v2-mobile-drawer .action-icon {
   height: 24px !important;
   min-width: 24px !important;
   border-radius: 8px !important;
-  background: rgba(101, 10, 24, 0.042) !important;
+  background: rgba(122, 18, 36, 0.042) !important;
   color: rgba(59, 7, 16, 0.72) !important;
 }
 
@@ -4595,9 +4595,9 @@ body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-item > span:last-child {
 body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active),
 body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.055), rgba(255, 250, 242, 0.46)) !important;
-  border-color: rgba(101, 10, 24, 0.08) !important;
-  color: #650A18 !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.055), rgba(255, 250, 242, 0.46)) !important;
+  border-color: rgba(122, 18, 36, 0.08) !important;
+  color: #7a1224 !important;
   box-shadow: none !important;
   transform: none !important;
 }
@@ -4611,15 +4611,15 @@ body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar
   bottom: 10px !important;
   width: 1.5px !important;
   border-radius: 999px !important;
-  background: rgba(101, 10, 24, 0.52) !important;
+  background: rgba(122, 18, 36, 0.52) !important;
 }
 
 body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) .sx-v2-nav-icon,
 body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) .sidebar-item-icon,
 body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) .sx-v2-nav-icon,
 body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.07) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.07) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .sx-v2-sidebar [data-sidebar="footer"],
@@ -4753,7 +4753,7 @@ body:not(.landing-page) .sx-v2-empty-state::before {
 
 body:not(.landing-page) .sx-v2-empty-state-icon {
   color: var(--sx-v2-wine);
-  border: 1px solid rgba(101, 10, 24, 0.12);
+  border: 1px solid rgba(122, 18, 36, 0.12);
   background:
     linear-gradient(145deg, rgba(255, 253, 248, 0.88), rgba(241, 234, 223, 0.62)),
     radial-gradient(circle at 50% 0%, rgba(200, 168, 90, 0.16), transparent 64%);
@@ -4981,7 +4981,7 @@ body:not(.landing-page) .home-v2-metric {
 body:not(.landing-page) .home-v2-metric-icon {
   width: 15px !important;
   height: 15px !important;
-  color: rgba(101, 10, 24, 0.42) !important;
+  color: rgba(122, 18, 36, 0.42) !important;
 }
 
 body:not(.landing-page) .home-v2-metric-value {
@@ -5055,7 +5055,7 @@ body:not(.landing-page) .home-v2-wine-mark {
   width: 30px !important;
   height: 30px !important;
   border-radius: 12px !important;
-  background: rgba(101, 10, 24, 0.06) !important;
+  background: rgba(122, 18, 36, 0.06) !important;
   color: var(--sx-v2-wine) !important;
 }
 
@@ -5421,7 +5421,7 @@ body:not(.landing-page) .cellar-v2-view-btn {
 }
 
 body:not(.landing-page) .cellar-v2-view-btn.active {
-  background: rgba(101, 10, 24, 0.1) !important;
+  background: rgba(122, 18, 36, 0.1) !important;
   color: var(--sx-v2-wine) !important;
 }
 
@@ -5451,8 +5451,8 @@ body:not(.landing-page) .cellar-v2-filter-chip {
 
 body:not(.landing-page) .cellar-v2-filter-chip.active,
 body:not(.landing-page) .cellar-v2-filter-chip.active.todos {
-  background: rgba(101, 10, 24, 0.1) !important;
-  border-color: rgba(101, 10, 24, 0.16) !important;
+  background: rgba(122, 18, 36, 0.1) !important;
+  border-color: rgba(122, 18, 36, 0.16) !important;
   color: var(--sx-v2-wine) !important;
 }
 
@@ -5851,7 +5851,7 @@ body:not(.landing-page) .add-wine-quick-action {
 
 body:not(.landing-page) .add-wine-quick-action:hover {
   transform: translateY(-1px);
-  border-color: rgba(101, 10, 24, 0.12);
+  border-color: rgba(122, 18, 36, 0.12);
   background: rgba(255, 253, 248, 0.78);
 }
 
@@ -5896,7 +5896,7 @@ body:not(.landing-page) .add-wine-identity {
   padding: 12px;
   border-radius: 24px;
   background:
-    radial-gradient(circle at 12% 0%, rgba(101, 10, 24, 0.035), transparent 36%),
+    radial-gradient(circle at 12% 0%, rgba(122, 18, 36, 0.035), transparent 36%),
     linear-gradient(145deg, rgba(255, 253, 248, 0.82), rgba(247, 242, 234, 0.58));
   border: 1px solid rgba(61, 53, 48, 0.08);
   box-shadow: 0 14px 34px rgba(42, 7, 16, 0.045);
@@ -5974,7 +5974,7 @@ body:not(.landing-page) .add-wine-accordion-trigger {
 }
 
 body:not(.landing-page) .add-wine-accordion-trigger:hover {
-  border-color: rgba(101, 10, 24, 0.11);
+  border-color: rgba(122, 18, 36, 0.11);
   background: rgba(255, 253, 248, 0.62);
 }
 
@@ -5996,7 +5996,7 @@ body:not(.landing-page) .add-wine-accordion-trigger small {
 }
 
 body:not(.landing-page) .add-wine-accordion-trigger svg {
-  color: #650A18;
+  color: #7a1224;
 }
 
 body:not(.landing-page) .add-wine-accordion-content {
@@ -6037,7 +6037,7 @@ body:not(.landing-page) .add-wine-check-row input {
   padding: 0;
   box-shadow: none;
   transform: none;
-  accent-color: #650A18;
+  accent-color: #7a1224;
 }
 
 body:not(.landing-page) .add-wine-location-fields {
@@ -6056,10 +6056,10 @@ body:not(.landing-page) .add-wine-location-fields p {
 body:not(.landing-page) .add-wine-location-fields button {
   height: 30px !important;
   border-radius: 999px !important;
-  color: #650A18 !important;
+  color: #7a1224 !important;
   font-size: 11px !important;
   font-weight: 540 !important;
-  background: rgba(101, 10, 24, 0.045) !important;
+  background: rgba(122, 18, 36, 0.045) !important;
 }
 
 body:not(.landing-page) .add-wine-location-fields .grid {
@@ -6094,7 +6094,7 @@ body:not(.landing-page) .add-wine-modal .modal-footer button {
   border-radius: 18px !important;
   background:
     radial-gradient(circle at 18% 0%, rgba(200,168,90,0.18), transparent 34%),
-    linear-gradient(135deg, #650A18, #3B0710) !important;
+    linear-gradient(135deg, #7a1224, #3B0710) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 12px 26px rgba(59, 7, 16, 0.16) !important;
 }
@@ -6228,9 +6228,9 @@ body:not(.landing-page) .sx-action-modal :is(.modal-action-button, .ai-modal-act
 body:not(.landing-page) .sx-action-modal :is(button, [role="button"], input, textarea, select):focus,
 body:not(.landing-page) .sx-action-modal :is(button, [role="button"], input, textarea, select):focus-visible {
   outline: none !important;
-  --tw-ring-color: rgba(101, 10, 24, 0.14) !important;
+  --tw-ring-color: rgba(122, 18, 36, 0.14) !important;
   --tw-ring-offset-width: 0px !important;
-  box-shadow: 0 0 0 2px rgba(101, 10, 24, 0.12) !important;
+  box-shadow: 0 0 0 2px rgba(122, 18, 36, 0.12) !important;
 }
 
 body:not(.landing-page) .harmonize-picker-flow {
@@ -6287,9 +6287,9 @@ body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip[aria-press
 body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip[aria-pressed="true"],
 body:not(.landing-page) .harmonizar-sort-row .consumption-filter-chip.active,
 body:not(.landing-page) .harmonizar-style-grid .consumption-filter-chip.active {
-  background: rgba(101, 10, 24, 0.09) !important;
-  border-color: rgba(101, 10, 24, 0.16) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.09) !important;
+  border-color: rgba(122, 18, 36, 0.16) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .harmonizar-wine-scroll {
@@ -6370,7 +6370,7 @@ body:not(.landing-page) .analyze-carta-modal .carta-loading-orb {
   color: #FFFDF8 !important;
   background:
     radial-gradient(circle at 28% 10%, rgba(200, 168, 90, 0.45), transparent 34%),
-    linear-gradient(135deg, #650A18 0%, #263A2B 100%) !important;
+    linear-gradient(135deg, #7a1224 0%, #263A2B 100%) !important;
   box-shadow: 0 14px 34px rgba(34, 4, 10, 0.16) !important;
   overflow: hidden !important;
 }
@@ -6429,7 +6429,7 @@ body:not(.landing-page) .analyze-carta-modal .carta-loading-progress span {
   width: 42% !important;
   height: 100% !important;
   border-radius: inherit !important;
-  background: linear-gradient(90deg, #C8A85A, #650A18, #263A2B) !important;
+  background: linear-gradient(90deg, #C8A85A, #7a1224, #263A2B) !important;
   animation: sx-carta-progress 1.8s ease-in-out infinite !important;
 }
 
@@ -6505,7 +6505,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-side
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item[data-action="harmonizar"],
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item[data-action="analisar-carta"] {
   background: rgba(255, 253, 248, 0.38) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3D3530 !important;
 }
 
@@ -6515,8 +6515,8 @@ body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="harmo
 body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="analisar-carta"]:hover,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item:hover {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.042), rgba(255, 253, 248, 0.54)) !important;
-  border-color: rgba(101, 10, 24, 0.085) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.042), rgba(255, 253, 248, 0.54)) !important;
+  border-color: rgba(122, 18, 36, 0.085) !important;
   color: #3B0710 !important;
 }
 
@@ -6525,7 +6525,7 @@ body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="adici
 body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="harmonizar"] .action-icon,
 body:not(.landing-page) .dashboard-shell .sidebar-action-item[data-action="analisar-carta"] .action-icon,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item .action-icon {
-  background: rgba(101, 10, 24, 0.044) !important;
+  background: rgba(122, 18, 36, 0.044) !important;
   color: rgba(59, 7, 16, 0.72) !important;
 }
 
@@ -6547,7 +6547,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-side
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item[data-action="harmonizar"],
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item[data-action="analisar-carta"] {
   background: rgba(255, 253, 248, 0.38) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3D3530 !important;
 }
 
@@ -6557,8 +6557,8 @@ body:not(.landing-page) .sidebar-action-item[data-action="harmonizar"]:hover,
 body:not(.landing-page) .sidebar-action-item[data-action="analisar-carta"]:hover,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item:hover {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.042), rgba(255, 253, 248, 0.54)) !important;
-  border-color: rgba(101, 10, 24, 0.085) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.042), rgba(255, 253, 248, 0.54)) !important;
+  border-color: rgba(122, 18, 36, 0.085) !important;
   color: #3B0710 !important;
 }
 
@@ -6567,7 +6567,7 @@ body:not(.landing-page) .sidebar-action-item[data-action="adicionar-consumo"] .a
 body:not(.landing-page) .sidebar-action-item[data-action="harmonizar"] .action-icon,
 body:not(.landing-page) .sidebar-action-item[data-action="analisar-carta"] .action-icon,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-action-item .action-icon {
-  background: rgba(101, 10, 24, 0.044) !important;
+  background: rgba(122, 18, 36, 0.044) !important;
   color: rgba(59, 7, 16, 0.72) !important;
 }
 
@@ -6583,9 +6583,9 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-side
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item.active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer :is(.sidebar-item--active, .sidebar-nav-item.active) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.050), rgba(255, 253, 248, 0.42)) !important;
-  border-color: rgba(101, 10, 24, 0.080) !important;
-  color: #650A18 !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.050), rgba(255, 253, 248, 0.42)) !important;
+  border-color: rgba(122, 18, 36, 0.080) !important;
+  color: #7a1224 !important;
   font-weight: 500 !important;
   box-shadow: none !important;
 }
@@ -18629,7 +18629,7 @@ body,
 .cellar-page .btn-adicionar-adega,
 .fab-chat,
 .premium-modal-shell .modal-btn-primary {
-  background: linear-gradient(180deg, #7E1024 0%, #6F0718 58%, #5F0D1A 100%) !important;
+  background: linear-gradient(180deg, #7E1024 0%, #7a1224 58%, #5F0D1A 100%) !important;
   color: #FFFDF8 !important;
   border-color: transparent !important;
   box-shadow: 0 10px 22px -18px rgba(74,7,18,0.54) !important;
@@ -18722,7 +18722,7 @@ body,
 .sx-action-modal .modal-icon-wrap,
 .sx-action-modal .modal-icon-circle {
   background: rgba(120,19,35,0.08) !important;
-  color: #6F0718 !important;
+  color: #7a1224 !important;
 }
 
 .sx-action-modal.harmonizar-modal .modal-icon-wrap,
@@ -18804,7 +18804,7 @@ body,
 [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item--active,
 [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item.active {
   background: rgba(120,19,35,0.075) !important;
-  color: #6F0718 !important;
+  color: #7a1224 !important;
 }
 
 .cellar-page .wine-card,
@@ -18841,7 +18841,7 @@ body,
 .cellar-page .btn-adicionar-adega,
 .fab-chat,
 .premium-modal-shell .modal-btn-primary {
-  background: linear-gradient(180deg, #6F0718 0%, #681023 56%, #4A0714 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #681023 56%, #4A0714 100%) !important;
   color: #FFFDF8 !important;
   box-shadow: 0 14px 28px -22px rgba(74,7,20,0.70) !important;
 }
@@ -18900,7 +18900,7 @@ body,
     border: 0 !important;
     background:
       radial-gradient(circle at 50% 0%, rgba(255,253,248,0.88), transparent 30%),
-      radial-gradient(circle at 8% 24%, rgba(111,7,24,0.18), transparent 38%),
+      radial-gradient(circle at 8% 24%, rgba(122, 18, 36,0.18), transparent 38%),
       linear-gradient(145deg, rgba(255,253,248,0.95), rgba(232,221,207,0.76)) !important;
     box-shadow: 0 22px 46px -34px rgba(42,7,16,0.42) !important;
   }
@@ -19182,7 +19182,7 @@ body,
 }
 
 .sx-action-modal.consumption-modal .consumption-source-card.is-selected {
-  background: linear-gradient(180deg, #6F0718, #5E0B1F) !important;
+  background: linear-gradient(180deg, #7a1224, #5E0B1F) !important;
   border-color: transparent !important;
   color: #FFFDF8 !important;
 }
@@ -19240,7 +19240,7 @@ body,
   justify-content: center !important;
   border-radius: 13px !important;
   background: rgba(122,16,40,0.075) !important;
-  color: #6F0718 !important;
+  color: #7a1224 !important;
 }
 
 .sx-action-modal.consumption-modal .consumption-select-title {
@@ -19334,7 +19334,7 @@ body,
 }
 
 .sx-action-modal.consumption-modal .modal-btn-primary:not(:disabled) {
-  background: linear-gradient(135deg, #8A132A 0%, #6F0718 56%, #2A0710 100%) !important;
+  background: linear-gradient(135deg, #8A132A 0%, #7a1224 56%, #2A0710 100%) !important;
 }
 
 /* Final premium direction: reduce helper copy and card-library density in action flows. */
@@ -19616,7 +19616,7 @@ body,
 .consumption-filter-apply {
   flex: 1 !important;
   border: 0 !important;
-  background: linear-gradient(135deg, #7E1024 0%, #6F0718 56%, #2A0710 100%) !important;
+  background: linear-gradient(135deg, #7E1024 0%, #7a1224 56%, #2A0710 100%) !important;
   color: #FFFDF8 !important;
 }
 
@@ -19972,7 +19972,7 @@ body.landing-page {
 
 .landing-kicker {
   margin: 0 0 14px;
-  color: rgba(111, 7, 24, 0.74);
+  color: rgba(122, 18, 36, 0.74);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.17em;
@@ -20059,7 +20059,7 @@ body.landing-page {
   bottom: 28px;
   width: 320px;
   height: 320px;
-  background: radial-gradient(circle, rgba(111, 7, 24, 0.24), transparent 70%);
+  background: radial-gradient(circle, rgba(122, 18, 36, 0.24), transparent 70%);
 }
 
 .landing-concierge-card {
@@ -20123,7 +20123,7 @@ body.landing-page {
   flex: 0 0 auto;
   border-radius: 16px;
   color: var(--landing-wine);
-  background: rgba(111, 7, 24, 0.08);
+  background: rgba(122, 18, 36, 0.08);
 }
 
 .landing-concierge-icon {
@@ -20357,7 +20357,7 @@ body.landing-page {
 
 .landing-experience-card:nth-child(1) {
   background:
-    radial-gradient(220px 200px at 16% 18%, rgba(111, 7, 24, 0.1), transparent 62%),
+    radial-gradient(220px 200px at 16% 18%, rgba(122, 18, 36, 0.1), transparent 62%),
     linear-gradient(145deg, rgba(255,253,248,0.9), rgba(244,232,216,0.62));
 }
 
@@ -20683,8 +20683,8 @@ body.landing-page {
 }
 
 .landing-faq-tabs button.is-active {
-  border-color: rgba(111, 7, 24, 0.16);
-  background: rgba(111, 7, 24, 0.08);
+  border-color: rgba(122, 18, 36, 0.16);
+  background: rgba(122, 18, 36, 0.08);
   color: var(--landing-wine);
 }
 
@@ -21065,7 +21065,7 @@ body.landing-page {
 
 .landing-shell-premium {
   background:
-    radial-gradient(820px 520px at 12% -8%, rgba(111, 7, 24, 0.1), transparent 58%),
+    radial-gradient(820px 520px at 12% -8%, rgba(122, 18, 36, 0.1), transparent 58%),
     radial-gradient(760px 520px at 88% 4%, rgba(38, 58, 43, 0.14), transparent 58%),
     linear-gradient(180deg, #fbf7ef 0%, #f5f0e7 48%, #efe7db 100%);
 }
@@ -21094,7 +21094,7 @@ body.landing-page {
 
 .landing-header-cta,
 .landing-btn-primary {
-  background: linear-gradient(135deg, #7b071d 0%, #6f0718 54%, #2a0710 100%);
+  background: linear-gradient(135deg, #7b071d 0%, #7a1224 54%, #2a0710 100%);
 }
 
 .landing-hero-cinematic {
@@ -21757,13 +21757,13 @@ body.landing-page .landing-bg-glow.glow-olive {
 
 /* Authenticated app visual-system correction: restore deep wine identity and compact density. */
 body:not(.landing-page) {
-  --sx-bordeaux: #6F0718;
+  --sx-bordeaux: #7a1224;
   --wine-hover: #4A0714;
   --wine-vivid: #7A1026;
   --wine-mid: #5E0B1F;
-  --wine-light: rgba(111, 7, 24, 0.075);
-  --sx-bordeaux-10: rgba(111, 7, 24, 0.10);
-  --sx-bordeaux-06: rgba(111, 7, 24, 0.06);
+  --wine-light: rgba(122, 18, 36, 0.075);
+  --sx-bordeaux-10: rgba(122, 18, 36, 0.10);
+  --sx-bordeaux-06: rgba(122, 18, 36, 0.06);
   --sx-olive: #263A2B;
   --olive-mid: #3F563D;
   --olive-surface: #E9EFE4;
@@ -21809,7 +21809,7 @@ body:not(.landing-page) :is(.overview-date, .adega-eyebrow, .consumo-eyebrow, .s
 }
 
 body:not(.landing-page) :is(.editorial-btn-primary, .sx-btn-primary, .modal-btn-primary, .sidebar-action-primary, .btn-adicionar-wine-primary, .cellar-page .cellar-add-button, .cellar-page .btn-adicionar-adega, .fab-chat, .premium-modal-shell .modal-btn-primary) {
-  background: linear-gradient(180deg, #6F0718 0%, #5E0B1F 58%, #4A0714 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5E0B1F 58%, #4A0714 100%) !important;
   color: #FFFDF8 !important;
   border-color: transparent !important;
   box-shadow: 0 12px 26px -20px rgba(74, 7, 20, 0.70) !important;
@@ -21869,7 +21869,7 @@ body:not(.landing-page) .sidebar-action-item {
 
 body:not(.landing-page) .sidebar-action-item[data-action="adicionar-consumo"] {
   background: rgba(255, 253, 248, 0.38) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3D3530 !important;
 }
 
@@ -21887,7 +21887,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-it
 body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
 body:not(.landing-page) .dashboard-shell .sidebar-item--active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
-  background: linear-gradient(180deg, #6F0718 0%, #5E0B1F 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5E0B1F 100%) !important;
   border-color: rgba(74, 7, 20, 0.20) !important;
   color: #FFFDF8 !important;
   font-weight: 650 !important;
@@ -22073,7 +22073,7 @@ body:not(.landing-page) .cellar-page .adega-filter-btn {
 
 body:not(.landing-page) .cellar-page .btn-adicionar-adega {
   height: 38px !important;
-  background: linear-gradient(180deg, #6F0718 0%, #5E0B1F 58%, #4A0714 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5E0B1F 58%, #4A0714 100%) !important;
 }
 
 body:not(.landing-page) .cellar-page .adega-filters-row {
@@ -22175,7 +22175,7 @@ body:not(.landing-page) .cellar-page .adega-grid {
   }
 
   body:not(.landing-page) .sx-mobile-header .header-avatar {
-    background: linear-gradient(180deg, #6F0718 0%, #5E0B1F 58%, #4A0714 100%) !important;
+    background: linear-gradient(180deg, #7a1224 0%, #5E0B1F 58%, #4A0714 100%) !important;
     color: #FFFDF8 !important;
   }
 
@@ -22325,7 +22325,7 @@ body:not(.landing-page) .cellar-page .adega-grid {
 
   body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item--active,
   body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer .sidebar-item.active {
-    background: linear-gradient(180deg, #6F0718 0%, #5E0B1F 100%) !important;
+    background: linear-gradient(180deg, #7a1224 0%, #5E0B1F 100%) !important;
     color: #FFFDF8 !important;
     border-color: rgba(74, 7, 20, 0.22) !important;
   }
@@ -23079,16 +23079,16 @@ body:not(.landing-page) .sx-action-modal :is(.modal-btn-secondary, .consumption-
   --sx-bg-card: #FFFDF8;
   --sx-bg-soft: #F1EADF;
   --sx-bg-input: #F1EADF;
-  --sx-wine: #650A18;
+  --sx-wine: #7a1224;
   --sx-wine-deep: #3B0710;
   --sx-wine-dark: #22040A;
-  --sx-bordeaux: #650A18;
-  --brand-primary: #650A18;
+  --sx-bordeaux: #7a1224;
+  --brand-primary: #7a1224;
   --wine-hover: #3B0710;
-  --wine-vivid: #650A18;
+  --wine-vivid: #7a1224;
   --wine-mid: #5A0713;
-  --sx-bordeaux-10: rgba(101, 10, 24, 0.10);
-  --sx-bordeaux-06: rgba(101, 10, 24, 0.06);
+  --sx-bordeaux-10: rgba(122, 18, 36, 0.10);
+  --sx-bordeaux-06: rgba(122, 18, 36, 0.06);
   --sx-olive: #263A2B;
   --sx-olive-deep: #18251D;
   --sx-olive-soft: #E9EFE5;
@@ -23106,7 +23106,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-btn-secondary, .consumption-
   --sx-border-strong: rgba(61, 53, 48, 0.16);
   --sx-b-default: rgba(61, 53, 48, 0.10);
   --sx-b-medium: rgba(61, 53, 48, 0.16);
-  --sx-b-focus: #650A18;
+  --sx-b-focus: #7a1224;
 }
 
 body:not(.landing-page) {
@@ -23226,7 +23226,7 @@ body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .side
 }
 
 body:not(.landing-page) .sidebar-action-primary {
-  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5A0713 58%, #3B0710 100%) !important;
   color: #FFFDF8 !important;
 }
 
@@ -23289,8 +23289,8 @@ body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
 body:not(.landing-page) .dashboard-shell .sidebar-item--active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
   position: relative !important;
-  background: rgba(101, 10, 24, 0.055) !important;
-  border-color: rgba(101, 10, 24, 0.10) !important;
+  background: rgba(122, 18, 36, 0.055) !important;
+  border-color: rgba(122, 18, 36, 0.10) !important;
   color: var(--sx-wine) !important;
   font-weight: 520 !important;
   box-shadow: none !important;
@@ -23312,7 +23312,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-it
 body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) .sidebar-item-icon,
 body:not(.landing-page) .dashboard-shell .sidebar-item--active .sidebar-item-icon,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.09) !important;
+  background: rgba(122, 18, 36, 0.09) !important;
   color: var(--sx-wine) !important;
 }
 
@@ -23361,7 +23361,7 @@ body:not(.landing-page) :is(.editorial-btn-primary, .editorial-btn-ghost, .btn-a
 }
 
 body:not(.landing-page) :is(.btn-adicionar-wine-primary, .editorial-btn-primary, .btn-adicionar-adega, .modal-btn-primary, .consumption-filter-apply) {
-  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5A0713 58%, #3B0710 100%) !important;
   border-color: transparent !important;
   color: #FFFDF8 !important;
 }
@@ -23536,7 +23536,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circl
   width: 42px !important;
   height: 42px !important;
   border-radius: 16px !important;
-  background: rgba(101, 10, 24, 0.07) !important;
+  background: rgba(122, 18, 36, 0.07) !important;
   color: var(--sx-wine) !important;
 }
 
@@ -23593,7 +23593,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-footer, .modal-footer-bar, .
 body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-action-button-primary, .consumption-filter-apply) {
   min-height: 46px !important;
   border-radius: 18px !important;
-  background: linear-gradient(180deg, #650A18 0%, #5A0713 58%, #3B0710 100%) !important;
+  background: linear-gradient(180deg, #7a1224 0%, #5A0713 58%, #3B0710 100%) !important;
   color: #FFFDF8 !important;
   font-size: 13.5px !important;
   font-weight: 560 !important;
@@ -23799,7 +23799,7 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] {
 
 body:not(.landing-page) :is(.dashboard-shell [data-sidebar="sidebar"], [data-mobile="true"][data-sidebar="sidebar"]) {
   background:
-    radial-gradient(circle at 12% 0%, rgba(101, 10, 24, 0.030), transparent 30%),
+    radial-gradient(circle at 12% 0%, rgba(122, 18, 36, 0.030), transparent 30%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.97), rgba(247, 242, 234, 0.98)) !important;
 }
 
@@ -23841,7 +23841,7 @@ body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-item, .side
 body:not(.landing-page) .sidebar-action-primary {
   background:
     radial-gradient(circle at 18% 0%, rgba(200, 168, 90, 0.15), transparent 32%),
-    linear-gradient(180deg, #650A18 0%, #4E0712 64%, #22040A 100%) !important;
+    linear-gradient(180deg, #7a1224 0%, #4E0712 64%, #22040A 100%) !important;
   color: #FFFDF8 !important;
 }
 
@@ -23858,8 +23858,8 @@ body:not(.landing-page) :is(.sidebar-action-item, .sidebar-item) {
 
 body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover, .sidebar-action-item:focus-visible, .sidebar-item:focus-visible) {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.040), rgba(255, 253, 248, 0.50)) !important;
-  border-color: rgba(101, 10, 24, 0.075) !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.040), rgba(255, 253, 248, 0.50)) !important;
+  border-color: rgba(122, 18, 36, 0.075) !important;
   color: #3B0710 !important;
   transform: translateX(1px) !important;
 }
@@ -23869,7 +23869,7 @@ body:not(.landing-page) :is(.sidebar-item-icon, .sidebar-action-item .action-ico
   height: 24px !important;
   min-width: 24px !important;
   border-radius: 8px !important;
-  background: rgba(101, 10, 24, 0.038) !important;
+  background: rgba(122, 18, 36, 0.038) !important;
   color: rgba(59, 7, 16, 0.72) !important;
 }
 
@@ -23880,8 +23880,8 @@ body:not(.landing-page) .sidebar-action-primary .action-icon {
 
 body:not(.landing-page) :is(.sidebar-action-item:hover, .sidebar-item:hover) :is(.sidebar-item-icon, .action-icon),
 body:not(.landing-page) :is(.sidebar-action-item:focus-visible, .sidebar-item:focus-visible) :is(.sidebar-item-icon, .action-icon) {
-  background: rgba(101, 10, 24, 0.060) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.060) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) :is(.sidebar-item-icon svg, .sidebar-action-item .action-icon svg, .sidebar-action-primary .action-icon svg) {
@@ -23908,9 +23908,9 @@ body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active),
 body:not(.landing-page) .dashboard-shell .sidebar-item--active,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active {
   background:
-    linear-gradient(90deg, rgba(101, 10, 24, 0.050), rgba(255, 253, 248, 0.42)) !important;
-  border-color: rgba(101, 10, 24, 0.080) !important;
-  color: #650A18 !important;
+    linear-gradient(90deg, rgba(122, 18, 36, 0.050), rgba(255, 253, 248, 0.42)) !important;
+  border-color: rgba(122, 18, 36, 0.080) !important;
+  color: #7a1224 !important;
   font-weight: 500 !important;
   box-shadow: none !important;
   transform: none !important;
@@ -23923,14 +23923,14 @@ body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-it
   top: 11px !important;
   bottom: 11px !important;
   width: 1.5px !important;
-  background: rgba(101, 10, 24, 0.52) !important;
+  background: rgba(122, 18, 36, 0.52) !important;
 }
 
 body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) .sidebar-item-icon,
 body:not(.landing-page) .dashboard-shell .sidebar-item--active .sidebar-item-icon,
 body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item--active .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.065) !important;
-  color: #650A18 !important;
+  background: rgba(122, 18, 36, 0.065) !important;
+  color: #7a1224 !important;
 }
 
 body:not(.landing-page) .sidebar-item[data-nav="sair"],
@@ -23942,7 +23942,7 @@ body:not(.landing-page) .sidebar-item[data-nav="sair"]:hover {
 
 body:not(.landing-page) .sidebar-item[data-nav="sair"] .sidebar-item-icon,
 body:not(.landing-page) .sidebar-item[data-nav="sair"]:hover .sidebar-item-icon {
-  background: rgba(101, 10, 24, 0.035) !important;
+  background: rgba(122, 18, 36, 0.035) !important;
   color: rgba(59, 7, 16, 0.62) !important;
 }
 
@@ -23992,7 +23992,7 @@ body:not(.landing-page) {
   --sx-lux-ink-soft: #34251F;
   --sx-lux-muted: rgba(31, 23, 19, 0.72);
   --sx-lux-muted-strong: rgba(31, 23, 19, 0.82);
-  --sx-lux-wine: #650A18;
+  --sx-lux-wine: #7a1224;
   --sx-lux-wine-mid: #4D0814;
   --sx-lux-wine-deep: #26050B;
   --sx-lux-olive: #263A2B;
@@ -24121,9 +24121,9 @@ body:not(.landing-page) :is(.cellar-rebuild-filter-btn, .cellar-rebuild-view-tog
 }
 
 body:not(.landing-page) :is(.cellar-rebuild-filter-chip.active, .cellar-rebuild-view-btn.active, .home-rebuild-row-status.now) {
-  background: linear-gradient(180deg, rgba(101, 10, 24, 0.14), rgba(101, 10, 24, 0.08)) !important;
+  background: linear-gradient(180deg, rgba(122, 18, 36, 0.14), rgba(122, 18, 36, 0.08)) !important;
   color: var(--sx-lux-wine) !important;
-  border-color: rgba(101, 10, 24, 0.18) !important;
+  border-color: rgba(122, 18, 36, 0.18) !important;
 }
 
 body:not(.landing-page) :is(.cellar-rebuild-card-chip, .cellar-rebuild-row-chip, .cellar-rebuild-drink-badge, .wishlist-card .badge, .wishlist-card [class*="Badge"], .wishlist-card [class*="badge"]) {
@@ -24177,7 +24177,7 @@ body:not(.landing-page) :is(.sx-action-modal, .premium-modal-shell.sx-action-mod
 
 body:not(.landing-page) .premium-modal-overlay {
   background:
-    radial-gradient(circle at 50% 20%, rgba(101, 10, 24, 0.12), transparent 34%),
+    radial-gradient(circle at 50% 20%, rgba(122, 18, 36, 0.12), transparent 34%),
     rgba(31, 23, 19, 0.38) !important;
   backdrop-filter: blur(18px) saturate(0.98) !important;
 }
@@ -24191,7 +24191,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, 
 }
 
 body:not(.landing-page) .sx-action-modal :is(.modal-icon-wrap, .modal-icon-circle, .modal-header-icon) {
-  background: rgba(101, 10, 24, 0.10) !important;
+  background: rgba(122, 18, 36, 0.10) !important;
   color: var(--sx-lux-wine) !important;
 }
 
@@ -24213,9 +24213,9 @@ body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .sx-v2-modal-ac
 body:not(.landing-page) .sx-action-modal :is(.segment-card.is-selected, .consumption-source-card.is-selected, .consumption-wine-row.is-selected, .harmonizar-option[aria-pressed="true"], .harmonizar-option.is-selected, .add-wine-rebuild-option.is-primary) {
   background:
     radial-gradient(circle at 18% 0%, rgba(183, 146, 71, 0.20), transparent 32%),
-    linear-gradient(180deg, rgba(101, 10, 24, 0.12), rgba(255, 253, 248, 0.60)) !important;
+    linear-gradient(180deg, rgba(122, 18, 36, 0.12), rgba(255, 253, 248, 0.60)) !important;
   color: var(--sx-lux-wine) !important;
-  box-shadow: inset 0 0 0 1px rgba(101, 10, 24, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 16px 34px -32px rgba(31, 23, 19, 0.34) !important;
+  box-shadow: inset 0 0 0 1px rgba(122, 18, 36, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.62), 0 16px 34px -32px rgba(31, 23, 19, 0.34) !important;
 }
 
 body:not(.landing-page) .sx-action-modal :is(.modal-action-card, .sx-v2-modal-action, .segment-card, .consumption-source-card, .consumption-select-card, .consumption-selected-summary, .consumption-section, .consumption-details-card, .add-wine-rebuild-option, .add-wine-rebuild-section, .analyze-carta-button, .harmonizar-option, .consumption-wine-row, .consumption-wine-list) :is(span, p, small, strong, label, div) {
@@ -24273,7 +24273,7 @@ body:not(.landing-page) .sx-action-modal :is(.add-wine-check-row, .consumption-r
 body:not(.landing-page) .sx-action-modal :is(.consumption-rating-button[aria-pressed="true"], .consumption-rating-button.active, .consumption-filter-chip.active, .consumption-filter-chip[data-state="on"], .consumption-filter-chip[aria-pressed="true"]) {
   background: linear-gradient(180deg, var(--sx-lux-wine), var(--sx-lux-wine-deep)) !important;
   color: #FFF8EF !important;
-  border-color: rgba(101, 10, 24, 0.30) !important;
+  border-color: rgba(122, 18, 36, 0.30) !important;
 }
 
 body:not(.landing-page) :is([data-radix-popper-content-wrapper] [role="option"], [data-radix-popper-content-wrapper] [role="menuitem"], [data-radix-select-content], [data-radix-dropdown-menu-content], [cmdk-list], [cmdk-item]) {
@@ -24286,7 +24286,7 @@ body:not(.landing-page) :is([data-radix-select-content], [data-radix-dropdown-me
 }
 
 body:not(.landing-page) :is([data-radix-popper-content-wrapper] [role="option"]:hover, [data-radix-popper-content-wrapper] [role="menuitem"]:hover, [data-radix-popper-content-wrapper] [data-highlighted], [cmdk-item][data-selected="true"]) {
-  background: rgba(101, 10, 24, 0.09) !important;
+  background: rgba(122, 18, 36, 0.09) !important;
   color: var(--sx-lux-wine) !important;
 }
 
@@ -24299,8 +24299,8 @@ body:not(.landing-page) :is(.sidebar-action-primary, .sidebar-action-primary *) 
 }
 
 body:not(.landing-page) :is(.sidebar-item--active, .sidebar-nav-item.active) {
-  background: linear-gradient(90deg, rgba(101, 10, 24, 0.12), rgba(255, 253, 248, 0.52)) !important;
-  border-color: rgba(101, 10, 24, 0.14) !important;
+  background: linear-gradient(90deg, rgba(122, 18, 36, 0.12), rgba(255, 253, 248, 0.52)) !important;
+  border-color: rgba(122, 18, 36, 0.14) !important;
   color: var(--sx-lux-wine) !important;
 }
 
@@ -24334,7 +24334,7 @@ body:not(.landing-page) .sx-action-modal {
   --sx-modal-border: rgba(52, 37, 31, 0.14);
   --sx-modal-ink: #1F1713;
   --sx-modal-muted: rgba(31, 23, 19, 0.68);
-  --sx-modal-wine: #650A18;
+  --sx-modal-wine: #7a1224;
   --sx-modal-wine-deep: #26050B;
   --sx-modal-olive: #263A2B;
   --sx-modal-gold: #B79247;
@@ -24346,7 +24346,7 @@ body:not(.landing-page) .sx-action-modal {
   border-radius: 32px !important;
   box-shadow:
     0 48px 96px -56px rgba(31, 23, 19, 0.58),
-    0 16px 48px -40px rgba(101, 10, 24, 0.42),
+    0 16px 48px -40px rgba(122, 18, 36, 0.42),
     inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
 }
 
@@ -24376,7 +24376,7 @@ body:not(.landing-page) .sx-action-modal .modal-header-icon {
   color: var(--sx-modal-wine) !important;
   background:
     linear-gradient(180deg, rgba(255, 248, 239, 0.92), rgba(245, 239, 229, 0.88)) !important;
-  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  border: 1px solid rgba(122, 18, 36, 0.14) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.72),
     0 16px 32px -28px rgba(31, 23, 19, 0.34) !important;
@@ -24486,7 +24486,7 @@ body:not(.landing-page) .sx-action-modal :is(
   .harmonizar-option
 ):hover {
   transform: translateY(-1px) !important;
-  border-color: rgba(101, 10, 24, 0.24) !important;
+  border-color: rgba(122, 18, 36, 0.24) !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.68),
     0 24px 40px -34px rgba(31, 23, 19, 0.42) !important;
@@ -24512,7 +24512,7 @@ body:not(.landing-page) .sx-action-modal :is(
   padding: 0 !important;
   color: var(--sx-modal-wine) !important;
   background: rgba(255, 248, 239, 0.76) !important;
-  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  border: 1px solid rgba(122, 18, 36, 0.14) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66) !important;
 }
 
@@ -24650,7 +24650,7 @@ body:not(.landing-page) .sx-action-modal :is(.modal-btn-primary, .modal-btn-seco
 body:not(.landing-page) .sx-action-modal .modal-btn-primary {
   color: var(--sx-modal-ivory) !important;
   background: linear-gradient(180deg, var(--sx-modal-wine), #4D0814 62%, var(--sx-modal-wine-deep)) !important;
-  border: 1px solid rgba(101, 10, 24, 0.28) !important;
+  border: 1px solid rgba(122, 18, 36, 0.28) !important;
   box-shadow: 0 18px 36px -30px rgba(38, 5, 11, 0.74) !important;
 }
 
@@ -24808,7 +24808,7 @@ body:not(.landing-page) .sx-action-modal .analyze-carta-actions .analyze-carta-b
   border-radius: 999px !important;
   color: currentColor !important;
   background: rgba(255, 248, 239, 0.76) !important;
-  border: 1px solid rgba(101, 10, 24, 0.14) !important;
+  border: 1px solid rgba(122, 18, 36, 0.14) !important;
   stroke-width: 1.75 !important;
 }
 

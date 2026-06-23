@@ -32,3 +32,8 @@ supabase/.temp/
 playwright-report/
 test-results/
 .tmp/
+
+# Local tooling artifacts (never commit — .playwright holds ~480MB of screenshots)
+.playwright/
+.agents/
+skills-lock.json
