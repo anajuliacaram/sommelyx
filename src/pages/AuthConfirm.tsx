@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
+import "@/styles/auth-v6.css";
 
 const REDIRECT_DELAY = 1800;
 
@@ -92,17 +93,12 @@ export default function AuthConfirm() {
   }, [loading, user, profileType, navigate, status]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#F6F3F2] text-[#17141D]">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-24 top-[-160px] h-[420px] w-[420px] rounded-full bg-gradient-to-br from-[#8C2044]/20 via-[#B44A72]/10 to-transparent blur-[100px]" />
-        <div className="absolute -right-24 bottom-[-220px] h-[520px] w-[520px] rounded-full bg-gradient-to-tl from-[#DBB58E]/18 via-[#C87595]/10 to-transparent blur-[120px]" />
-      </div>
-
+    <div className="auth-v6 relative min-h-screen overflow-hidden text-[#1d150f]">
       <div className="relative z-10 flex min-h-screen items-center justify-center p-6">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-lg rounded-[28px] border border-white/55 bg-white/70 p-8 text-center shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] ring-1 ring-black/[0.03] backdrop-blur-2xl"
+          className="w-full max-w-lg rounded-[24px] border border-white/70 bg-[rgba(255,252,246,0.72)] p-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(50,30,20,0.05),0_24px_56px_-28px_rgba(50,30,20,0.3)] backdrop-blur-2xl"
         >
           <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#8C2044]/10 text-[#8C2044]">
             {status === "loading" ? (
@@ -116,21 +112,21 @@ export default function AuthConfirm() {
 
           {status === "loading" && (
             <>
-              <h1 className="text-[32px] font-serif font-bold italic">Confirmando seu acesso...</h1>
+              <h1 className="text-[32px] font-medium">Confirmando seu acesso...</h1>
               <p className="mt-3 text-[15px] text-[#5B5564]">Estamos validando seu e-mail e preparando sua entrada.</p>
             </>
           )}
 
           {status === "success" && (
             <>
-              <h1 className="text-[32px] font-serif font-bold italic">Conta confirmada com sucesso.</h1>
+              <h1 className="text-[32px] font-medium">Conta confirmada com sucesso.</h1>
               <p className="mt-3 text-[15px] text-[#5B5564]">Redirecionando para sua área.</p>
             </>
           )}
 
           {status === "fallback-login" && (
             <>
-              <h1 className="text-[30px] font-serif font-bold italic">Conta confirmada com sucesso.</h1>
+              <h1 className="text-[30px] font-medium">Conta confirmada com sucesso.</h1>
               <p className="mt-3 text-[15px] text-[#5B5564]">
                 Seu provedor não retornou uma sessão automática nesta confirmação. Redirecionando para login para concluir o acesso.
               </p>
@@ -139,7 +135,7 @@ export default function AuthConfirm() {
 
           {status === "error" && (
             <>
-              <h1 className="text-[30px] font-serif font-bold italic">Não foi possível confirmar seu acesso.</h1>
+              <h1 className="text-[30px] font-medium">Não foi possível confirmar seu acesso.</h1>
               <p className="mt-3 text-[15px] text-muted-foreground">
                 {reason === "expired"
                   ? "Este link de confirmação expirou. Solicite um novo envio para continuar."
@@ -149,17 +145,17 @@ export default function AuthConfirm() {
               </p>
               {errorMessage && <p className="mt-2 text-[13px] text-destructive">{errorMessage}</p>}
               <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Button asChild variant="primary" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
+                <Button asChild variant="primary" className="h-11 rounded-xl px-6 text-[13px] font-medium">
                   <Link to="/signup?resend=true">Reenviar confirmação</Link>
                 </Button>
-                <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[12px] font-black uppercase tracking-[0.12em]">
+                <Button asChild variant="outline" className="h-11 rounded-xl px-6 text-[13px] font-medium">
                   <Link to="/login">Voltar para login</Link>
                 </Button>
               </div>
             </>
           )}
 
-          <p className="mt-8 inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-primary">
+          <p className="mt-8 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.14em] text-wine">
             <Sparkles className="h-3.5 w-3.5" /> Sommelyx • fluxo seguro
           </p>
         </motion.div>

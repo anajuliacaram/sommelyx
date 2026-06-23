@@ -14,6 +14,7 @@ import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { designSystem } from "@/styles/designSystem";
 import { LandingBackground } from "@/components/landing/LandingBackground";
+import "@/styles/auth-v6.css";
 
 const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : "Tente novamente em instantes.");
 
@@ -168,7 +169,7 @@ export default function Signup() {
                     onClick={handleResend}
                     disabled={resentLoading}
                     variant="primary"
-                    className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
+                    className={`w-full ${designSystem.primaryButton}`}
                   >
                     <span className="flex items-center gap-2">
                       <RefreshCcw className={`h-4 w-4 ${resentLoading ? "animate-spin" : ""}`} />
@@ -178,7 +179,7 @@ export default function Signup() {
 
                   <Button
                     variant="outline"
-                    className={`w-full ${designSystem.secondaryButton} uppercase tracking-[0.10em]`}
+                    className={`w-full ${designSystem.secondaryButton}`}
                     onClick={() => navigate("/login")}
                   >
                     Voltar para login
@@ -232,7 +233,7 @@ export default function Signup() {
                         type="submit"
                         variant="primary"
                         disabled={loading}
-                        className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
+                        className={`w-full ${designSystem.primaryButton}`}
                       >
                         {loading ? (
                           <span className="flex items-center gap-3">

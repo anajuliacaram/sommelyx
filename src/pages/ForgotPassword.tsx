@@ -12,6 +12,7 @@ import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { designSystem } from "@/styles/designSystem";
 import { LandingBackground } from "@/components/landing/LandingBackground";
+import "@/styles/auth-v6.css";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -114,7 +115,7 @@ export default function ForgotPassword() {
                 <Button
                   type="button"
                   variant="primary"
-                  className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}
+                  className={`w-full ${designSystem.primaryButton}`}
                   onClick={() => setSent(false)}
                 >
                   Enviar para outro e-mail
@@ -149,7 +150,7 @@ export default function ForgotPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading}>
-                      <Button type="submit" disabled={loading} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
+                      <Button type="submit" disabled={loading} variant="primary" className={`w-full ${designSystem.primaryButton}`}>
                         {loading ? (
                           <span className="flex items-center gap-3">
                             Enviando

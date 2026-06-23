@@ -5,6 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { analytics } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import { designSystem } from "@/styles/designSystem";
+import "@/styles/auth-v6.css";
 
 type CallbackStatus = "loading" | "success" | "error";
 
@@ -92,30 +94,30 @@ export default function AuthCallback() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#F6F3F2" }}>
-      <div className="w-full max-w-lg rounded-[28px] border border-white/55 bg-white/70 p-8 text-center shadow-[0_24px_64px_-24px_rgba(15,15,20,0.2),0_2px_8px_rgba(15,15,20,0.06)] ring-1 ring-black/[0.03] backdrop-blur-2xl md:p-10">
+    <div className="auth-v6 min-h-screen flex items-center justify-center p-6 text-[#1d150f]">
+      <div className="relative z-10 w-full max-w-lg rounded-[24px] border border-white/70 bg-[rgba(255,252,246,0.72)] p-8 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_6px_rgba(50,30,20,0.05),0_24px_56px_-28px_rgba(50,30,20,0.3)] backdrop-blur-2xl md:p-10">
         {status === "loading" && (
           <>
-            <Loader2 className="mx-auto mb-5 h-9 w-9 animate-spin text-[#8C2044]" />
-            <h1 className="text-[30px] font-serif font-bold italic text-[#17141D]">Confirmando acesso</h1>
+            <Loader2 className="mx-auto mb-5 h-9 w-9 animate-spin text-wine" />
+            <h1 className="text-[30px] font-medium text-[#1d150f]">Confirmando acesso</h1>
           </>
         )}
 
         {status === "success" && (
           <>
             <CheckCircle2 className="mx-auto mb-5 h-10 w-10 text-emerald-600" />
-            <h1 className="text-[30px] font-serif font-bold italic text-[#17141D]">Conta confirmada</h1>
+            <h1 className="text-[30px] font-medium text-[#1d150f]">Conta confirmada</h1>
           </>
         )}
 
         {status === "error" && (
           <>
             <AlertCircle className="mx-auto mb-5 h-10 w-10 text-[#E07A5F]" />
-            <h1 className="text-[30px] font-serif font-bold italic text-[#17141D]">Não foi possível confirmar</h1>
+            <h1 className="text-[30px] font-medium text-[#1d150f]">Não foi possível confirmar</h1>
           </>
         )}
 
-        <p className="mt-4 text-[15px] font-medium leading-relaxed text-[#655E6E]">{message}</p>
+        <p className="mt-4 text-[15px] font-normal leading-relaxed text-[rgba(72,60,46,0.7)]">{message}</p>
 
         {status === "error" && (
           <div className="mt-6 space-y-3">
@@ -123,7 +125,7 @@ export default function AuthCallback() {
               type="button"
               variant="primary"
               onClick={() => navigate("/login?confirmed=true", { replace: true })}
-              className="h-12 w-full rounded-2xl text-[13px] font-black uppercase tracking-[0.12em]"
+              className={`w-full ${designSystem.primaryButton}`}
             >
               Ir para login
             </Button>
@@ -131,7 +133,7 @@ export default function AuthCallback() {
               type="button"
               variant="ghost"
               onClick={() => navigate("/signup", { replace: true })}
-              className="h-12 w-full rounded-2xl border border-border/70 bg-background/60 text-[13px] font-bold uppercase tracking-[0.1em] hover:bg-background"
+              className={`w-full ${designSystem.secondaryButton}`}
             >
               Tentar novamente
             </Button>

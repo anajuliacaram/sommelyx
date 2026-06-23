@@ -1,0 +1,73 @@
+/* Sommelyx Auth — extends the approved V6 landing design language to the
+   authentication experience. Scoped under `.auth-v6` so it only affects the
+   auth shell and never leaks into the dashboard or other routes.
+   Visual only — no logic, layout-grid, or behaviour assumptions. */
+
+.auth-v6 {
+  font-family: "Geist", "Inter", system-ui, sans-serif;
+  /* Warm cream "wine paper" base + soft burgundy / olive / champagne atmosphere */
+  background:
+    radial-gradient(ellipse 55% 50% at 82% 6%, rgba(184, 148, 60, 0.08) 0%, transparent 58%),
+    radial-gradient(ellipse 52% 56% at 4% 78%, rgba(61, 79, 53, 0.06) 0%, transparent 56%),
+    radial-gradient(ellipse 48% 48% at 72% 94%, rgba(122, 18, 36, 0.06) 0%, transparent 55%),
+    #fdfbf7 !important;
+}
+
+/* very subtle paper grain */
+.auth-v6::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.02;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 240px;
+}
+
+/* Editorial luxury: never SaaS-uppercase the action buttons */
+.auth-v6 form button,
+.auth-v6 [data-auth-cta] {
+  text-transform: none;
+  letter-spacing: 0.005em;
+}
+
+/* Auth headlines render in Fraunces (set inline by pages); make the
+   "gradient-text" highlight word match the V6 burgundy. */
+.auth-v6 .gradient-text {
+  background: linear-gradient(120deg, #7a1224 0%, #93182f 60%, #8d673a 120%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Premium link affordance for secondary actions */
+.auth-v6 a.auth-link {
+  position: relative;
+  color: #7a1224;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.auth-v6 a.auth-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.auth-v6 a.auth-link:hover { color: #5b1023; }
+.auth-v6 a.auth-link:hover::after { transform: scaleX(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-v6 a.auth-link::after { transition: none; }
+}
+
+/* status pages (AuthConfirm / AuthCallback) headline font */
+.auth-v6 h1, .auth-v6 h2 { font-family: "Fraunces", Georgia, serif; }

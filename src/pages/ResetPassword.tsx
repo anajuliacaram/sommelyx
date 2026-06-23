@@ -13,6 +13,7 @@ import { Logo } from "@/components/Logo";
 import { BrandName } from "@/components/BrandName";
 import { designSystem } from "@/styles/designSystem";
 import { LandingBackground } from "@/components/landing/LandingBackground";
+import "@/styles/auth-v6.css";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -133,11 +134,11 @@ export default function ResetPassword() {
 
                 <div className="mt-6 grid gap-3">
                   <MagneticButton>
-                  <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
+                  <Button type="button" onClick={() => navigate("/forgot-password")} variant="primary" className={`w-full ${designSystem.primaryButton}`}>
                     Solicitar novo link <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </MagneticButton>
-                  <Button type="button" variant="ghost" className={`w-full ${designSystem.secondaryButton} uppercase tracking-[0.10em]`} onClick={() => navigate("/login")}>
+                  <Button type="button" variant="ghost" className={`w-full ${designSystem.secondaryButton}`} onClick={() => navigate("/login")}>
                     Voltar ao login
                   </Button>
                 </div>
@@ -188,7 +189,7 @@ export default function ResetPassword() {
 
                   <div className="pt-1">
                     <MagneticButton disabled={loading || !isValid}>
-                      <Button type="submit" disabled={loading || !isValid} variant="primary" className={`w-full ${designSystem.primaryButton} uppercase tracking-[0.10em]`}>
+                      <Button type="submit" disabled={loading || !isValid} variant="primary" className={`w-full ${designSystem.primaryButton}`}>
                         {loading ? (
                           <span className="flex items-center justify-center gap-3">
                             Redefinindo

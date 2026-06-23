@@ -10,8 +10,9 @@ export const COLORS = {
 } as const;
 
 export const TYPOGRAPHY = {
-  heading: "'Libre Baskerville', Georgia, serif",
-  body: "'Plus Jakarta Sans', system-ui, sans-serif",
+  // V6 landing language: Fraunces for editorial headlines, Geist for UI.
+  heading: "'Fraunces', Georgia, serif",
+  body: "'Geist', 'Inter', system-ui, sans-serif",
 } as const;
 
 export const SPACING = {
@@ -75,33 +76,39 @@ export const designSystem = {
     color: "hsl(var(--wine))",
     boxShadow: "0 8px 18px -14px rgba(0,0,0,0.14)",
   } as const,
+  // V6 primary CTA — burgundy gradient, inner highlight, soft depth, hover lift.
   primaryButton:
-    "h-11 sm:h-12 rounded-[17px] px-5.5 sm:px-6.5 text-[13px] font-semibold bg-[linear-gradient(135deg,#7b1e2b_0%,#912634_100%)] text-white shadow-[0_20px_40px_-24px_rgba(123,30,43,0.46),inset_0_1px_0_rgba(255,255,255,0.12)] transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:brightness-[1.035] active:scale-[0.975]",
+    "h-12 rounded-[14px] px-7 text-[14.5px] font-medium normal-case text-[#fdf3ee] bg-[linear-gradient(180deg,#8d1d36_0%,#7B1730_48%,#5B1023_100%)] shadow-[inset_0_1px_1px_rgba(255,255,255,0.22),inset_0_-1px_2px_rgba(0,0,0,0.2),0_3px_8px_rgba(122,18,36,0.3),0_12px_30px_-10px_rgba(122,18,36,0.5)] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:brightness-[1.04] active:translate-y-0",
+  // V6 secondary — warm cream glass, burgundy hover.
   secondaryButton:
-    "h-11 sm:h-12 rounded-[17px] border border-white/30 bg-[rgba(255,252,247,0.48)] px-5.5 sm:px-6.5 text-[13px] font-semibold text-[rgba(36,30,24,0.86)] shadow-[inset_0_1px_0_rgba(255,255,255,0.40),0_16px_32px_-28px_rgba(58,51,39,0.16)] backdrop-blur-xl transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:bg-[rgba(255,253,249,0.62)]",
+    "h-12 rounded-[14px] border border-[rgba(122,18,36,0.16)] bg-[rgba(255,252,246,0.55)] px-6 text-[14.5px] font-medium normal-case text-[#3d4f35] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-px hover:border-[rgba(122,18,36,0.3)] hover:text-[#7a1224] hover:bg-[rgba(122,18,36,0.06)]",
   pillButton:
-    "rounded-full px-4 py-2 text-[12px] font-semibold border border-[rgba(58,51,39,0.08)] bg-white/72 backdrop-blur-sm text-[#3A3A3A] hover:bg-white transition-colors",
+    "rounded-full px-4 py-2 text-[12px] font-medium border border-[rgba(122,18,36,0.12)] bg-[rgba(255,252,246,0.7)] backdrop-blur-sm text-[#3d4f35] hover:text-[#7a1224] hover:bg-[rgba(122,18,36,0.06)] transition-colors",
+  // V6 input — translucent cream glass, hairline border, burgundy focus ring.
   inputField:
-    "h-10 rounded-[15px] border border-white/30 bg-[linear-gradient(180deg,rgba(255,255,255,0.52)_0%,rgba(249,244,237,0.40)_100%)] px-3.5 text-[13px] font-medium text-[rgba(36,30,24,0.86)] placeholder:text-[rgba(108,96,84,0.52)] shadow-[inset_0_1px_0_rgba(255,255,255,0.42),0_14px_28px_-28px_rgba(58,51,39,0.14)] backdrop-blur-xl transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)] focus:border-primary/16 focus:bg-[linear-gradient(180deg,rgba(255,255,255,0.66)_0%,rgba(252,248,242,0.52)_100%)] focus:ring-2 focus:ring-primary/[0.055]",
+    "h-12 w-full rounded-[13px] border border-[rgba(122,18,36,0.12)] bg-[rgba(255,252,246,0.6)] px-4 text-[15px] font-normal text-[#1d150f] placeholder:text-[rgba(29,21,15,0.4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] focus:border-[rgba(122,18,36,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(122,18,36,0.16)] focus:bg-[rgba(255,253,249,0.82)]",
   authShell:
-    "relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary",
+    "auth-v6 relative min-h-screen overflow-hidden text-foreground selection:bg-primary/15 selection:text-primary",
   authGrid:
     "relative z-10 mx-auto grid min-h-screen w-full max-w-[1160px] items-center grid-cols-1 px-4 py-4 sm:px-6 sm:py-5 lg:grid-cols-[1fr_0.92fr] lg:gap-8 lg:px-5 lg:py-6",
+  // V6 glass card — translucent cream, layered highlight + soft depth.
   authCard: {
-    background: "linear-gradient(180deg, rgba(255,255,255,0.76) 0%, rgba(249,244,237,0.70) 100%)",
-    backdropFilter: "blur(18px) saturate(1.02)",
-    WebkitBackdropFilter: "blur(18px) saturate(1.02)",
-    border: "1px solid rgba(255,255,255,0.56)",
-    boxShadow: "0 22px 46px -34px rgba(58,51,39,0.18), 0 1px 2px rgba(255,255,255,0.52) inset",
-    borderRadius: "20px",
+    background: "rgba(255,252,246,0.72)",
+    backdropFilter: "blur(20px) saturate(1.1)",
+    WebkitBackdropFilter: "blur(20px) saturate(1.1)",
+    border: "1px solid rgba(255,255,255,0.7)",
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 0 0 1px rgba(255,255,255,0.16), 0 2px 6px rgba(50,30,20,0.05), 0 24px 56px -28px rgba(50,30,20,0.3)",
+    borderRadius: "22px",
   } as const,
-  authPanel: "rounded-[20px] p-4 sm:p-5 md:p-6 lg:p-7",
-  authFormCard: "w-full max-w-[500px] rounded-[20px] p-4 sm:p-5 md:p-6",
+  authPanel: "rounded-[22px] p-4 sm:p-5 md:p-6 lg:p-7",
+  authFormCard: "w-full max-w-[480px] rounded-[22px] p-5 sm:p-6 md:p-7",
   authLogoLink: "inline-flex items-center gap-2.5 sm:gap-3 transition-opacity hover:opacity-80",
   authLogo: "h-10 sm:h-12 md:h-14 w-auto drop-shadow-[0_2px_8px_rgba(15,15,20,0.12)]",
-  authBrand: "text-[22px] sm:text-[26px] md:text-[32px]",
-  authHeadline: "text-[26px] sm:text-[30px] font-semibold leading-[1.06] tracking-[-0.02em] text-[rgba(26,23,19,0.92)]",
-  authBody: "text-[13px] font-medium leading-relaxed text-[rgba(72,60,46,0.74)]",
+  authBrand: "text-[22px] sm:text-[26px] md:text-[32px] text-[#7a1224]",
+  authHeadline:
+    "text-[28px] sm:text-[32px] font-medium leading-[1.04] tracking-[-0.022em] text-[#1d150f]",
+  authBody: "text-[14px] font-normal leading-relaxed text-[rgba(72,60,46,0.7)]",
 } as const;
 
 export type DesignSystem = typeof designSystem;
