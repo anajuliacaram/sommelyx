@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
  * BrandName — Renderização padronizada do nome "Sommelyx".
  *
  * Regras de marca:
- * - Cor padrão: bordô premium (--brand-primary = #7B1E2B) em fundos claros
- * - Tipografia: Libre Baskerville (serif), peso 600, tracking 0.02em
+ * - Cor padrão: bordô premium (--brand-primary = #7a1224) em fundos claros
+ * - Tipografia: Fraunces (serif), peso 600, tracking 0.02em
  * - Tom "light" para uso em fundos escuros (sidebar, hero escuro)
  * - Acento dourado opcional no ponto final (.) — sutil, não obrigatório
  */
@@ -31,7 +31,7 @@ const sizeClasses: Record<NonNullable<BrandNameProps["size"]>, string> = {
 };
 
 const toneColor: Record<BrandNameTone, string> = {
-  primary: "var(--brand-primary, #7B1E2B)",
+  primary: "var(--brand-primary, #7a1224)",
   light: "#FFFFFF",
   dark: "#1C1C1C",
 };
@@ -49,14 +49,14 @@ export const BrandName = React.forwardRef<HTMLSpanElement, BrandNameProps>(
           color: toneColor[tone],
           fontWeight: 600,
           letterSpacing: "0.02em",
-          fontFamily: "'Libre Baskerville', Georgia, serif",
+          fontFamily: "'Fraunces', Georgia, serif",
           ...style,
         }}
         {...props}
       >
         Sommelyx
         {withAccent && (
-          <span aria-hidden="true" style={{ color: "#C8A96A", marginLeft: "1px" }}>
+          <span aria-hidden="true" style={{ color: "#b8943c", marginLeft: "1px" }}>
             .
           </span>
         )}

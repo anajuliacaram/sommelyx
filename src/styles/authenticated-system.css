@@ -1739,3 +1739,476 @@ body:not(.landing-page) .home-rebuild-open:hover {
     margin-bottom: 20px !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V6 UNIFICATION — one product from the landing to the cellar.
+   The approved landing/auth material (cream glass, white hairlines,
+   layered warm shadows, Fraunces display, wine-gradient primaries,
+   tinted pill chips) becomes the only material in the authenticated
+   app. Later source order beats every band above and the legacy file.
+   ═══════════════════════════════════════════════════════════════════ */
+
+body:not(.landing-page) {
+  /* V6 glass material (values lifted from landing-v6.css) */
+  --v6-glass: rgba(255, 252, 246, 0.68);
+  --v6-glass-hi: rgba(255, 254, 251, 0.86);
+  --v6-glass-border: rgba(255, 255, 255, 0.72);
+  --v6-blur: blur(20px) saturate(1.1);
+  --v6-shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 2px 6px rgba(50, 30, 20, 0.05),
+    0 12px 28px -18px rgba(50, 30, 20, 0.2),
+    0 28px 56px -34px rgba(50, 30, 20, 0.28);
+  --v6-shadow-card-hover:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 2px 6px rgba(26, 19, 14, 0.05),
+    0 28px 60px -28px rgba(26, 19, 14, 0.34);
+  --v6-wine-gradient: linear-gradient(180deg, #8d1d36 0%, #7b1730 48%, #5b1023 100%);
+  --v6-btn-shadow:
+    0 1px 1px rgba(255, 255, 255, 0.22) inset,
+    0 -1px 2px rgba(0, 0, 0, 0.2) inset,
+    0 3px 8px rgba(122, 18, 36, 0.3),
+    0 12px 30px -10px rgba(122, 18, 36, 0.5);
+  --v6-btn-shadow-hover:
+    0 1px 1px rgba(255, 255, 255, 0.26) inset,
+    0 -1px 2px rgba(0, 0, 0, 0.22) inset,
+    0 6px 14px rgba(122, 18, 36, 0.34),
+    0 20px 40px -12px rgba(122, 18, 36, 0.56);
+  --v6-ink-6: rgba(29, 21, 15, 0.6);
+  --v6-ink-4: rgba(29, 21, 15, 0.4);
+  --v6-ink-1: rgba(29, 21, 15, 0.1);
+
+  /* Legacy sx-v2 odd weights (520/560/580) collapse to the 400/500/600 scale */
+  --sx-v2-weight-display: 500;
+  --sx-v2-weight-title: 500;
+  --sx-v2-weight-body: 400;
+  --sx-v2-weight-strong: 600;
+}
+
+/* ── Ground: exactly the landing atmosphere, quiet and warm ── */
+body:not(.landing-page) #root,
+body:not(.landing-page) .app-shell,
+body:not(.landing-page) .dashboard-shell {
+  background:
+    radial-gradient(ellipse 50% 40% at 82% 0%, rgba(184, 148, 60, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 50% at 0% 28%, rgba(61, 79, 53, 0.05) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 70% 100%, rgba(122, 18, 36, 0.045) 0%, transparent 56%),
+    #fdfbf7 !important;
+}
+
+/* ── Topbar: the landing navbar, indoors ── */
+body:not(.landing-page) .sx-v6-topbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6) !important;
+  background: rgba(255, 250, 242, 0.55) !important;
+  backdrop-filter: blur(32px) saturate(1.3) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.3) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.25),
+    0 14px 36px -24px rgba(50, 30, 20, 0.16) !important;
+}
+
+body:not(.landing-page) .sx-v2-shell-header .sx-v6-topbar-btn,
+body:not(.landing-page) .sx-v6-topbar-btn {
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  background: rgba(255, 253, 249, 0.7) !important;
+  color: var(--v6-ink-6) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 3px 10px -4px rgba(50, 30, 20, 0.16) !important;
+  transition:
+    color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    background-color var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease) !important;
+}
+
+body:not(.landing-page) .sx-v2-shell-header .sx-v6-topbar-btn:hover,
+body:not(.landing-page) .sx-v6-topbar-btn:hover {
+  color: var(--sx-auth-wine) !important;
+  background: rgba(255, 253, 249, 0.92) !important;
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 6px 16px -6px rgba(50, 30, 20, 0.22) !important;
+}
+
+body:not(.landing-page) .sx-v6-topbar-btn svg {
+  color: currentColor !important;
+}
+
+body:not(.landing-page) .sx-v2-shell-header .sx-v6-avatar,
+body:not(.landing-page) .sx-v6-avatar {
+  background: linear-gradient(140deg, #8a3a44, #6e242e) !important;
+  color: #fdf3ee !important;
+  border: 2px solid rgba(253, 251, 247, 0.9) !important;
+  box-shadow: 0 2px 6px rgba(26, 19, 14, 0.14), 0 8px 20px -10px rgba(122, 18, 36, 0.45) !important;
+}
+
+body:not(.landing-page) .sx-v2-shell-header .sx-v6-avatar:hover,
+body:not(.landing-page) .sx-v6-avatar:hover {
+  filter: brightness(1.06);
+}
+
+/* Business badge joins the chip family */
+body:not(.landing-page) .business-mode-badge {
+  border: 1px solid rgba(184, 148, 60, 0.26) !important;
+  border-radius: 999px !important;
+  background: rgba(184, 148, 60, 0.13) !important;
+  color: #6f5212 !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  padding: 4px 11px !important;
+}
+
+/* ── Sidebar: premium cream glass, navigation as an object ── */
+body:not(.landing-page) .sx-v6-sidebar [data-sidebar="sidebar"] {
+  border-right: 1px solid rgba(255, 255, 255, 0.65) !important;
+  background: rgba(252, 248, 241, 0.78) !important;
+  backdrop-filter: blur(28px) saturate(1.15);
+  -webkit-backdrop-filter: blur(28px) saturate(1.15);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.4),
+    10px 0 36px -28px rgba(50, 30, 20, 0.22);
+}
+
+body:not(.landing-page) .sx-v6-sidebar-brand {
+  background: transparent !important;
+}
+
+body:not(.landing-page) .sx-v6-sidebar-brand:hover {
+  background: rgba(29, 21, 15, 0.035) !important;
+}
+
+body:not(.landing-page) .sx-v6-sidebar-profile {
+  color: var(--sx-auth-gold-deep) !important;
+}
+
+/* Quick-action tray: a glass card inside the glass rail */
+body:not(.landing-page) .sx-v6-actions-shell,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-actions,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-actions {
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 253, 248, 0.6) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 10px 26px -20px rgba(50, 30, 20, 0.24) !important;
+}
+
+/* Primary sidebar action: the landing wine button */
+body:not(.landing-page) .sx-v2-sidebar .sidebar-action-primary,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-primary,
+body:not(.landing-page) .sidebar-actions .sidebar-action-primary {
+  border: none !important;
+  background: var(--v6-wine-gradient) !important;
+  color: #fdf3ee !important;
+  box-shadow: var(--v6-btn-shadow) !important;
+  transition:
+    transform var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    box-shadow var(--sx-auth-dur-fast) var(--sx-auth-ease),
+    filter var(--sx-auth-dur-fast) var(--sx-auth-ease) !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar .sidebar-action-primary:hover,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-primary:hover,
+body:not(.landing-page) .sidebar-actions .sidebar-action-primary:hover {
+  transform: translateY(-1px) !important;
+  filter: brightness(1.05) saturate(1.05);
+  box-shadow: var(--v6-btn-shadow-hover) !important;
+}
+
+body:not(.landing-page) .sidebar-actions .sidebar-action-primary .action-icon {
+  background: rgba(255, 250, 242, 0.16) !important;
+  color: #fdf3ee !important;
+}
+
+/* Active nav item: cream glass pill with a wine point, landing-nav style */
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active),
+body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 253, 249, 0.85) !important;
+  color: var(--sx-auth-wine) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 3px 10px -4px rgba(50, 30, 20, 0.16) !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active)::before,
+body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active)::before {
+  content: "" !important;
+  position: absolute !important;
+  left: 7px !important;
+  top: 50% !important;
+  bottom: auto !important;
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  transform: translateY(-50%) !important;
+  background: var(--sx-auth-wine) !important;
+  box-shadow: 0 0 0 3px rgba(122, 18, 36, 0.12) !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) > span:last-child,
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sx-v2-nav-row-active) .sx-v2-nav-label {
+  padding-left: 6px;
+}
+
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-action-item:hover, .sx-v2-nav-row:hover, .sidebar-item:hover),
+body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-action-item:hover, .sx-v2-nav-row:hover, .sidebar-item:hover) {
+  background: rgba(255, 253, 249, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--sx-auth-wine) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 12px -4px rgba(50, 30, 20, 0.18) !important;
+}
+
+/* ── Cards: every surface is the landing glass card ── */
+body:not(.landing-page) :is(
+  .glass-card,
+  .card-depth,
+  .sx-card,
+  .premium-card-surface,
+  .sx-v2-floating-panel,
+  .sx-v2-matte-panel,
+  .section-surface,
+  .chart-surface,
+  .surface-clarity,
+  .home-rebuild-actions-card,
+  .home-rebuild-summary,
+  .home-rebuild-panel,
+  .cellar-rebuild-summary,
+  .cellar-rebuild-controls,
+  .consumo-rebuild-chart,
+  .consumo-rebuild-timeline,
+  .consumo-rebuild-stat,
+  .settings-page section,
+  .reports-page section
+) {
+  border: 1px solid var(--v6-glass-border) !important;
+  background: var(--v6-glass) !important;
+  backdrop-filter: var(--v6-blur);
+  -webkit-backdrop-filter: var(--v6-blur);
+  box-shadow: var(--v6-shadow-card) !important;
+}
+
+body:not(.landing-page) :is(
+  .cellar-rebuild-card,
+  .cellar-rebuild-row,
+  .consumo-rebuild-entry,
+  .wishlist-card,
+  .wishlist-empty,
+  .alert-card
+) {
+  border: 1px solid var(--v6-glass-border) !important;
+  background: var(--v6-glass) !important;
+  backdrop-filter: var(--v6-blur);
+  -webkit-backdrop-filter: var(--v6-blur);
+  box-shadow: var(--v6-shadow-card) !important;
+}
+
+body:not(.landing-page) :is(
+  .cellar-rebuild-card,
+  .cellar-rebuild-row,
+  .consumo-rebuild-entry,
+  .wishlist-card,
+  .alert-card
+):hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: var(--v6-shadow-card-hover) !important;
+}
+
+/* ── Buttons: the landing primary, everywhere, no exceptions ── */
+body:not(.landing-page) :is(
+  .sx-btn-primary,
+  .btn-primary-premium,
+  .modal-btn-primary,
+  .home-rebuild-action-primary,
+  .cellar-rebuild-add-button,
+  .sx-v2-btn-primary
+) {
+  border: none !important;
+  background: var(--v6-wine-gradient) !important;
+  color: #fdf3ee !important;
+  box-shadow: var(--v6-btn-shadow) !important;
+}
+
+body:not(.landing-page) :is(
+  .sx-btn-primary,
+  .btn-primary-premium,
+  .modal-btn-primary,
+  .home-rebuild-action-primary,
+  .cellar-rebuild-add-button,
+  .sx-v2-btn-primary
+):hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.04) saturate(1.05);
+  box-shadow: var(--v6-btn-shadow-hover) !important;
+}
+
+/* Secondary: the landing outline button — cream glass, wine hairline */
+body:not(.landing-page) :is(.sx-btn-secondary, .sx-btn-outline, .modal-btn-secondary, .premium-control-surface, .home-rebuild-action:not(.home-rebuild-action-primary)) {
+  border: 1px solid rgba(122, 18, 36, 0.16) !important;
+  background: rgba(255, 252, 246, 0.55) !important;
+  color: var(--sx-auth-olive) !important;
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+body:not(.landing-page) :is(.sx-btn-secondary, .sx-btn-outline, .modal-btn-secondary, .premium-control-surface, .home-rebuild-action:not(.home-rebuild-action-primary)):hover {
+  transform: translateY(-1px);
+  border-color: rgba(122, 18, 36, 0.3) !important;
+  background: rgba(122, 18, 36, 0.06) !important;
+  color: var(--sx-auth-wine) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ── Inputs: warm paper, champagne focus (unchanged voice, V6 material) ── */
+body:not(.landing-page) :is(input, textarea, select, [cmdk-input], .modal-input, .form-input, .cellar-rebuild-search) {
+  border: 1px solid rgba(29, 21, 15, 0.12) !important;
+  background: rgba(255, 253, 249, 0.8) !important;
+}
+
+body:not(.landing-page) :is(input, textarea, select, [cmdk-input], .modal-input, .form-input, .cellar-rebuild-search):focus {
+  border-color: rgba(184, 148, 60, 0.55) !important;
+  background: #fffdf9 !important;
+  box-shadow: 0 0 0 3px rgba(184, 148, 60, 0.14) !important;
+}
+
+/* ── Chips: tinted pills with tinted hairlines, landing vocabulary ── */
+body:not(.landing-page) :is(.chip, .sx-v2-chip, .badge, .premium-chip-surface, .consumption-filter-chip, .cellar-rebuild-filter-chip) {
+  border: 1px solid var(--v6-ink-1) !important;
+  background: rgba(29, 21, 15, 0.04) !important;
+  color: rgba(29, 21, 15, 0.62) !important;
+}
+
+body:not(.landing-page) :is(.chip, .sx-v2-chip, .consumption-filter-chip, .cellar-rebuild-filter-chip):hover {
+  border-color: rgba(184, 148, 60, 0.35) !important;
+  background: rgba(184, 148, 60, 0.1) !important;
+  color: #6f5212 !important;
+}
+
+body:not(.landing-page) :is(.chip.active, .sx-v2-chip-active, .consumption-filter-chip.active, .consumption-filter-chip[aria-pressed="true"], .cellar-rebuild-filter-chip.active) {
+  border-color: rgba(122, 18, 36, 0.2) !important;
+  background: rgba(122, 18, 36, 0.07) !important;
+  color: var(--sx-auth-wine) !important;
+}
+
+/* ── Tables (commercial suite): quiet ledgers, not enterprise grids ── */
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+}
+
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) thead th {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+  color: var(--v6-ink-4) !important;
+  border-bottom: 1px solid rgba(29, 21, 15, 0.08) !important;
+  background: transparent !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) tbody td {
+  border-bottom: 1px solid rgba(29, 21, 15, 0.05) !important;
+  padding-top: 13px !important;
+  padding-bottom: 13px !important;
+  font-size: 13.5px !important;
+}
+
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) tbody tr {
+  transition: background-color var(--sx-auth-dur-fast) var(--sx-auth-ease);
+}
+
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) tbody tr:hover {
+  background: rgba(255, 253, 249, 0.75) !important;
+}
+
+/* ── Dark collectible surfaces: warm ink, never forest green ── */
+body:not(.landing-page) :is(.consumo-rebuild-last, .daily-insight-card, .last-opened-card.featured) {
+  background:
+    radial-gradient(ellipse at 16% -6%, rgba(184, 148, 60, 0.28), transparent 44%),
+    radial-gradient(ellipse at 92% 96%, rgba(255, 253, 248, 0.05), transparent 40%),
+    linear-gradient(150deg, #2a1017 0%, #1d150f 55%, #241a10 100%) !important;
+}
+
+/* ── Settings / generic section headings that escaped the scale ── */
+body:not(.landing-page) :is(.settings-page, .glass-card, .section-surface) :is(h2, h3):not([class*="title"]):not([class*="Title"]) {
+  font-family: var(--sx-auth-font-ui) !important;
+  font-size: var(--sx-auth-section-title) !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em !important;
+  color: var(--sx-auth-ink) !important;
+}
+
+/* ── Kickers: V6 landing eyebrow — wine, tracked, 11px ── */
+body:not(.landing-page) :is(
+  .editorial-kicker,
+  .sx-v2-kicker,
+  .t-eyebrow,
+  .home-rebuild-kicker,
+  .consumo-rebuild-kicker,
+  .harmonizar-eyebrow
+) {
+  letter-spacing: 0.13em !important;
+  color: var(--sx-auth-wine) !important;
+}
+
+/* ── Focus: champagne ring everywhere (matches auth pages) ── */
+body:not(.landing-page) :is(button, a, [role="button"], [tabindex], input, select, textarea):focus-visible {
+  outline: 2px solid rgba(184, 148, 60, 0.8) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Scrollbars: quiet, warm ── */
+body:not(.landing-page) .dashboard-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+body:not(.landing-page) .dashboard-scroll::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: rgba(29, 21, 15, 0.14);
+  background-clip: padding-box;
+}
+
+body:not(.landing-page) .dashboard-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(29, 21, 15, 0.24);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+}
+
+/* Brand lockup: legacy "exact mockup" bands paint it forest-green at
+   (0,4,2) with !important (index.css ~7106/21843/23185). Match their
+   selector shape so later source order settles it. */
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"],
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"],
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"].mobile-sidebar-drawer [data-sidebar="header"] > a {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--sx-auth-ink) !important;
+  box-shadow: none !important;
+  min-height: 54px !important;
+  border-radius: 18px !important;
+}
+
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"]:hover,
+body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"]:hover {
+  background: rgba(29, 21, 15, 0.035) !important;
+}
+
+body:not(.landing-page) [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"] img {
+  width: 38px !important;
+  height: 38px !important;
+}
+
+/* Legacy 610 weight on the sidebar primary → scale weight */
+body:not(.landing-page) .sidebar-action-primary {
+  font-weight: 500 !important;
+}
+
+/* Page subtitles: quiet ink, never accent-colored */
+body:not(.landing-page) :is(.t-subtitle, .wishlist-sub, .cellar-rebuild-subtitle) {
+  color: var(--sx-auth-muted) !important;
+}

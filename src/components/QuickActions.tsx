@@ -31,7 +31,7 @@ export const QuickActions = memo(function QuickActions({
         </Button>
         {onRegisterConsumption && (
           <Button variant="secondary" size="default" onClick={onRegisterConsumption}>
-            <Wine className="mr-1.5 h-4 w-4 text-[#7B1E2B]" />
+            <Wine className="mr-1.5 h-4 w-4 text-[#7a1224]" />
             {isCommercial ? "Registrar venda" : "Adicionar consumo"}
           </Button>
         )}
@@ -41,13 +41,13 @@ export const QuickActions = memo(function QuickActions({
 
   /* ── Stacked layout (sidebar — dark context) ── */
   return (
-    <div className="sidebar-actions rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
+    <div className="sidebar-actions sx-v6-actions-shell rounded-[18px] p-2">
       <div className="sidebar-actions-list flex flex-col gap-2">
         {/* ── Primary ── */}
           <Button
             variant="primary"
             onClick={onAddWine}
-            className="sidebar-action-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
+            className="sidebar-action-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-pill)] border-0 px-4 py-3 text-[14px] font-medium"
           >
             <span className="action-icon action-icon-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">
               <Plus className="h-[15px] w-[15px]" />

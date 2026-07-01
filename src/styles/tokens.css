@@ -271,56 +271,58 @@
        Objects over containers. Bottle as protagonist.
        ================================================================ */
 
-    /* Atmosphere — dark editorial canvas */
-    --ed-bg-canvas: #1A2420;
-    --ed-bg-canvas-soft: #1F2A26;
-    --ed-bg-canvas-deep: #131B18;
+    /* Atmosphere — V6 light editorial canvas (warm cream + soft ambient) */
+    --ed-bg-canvas: #fdfbf7;
+    --ed-bg-canvas-soft: #fcf8f1;
+    --ed-bg-canvas-deep: #f7f2ea;
     --ed-vignette:
-      radial-gradient(ellipse 80% 60% at 75% 18%, rgba(200, 169, 106, 0.10), transparent 62%),
-      radial-gradient(ellipse 100% 70% at 50% 100%, rgba(0, 0, 0, 0.40), transparent 60%);
-    --ed-grain-url: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.91  0 0 0 0 0.86  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      radial-gradient(ellipse 60% 55% at 82% 6%, rgba(184, 148, 60, 0.08), transparent 58%),
+      radial-gradient(ellipse 55% 58% at 4% 80%, rgba(61, 79, 53, 0.06), transparent 56%),
+      radial-gradient(ellipse 50% 50% at 70% 96%, rgba(122, 18, 36, 0.05), transparent 56%);
+    --ed-grain-url: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4  0 0 0 0 0.28  0 0 0 0 0.18  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 
-    /* Editorial color hierarchy */
-    --ed-ivory: #F0E8DC;
-    --ed-ivory-soft: rgba(240, 232, 220, 0.78);
-    --ed-ivory-muted: rgba(240, 232, 220, 0.58);
-    --ed-ivory-subtle: rgba(240, 232, 220, 0.38);
-    --ed-ivory-faint: rgba(240, 232, 220, 0.16);
-    --ed-gold: #C8A96A;
-    --ed-gold-soft: rgba(200, 169, 106, 0.42);
-    --ed-gold-line: rgba(200, 169, 106, 0.28);
-    --ed-bordeaux: #7B1E2B;
-    --ed-bordeaux-jewel: #912634;
+    /* Editorial color hierarchy — V6 warm ink on cream */
+    --ed-ivory: #1d150f;
+    --ed-ivory-soft: rgba(29, 21, 15, 0.72);
+    --ed-ivory-muted: rgba(29, 21, 15, 0.56);
+    --ed-ivory-subtle: rgba(29, 21, 15, 0.42);
+    --ed-ivory-faint: rgba(29, 21, 15, 0.12);
+    --ed-gold: #8d673a;
+    --ed-gold-soft: rgba(184, 148, 60, 0.40);
+    --ed-gold-line: rgba(184, 148, 60, 0.30);
+    --ed-bordeaux: #7a1224;
+    --ed-bordeaux-jewel: #93182f;
 
-    /* Bottle-as-object lighting */
+    /* Bottle-as-object lighting — softened for light ground */
     --ed-spotlight:
-      radial-gradient(ellipse 50% 70% at 65% 35%, rgba(255, 220, 160, 0.18), transparent 65%);
+      radial-gradient(ellipse 50% 70% at 65% 35%, rgba(184, 148, 60, 0.14), transparent 65%);
     --ed-bottle-shadow:
-      drop-shadow(0 30px 24px rgba(0, 0, 0, 0.55))
-      drop-shadow(0 10px 12px rgba(0, 0, 0, 0.35));
+      drop-shadow(0 26px 30px rgba(45, 27, 18, 0.22))
+      drop-shadow(0 8px 14px rgba(45, 27, 18, 0.14));
     --ed-bottle-shadow-soft:
-      drop-shadow(0 12px 14px rgba(0, 0, 0, 0.45))
-      drop-shadow(0 4px 6px rgba(0, 0, 0, 0.30));
+      drop-shadow(0 12px 18px rgba(45, 27, 18, 0.18))
+      drop-shadow(0 4px 8px rgba(45, 27, 18, 0.10));
 
     /* Editorial shelf baseline (museum vitrine) */
     --ed-shelf-line: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(200, 169, 106, 0.25) 18%,
-      rgba(200, 169, 106, 0.42) 50%,
-      rgba(200, 169, 106, 0.25) 82%,
+      rgba(184, 148, 60, 0.22) 18%,
+      rgba(184, 148, 60, 0.40) 50%,
+      rgba(184, 148, 60, 0.22) 82%,
       transparent 100%
     );
 
-    /* Editorial surfaces — Apple Wallet sheet style */
-    --ed-sheet-bg: rgba(26, 36, 32, 0.92);
-    --ed-sheet-border: rgba(240, 232, 220, 0.10);
+    /* Editorial surfaces — V6 cream glass */
+    --ed-sheet-bg: rgba(255, 252, 246, 0.86);
+    --ed-sheet-border: rgba(255, 255, 255, 0.7);
     --ed-sheet-shadow:
-      0 48px 120px -32px rgba(0, 0, 0, 0.75),
-      0 16px 36px -16px rgba(0, 0, 0, 0.45);
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 48px 120px -44px rgba(45, 27, 18, 0.34),
+      0 16px 36px -22px rgba(45, 27, 18, 0.2);
     --ed-modal-bg:
-      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(200, 169, 106, 0.10), transparent 60%),
-      linear-gradient(180deg, rgba(31, 42, 38, 0.96) 0%, rgba(19, 27, 24, 0.98) 100%);
+      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(184, 148, 60, 0.10), transparent 60%),
+      linear-gradient(180deg, rgba(255, 253, 248, 0.97) 0%, rgba(251, 245, 236, 0.98) 100%);
 
     /* Motion — editorial cadence */
     --ed-ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -348,8 +350,8 @@
     background-image: var(--ed-grain-url);
     background-size: 220px 220px;
     pointer-events: none;
-    mix-blend-mode: overlay;
-    opacity: 0.55;
+    mix-blend-mode: multiply;
+    opacity: 0.35;
     z-index: 0;
   }
   .ed-canvas > * {
@@ -393,9 +395,12 @@
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     border-radius: 999px;
-    border: 1px solid var(--ed-gold-soft);
-    background: transparent;
-    color: var(--ed-gold);
+    border: 1px solid rgba(122, 18, 36, 0.16);
+    background: rgba(255, 252, 246, 0.55);
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    color: var(--ed-bordeaux);
     font-family: var(--font-display);
     font-size: 15px;
     letter-spacing: 0.01em;
@@ -403,18 +408,29 @@
     cursor: pointer;
   }
   .ed-pill:hover {
-    background: rgba(200, 169, 106, 0.08);
-    border-color: var(--ed-gold);
+    background: rgba(122, 18, 36, 0.06);
+    border-color: rgba(122, 18, 36, 0.3);
     transform: translateY(-1px);
   }
   .ed-pill.is-primary {
-    background: var(--ed-gold);
-    color: #1A2420;
-    border-color: var(--ed-gold);
+    background: linear-gradient(180deg, #8d1d36 0%, #7b1730 48%, #5b1023 100%);
+    color: #fdf3ee;
+    border: none;
+    box-shadow:
+      0 1px 1px rgba(255, 255, 255, 0.22) inset,
+      0 -1px 2px rgba(0, 0, 0, 0.2) inset,
+      0 3px 8px rgba(122, 18, 36, 0.3),
+      0 12px 30px -10px rgba(122, 18, 36, 0.5);
   }
   .ed-pill.is-primary:hover {
-    background: #D4B97A;
-    border-color: #D4B97A;
+    background: linear-gradient(180deg, #8d1d36 0%, #7b1730 48%, #5b1023 100%);
+    filter: brightness(1.06) saturate(1.05);
+    transform: translateY(-1.5px);
+    box-shadow:
+      0 1px 1px rgba(255, 255, 255, 0.26) inset,
+      0 -1px 2px rgba(0, 0, 0, 0.22) inset,
+      0 6px 14px rgba(122, 18, 36, 0.34),
+      0 20px 40px -12px rgba(122, 18, 36, 0.56);
   }
 
   .ed-shelf-line {
@@ -452,5 +468,17 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ed-anim-bottle, .ed-anim-fade-up { animation: none; }
+}
+
+/* Mobile: a garrafa-protagonista impressiona sem monopolizar a dobra */
+@media (max-width: 767px) {
+  figure.ed-hero-bottle {
+    width: 132px !important;
+  }
+  figure.ed-hero-bottle > img,
+  figure.ed-hero-bottle > svg {
+    width: 132px !important;
+    height: 396px !important;
+  }
 }
 

@@ -79,7 +79,7 @@ function getDrinkWindowIndicator(from: number, until: number) {
 function getDrinkWindowState(from: number, until: number) {
   const currentYear = new Date().getFullYear();
   if (currentYear < from) return { label: "Guardar", className: "bg-[#EEF2FF] text-[#36508A] border-[#D8E2FF]" };
-  if (currentYear > until) return { label: "Atenção", className: "bg-[rgba(123,30,43,0.08)] text-[#7B1E2B] border-[rgba(123,30,43,0.16)]" };
+  if (currentYear > until) return { label: "Atenção", className: "bg-[rgba(122, 18, 36,0.08)] text-[#7a1224] border-[rgba(122, 18, 36,0.16)]" };
   return { label: "Beber agora", className: "bg-[rgba(63,94,59,0.12)] text-[#2E4A2F] border-[rgba(63,94,59,0.22)]" };
 }
 

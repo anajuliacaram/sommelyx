@@ -1,5 +1,5 @@
 export const WINE_TYPE_COLORS: Record<string, string> = {
-  tinto: "#7B1E2B",
+  tinto: "#7a1224",
   branco: "#C9A84C",
   rose: "#C97B8A",
   "rosé": "#C97B8A",

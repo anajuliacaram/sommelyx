@@ -81,27 +81,22 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="sx-v2-sidebar w-[216px] border-r border-[var(--sx-b-default)] bg-[var(--sx-bg-card)]"
-        style={{
-          background: "var(--sx-bg-card)",
-          borderColor: "var(--sx-b-default)",
-          boxShadow: "none",
-        }}
+        className="sx-v2-sidebar sx-v6-sidebar w-[216px]"
       >
         <SidebarHeader className="sx-v2-sidebar-header px-0 pt-2">
           <Link
             to="/dashboard"
             onClick={closeMobileSidebar}
-            className="sx-v2-sidebar-brand mx-2.5 mt-0 flex items-center gap-2.5 rounded-[var(--sx-r-lg)] bg-[var(--sx-olive)] px-3 py-3 text-white transition-opacity hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sx-olive-10)]"
+            className="sx-v2-sidebar-brand sx-v6-sidebar-brand mx-2.5 mt-0 flex items-center gap-2.5 rounded-[18px] px-3 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(184,148,60,0.4)]"
             aria-label="Ir para o início do dashboard"
           >
-            <img src="/logo-sommelyx-mark.png" className="h-9 w-9 shrink-0 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.18)]" alt="Sommelyx" />
+            <img src="/logo-sommelyx-mark.png" className="h-10 w-10 shrink-0 object-contain drop-shadow-[0_3px_8px_rgba(26,19,14,0.18)]" alt="Sommelyx" />
 
             <div className="flex min-w-0 flex-col text-left">
-              <BrandName tone="light" className="text-[16px] font-medium leading-none tracking-[-0.01em]" />
+              <BrandName className="sx-v6-sidebar-wordmark text-[19px] font-semibold leading-none tracking-[-0.018em]" />
 
-              <span className="mt-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white/65">
-                {isCommercial ? "COMERCIAL" : "PESSOAL"}
+              <span className="sx-v6-sidebar-profile mt-1 text-[9.5px] font-semibold uppercase tracking-[0.13em]">
+                {isCommercial ? "Comercial" : "Pessoal"}
               </span>
             </div>
           </Link>
@@ -109,10 +104,10 @@ export function AppSidebar() {
           {/* CTAs */}
           <div className="sx-v2-sidebar-actions-wrap mx-2.5 my-2">
             {isCommercial ? (
-              <div className="sidebar-actions sx-v2-nav-shell flex flex-col gap-0.5 rounded-[var(--sx-r-lg)] border border-[var(--sx-b-default)] bg-[var(--sx-bg-card)] p-2">
+              <div className="sidebar-actions sx-v2-nav-shell sx-v6-actions-shell flex flex-col gap-0.5 rounded-[18px] p-2">
                 <Button
                   variant="primary"
-                  className="sidebar-action-primary sx-v2-btn-primary h-auto w-full justify-start gap-2.5 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] px-4 py-3 text-[14px] font-medium text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90"
+                  className="sidebar-action-primary sx-v2-btn-primary h-auto w-full justify-start gap-2.5 rounded-[14px] border-0 px-4 py-3 text-[14px] font-medium"
                   onClick={() => { setAddOpen(true); setAddWithScan(false); closeMobileSidebar(); }}
                 >
                   <span className="action-icon sx-v2-nav-icon flex h-7 w-7 shrink-0 items-center justify-center rounded-lg">

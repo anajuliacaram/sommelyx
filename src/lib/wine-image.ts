@@ -52,7 +52,7 @@ function getTone(style?: string | null) {
     };
   }
   return {
-    main: "#7B1E2B",
+    main: "#7a1224",
     accent: "#4A101A",
     glow: "rgba(241, 206, 211, 0.82)",
   };

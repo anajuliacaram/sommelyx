@@ -66,7 +66,7 @@ export const UserAccountMenu = React.memo(function UserAccountMenu({
 
             <div className="pr-14">
               <div className="flex items-start gap-3.5">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(123,30,43,0.14),rgba(95,111,82,0.14))] text-[14px] font-bold text-[#7B1E2B] ring-1 ring-black/5">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(122, 18, 36,0.14),rgba(95,111,82,0.14))] text-[14px] font-bold text-[#7a1224] ring-1 ring-black/5">
                   {initials}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -93,7 +93,7 @@ export const UserAccountMenu = React.memo(function UserAccountMenu({
                 className="h-11 w-full justify-start gap-2 rounded-[16px] px-4 text-[13px] font-semibold"
                 onClick={onProfile}
               >
-                <User className="h-4 w-4 text-[#7B1E2B]" />
+                <User className="h-4 w-4 text-[#7a1224]" />
                 Meu perfil
               </Button>
               <Button

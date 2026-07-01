@@ -69,7 +69,7 @@ export function RecipeModal({
                 <ul className="space-y-2">
                   {recipe.ingredients.map((ingredient, index) => (
                     <li key={`${ingredient}-${index}`} className="flex items-start gap-2 text-sm text-[var(--sx-text-body)] leading-relaxed">
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7B1E2B]/35" />
+                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7a1224]/35" />
                       <span>{ingredient}</span>
                     </li>
                   ))}

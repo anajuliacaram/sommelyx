@@ -1,5 +1,5 @@
 // Primitivas visuais do design "Editorial" (referência: design-reference/Adega_Pessoal)
-// Adaptadas ao tema claro/creme do Sommelyx, accent vinho #7B1E2B.
+// Adaptadas ao tema claro/creme do Sommelyx, accent vinho #7a1224.
 
 import { cn } from "@/lib/utils";
 import { formatMotionNumber, motionDelay, useCountUp, usePrefersReducedMotion } from "@/lib/motion";
@@ -68,7 +68,7 @@ const CHIP_TONES: Record<ChipTone, { bg: string; color: string; border: string }
   // Verde sálvia (padrão / "todos")
   default:    { bg: "rgba(95,111,82,0.14)",  color: "#5F7F52", border: "rgba(95,111,82,0.22)" },
   // Bordô suave
-  tinto:      { bg: "rgba(123,30,43,0.10)",  color: "#7B1E2B", border: "rgba(123,30,43,0.22)" },
+  tinto:      { bg: "rgba(122, 18, 36,0.10)",  color: "#7a1224", border: "rgba(122, 18, 36,0.22)" },
   // Amarelo dourado suave
   branco:     { bg: "rgba(212,175,55,0.16)", color: "#8B6914", border: "rgba(212,175,55,0.30)" },
   // Rosa suave
@@ -422,7 +422,7 @@ export function getDrinkWindowIndicatorPosition({
 export function Sparkbar({
   data,
   height = 140,
-  accent = "#7B1E2B",
+  accent = "#7a1224",
   showValues = true,
   barWidth = 10,
   activeIndex,

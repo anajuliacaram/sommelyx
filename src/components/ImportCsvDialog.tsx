@@ -1105,8 +1105,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
   };
 
   const STYLE_ACCENT: Record<string, { bar: string; dot: string; chip: string; chipText: string }> = {
-    tinto: { bar: "#7B1E2B", dot: "#7B1E2B", chip: "rgba(123,30,43,0.10)", chipText: "#7B1E2B" },
-    branco: { bar: "#C8A96A", dot: "#C8A96A", chip: "rgba(200,169,106,0.16)", chipText: "#8A6E2E" },
+    tinto: { bar: "#7a1224", dot: "#7a1224", chip: "rgba(122, 18, 36,0.10)", chipText: "#7a1224" },
+    branco: { bar: "#b8943c", dot: "#b8943c", chip: "rgba(200,169,106,0.16)", chipText: "#8A6E2E" },
     rose: { bar: "#E8A0A6", dot: "#E8A0A6", chip: "rgba(232,160,166,0.18)", chipText: "#A34C68" },
     espumante: { bar: "#6A8F6B", dot: "#6A8F6B", chip: "rgba(106,143,107,0.16)", chipText: "#3F5E40" },
     sobremesa: { bar: "#A67C52", dot: "#A67C52", chip: "rgba(166,124,82,0.16)", chipText: "#6F4F2C" },
@@ -3363,7 +3363,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       className={cn(
                         "h-7 rounded-full border px-2.5 text-[11px] font-semibold transition-all duration-150",
                         emptyFieldFilters.includes(field.key)
-                          ? "border-[#C8A96A]/32 bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
+                          ? "border-[#b8943c]/32 bg-[rgba(198,167,104,0.10)] text-[#7B6528]"
                           : "border-[rgba(58,51,39,0.06)] bg-transparent text-[#6B6258] hover:bg-[rgba(255,251,244,0.42)] hover:text-[#4A4338]",
                       )}
                     >
@@ -3422,7 +3422,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                 {false && selectedRows.length > 0 ? (
                 <AiToolbarSurface className="hidden">
                     <span className="inline-flex items-center gap-2 font-semibold">
-                      <span className="h-2 w-2 rounded-full bg-[#7B1E2B]" />
+                      <span className="h-2 w-2 rounded-full bg-[#7a1224]" />
                       {selectedRows.length} linha(s) selecionada(s)
                     </span>
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -3438,7 +3438,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
 
                 <AiToolbarSurface className="hidden">
                   <Select value={bulkTargetField} onValueChange={(value) => setBulkTargetField(value as BulkTargetField)}>
-                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7a1224]/10">
                       <SelectValue placeholder="Campo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3448,7 +3448,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </SelectContent>
                   </Select>
                   <Input
-                    className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] shadow-none transition-all duration-150 focus:border-[#7B1E2B]/20 focus-visible:ring-[#7B1E2B]/10"
+                    className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] shadow-none transition-all duration-150 focus:border-[#7a1224]/20 focus-visible:ring-[#7a1224]/10"
                     value={bulkValue}
                     onChange={(event) => setBulkValue(event.target.value)}
                     placeholder={`Valor para ${bulkTarget.label.toLowerCase()}`}
@@ -3456,7 +3456,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     disabled={!editMode || step === "importing" || step === "done"}
                   />
                   <Select value={bulkMode} onValueChange={(value) => setBulkMode(value as BulkMode)}>
-                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7a1224]/10">
                       <SelectValue placeholder="Modo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3465,7 +3465,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     </SelectContent>
                   </Select>
                   <Select value={bulkScope} onValueChange={(value) => setBulkScope(value as BulkScope)}>
-                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7B1E2B]/10">
+                    <SelectTrigger className="h-8 rounded-[12px] border-[rgba(58,51,39,0.08)] bg-transparent text-[12px] focus:ring-[#7a1224]/10">
                       <SelectValue placeholder="Escopo" />
                     </SelectTrigger>
                     <SelectContent>
@@ -3489,7 +3489,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                   <div className="premium-card-surface shrink-0 rounded-[16px] border border-[rgba(95,111,82,0.10)] px-3 py-2 text-[12px] text-[#5F5F5F] shadow-[inset_0_1px_0_rgba(255,255,255,0.64),0_14px_26px_-28px_rgba(58,51,39,0.22)]">
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <span className="font-medium">{enriching ? "Corrigindo automaticamente..." : "Processando importação"}</span>
-                      {processingTotal > 0 ? <span className="font-semibold text-[#7B1E2B]">{processingRows}/{processingTotal}</span> : null}
+                      {processingTotal > 0 ? <span className="font-semibold text-[#7a1224]">{processingRows}/{processingTotal}</span> : null}
                     </div>
                     {processingTotal > 0 ? (
                       <div className="h-2 overflow-hidden rounded-full bg-black/5">
@@ -3565,7 +3565,7 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                     <div>
                       <div className="relative mx-auto mb-4 h-10 w-10">
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="h-5 w-5 animate-spin text-[#7B1E2B]" />
+                          <Loader2 className="h-5 w-5 animate-spin text-[#7a1224]" />
                         </div>
                       </div>
                       <p className="text-[14px] font-semibold text-[#1A1713]">
@@ -3584,8 +3584,8 @@ export function ImportCsvDialog({ open, onOpenChange }: ImportCsvDialogProps) {
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleDrop}
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(123,30,43,0.08)]">
-                        <Upload className="h-4.5 w-4.5 text-[#7B1E2B]" />
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-[rgba(122, 18, 36,0.08)]">
+                        <Upload className="h-4.5 w-4.5 text-[#7a1224]" />
                       </div>
                       <div>
                         <p className="text-[14px] font-semibold text-[#1A1713]">Selecionar arquivo</p>

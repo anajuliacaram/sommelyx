@@ -271,7 +271,7 @@ const metricToneClasses = {
   success: "border-emerald-100 bg-emerald-50/90 text-emerald-700",
   warning: "border-amber-100 bg-amber-50/90 text-amber-700",
   danger: "border-rose-100 bg-rose-50/90 text-rose-700",
-  accent: "border-[#E9D3D8] bg-[#F4E7EA] text-[#7B1E2B]",
+  accent: "border-[#E9D3D8] bg-[#F4E7EA] text-[#7a1224]",
 } as const;
 
 export function AiMetricPill({

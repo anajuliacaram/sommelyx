@@ -53,7 +53,7 @@ const CARD_STYLE: React.CSSProperties = {
 const CTA_STYLE: React.CSSProperties = {
   background: "linear-gradient(135deg, #6b1f1f, #8b2c2c)",
   color: "white",
-  boxShadow: "0 12px 28px rgba(123,30,43,0.24)",
+  boxShadow: "0 12px 28px rgba(122, 18, 36,0.24)",
 };
 
 export default function SelectProfile() {
@@ -350,8 +350,8 @@ export default function SelectProfile() {
                 onClick={handleFinish}
                 variant="primary"
                 className={cn(
-                  "h-12 rounded-[12px] px-10 text-[13px] font-semibold shadow-[0_12px_24px_-16px_rgba(123,30,43,0.3)]",
-                  "bg-[linear-gradient(135deg,#7b1e2b_0%,#9f2c3a_100%)] text-white transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:brightness-105 active:scale-[0.98]",
+                  "h-12 rounded-[12px] px-10 text-[13px] font-semibold shadow-[0_12px_24px_-16px_rgba(122, 18, 36,0.3)]",
+                  "bg-[linear-gradient(135deg,#7a1224_0%,#9f2c3a_100%)] text-white transition-all duration-180 ease-[cubic-bezier(0.4,0,0.2,1)] hover:-translate-y-px hover:brightness-105 active:scale-[0.98]",
                 )}
               >
                 <Sparkles className="mr-2 h-4 w-4" />

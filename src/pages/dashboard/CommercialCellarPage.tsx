@@ -67,8 +67,8 @@ const statusColor = {
 
 function getWineTone(style?: string | null) {
   const s = (style || "").toLowerCase();
-  if (s.includes("tinto")) return "bg-[#7B1E2B]";
-  if (s.includes("branco")) return "bg-[#C9B469]";
+  if (s.includes("tinto")) return "bg-[#7a1224]";
+  if (s.includes("branco")) return "bg-[#b8943c]";
   if (s.includes("rose") || s.includes("rosé")) return "bg-[#D89BA0]";
   if (s.includes("espum")) return "bg-[#B8C49A]";
   return "bg-[#C5BAAA]";
@@ -80,8 +80,8 @@ function getStyleBadgeClass(style?: string | null, compact = false) {
     ? "min-h-[24px] rounded-full px-2.5 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]"
     : "min-h-[24px] rounded-full px-3 text-[9px] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_1px_2px_rgba(0,0,0,0.03)]";
 
-  if (s.includes("tinto")) return `${sizing} wine-type-chip type-chip tinto border-[rgba(123,30,43,0.12)] group-hover:brightness-[1.03]`;
-  if (s.includes("branco")) return `${sizing} wine-type-chip type-chip branco border-[rgba(201,180,105,0.18)] group-hover:brightness-[1.03]`;
+  if (s.includes("tinto")) return `${sizing} wine-type-chip type-chip tinto border-[rgba(122, 18, 36,0.12)] group-hover:brightness-[1.03]`;
+  if (s.includes("branco")) return `${sizing} wine-type-chip type-chip branco border-[rgba(184, 148, 60,0.18)] group-hover:brightness-[1.03]`;
   if (s.includes("rose") || s.includes("rosé")) return `${sizing} wine-type-chip type-chip rose border-[rgba(216,155,160,0.18)] group-hover:brightness-[1.03]`;
   if (s.includes("espum")) return `${sizing} wine-type-chip type-chip espumante border-[rgba(184,196,154,0.20)] group-hover:brightness-[1.03]`;
   return `${sizing} bg-[rgba(255,255,255,0.82)] text-[#564d5c] border-white/40 group-hover:brightness-[1.02]`;
@@ -90,8 +90,8 @@ function getStyleBadgeClass(style?: string | null, compact = false) {
 function getCardTypeTagClass(style?: string | null) {
   const s = (style || "").toLowerCase();
   const base = "wine-type-chip type-chip inline-flex min-h-[24px] items-center justify-center rounded-full border px-3 py-1.5 text-[11px] font-medium leading-none tracking-[0.06em] transition-[filter,opacity] duration-200 ease-out group-hover:brightness-[1.02]";
-  if (s.includes("tinto")) return `${base} tinto border-[rgba(123,30,43,0.12)]`;
-  if (s.includes("branco")) return `${base} branco border-[rgba(201,180,105,0.18)]`;
+  if (s.includes("tinto")) return `${base} tinto border-[rgba(122, 18, 36,0.12)]`;
+  if (s.includes("branco")) return `${base} branco border-[rgba(184, 148, 60,0.18)]`;
   if (s.includes("espum")) return `${base} espumante border-[rgba(184,196,154,0.20)]`;
   if (s.includes("rose") || s.includes("rosé")) return `${base} rose border-[rgba(216,155,160,0.18)]`;
   return `${base} bg-neutral-100 text-neutral-600 border-neutral-200`;
@@ -278,7 +278,7 @@ const drinkWindowOptions = [
 ];
 
 const wineTypePalette: Record<string, { dot: string; text: string; label: string }> = {
-  tinto: { dot: "#7B1E2B", text: "#7B1E2B", label: "Tinto" },
+  tinto: { dot: "#7a1224", text: "#7a1224", label: "Tinto" },
   rose: { dot: "#D8A7A7", text: "#A96F7A", label: "Rosé" },
   branco: { dot: "#C8A95B", text: "#A68B34", label: "Branco" },
   espumante: { dot: "#8FAF8B", text: "#6F8F6B", label: "Espumante" },
@@ -365,7 +365,7 @@ function EditorialLabelPreview({
       ) : (
         <div className={`flex h-full items-center justify-center ${styleTone}`}>
           <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/65 px-4 py-3 text-center shadow-[0_10px_24px_-20px_rgba(0,0,0,0.18)] backdrop-blur-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#7B1E2B]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-[#7a1224]">
               <Wine className="h-4 w-4" />
             </div>
             <div className="space-y-0.5">
@@ -899,7 +899,7 @@ export default function CellarPage() {
                   onClick={() => setViewMode("grid")}
                   className={cn(
                     "h-8 w-8 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer",
-                    viewMode === "grid" ? "bg-[#7B1E2B] text-white hover:bg-[#7B1E2B]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
+                    viewMode === "grid" ? "bg-[#7a1224] text-white hover:bg-[#7a1224]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
                   )}
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
@@ -912,7 +912,7 @@ export default function CellarPage() {
                   onClick={() => setViewMode("list")}
                   className={cn(
                     "h-8 w-8 rounded-full transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.98] cursor-pointer",
-                    viewMode === "list" ? "bg-[#7B1E2B] text-white hover:bg-[#7B1E2B]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
+                    viewMode === "list" ? "bg-[#7a1224] text-white hover:bg-[#7a1224]" : "text-[#7B6F76] hover:text-[#1A1A1A]",
                   )}
                 >
                   <List className="h-3.5 w-3.5" />
@@ -940,7 +940,7 @@ export default function CellarPage() {
                 className={cn(
                   "h-9 rounded-full border px-3 text-[11px] font-medium transition-[transform,background-color,color,filter] duration-200 ease-out active:scale-[0.98]",
                   lowStock
-                    ? "border-[#7B1E2B]/20 bg-[#7B1E2B]/8 text-[#7B1E2B] hover:bg-[#7B1E2B]/10"
+                    ? "border-[#7a1224]/20 bg-[#7a1224]/8 text-[#7a1224] hover:bg-[#7a1224]/10"
                     : "border-[var(--sx-border-default)] bg-white/78 text-[#6F6A60] hover:bg-white hover:text-[#1A1A1A]",
                 )}
               >
@@ -979,7 +979,7 @@ export default function CellarPage() {
                 <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-40 transition-opacity duration-150 hover:opacity-100" onClick={chip.onRemove} />
               </Badge>
             ))}
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="ml-1 h-7 text-[10px] font-medium text-[#7B1E2B] hover:bg-[#7B1E2B]/8">
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="ml-1 h-7 text-[10px] font-medium text-[#7a1224] hover:bg-[#7a1224]/8">
               Limpar tudo
             </Button>
           </div>

@@ -9,8 +9,8 @@ import { toast } from "sonner";
 import { Trash2 } from "@/icons/lucide";
 
 const STYLES = [
-  { value: "Tinto", color: "#7B1E2B" },
-  { value: "Branco", color: "#C9B469" },
+  { value: "Tinto", color: "#7a1224" },
+  { value: "Branco", color: "#b8943c" },
   { value: "Rosé", color: "#D89BA0" },
   { value: "Espumante", color: "#B8C49A" },
   { value: "Sobremesa", color: "#B48C3A" },
@@ -216,7 +216,7 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
             variant="ghost"
             onClick={handleDelete}
             disabled={del.isPending}
-            className="text-[12.5px] text-[#7B1E2B] hover:bg-[rgba(123,30,43,0.08)]"
+            className="text-[12.5px] text-[#7a1224] hover:bg-[rgba(122, 18, 36,0.08)]"
           >
             <Trash2 className="mr-1.5 h-4 w-4" /> Remover
           </Button>
@@ -228,7 +228,7 @@ export function EditConsumptionDialog({ entry, open, onOpenChange }: Props) {
               type="button"
               onClick={handleSave}
               disabled={update.isPending}
-              style={{ background: "#7B1E2B", color: "#fff" }}
+              style={{ background: "#7a1224", color: "#fff" }}
             >
               {update.isPending ? "Salvando…" : "Salvar"}
             </Button>

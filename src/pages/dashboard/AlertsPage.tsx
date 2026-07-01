@@ -200,9 +200,9 @@ export default function AlertsPage() {
       {/* ── Ações inteligentes (CTA premium) ── */}
       {visibleAlerts.length > 0 && (
         <div className="space-y-3 pt-1">
-          <div className="flex items-center gap-2 px-1">
-            <Sparkles className="h-3.5 w-3.5 text-[#7B1E2B]" />
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#7B1E2B]">
+          <div className="alerts-smart-heading flex items-center gap-2 px-1">
+            <Sparkles className="h-3.5 w-3.5 text-[#7a1224]" />
+            <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#7a1224]">
               Ações inteligentes
             </h2>
           </div>
@@ -210,23 +210,24 @@ export default function AlertsPage() {
           <button
             type="button"
             onClick={scrollToDrinkNow}
-            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:scale-[1.015] active:scale-[0.99]"
+            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
             style={{
               height: 64,
-              background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)",
-              boxShadow: "0 10px 25px rgba(123,30,43,0.18), inset 0 1px 0 rgba(255,255,255,0.12)",
+              background: "linear-gradient(180deg, #8d1d36 0%, #7b1730 48%, #5b1023 100%)",
+              boxShadow:
+                "0 1px 1px rgba(255,255,255,0.22) inset, 0 -1px 2px rgba(0,0,0,0.2) inset, 0 3px 8px rgba(122,18,36,0.3), 0 12px 30px -10px rgba(122,18,36,0.5)",
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/0 to-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <div className="relative flex h-full items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/12 backdrop-blur-sm ring-1 ring-white/15">
-                <GlassWater className="h-5 w-5 text-white" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/12 backdrop-blur-sm ring-1 ring-white/20">
+                <GlassWater className="h-5 w-5 text-[#fdf3ee]" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[16px] font-semibold leading-none text-white">Beber agora</span>
+                  <span className="text-[15px] font-medium leading-none text-[#fdf3ee]">Beber agora</span>
                   {cellarAnalysis.drinkNowCount > 0 && (
-                    <span className="rounded-full bg-[#C9B469] px-1.5 py-0.5 text-[10px] font-bold text-[#1A1713] shadow-[0_0_6px_rgba(201,180,105,0.45)]">
+                    <span className="rounded-full bg-white/16 px-2 py-0.5 text-[10px] font-semibold text-[#fdf3ee] ring-1 ring-white/25">
                       {cellarAnalysis.drinkNowCount}
                     </span>
                   )}
@@ -244,12 +245,12 @@ export default function AlertsPage() {
                       counts[fam] = (counts[fam] || 0) + 1;
                     });
                     const colorMap: Record<string, string> = {
-                      tinto: "#7B1E2B",
+                      tinto: "#7a1224",
                       branco: "#EFE3B0",
                       rose: "#E8A4B0",
                       espumante: "#F4E27A",
                       fort: "#5A1420",
-                      outros: "#C9B469",
+                      outros: "#b8943c",
                     };
                     const labelMap: Record<string, string> = {
                       tinto: "Tinto", branco: "Branco", rose: "Rosé", espumante: "Espumante", fort: "Fortificado", outros: "Outros",
@@ -273,26 +274,35 @@ export default function AlertsPage() {
           <button
             type="button"
             onClick={() => setAnalysisOpen(true)}
-            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
             style={{
               height: 56,
-              background: "linear-gradient(135deg, #1B3B27 0%, #2A5A3C 60%, #102515 100%)",
-              boxShadow: "0 10px 25px rgba(18,54,31,0.22), inset 0 1px 0 rgba(255,255,255,0.10)",
-              border: "1px solid rgba(201,180,105,0.20)",
+              background: "rgba(255,252,246,0.68)",
+              border: "1px solid rgba(255,255,255,0.72)",
+              backdropFilter: "blur(20px) saturate(1.1)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.1)",
+              boxShadow:
+                "inset 0 1px 0 rgba(255,255,255,0.9), 0 2px 6px rgba(50,30,20,0.05), 0 12px 28px -18px rgba(50,30,20,0.2)",
             }}
           >
-            <div className="absolute -right-8 top-0 h-20 w-20 rounded-full bg-[#C9B469]/10 blur-2xl pointer-events-none" />
             <div className="relative flex h-full items-center gap-3.5">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15 backdrop-blur-sm">
-                <BarChart3 className="h-4 w-4 text-[#C9B469]" />
+              <div
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: "linear-gradient(160deg, #fff8ec, #f4e9d6)",
+                  border: "1px solid rgba(61,79,53,0.24)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85)",
+                }}
+              >
+                <BarChart3 className="h-4 w-4 text-[#3d4f35]" />
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-[14px] font-semibold leading-none text-white">Analisar com Sommelyx</div>
-                <p className="mt-1 text-[11px] font-medium leading-none text-white/70">
+                <div className="text-[14px] font-medium leading-none text-[#1d150f]">Analisar com Sommelyx</div>
+                <p className="mt-1 text-[11px] font-normal leading-none text-[rgba(29,21,15,0.55)]">
                   Entenda valor, giro e consumo
                 </p>
               </div>
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#C9B469] transition-transform duration-300 group-hover:rotate-12" />
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#8d673a] transition-transform duration-300 group-hover:rotate-12" />
             </div>
           </button>
         </div>
@@ -441,7 +451,7 @@ export default function AlertsPage() {
                                       </div>
                                       <h4
                                         className="font-serif text-[19px] font-bold leading-none tracking-[-0.01em] text-foreground"
-                                        style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                                        style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                                       >
                                         Análise Sommelyx
                                       </h4>
@@ -475,24 +485,28 @@ export default function AlertsPage() {
 
       {/* ── Modal: Análise Sommelyx geral da adega ── */}
       <Dialog open={analysisOpen} onOpenChange={setAnalysisOpen}>
-        <DialogContent className="max-w-lg p-0 overflow-hidden bg-white border-[rgba(123,30,43,0.15)]">
-          <div
-            className="px-6 py-5"
-            style={{ background: "linear-gradient(135deg, #7B1E2B 0%, #A12C3A 100%)" }}
-          >
+        <DialogContent className="max-w-lg p-0 overflow-hidden border-[rgba(255,255,255,0.72)] bg-[linear-gradient(180deg,rgba(255,253,248,0.97)_0%,rgba(251,245,236,0.98)_100%)]">
+          <div className="px-6 pb-4 pt-6" style={{ borderBottom: "1px solid rgba(29,21,15,0.08)" }}>
             <DialogHeader className="space-y-2">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-                  <Sparkles className="h-4 w-4 text-white" />
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-full"
+                  style={{
+                    background: "linear-gradient(160deg, #fff8ec, #f6ecda)",
+                    border: "1px solid rgba(184,148,60,0.3)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 2px 6px -2px rgba(45,27,18,0.18)",
+                  }}
+                >
+                  <Sparkles className="h-4.5 w-4.5 text-[#7a1224]" />
                 </div>
                 <DialogTitle
-                  className="text-[22px] font-bold leading-none text-white"
-                  style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
+                  className="text-[26px] font-medium leading-none text-[#1d150f]"
+                  style={{ fontFamily: "'Fraunces', Georgia, serif" }}
                 >
                   Análise Sommelyx
                 </DialogTitle>
               </div>
-              <p className="text-[12px] font-medium leading-snug text-white/80">
+              <p className="text-[12.5px] font-normal leading-snug text-[rgba(29,21,15,0.55)]">
                 Diagnóstico técnico completo da sua adega
               </p>
             </DialogHeader>
@@ -500,8 +514,8 @@ export default function AlertsPage() {
 
           <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
             <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-xl border border-[rgba(123,30,43,0.12)] bg-[rgba(123,30,43,0.04)] px-3 py-2.5">
-                <div className="text-[18px] font-bold leading-none text-[#7B1E2B] tabular-nums">
+              <div className="rounded-xl border border-[rgba(122, 18, 36,0.12)] bg-[rgba(122, 18, 36,0.04)] px-3 py-2.5">
+                <div className="text-[18px] font-bold leading-none text-[#7a1224] tabular-nums">
                   {cellarAnalysis.totalBottles}
                 </div>
                 <div className="mt-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[rgba(58,51,39,0.55)]">

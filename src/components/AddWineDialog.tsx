@@ -781,7 +781,7 @@ export function AddWineDialog({ open, onOpenChange, initialScan = false, initial
           <AiModalShell>
           <AiModalHeaderBar>
             <AiModalHeader
-              icon={<Wine className="h-5 w-5 text-[#7B1E2B]" />}
+              icon={<Wine className="h-5 w-5 text-[#7a1224]" />}
               title={isCommercial ? "Cadastrar vinho" : "Adicionar vinho"}
               tone="wine"
             />

@@ -1032,7 +1032,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   >
                     <div className="space-y-2.5">
                       {highlightTag ? (
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7B1E2B]/60">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#7a1224]/60">
                           {highlightTag}
                         </p>
                       ) : null}
@@ -1943,7 +1943,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                   <ul className="space-y-2">
                     {recipeModal.recipe.ingredients.map((ing, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-[var(--sx-text-body)] leading-relaxed">
-                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7B1E2B]/35" />
+                        <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#7a1224]/35" />
                         {ing}
                       </li>
                     ))}
@@ -1964,7 +1964,7 @@ export function DishToWineDialog({ open, onOpenChange, initialWineId, initialWin
                 </div>
                 <div className="rounded-[14px] border border-[rgba(58,51,39,0.06)] bg-transparent p-3">
                   <div className="mb-1 flex items-center gap-1.5">
-                    <Sparkles className="h-3 w-3 text-[#7B1E2B]" />
+                    <Sparkles className="h-3 w-3 text-[#7a1224]" />
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--sx-text-muted)]">Por que harmoniza</span>
                   </div>
                   <p className="text-sm text-[var(--sx-text-body)] leading-relaxed">{recipeModal.recipe.wine_reason}</p>

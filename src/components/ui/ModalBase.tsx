@@ -42,7 +42,7 @@ export function ModalBase({
         >
           <div className="shrink-0 px-5 pb-4 pt-5 sm:px-6 sm:pb-5 sm:pt-6">
             <div className="flex items-start gap-4">
-            <div className="modal-header-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20 text-[#7B1E2B]">
+            <div className="modal-header-icon flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7a1224]/20 to-[#b8943c]/20 text-[#7a1224]">
               {icon}
             </div>
             <div className="modal-header-text min-w-0 flex-1">

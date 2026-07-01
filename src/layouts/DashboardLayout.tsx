@@ -75,15 +75,15 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="sx-v2-shell-main flex-1 flex h-full min-w-0 flex-col overflow-hidden">
           <header
-            className="mobile-header sx-mobile-header sx-v2-shell-header relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden border-b border-[var(--sx-b-default)] bg-[rgba(242,239,233,0.85)] px-4 backdrop-blur-[8px] md:px-6"
+            className="mobile-header sx-mobile-header sx-v2-shell-header sx-v6-topbar relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden px-4 md:px-6"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "mobile-header-menu group relative h-9.5 w-9.5 rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] p-0 text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-[0.96]",
-                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
+                    "mobile-header-menu sx-v6-topbar-btn group relative h-9.5 w-9.5 rounded-full p-0",
+                    "[&>svg]:h-4 [&>svg]:w-4",
                   )}
                 />
               )}
@@ -92,11 +92,11 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "mobile-header-menu h-9.5 min-w-[84px] gap-[7px] rounded-[var(--sx-r-md)] bg-[var(--sx-bordeaux)] px-3.5 text-[13px] font-medium text-[var(--sx-t-white)] shadow-[0_4px_16px_rgba(139,26,59,0.24)] transition-all duration-150 hover:bg-[var(--sx-bordeaux)] hover:opacity-90 active:scale-95",
-                    "[&>svg]:h-4 [&>svg]:w-4 [&>svg]:text-white",
+                    "mobile-header-menu sx-v6-topbar-btn h-9.5 min-w-[84px] gap-[7px] rounded-full px-3.5 text-[13px] font-medium",
+                    "[&>svg]:h-4 [&>svg]:w-4",
                   )}
                 >
-                  <span className="text-[13px] font-medium leading-none text-white">Menu</span>
+                  <span className="text-[13px] font-medium leading-none">Menu</span>
                 </SidebarTrigger>
               )}
 
@@ -123,8 +123,8 @@ export default function DashboardLayout() {
                   variant="primary"
                   size="icon"
                   className={cn(
-                    "header-avatar h-9 w-9 rounded-[var(--sx-r-md)] border-0 bg-[var(--sx-bordeaux)] p-0 text-[13px] font-semibold text-[var(--sx-t-white)] shadow-none hover:bg-[var(--sx-bordeaux)] hover:opacity-90",
-                    accountOpen && "ring-2 ring-[rgba(139,26,59,0.18)]",
+                    "header-avatar sx-v6-avatar h-9 w-9 rounded-full border-0 p-0 text-[13px] font-semibold",
+                    accountOpen && "ring-2 ring-[rgba(184,148,60,0.35)]",
                   )}
                   onClick={handleOpenAccount}
                   aria-haspopup="dialog"

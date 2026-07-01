@@ -248,7 +248,7 @@ function WineCard({
           disabled
           className={cn(
             "pointer-events-none",
-            state === "now" && "[&_[data-radix-slider-range]]:from-[#7B1E2B] [&_[data-radix-slider-range]]:to-[#5A1420]",
+            state === "now" && "[&_[data-radix-slider-range]]:from-[#7a1224] [&_[data-radix-slider-range]]:to-[#5A1420]",
             state === "soon" && "[&_[data-radix-slider-range]]:from-[#B48C3A] [&_[data-radix-slider-range]]:to-[#D7B76E]",
             state === "hold" && "[&_[data-radix-slider-range]]:from-[#6F7F5B] [&_[data-radix-slider-range]]:to-[#94A38B]",
             state === "past" && "[&_[data-radix-slider-range]]:from-[#7A6A52] [&_[data-radix-slider-range]]:to-[#A6957A]",
@@ -285,13 +285,13 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
   return (
     <section className="space-y-3">
       <motion.div
-        className="motion-card-hover relative min-h-[122px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#1B3B27] to-[#102515] p-3.5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)] sm:p-5"
+        className="motion-card-hover relative min-h-[122px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#214A31] via-[#3d4f35] to-[#2a3a26] p-3.5 text-white shadow-[0_14px_32px_-22px_rgba(18,54,31,0.6)] sm:p-5"
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="pointer-events-none absolute -right-10 top-0 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[#C8A96A]/10 blur-2xl" />
+        <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[#b8943c]/10 blur-2xl" />
 
         <div className="relative flex items-start gap-3 md:items-center">
           <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/12 text-[#EAD9A0] ring-1 ring-white/10">
@@ -321,7 +321,7 @@ export function DailyInsight({ wines, onOpenWine, onViewRecs }: DailyInsightProp
       {hasSuggestions && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#7B1E2B]" />
+            <Sparkles className="h-4 w-4 text-[#7a1224]" />
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#5F5F5F]">SUGERIDOS PARA HOJE</p>
           </div>
 

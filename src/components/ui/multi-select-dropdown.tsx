@@ -79,13 +79,13 @@ export function MultiSelectDropdown({
                     className={cn(
                         "premium-chip-surface h-9 rounded-full border px-3.5 text-[12.5px] font-medium flex items-center gap-1.5 transition-all duration-200 ease-out hover:-translate-y-px active:scale-[0.98]",
                         hasSelection
-                            ? "premium-chip-surface--active text-[#7B1E2B] hover:bg-[rgba(123,30,43,0.10)]"
+                            ? "premium-chip-surface--active text-[#7a1224] hover:bg-[rgba(122, 18, 36,0.10)]"
                             : "text-[#3A3327] hover:bg-black/[0.03] hover:border-[rgba(95,111,82,0.18)]"
                     )}
                 >
                     <span className="truncate max-w-[120px]">{triggerLabel}</span>
                     {hasSelection && selected.length > 1 && (
-                        <span className="ml-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#7B1E2B] px-1 text-[9px] font-bold text-white">
+                        <span className="ml-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-[#7a1224] px-1 text-[9px] font-bold text-white">
                             {selected.length}
                         </span>
                     )}

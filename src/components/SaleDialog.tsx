@@ -160,8 +160,8 @@ export function SaleDialog({ open, onOpenChange }: SaleDialogProps) {
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7B1E2B]/20 to-[#C8A96A]/20">
-              <ShoppingCart className="h-5 w-5 text-[#7B1E2B]" />
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7a1224]/20 to-[#b8943c]/20">
+              <ShoppingCart className="h-5 w-5 text-[#7a1224]" />
             </div>
             <div className="min-w-0 flex-1">
               <SheetTitle>Registrar venda</SheetTitle>

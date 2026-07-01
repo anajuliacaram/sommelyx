@@ -193,8 +193,6 @@ export default function SettingsPage() {
             { type: "commercial" as const, icon: Building2, title: "Operação Comercial", desc: "Para bares, restaurantes e lojas." },
           ]).map((opt) => {
             const isActive = profileType === opt.type;
-            const isLight = opt.type === "personal";
-            const txt = isLight ? "#2B2B2B" : "#F8F6F3";
 
             return (
               <button
@@ -202,46 +200,39 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => handleProfileSwitch(opt.type)}
                 className={cn(
-                  "relative rounded-2xl overflow-hidden text-left transition-all duration-300 flex flex-col items-start justify-start p-5",
-                  "hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-                  isLight
-                    ? "bg-[#F8F6F3] shadow-[0_20px_60px_-40px_rgba(44,20,31,0.35)] ring-1 ring-black/[0.06]"
-                    : "bg-[linear-gradient(180deg,#2B2B2B_0%,#1F1C20_55%,#171518_100%)] shadow-[0_20px_60px_-40px_rgba(15,15,20,0.60)] ring-1 ring-white/[0.08]",
-                  isActive && (isLight
-                    ? "ring-2 ring-primary/30 shadow-[0_24px_70px_-40px_rgba(44,20,31,0.45)]"
-                    : "ring-2 ring-[#C6A768]/40 shadow-[0_24px_70px_-40px_rgba(15,15,20,0.70)]"),
+                  "relative flex flex-col items-start justify-start overflow-hidden rounded-2xl p-5 text-left transition-all duration-300",
+                  "hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(184,148,60,0.4)]",
                 )}
+                style={
+                  isActive
+                    ? {
+                        background: "rgba(122,18,36,0.06)",
+                        border: "1px solid rgba(122,18,36,0.22)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.6), 0 12px 28px -18px rgba(122,18,36,0.3)",
+                      }
+                    : {
+                        background: "rgba(255,253,248,0.8)",
+                        border: "1px solid rgba(29,21,15,0.1)",
+                        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(45,27,18,0.04)",
+                      }
+                }
               >
-                {/* Radial overlays */}
-                {isLight ? (
-                  <>
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.10),transparent_55%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_100%_35%,rgba(198,167,104,0.10),transparent_55%)]" />
-                  </>
-                ) : (
-                  <>
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(110,30,42,0.35),transparent_60%)]" />
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_82%_18%,rgba(198,167,104,0.18),transparent_55%)]" />
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-[linear-gradient(90deg,transparent,rgba(198,167,104,0.65),transparent)]" />
-                  </>
-                )}
-
-                <div className="relative flex items-center gap-3 w-full">
+                <div className="relative flex w-full items-center gap-3">
                   <div
-                    className={cn(
-                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                      isLight
-                        ? "bg-[#6E1E2A]/8 ring-1 ring-[#6E1E2A]/12"
-                        : "bg-white/10 ring-1 ring-white/10",
-                    )}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      background: "linear-gradient(160deg, #fff8ec, #f4e9d6)",
+                      border: "1px solid rgba(184,148,60,0.3)",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.85)",
+                    }}
                   >
-                    <opt.icon className={cn("h-4 w-4", isLight ? "text-[#6E1E2A]/70" : "text-[#C6A768]/80")} />
+                    <opt.icon className="h-4 w-4 text-[#7a1224]" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-bold leading-snug tracking-[-0.015em] truncate" style={{ color: txt }}>
+                    <p className={cn("truncate text-[14px] font-medium leading-snug tracking-[-0.015em]", isActive ? "text-[#7a1224]" : "text-[#1d150f]")}>
                       {opt.title}
                     </p>
-                    <p className="mt-0.5 text-[12px] leading-snug" style={{ color: isLight ? "rgba(43,43,43,0.7)" : "rgba(248,246,243,0.7)" }}>
+                    <p className="mt-0.5 text-[12px] leading-snug text-[rgba(29,21,15,0.55)]">
                       {opt.desc}
                     </p>
                   </div>
@@ -249,15 +240,8 @@ export default function SettingsPage() {
 
                 {isActive && (
                   <div className="relative mt-3 w-full">
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.08em]",
-                        isLight
-                          ? "text-[#6E1E2A] ring-1 ring-[#6E1E2A]/15 bg-[linear-gradient(135deg,rgba(110,30,42,0.07),rgba(198,167,104,0.14))]"
-                          : "text-[#F8F6F3] ring-1 ring-[#C6A768]/30 bg-[linear-gradient(135deg,rgba(198,167,104,0.18),rgba(110,30,42,0.15))]",
-                      )}
-                    >
-                      <Check className={cn("h-2.5 w-2.5", isLight ? "text-[#6E1E2A]/80" : "text-[#C6A768]")} strokeWidth={2.5} />
+                    <span className="inline-flex items-center gap-1 rounded-full border border-[rgba(61,79,53,0.22)] bg-[rgba(61,79,53,0.12)] px-2.5 py-1 text-[9.5px] font-semibold uppercase tracking-[0.08em] text-[#2e3d26]">
+                      <Check className="h-2.5 w-2.5 text-[#3d4f35]" strokeWidth={2.5} />
                       Ativo
                     </span>
                   </div>
@@ -273,7 +257,7 @@ export default function SettingsPage() {
         <Button
           onClick={handleSaveProfile}
           variant="primary"
-          className="h-11 w-full sm:w-auto px-8 text-[12px] font-black uppercase tracking-[0.12em] shadow-float"
+          className="h-11 w-full px-8 text-[14px] font-medium sm:w-auto"
           disabled={saving}
         >
           {saved ? <Check className="h-4 w-4 mr-1.5" /> : <Save className="h-4 w-4 mr-1.5" />}

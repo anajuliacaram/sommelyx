@@ -67,10 +67,10 @@ export function RangeSliderFilter({
         className="group relative mt-2 flex h-3 w-full touch-none select-none items-center"
       >
         <SliderPrimitive.Track className="relative h-[4px] w-full grow overflow-hidden rounded-full bg-black/5">
-          <SliderPrimitive.Range className="absolute h-full bg-[linear-gradient(90deg,rgba(123,30,43,0.92),rgba(95,111,82,0.82))]" />
+          <SliderPrimitive.Range className="absolute h-full bg-[linear-gradient(90deg,rgba(122, 18, 36,0.92),rgba(95,111,82,0.82))]" />
         </SliderPrimitive.Track>
-        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(123,30,43,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
-        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(123,30,43,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
+        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(122, 18, 36,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
+        <SliderPrimitive.Thumb className="block h-[13px] w-[13px] cursor-grab rounded-full border border-[rgba(122, 18, 36,0.26)] bg-white shadow-[0_2px_8px_rgba(20,18,16,0.10)] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(95,111,82,0.16)] active:scale-105 active:cursor-grabbing" />
       </SliderPrimitive.Root>
     </div>
   );

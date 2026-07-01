@@ -166,7 +166,7 @@ export function FallbackAnalysisNotice({
     },
     limited: {
       label: "Seleção inicial",
-      textClassName: "text-[#7b1e2b]",
+      textClassName: "text-[#7a1224]",
     },
   }[confidence];
 
@@ -228,7 +228,7 @@ export function HarmonyTag({ type, label }: { type?: string | null; label?: stri
   const text = label || (type && harmonyLabelMap[type]);
   if (!text) return null;
   return (
-    <span className="inline-flex items-center rounded-full border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#7B1E2B]">
+    <span className="inline-flex items-center rounded-full border border-[rgba(122, 18, 36,0.10)] bg-[rgba(122, 18, 36,0.07)] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-[#7a1224]">
       {text}
     </span>
   );
@@ -279,7 +279,7 @@ export function SectionHeader({ icon, label, count }: { icon?: "sparkles" | "che
   return (
     <div className="flex items-center gap-2.5 px-0 pb-1.5">
       <div className="flex h-8 w-8 items-center justify-center rounded-[12px] border border-[rgba(95,111,82,0.10)] bg-[linear-gradient(180deg,rgba(255,255,255,0.88)_0%,rgba(249,241,242,0.82)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.72),0_12px_24px_-24px_rgba(122,20,30,0.18)]">
-        <Icon className="h-4.5 w-4.5 text-[#7B1E2B]" />
+        <Icon className="h-4.5 w-4.5 text-[#7a1224]" />
       </div>
       <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6B6B6B]">
         {label}
@@ -374,7 +374,7 @@ export function RecipeButton({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       variant="ghost"
-      className="recipe-button min-h-9 h-auto rounded-[12px] border border-[rgba(123,30,43,0.10)] bg-[rgba(123,30,43,0.07)] px-3 py-2 text-[#7B1E2B] shadow-none transition-all duration-200 hover:-translate-y-px hover:bg-[rgba(123,30,43,0.10)] hover:text-[#5A1528]"
+      className="recipe-button min-h-9 h-auto rounded-[12px] border border-[rgba(122, 18, 36,0.10)] bg-[rgba(122, 18, 36,0.07)] px-3 py-2 text-[#7a1224] shadow-none transition-all duration-200 hover:-translate-y-px hover:bg-[rgba(122, 18, 36,0.10)] hover:text-[#5A1528]"
     >
       <BookOpen className="h-4 w-4" />
       Ver receita
@@ -438,7 +438,7 @@ export function WineSuggestionCard({
     >
       <div className="space-y-2.5 p-3 sm:p-3.5">
         <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7B1E2B] text-[12px] font-semibold text-white">
+          <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7a1224] text-[12px] font-semibold text-white">
             {index + 1}
           </span>
           <div className="min-w-0">
@@ -497,7 +497,7 @@ export function PairingSheetHero({
           boxShadow: "none",
         }}
       >
-        <Icon className={cn("text-[#7B1E2B]", compact ? "h-5.5 w-5.5" : "h-6 w-6")} strokeWidth={1.75} />
+        <Icon className={cn("text-[#7a1224]", compact ? "h-5.5 w-5.5" : "h-6 w-6")} strokeWidth={1.75} />
       </div>
       <div className={cn("min-w-0", compact ? "pt-0.5" : "pt-1")}>
         <h2
@@ -505,7 +505,7 @@ export function PairingSheetHero({
             "font-semibold tracking-[-0.02em] leading-[1.1] text-[#1A1713]",
             compact ? "text-[22px]" : "text-[24px]",
           )}
-          style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 600 }}
+          style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600 }}
         >
           {title}
         </h2>
@@ -544,7 +544,7 @@ export function PremiumChoiceCard({
   accent?: "wine" | "gold";
   index?: number;
 }) {
-  const accentColor = accent === "gold" ? "#B7791F" : "#7B1E2B";
+  const accentColor = accent === "gold" ? "#B7791F" : "#7a1224";
   return (
     <motion.button
       type="button"
@@ -566,8 +566,8 @@ export function PremiumChoiceCard({
         <div
           className="harmonizar-option-icon flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-[10px] transition-all duration-200 group-hover:scale-[1.03]"
           style={{
-            background: selected ? `${accentColor}14` : "rgba(123,30,43,0.05)",
-            border: `1px solid ${selected ? `${accentColor}24` : "rgba(123,30,43,0.06)"}`,
+            background: selected ? `${accentColor}14` : "rgba(122, 18, 36,0.05)",
+            border: `1px solid ${selected ? `${accentColor}24` : "rgba(122, 18, 36,0.06)"}`,
           }}
         >
           <IconCmp className="h-[18px] w-[18px]" strokeWidth={1.8} />

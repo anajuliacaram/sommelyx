@@ -63,6 +63,7 @@ export function EditorialHero({
             size={isCompact ? "lg" : "xl"}
             withSpotlight
             priority
+            className="ed-hero-bottle"
           />
         </div>
 

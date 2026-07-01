@@ -1,8 +1,8 @@
 export type SommelyxStyle = "tinto" | "branco" | "rosé" | "espumante" | "sobremesa";
 
 export const styleColor: Record<SommelyxStyle, string> = {
-  tinto: "#7B1E2B",
-  branco: "#C9B469",
+  tinto: "#7a1224",
+  branco: "#b8943c",
   rosé: "#D89BA0",
   espumante: "#B8C49A",
   sobremesa: "#B4793F",
