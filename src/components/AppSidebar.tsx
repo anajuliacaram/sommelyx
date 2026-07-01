@@ -31,7 +31,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface MenuItem {
   title: string;
   url: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   navKey: string;
 }
 
@@ -81,7 +81,7 @@ export function AppSidebar() {
     <>
       <Sidebar
         collapsible="offcanvas"
-        className="sx-v2-sidebar sx-v6-sidebar w-[216px]"
+        className="sx-v2-sidebar sx-v6-sidebar w-[248px]"
       >
         <SidebarHeader className="sx-v2-sidebar-header px-0 pt-2">
           <Link
@@ -102,7 +102,7 @@ export function AppSidebar() {
           </Link>
 
           {/* CTAs */}
-          <div className="sx-v2-sidebar-actions-wrap mx-2.5 my-2">
+          <div className="sx-v2-sidebar-actions-wrap mx-[7px] my-1.5">
             {isCommercial ? (
               <div className="sidebar-actions sx-v2-nav-shell sx-v6-actions-shell flex flex-col gap-0.5 rounded-[18px] p-2">
                 <Button

@@ -2212,3 +2212,278 @@ body:not(.landing-page) .sidebar-action-primary {
 body:not(.landing-page) :is(.t-subtitle, .wishlist-sub, .cellar-rebuild-subtitle) {
   color: var(--sx-auth-muted) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRODUCTION DENSITY — same V6 language, application proportions.
+   Tighter shell, denser lists and tables, content-sized cards,
+   safe-area awareness for modern phones. No identity changes.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Topbar: lighter, safe-area aware (Dynamic Island, cutouts) ── */
+body:not(.landing-page) .sx-v6-topbar {
+  height: calc(56px + env(safe-area-inset-top, 0px)) !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
+}
+
+@media (min-width: 768px) {
+  body:not(.landing-page) .sx-v6-topbar {
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
+  }
+}
+
+/* Gesture-navigation and rounded-corner insets on the shell */
+body:not(.landing-page) .dashboard-shell {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* ── Sidebar: premium desktop software density ── */
+body:not(.landing-page) .sx-v2-sidebar .sx-v2-nav-row,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-action-item,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-item {
+  min-height: 34px !important;
+  padding: 5px 10px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar [data-sidebar="group-label"] {
+  margin-top: 8px !important;
+  margin-bottom: 3px !important;
+}
+
+body:not(.landing-page) .dashboard-shell [data-sidebar="sidebar"] a[aria-label="Ir para o início do dashboard"] {
+  min-height: 48px !important;
+  margin-bottom: 2px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar-actions-wrap {
+  margin: 6px 10px 4px !important;
+}
+
+/* Mobile drawer: comfortable 44px touch rows */
+@media (max-width: 767px) {
+  body:not(.landing-page) .sx-v2-mobile-drawer .sx-v2-nav-row,
+  body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-item,
+  body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-primary,
+  body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-item,
+  body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-item,
+  body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-action-item,
+  body:not(.landing-page) [data-mobile="true"][data-sidebar="sidebar"] .sidebar-action-primary {
+    min-height: 44px !important;
+    height: auto !important;
+  }
+}
+
+/* ── Content rails: application rhythm, not landing rhythm ── */
+body:not(.landing-page) :is(.home-rebuild-rail, .cellar-rebuild-rail, .consumo-rebuild-rail) {
+  gap: 18px !important;
+  padding-top: 14px !important;
+  padding-bottom: 36px !important;
+}
+
+body:not(.landing-page) :is(.home-rebuild-summary, .home-rebuild-panel) {
+  padding: 18px !important;
+}
+
+body:not(.landing-page) .home-rebuild-section-head {
+  margin-bottom: 12px !important;
+}
+
+body:not(.landing-page) :is(.consumo-rebuild-chart, .consumo-rebuild-timeline) {
+  padding: 18px !important;
+}
+
+/* ── Lists: more information per viewport, still unhurried ── */
+body:not(.landing-page) .cellar-rebuild-row {
+  min-height: 72px !important;
+  padding: 8px 12px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry {
+  min-height: 66px !important;
+  padding: 8px 12px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-entry-day {
+  font-size: 22px !important;
+}
+
+body:not(.landing-page) .wishlist-card {
+  padding: 14px 16px !important;
+  margin-bottom: 10px !important;
+}
+
+body:not(.landing-page) .alert-card {
+  padding: 12px 16px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat {
+  min-height: 62px !important;
+  padding: 12px !important;
+}
+
+body:not(.landing-page) .consumo-rebuild-stat-value {
+  font-size: 22px !important;
+}
+
+/* Cellar summary: headline number contained */
+body:not(.landing-page) .cellar-rebuild-summary-main strong {
+  font-size: 34px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary {
+  padding: 16px !important;
+  gap: 12px !important;
+}
+
+body:not(.landing-page) .cellar-rebuild-summary-stats span {
+  min-height: 54px !important;
+  padding: 9px 12px !important;
+}
+
+/* ── Tables: denser ledgers, readable rows ── */
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) thead th {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+}
+
+body:not(.landing-page) :is(.table-premium, .inventory-page table, .commercial-page table) tbody td {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  font-size: 13px !important;
+}
+
+/* ── Modal option cards: content-sized ── */
+body:not(.landing-page) .sx-action-modal :is(
+  .modal-action-card,
+  .sx-v2-modal-action,
+  .segment-card,
+  .consumption-source-card,
+  .consumption-select-card,
+  .add-wine-rebuild-option,
+  .analyze-carta-button,
+  .harmonizar-option
+) {
+  min-height: 58px !important;
+  padding: 11px 16px !important;
+}
+
+/* ── Page titles: hero voice with application proportions ── */
+body:not(.landing-page) {
+  --sx-auth-page-title: 34px;
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) {
+    --sx-auth-page-title: 28px;
+  }
+}
+
+/* Modal titles follow */
+body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title], [data-radix-sheet-title]) {
+  font-size: 26px !important;
+}
+
+@media (max-width: 639px) {
+  body:not(.landing-page) .sx-action-modal :is(.modal-title, .modal-header-title, [data-radix-dialog-title], [data-radix-sheet-title]) {
+    font-size: 22px !important;
+  }
+}
+
+body:not(.landing-page) .sx-action-modal .modal-header {
+  padding: 22px 26px 16px !important;
+  padding-right: 76px !important;
+}
+
+body:not(.landing-page) .sx-action-modal :is(.modal-body, .sx-v2-modal-body, .consumption-modal-body, .analyze-carta-body) {
+  padding: 20px 26px 24px !important;
+}
+
+/* ── Editorial canvas grain and vignette stay; sections breathe less ── */
+body:not(.landing-page) .wishlist-sub {
+  margin-bottom: 16px !important;
+}
+
+/* ── Very narrow phones (Z Fold cover 344px): protect every row ── */
+@media (max-width: 359px) {
+  body:not(.landing-page) .cellar-rebuild-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body:not(.landing-page) .ed-pill {
+    padding: 0.65rem 1.1rem !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ── Sidebar: wider rail, tighter gutters, deliberate alignment ── */
+body:not(.landing-page) .sx-v2-sidebar [data-sidebar="group"],
+body:not(.landing-page) .sx-v2-mobile-drawer [data-sidebar="group"] {
+  padding: 0 7px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar [data-sidebar="menu"],
+body:not(.landing-page) .sx-v2-mobile-drawer [data-sidebar="menu"] {
+  gap: 3px !important;
+}
+
+/* Group labels indent to the same optical column as the row icons */
+body:not(.landing-page) .sx-v2-sidebar [data-sidebar="group-label"],
+body:not(.landing-page) .sx-v2-mobile-drawer [data-sidebar="group-label"] {
+  padding: 0 11px !important;
+  margin-top: 10px !important;
+  margin-bottom: 3px !important;
+}
+
+/* Rows: use the full rail width, comfortable label size */
+body:not(.landing-page) .sx-v2-sidebar .sx-v2-nav-row,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-action-item,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-item,
+body:not(.landing-page) .sx-v2-mobile-drawer .sx-v2-nav-row,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-item,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-item {
+  gap: 9px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar .sx-v2-nav-label,
+body:not(.landing-page) .sx-v2-sidebar .sidebar-item > span:last-child,
+body:not(.landing-page) .sx-v2-mobile-drawer .sx-v2-nav-label,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-item > span:last-child {
+  font-size: 13.5px !important;
+}
+
+/* Active pill: dot sits in its own column, content steps right — no
+   overlap with the icon, no decoration floating beside the row */
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active),
+body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) {
+  padding-left: 20px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active)::before,
+body:not(.landing-page) .sx-v2-mobile-drawer :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active)::before {
+  left: 8px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sidebar-nav-item.active, .sx-v2-nav-row-active) > span:last-child,
+body:not(.landing-page) .sx-v2-sidebar :is(.sidebar-item--active, .sx-v2-nav-row-active) .sx-v2-nav-label {
+  padding-left: 0;
+}
+
+/* Primary sidebar action: a touch stronger, still the landing button */
+body:not(.landing-page) .sx-v2-sidebar .sidebar-action-primary,
+body:not(.landing-page) .sx-v2-mobile-drawer .sidebar-action-primary,
+body:not(.landing-page) .sidebar-actions .sidebar-action-primary {
+  min-height: 42px !important;
+  font-size: 13.5px !important;
+}
+
+body:not(.landing-page) .sx-v2-sidebar [data-sidebar="footer"],
+body:not(.landing-page) .sx-v2-mobile-drawer [data-sidebar="footer"] {
+  padding-top: 2px !important;
+}
+
+/* Analisar carta: options stack like every other action modal */
+body:not(.landing-page) .sx-action-modal .analyze-carta-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+}

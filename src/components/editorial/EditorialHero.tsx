@@ -4,6 +4,10 @@
  * Hero "garrafa-protagonista" no estilo Apple Music album / Moët luxury page.
  * Garrafa grande à esquerda, tipografia editorial à direita.
  * Usado em: Home (vinho do dia), Alertas (recomendação sommelier), ficha de vinho.
+ *
+ * Densidade de aplicativo: alturas contidas, a tipografia é o ponto focal e a
+ * garrafa apoia a composição. No mobile o texto vem primeiro (touch-first) e a
+ * garrafa ocupa uma coluna secundária à direita.
  */
 
 import { ReactNode } from "react";
@@ -43,34 +47,34 @@ export function EditorialHero({
   return (
     <section
       className={cn(
-        "ed-canvas relative w-full overflow-hidden rounded-[28px]",
-        isCompact ? "px-5 py-8 md:px-10 md:py-12" : "px-6 py-12 md:px-14 md:py-20",
+        "ed-canvas relative w-full overflow-hidden rounded-[24px]",
+        isCompact ? "px-5 py-6 md:px-8 md:py-7" : "px-5 py-7 sm:px-8 md:px-10 md:py-9",
         className,
       )}
     >
       <div
         className={cn(
-          "relative grid items-center gap-8 md:gap-12",
-          "grid-cols-1 md:grid-cols-[auto,1fr]",
+          "relative grid items-center gap-5 sm:gap-8 md:gap-10",
+          "grid-cols-[minmax(0,1fr),auto] sm:grid-cols-[auto,minmax(0,1fr)]",
         )}
       >
-        {/* Garrafa-protagonista */}
-        <div className="flex justify-center md:justify-start">
+        {/* Garrafa-protagonista — apoia a composição, não a domina */}
+        <div className="order-2 flex justify-center self-end sm:order-1 sm:self-center sm:justify-start">
           <BottleObject
             imageUrl={imageUrl}
             style={style}
             alt={alt || (typeof title === "string" ? title : "Garrafa em destaque")}
-            size={isCompact ? "lg" : "xl"}
+            size="lg"
             withSpotlight
             priority
             className="ed-hero-bottle"
           />
         </div>
 
-        {/* Tipografia editorial */}
-        <div className="flex flex-col gap-5 ed-anim-fade-up text-center md:text-left">
+        {/* Tipografia editorial — o ponto focal */}
+        <div className="order-1 flex min-w-0 flex-col gap-3 text-left ed-anim-fade-up sm:order-2">
           {kicker && (
-            <div className="ed-kicker flex items-center justify-center gap-2 md:justify-start">
+            <div className="ed-kicker flex items-center gap-2">
               {kicker}
             </div>
           )}
@@ -79,29 +83,31 @@ export function EditorialHero({
             className={cn(
               "ed-display",
               isCompact
-                ? "text-[clamp(2rem,5vw,3rem)]"
-                : "text-[clamp(2.5rem,6vw,4.5rem)]",
+                ? "text-[clamp(1.6rem,2.8vw,2.2rem)]"
+                : "text-[clamp(1.75rem,3.4vw,2.9rem)]",
             )}
           >
             {title}
           </h1>
 
           {meta && (
-            <p className="ed-kicker text-[11px] tracking-[0.24em]">{meta}</p>
+            <p className="ed-kicker text-[10.5px] tracking-[0.18em]">{meta}</p>
           )}
 
           {note && (
             <p
               className={cn(
-                "ed-note max-w-[42ch] mx-auto md:mx-0",
-                isCompact ? "text-[15px]" : "text-[17px] md:text-[19px]",
+                "ed-note max-w-[46ch]",
+                isCompact ? "text-[14px]" : "text-[15px] md:text-[16px]",
               )}
             >
               {note}
             </p>
           )}
 
-          {cta && <div className="mt-2 flex items-center justify-center md:justify-start gap-3">{cta}</div>}
+          {cta && (
+            <div className="ed-hero-cta mt-1.5 flex flex-wrap items-center gap-2.5">{cta}</div>
+          )}
 
           {side}
         </div>

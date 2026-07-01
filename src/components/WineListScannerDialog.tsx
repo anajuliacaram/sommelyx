@@ -35,7 +35,6 @@ import { PremiumEmptyState } from "@/components/ui/premium-empty-state";
 import {
   AiModalHeader,
   AiModalCard,
-  AiModalActionButton,
   AiModalShell,
   AiModalHeaderBar,
   AiModalBody,
@@ -624,15 +623,27 @@ export function WineListScannerDialog({ open, onOpenChange }: WineListScannerDia
                         className="analyze-carta-capture space-y-3"
                       >
                         <div className="space-y-2">
-                          <div className="analyze-carta-actions grid gap-2 sm:grid-cols-2">
-                            <AiModalActionButton variant="default" onClick={() => cameraInputRef.current?.click()} className="analyze-carta-button w-full">
-                              <Camera className="mr-2 h-4 w-4" />
-                              Tirar foto
-                            </AiModalActionButton>
-                            <AiModalActionButton variant="secondary" onClick={() => fileInputRef.current?.click()} className="analyze-carta-button w-full">
-                              <Upload className="mr-2 h-4 w-4" />
-                              Arquivo
-                            </AiModalActionButton>
+                          <div className="analyze-carta-actions add-wine-rebuild-choice">
+                            <button
+                              type="button"
+                              className="add-wine-rebuild-option analyze-carta-option is-primary"
+                              onClick={() => cameraInputRef.current?.click()}
+                            >
+                              <span className="add-wine-rebuild-option-icon">
+                                <Camera className="h-4 w-4" />
+                              </span>
+                              <span>Tirar foto</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="add-wine-rebuild-option analyze-carta-option"
+                              onClick={() => fileInputRef.current?.click()}
+                            >
+                              <span className="add-wine-rebuild-option-icon is-gold">
+                                <Upload className="h-4 w-4" />
+                              </span>
+                              <span>Arquivo</span>
+                            </button>
                           </div>
 
                           <input ref={cameraInputRef} type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" className="hidden" onChange={(event) => event.target.files?.[0] && handleFile(event.target.files[0])} />

@@ -165,6 +165,26 @@ export default function PersonalDashboard() {
         .toUpperCase()
     : "";
 
+  /** Fatos rápidos acima da dobra: janela, estado, produtor, uva, estoque. */
+  const insightFacts = insightWine
+    ? ([
+        insightWindow && {
+          label: "Janela",
+          value: `${insightWindow.from}–${insightWindow.until}`,
+        },
+        insightClassification && {
+          label: "Momento",
+          value: insightClassification.label,
+        },
+        insightWine.producer && { label: "Produtor", value: insightWine.producer },
+        insightWine.grape && { label: "Uva", value: insightWine.grape },
+        insightWine.quantity > 0 && {
+          label: "Na adega",
+          value: `${insightWine.quantity} ${insightWine.quantity === 1 ? "garrafa" : "garrafas"}`,
+        },
+      ].filter(Boolean) as { label: string; value: string }[])
+    : [];
+
   const todayLabel = new Date().toLocaleDateString("pt-BR", {
     weekday: "long",
     day: "numeric",
@@ -183,14 +203,14 @@ export default function PersonalDashboard() {
         />
       )}
 
-      {/* Fundo editorial — verde profundo + vinheta quente + grão de filme */}
+      {/* Fundo editorial — cream V6 + vinheta quente + grão de filme */}
       <div className="ed-canvas min-h-screen w-full">
-        <div className="mx-auto max-w-[1240px] px-5 py-10 md:px-10 md:py-14">
+        <div className="mx-auto max-w-[1240px] px-5 py-6 md:px-8 md:py-7">
 
           {/* ── Saudação editorial ───────────────────────────────── */}
-          <header className="mb-10 md:mb-14 ed-anim-fade-up">
-            <p className="ed-kicker mb-3">{todayLabel}</p>
-            <h1 className="ed-display text-[clamp(2.25rem,4.5vw,3.5rem)]">
+          <header className="mb-5 md:mb-6 ed-anim-fade-up">
+            <p className="ed-kicker mb-1.5">{todayLabel}</p>
+            <h1 className="ed-display text-[clamp(1.7rem,2.6vw,2.5rem)]">
               Olá, <em style={{ fontStyle: "italic", color: "var(--ed-gold)" }}>{firstName}</em>
             </h1>
           </header>
@@ -232,12 +252,26 @@ export default function PersonalDashboard() {
                   </EditorialPill>
                 </>
               }
-              className="mb-16 md:mb-24"
+              side={
+                insightFacts.length > 0 ? (
+                  <dl className="mt-3 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-[color:var(--ed-ivory-faint)] pt-3">
+                    {insightFacts.map((fact) => (
+                      <div key={fact.label} className="flex items-baseline gap-1.5 min-w-0">
+                        <dt className="ed-kicker text-[9.5px] tracking-[0.14em] shrink-0">{fact.label}</dt>
+                        <dd className="m-0 truncate text-[13px] font-normal" style={{ color: "var(--ed-ivory-soft)" }}>
+                          {fact.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : undefined
+              }
+              className="mb-8 md:mb-10"
             />
           ) : (
-            <section className="ed-canvas relative w-full overflow-hidden rounded-[28px] px-6 py-16 md:px-14 md:py-20 mb-16 text-center">
-              <div className="mx-auto flex max-w-md flex-col items-center gap-6 ed-anim-fade-up">
-                <BottleObject style="tinto" size="lg" withSpotlight />
+            <section className="ed-canvas relative w-full overflow-hidden rounded-[24px] px-6 py-10 md:px-12 md:py-12 mb-8 text-center">
+              <div className="mx-auto flex max-w-md flex-col items-center gap-4 ed-anim-fade-up">
+                <BottleObject style="tinto" size="md" withSpotlight />
                 <p className="ed-kicker">Sua adega aguarda</p>
                 <h2 className="ed-display text-[clamp(1.75rem,4vw,2.5rem)]">
                   Sem rótulos ainda
@@ -255,18 +289,18 @@ export default function PersonalDashboard() {
 
           {/* ── Prateleira: próximas garrafas ─────────────────── */}
           {readyWines.length > 0 && (
-            <section className="mb-16 md:mb-24">
-              <div className="mb-8 flex items-end justify-between gap-4">
+            <section className="mb-9 md:mb-11">
+              <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
-                  <p className="ed-kicker mb-2">Curadoria pessoal</p>
-                  <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+                  <p className="ed-kicker mb-1.5">Curadoria pessoal</p>
+                  <h2 className="ed-display text-[clamp(1.3rem,2.1vw,1.7rem)]">
                     Próximas da sua janela
                   </h2>
                 </div>
                 <div className="ed-shelf-line max-w-[200px] flex-1 mb-3 hidden md:block" aria-hidden />
               </div>
 
-              <div className="grid gap-10 md:gap-12 grid-cols-1 md:grid-cols-3">
+              <div className="grid gap-5 md:gap-8 grid-cols-1 sm:grid-cols-3">
                 {readyWines.map(({ wine, drinkWindow, classification }) => {
                   const meta = [wine.region || wine.country, wine.vintage].filter(Boolean).join(" · ").toUpperCase();
                   const status =
@@ -294,19 +328,19 @@ export default function PersonalDashboard() {
 
           {/* ── Diário: últimos consumos ─────────────────────── */}
           {recentToasts.length > 0 && (
-            <section className="mb-16 md:mb-24">
-              <div className="mb-8">
-                <p className="ed-kicker mb-2">Diário</p>
-                <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+            <section className="mb-9 md:mb-11">
+              <div className="mb-4">
+                <p className="ed-kicker mb-1.5">Diário</p>
+                <h2 className="ed-display text-[clamp(1.3rem,2.1vw,1.7rem)]">
                   Memórias recentes
                 </h2>
               </div>
 
-              <ol className="flex flex-col gap-6">
+              <ol className="flex flex-col gap-3.5">
                 {recentToasts.map((entry, idx) => (
                   <li
                     key={entry.id}
-                    className="ed-anim-fade-up flex items-baseline gap-6 border-b border-[color:var(--ed-ivory-faint)] pb-6 last:border-0"
+                    className="ed-anim-fade-up flex items-baseline gap-5 border-b border-[color:var(--ed-ivory-faint)] pb-3.5 last:border-0"
                     style={{ animationDelay: `${idx * 80}ms` }}
                   >
                     <time
@@ -343,15 +377,15 @@ export default function PersonalDashboard() {
           )}
 
           {/* ── Sua coleção em números (editorial, não KPI) ──── */}
-          <section className="mb-16">
-            <div className="mb-8">
-              <p className="ed-kicker mb-2">Sua coleção</p>
-              <h2 className="ed-display text-[clamp(1.5rem,3vw,2.25rem)]">
+          <section className="mb-9">
+            <div className="mb-4">
+              <p className="ed-kicker mb-1.5">Sua coleção</p>
+              <h2 className="ed-display text-[clamp(1.3rem,2.1vw,1.7rem)]">
                 Em silêncio na adega
               </h2>
             </div>
 
-            <div className="flex flex-wrap items-end gap-x-10 gap-y-8 md:gap-x-16">
+            <div className="flex flex-wrap items-end gap-x-8 gap-y-5 md:gap-x-12">
               <EditorialMetric
                 label="Garrafas"
                 value={totalBottles.toLocaleString("pt-BR")}
@@ -389,9 +423,9 @@ export default function PersonalDashboard() {
           {/* ── Ações editoriais (não-cards) ──────────────────── */}
           <section
             aria-label="Ações principais"
-            className="border-t border-[color:var(--ed-ivory-faint)] pt-10"
+            className="border-t border-[color:var(--ed-ivory-faint)] pt-6"
           >
-            <p className="ed-kicker mb-6">Concierge</p>
+            <p className="ed-kicker mb-3.5">Concierge</p>
             <div className="flex flex-wrap gap-3 md:gap-4">
               <EditorialPill variant="primary" onClick={() => setAddOpen(true)}>
                 <Plus className="h-4 w-4" />
@@ -422,7 +456,7 @@ export default function PersonalDashboard() {
             </div>
 
             {lowStock > 0 && (
-              <p className="ed-note text-[13px] mt-6" style={{ color: "var(--ed-ivory-muted)" }}>
+              <p className="ed-note text-[13px] mt-4" style={{ color: "var(--ed-ivory-muted)" }}>
                 Algumas garrafas estão chegando ao fim — vale uma visita à adega.
               </p>
             )}

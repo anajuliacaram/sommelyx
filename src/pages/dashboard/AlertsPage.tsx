@@ -168,7 +168,7 @@ export default function AlertsPage() {
   };
 
   return (
-    <div className="alerts-page space-y-7 max-w-3xl">
+    <div className="alerts-page space-y-5 max-w-3xl">
       {/* ── Header ── */}
       <div>
         <div className="glass-card px-5 py-4">
@@ -210,9 +210,9 @@ export default function AlertsPage() {
           <button
             type="button"
             onClick={scrollToDrinkNow}
-            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+            className="group relative w-full overflow-hidden rounded-2xl px-5 py-2.5 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              height: 64,
+              minHeight: 64,
               background: "linear-gradient(180deg, #8d1d36 0%, #7b1730 48%, #5b1023 100%)",
               boxShadow:
                 "0 1px 1px rgba(255,255,255,0.22) inset, 0 -1px 2px rgba(0,0,0,0.2) inset, 0 3px 8px rgba(122,18,36,0.3), 0 12px 30px -10px rgba(122,18,36,0.5)",
@@ -263,7 +263,7 @@ export default function AlertsPage() {
                     ));
                   })()}
                 </div>
-                <p className="mt-1 text-[11.5px] font-medium leading-none text-white/75">
+                <p className="mt-1 text-[11.5px] font-medium leading-snug text-white/75">
                   Veja os vinhos no momento ideal
                 </p>
               </div>
@@ -274,9 +274,9 @@ export default function AlertsPage() {
           <button
             type="button"
             onClick={() => setAnalysisOpen(true)}
-            className="group relative w-full overflow-hidden rounded-2xl px-5 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
+            className="group relative w-full overflow-hidden rounded-2xl px-5 py-2 text-left transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
             style={{
-              height: 56,
+              minHeight: 56,
               background: "rgba(255,252,246,0.68)",
               border: "1px solid rgba(255,255,255,0.72)",
               backdropFilter: "blur(20px) saturate(1.1)",
@@ -298,7 +298,7 @@ export default function AlertsPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[14px] font-medium leading-none text-[#1d150f]">Analisar com Sommelyx</div>
-                <p className="mt-1 text-[11px] font-normal leading-none text-[rgba(29,21,15,0.55)]">
+                <p className="mt-1 text-[11px] font-normal leading-snug text-[rgba(29,21,15,0.55)]">
                   Entenda valor, giro e consumo
                 </p>
               </div>
@@ -355,7 +355,7 @@ export default function AlertsPage() {
                         />
                         {/* Card row */}
                         <div
-                          className="py-2 gap-2 cursor-pointer group transition-colors hover:bg-black/[0.015] flex items-center justify-start px-[24px]"
+                          className="py-2 gap-x-2 gap-y-1.5 cursor-pointer group transition-colors hover:bg-black/[0.015] flex flex-wrap items-center justify-start px-[24px]"
                           onClick={() => navigate("/dashboard/cellar")}
                           role="button"
                           tabIndex={0}
@@ -388,7 +388,7 @@ export default function AlertsPage() {
                           </div>
 
                           {/* Actions cluster */}
-                          <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="ml-auto flex items-center gap-1.5 shrink-0">
                             {hasAiSupport(a.type) && (
                               <button
                                 type="button"
@@ -408,7 +408,7 @@ export default function AlertsPage() {
                             )}
 
                             <span className={cn(
-                              "text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md shrink-0",
+                              "inline-flex text-[8px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md shrink-0",
                               a.bg, a.tone
                             )}>
                               {a.title}

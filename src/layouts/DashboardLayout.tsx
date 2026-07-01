@@ -75,14 +75,14 @@ export default function DashboardLayout() {
         <AppSidebar />
         <main className="sx-v2-shell-main flex-1 flex h-full min-w-0 flex-col overflow-hidden">
           <header
-            className="mobile-header sx-mobile-header sx-v2-shell-header sx-v6-topbar relative isolate sticky top-0 z-30 flex h-[60px] items-center gap-2.5 overflow-hidden px-4 md:px-6"
+            className="mobile-header sx-mobile-header sx-v2-shell-header sx-v6-topbar relative isolate sticky top-0 z-30 flex h-14 items-center gap-2.5 overflow-hidden px-3 md:h-[52px] md:px-5"
           >
             <div className="relative z-10 flex items-center gap-3 w-full">
               {!isMobile && (
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "icon" }),
-                    "mobile-header-menu sx-v6-topbar-btn group relative h-9.5 w-9.5 rounded-full p-0",
+                    "mobile-header-menu sx-v6-topbar-btn group relative h-9 w-9 rounded-full p-0",
                     "[&>svg]:h-4 [&>svg]:w-4",
                   )}
                 />
@@ -92,7 +92,7 @@ export default function DashboardLayout() {
                 <SidebarTrigger
                   className={cn(
                     buttonVariants({ variant: "ghost" }),
-                    "mobile-header-menu sx-v6-topbar-btn h-9.5 min-w-[84px] gap-[7px] rounded-full px-3.5 text-[13px] font-medium",
+                    "mobile-header-menu sx-v6-topbar-btn h-11 min-w-[88px] gap-[7px] rounded-full px-3.5 text-[13px] font-medium",
                     "[&>svg]:h-4 [&>svg]:w-4",
                   )}
                 >
@@ -123,7 +123,7 @@ export default function DashboardLayout() {
                   variant="primary"
                   size="icon"
                   className={cn(
-                    "header-avatar sx-v6-avatar h-9 w-9 rounded-full border-0 p-0 text-[13px] font-semibold",
+                    "header-avatar sx-v6-avatar h-11 w-11 rounded-full border-0 p-0 text-[13px] font-semibold md:h-9 md:w-9",
                     accountOpen && "ring-2 ring-[rgba(184,148,60,0.35)]",
                   )}
                   onClick={handleOpenAccount}

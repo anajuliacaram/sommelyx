@@ -470,15 +470,36 @@
   .ed-anim-bottle, .ed-anim-fade-up { animation: none; }
 }
 
-/* Mobile: a garrafa-protagonista impressiona sem monopolizar a dobra */
-@media (max-width: 767px) {
+/* A garrafa-protagonista apoia a composição — a tipografia é o foco.
+   Desktop: contida na altura de um hero de aplicativo. Mobile: coluna
+   secundária ao lado do texto, nunca monopoliza a dobra. */
+figure.ed-hero-bottle {
+  width: 118px !important;
+}
+figure.ed-hero-bottle > img,
+figure.ed-hero-bottle > svg {
+  width: 118px !important;
+  height: 354px !important;
+}
+
+@media (max-width: 639px) {
   figure.ed-hero-bottle {
-    width: 132px !important;
+    width: 84px !important;
   }
   figure.ed-hero-bottle > img,
   figure.ed-hero-bottle > svg {
-    width: 132px !important;
-    height: 396px !important;
+    width: 84px !important;
+    height: 252px !important;
+  }
+
+  /* CTAs empilhados, largura total, alvo de toque confortável */
+  .ed-hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ed-hero-cta .ed-pill {
+    justify-content: center;
+    min-height: 44px;
   }
 }
 

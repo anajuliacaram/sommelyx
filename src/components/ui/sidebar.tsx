@@ -14,8 +14,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "228px";
-const SIDEBAR_WIDTH_MOBILE = "min(60vw, 236px)";
+const SIDEBAR_WIDTH = "248px";
+const SIDEBAR_WIDTH_MOBILE = "min(80vw, 300px)";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -162,7 +162,7 @@ const Sidebar = React.forwardRef<
         data-sidebar="sidebar"
         data-mobile="true"
         aria-describedby={undefined}
-        className="mobile-sidebar-drawer sx-v2-mobile-drawer w-[--sidebar-width] max-w-[255px] overflow-hidden p-0 text-sidebar-foreground !bg-[#F6F4F1] !backdrop-blur-none !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)]"
+        className="mobile-sidebar-drawer sx-v2-mobile-drawer w-[--sidebar-width] max-w-[300px] overflow-hidden p-0 text-sidebar-foreground !bg-[#F6F4F1] !backdrop-blur-none !border-r !border-[rgba(95,111,82,0.10)] !shadow-[0_20px_40px_-28px_rgba(0,0,0,0.18)]"
         style={
           {
             "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
